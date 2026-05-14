@@ -4,21 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+This project uses **pnpm** (pinned via `packageManager` in
+`package.json`). Don't run `npm install` — it will recreate
+`package-lock.json` next to `pnpm-lock.yaml` and drift the dep tree.
+
 ```bash
-npm run typecheck                          # tsc --noEmit
-npm run lint:ts                            # ESLint on src/**/*.ts
-npm run lint:ext                           # web-ext lint on dist/ (run build first)
-npm test                                   # vitest run
-npm run test:watch                         # vitest interactive
-npx vitest run tests/orgnr.test.ts         # single file
-npx vitest run -t "rejects cd=10"          # single test by name
-npm run build                              # production build to dist/
-npm run watch                              # vite build --watch
-npm run dev                                # build + web-ext run (Firefox dev profile)
-npm run package                            # build + .xpi to web-ext-artifacts/
+pnpm typecheck                             # tsc --noEmit
+pnpm lint:ts                               # ESLint on src/**/*.ts
+pnpm lint:ext                              # web-ext lint on dist/ (run build first)
+pnpm test                                  # vitest run
+pnpm test:watch                            # vitest interactive
+pnpm exec vitest run tests/orgnr.test.ts   # single file
+pnpm exec vitest run -t "rejects cd=10"    # single test by name
+pnpm build                                 # production build to dist/
+pnpm watch                                 # vite build --watch
+pnpm dev                                   # build + web-ext run (Firefox dev profile)
+pnpm package                               # build + .xpi to web-ext-artifacts/
 ```
 
-`npm run dev` is the only way to exercise the popup — there is no Vite
+`pnpm dev` is the only way to exercise the popup — there is no Vite
 dev server for popup-only extensions.
 
 ## Architecture
@@ -189,7 +193,7 @@ PRs that relax any of the above will be rejected.
 ## Dependencies
 
 Zero runtime dependencies in the shipped bundle (everything is
-inlined TypeScript). `npm audit --omit=dev` should always return 0.
+inlined TypeScript). `pnpm audit --prod` should always return 0.
 The advisories in `web-ext`'s transitive chain are dev-only and do
 not enter the extension — defer the breaking `web-ext` 10.x upgrade
 until something actually exercises a vulnerable path.

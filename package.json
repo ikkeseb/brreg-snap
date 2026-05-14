@@ -4,14 +4,15 @@
   "description": "Firefox extension that surfaces Brønnøysundregistrene company info from any Norwegian company site.",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=18"
   },
   "scripts": {
     "build": "vite build",
-    "dev": "npm run build && web-ext run --source-dir dist",
+    "dev": "pnpm run build && web-ext run --source-dir dist",
     "watch": "vite build --watch",
-    "package": "npm run build && web-ext build --source-dir dist --artifacts-dir web-ext-artifacts --overwrite-dest",
+    "package": "pnpm run build && web-ext build --source-dir dist --artifacts-dir web-ext-artifacts --overwrite-dest",
     "lint:ext": "web-ext lint --source-dir dist",
     "lint:ts": "eslint \"src/**/*.ts\"",
     "test": "vitest run",
