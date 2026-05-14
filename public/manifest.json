@@ -31,6 +31,6 @@
     "type": "module"
   },
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://data.brreg.no"
+    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'self'; connect-src https://data.brreg.no; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
   }
 }

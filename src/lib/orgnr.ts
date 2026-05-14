@@ -1,29 +1,19 @@
 import { domainToOrgnr } from './domains.js';
+import { isValidOrgnr } from './mod11.js';
 
-const ORGNR_RE = /\b(\d{9})\b/;
+const ORGNR_RE = /\b(\d{9})\b/g;
 
-export function isValidOrgnr(candidate: string): boolean {
-  if (!/^\d{9}$/.test(candidate)) return false;
-  return mod11Check(candidate);
-}
-
-function mod11Check(orgnr: string): boolean {
-  const weights = [3, 2, 7, 6, 5, 4, 3, 2];
-  let sum = 0;
-  for (let i = 0; i < 8; i++) {
-    sum += Number(orgnr[i]) * weights[i]!;
-  }
-  const remainder = sum % 11;
-  const checkDigit = remainder === 0 ? 0 : 11 - remainder;
-  if (checkDigit === 10) return false;
-  return checkDigit === Number(orgnr[8]);
-}
+export { isValidOrgnr };
 
 export function extractOrgnrFromText(text: string): string | undefined {
-  const match = ORGNR_RE.exec(text);
-  if (!match) return undefined;
-  const candidate = match[1]!;
-  return isValidOrgnr(candidate) ? candidate : undefined;
+  // Iterate every 9-digit run in text. The first mod-11 valid candidate
+  // wins. A URL like /?ref=123456789&orgnr=982463718 would otherwise be
+  // disqualified by an upstream phone number or article id.
+  for (const match of text.matchAll(ORGNR_RE)) {
+    const candidate = match[1]!;
+    if (isValidOrgnr(candidate)) return candidate;
+  }
+  return undefined;
 }
 
 export interface ResolveContext {

@@ -21,6 +21,11 @@ describe('isValidOrgnr', () => {
   it('rejects 9-digit numbers with invalid check digit', () => {
     expect(isValidOrgnr('982463719')).toBe(false);
   });
+
+  it('rejects numbers whose check digit would be 10', () => {
+    // 400000000 → sum 12, 12 % 11 = 1, cd = 10 → invalid by spec
+    expect(isValidOrgnr('400000000')).toBe(false);
+  });
 });
 
 describe('extractOrgnrFromText', () => {
@@ -32,6 +37,13 @@ describe('extractOrgnrFromText', () => {
   it('returns undefined when no valid orgnr is present', () => {
     expect(extractOrgnrFromText('no numbers here')).toBeUndefined();
     expect(extractOrgnrFromText('123456789')).toBeUndefined();
+  });
+
+  it('skips earlier invalid 9-digit runs and returns the first valid one', () => {
+    // 123456789 fails mod-11; 982463718 is Telenor and passes.
+    expect(extractOrgnrFromText('foo 123456789 bar 982463718 baz')).toBe(
+      '982463718',
+    );
   });
 });
 

@@ -1,6 +1,13 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
-import { copyFileSync, cpSync, mkdirSync, existsSync } from 'node:fs';
+import {
+  copyFileSync,
+  cpSync,
+  mkdirSync,
+  existsSync,
+  renameSync,
+  rmSync,
+} from 'node:fs';
 
 export default defineConfig({
   build: {
@@ -34,6 +41,19 @@ export default defineConfig({
       closeBundle() {
         const dist = resolve(__dirname, 'dist');
         if (!existsSync(dist)) mkdirSync(dist, { recursive: true });
+
+        // Vite emits the HTML entry under dist/src/popup/popup.html
+        // because the input path lives at src/popup/popup.html. The
+        // manifest expects popup/popup.html, so move it and drop the
+        // empty dist/src tree.
+        const emittedHtml = resolve(dist, 'src/popup/popup.html');
+        const targetHtml = resolve(dist, 'popup/popup.html');
+        if (existsSync(emittedHtml)) {
+          mkdirSync(resolve(dist, 'popup'), { recursive: true });
+          renameSync(emittedHtml, targetHtml);
+          rmSync(resolve(dist, 'src'), { recursive: true, force: true });
+        }
+
         copyFileSync(
           resolve(__dirname, 'public/manifest.json'),
           resolve(dist, 'manifest.json'),

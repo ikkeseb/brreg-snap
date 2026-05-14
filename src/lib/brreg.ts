@@ -13,10 +13,26 @@ async function cacheGet<T>(key: string): Promise<T | undefined> {
   const entry = store[key] as CacheEntry<T> | undefined;
   if (!entry) return undefined;
   if (entry.expiresAt < Date.now()) {
-    await browser.storage.session.remove(key);
+    // Best-effort eviction; swallow failure so a flaky remove doesn't
+    // turn into a hard read failure for the caller.
+    try {
+      await browser.storage.session.remove(key);
+    } catch {
+      /* ignore */
+    }
     return undefined;
   }
   return entry.value;
+}
+
+function isEnhet(value: unknown): value is Enhet {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { organisasjonsnummer?: unknown }).organisasjonsnummer ===
+      'string' &&
+    typeof (value as { navn?: unknown }).navn === 'string'
+  );
 }
 
 async function cacheSet<T>(key: string, value: T): Promise<void> {
@@ -41,7 +57,10 @@ export async function fetchEnhet(orgnr: string): Promise<Enhet> {
   if (!res.ok) {
     throw new Error(`brreg API returned ${res.status}.`);
   }
-  const data = (await res.json()) as Enhet;
+  const data: unknown = await res.json();
+  if (!isEnhet(data)) {
+    throw new Error('brreg returned an unexpected response shape.');
+  }
   await cacheSet(key, data);
   return data;
 }

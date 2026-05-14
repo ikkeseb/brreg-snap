@@ -117,20 +117,29 @@ function setState(state: 'loading' | 'result' | 'search' | 'error'): void {
 }
 
 let searchTimer: ReturnType<typeof setTimeout> | undefined;
+let searchRunId = 0;
 
 queryInput.addEventListener('input', () => {
   if (searchTimer) clearTimeout(searchTimer);
+  // Invalidate any in-flight search; whoever lands last must drop its results.
+  searchRunId += 1;
   const value = queryInput.value.trim();
   if (value.length < 2) {
     searchResults.innerHTML = '';
     return;
   }
-  searchTimer = setTimeout(() => runSearch(value), 250);
+  // Cap user-supplied search length before it hits the brreg API.
+  const capped = value.slice(0, 100);
+  searchTimer = setTimeout(() => {
+    void runSearch(capped);
+  }, 250);
 });
 
 async function runSearch(query: string): Promise<void> {
+  const myRunId = ++searchRunId;
   try {
     const results = await searchEnheter(query, 10);
+    if (myRunId !== searchRunId) return; // stale — newer search in flight
     searchResults.innerHTML = '';
     for (const item of results) {
       const li = document.createElement('li');
@@ -151,6 +160,7 @@ async function runSearch(query: string): Promise<void> {
       searchResults.appendChild(li);
     }
   } catch (err) {
+    if (myRunId !== searchRunId) return; // stale — let newer search render
     showError(err);
   }
 }
