@@ -68,8 +68,8 @@ main > header h1 {
 }
 
 main > header h1 img.brand-mark {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   flex-shrink: 0;
 }
 

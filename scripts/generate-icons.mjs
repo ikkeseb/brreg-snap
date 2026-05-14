@@ -23,16 +23,38 @@ const OUT_DIR = resolve(REPO_ROOT, 'public', 'icons');
 const source = PNG.sync.read(readFileSync(SOURCE));
 const { width: srcW, height: srcH, data: srcData } = source;
 
-// Center-crop to a square viewport so non-square art doesn't get
-// distorted on downsample. The B mark sits roughly centered in the
-// source PNG; if that changes, retune cropY.
-const square = Math.min(srcW, srcH);
-const cropX = Math.floor((srcW - square) / 2);
-const cropY = Math.floor((srcH - square) / 2);
+// Find the bounding box of non-transparent pixels and crop to that
+// (squared, with a small margin). The source PNG has wide transparent
+// padding around the B mark; without this the glyph occupies ~50% of
+// the icon area and reads as a smudge at 16px. Pad by ~6% to keep the
+// glyph from kissing the edges.
+const ALPHA_THRESHOLD = 8;
+const PADDING_PCT = 0.06;
+let bboxMinX = srcW, bboxMinY = srcH, bboxMaxX = -1, bboxMaxY = -1;
+for (let y = 0; y < srcH; y++) {
+  for (let x = 0; x < srcW; x++) {
+    const alpha = srcData[(y * srcW + x) * 4 + 3];
+    if (alpha < ALPHA_THRESHOLD) continue;
+    if (x < bboxMinX) bboxMinX = x;
+    if (x > bboxMaxX) bboxMaxX = x;
+    if (y < bboxMinY) bboxMinY = y;
+    if (y > bboxMaxY) bboxMaxY = y;
+  }
+}
+if (bboxMaxX < 0) throw new Error('source PNG has no visible pixels');
+const bboxW = bboxMaxX - bboxMinX + 1;
+const bboxH = bboxMaxY - bboxMinY + 1;
+const bboxSide = Math.max(bboxW, bboxH);
+const square = Math.ceil(bboxSide * (1 + 2 * PADDING_PCT));
+const bboxCenterX = bboxMinX + bboxW / 2;
+const bboxCenterY = bboxMinY + bboxH / 2;
+const cropX = Math.round(bboxCenterX - square / 2);
+const cropY = Math.round(bboxCenterY - square / 2);
 
 function sampleSource(x, y) {
   const sx = cropX + x;
   const sy = cropY + y;
+  if (sx < 0 || sx >= srcW || sy < 0 || sy >= srcH) return [0, 0, 0, 0];
   const off = (sy * srcW + sx) * 4;
   return [srcData[off], srcData[off + 1], srcData[off + 2], srcData[off + 3]];
 }
@@ -44,8 +66,8 @@ function downsample(size) {
     for (let x = 0; x < size; x++) {
       const x0 = Math.floor(x * scale);
       const y0 = Math.floor(y * scale);
-      const x1 = Math.min(square, Math.floor((x + 1) * scale));
-      const y1 = Math.min(square, Math.floor((y + 1) * scale));
+      const x1 = Math.floor((x + 1) * scale);
+      const y1 = Math.floor((y + 1) * scale);
       let r = 0, g = 0, b = 0, a = 0, n = 0;
       for (let sy = y0; sy < y1; sy++) {
         for (let sx = x0; sx < x1; sx++) {

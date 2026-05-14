@@ -19,7 +19,7 @@ import type {
 
 const app = $('app');
 const brandMark = $('brand-mark') as HTMLImageElement;
-brandMark.src = browser.runtime.getURL('icons/icon-32.png');
+brandMark.src = browser.runtime.getURL('icons/icon-48.png');
 const statusEl = $('status');
 const resultEl = $('result');
 const nameEl = $('name');
@@ -352,8 +352,7 @@ function renderUnderenheter(items: Underenhet[]): void {
   const table = document.createElement('table');
   table.className = 'underenheter';
   const thead = document.createElement('thead');
-  thead.innerHTML =
-    '<tr><th>Navn</th><th>Org.nr</th><th>Næring</th><th>Sted</th></tr>';
+  thead.innerHTML = '<tr><th>Navn</th><th>Org.nr</th><th>Sted</th></tr>';
   table.appendChild(thead);
 
   const tbody = document.createElement('tbody');
@@ -368,10 +367,6 @@ function renderUnderenheter(items: Underenhet[]): void {
     orgnrCell.style.fontFamily = 'ui-monospace, SFMono-Regular, Menlo, monospace';
     orgnrCell.textContent = u.organisasjonsnummer;
     tr.appendChild(orgnrCell);
-
-    const industryCell = document.createElement('td');
-    industryCell.textContent = u.naeringskode1?.beskrivelse ?? '';
-    tr.appendChild(industryCell);
 
     const placeCell = document.createElement('td');
     placeCell.textContent =
