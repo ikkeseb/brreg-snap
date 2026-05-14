@@ -60,10 +60,37 @@ async function init(): Promise<void> {
     if (orgnr) {
       await loadAndRender(orgnr);
     } else {
-      showSearch('No company detected on this page — try a search:');
+      showSearch('Ingen bedrift oppdaget på denne siden — søk i stedet:');
     }
   } catch (err) {
     showError(err);
+  }
+}
+
+async function syncSidebarIfOpen(orgnr: string): Promise<void> {
+  // The popup runs with activeTab grant on the current tab — it can
+  // read the URL and resolve the orgnr. The sidebar, opened earlier
+  // on a different tab, holds stale data until something tells it
+  // to repaint. We do that here: if the sidebar is open, swap its
+  // panel to the orgnr the popup just resolved.
+  //
+  // Fire-and-forget — popup rendering shouldn't block on this, and
+  // setPanel survives the popup closing.
+  //
+  // Note: this does not consistently re-render the open sidebar in
+  // Firefox today (the trigger for the actual visible refresh is
+  // unclear). The user-facing fallback is the refresh button in the
+  // sidebar header.
+  try {
+    const open = await browser.sidebarAction.isOpen({});
+    if (!open) return;
+    const url = browser.runtime.getURL(
+      `details/details.html?orgnr=${orgnr}`,
+    );
+    await browser.sidebarAction.setPanel({ panel: url });
+  } catch {
+    // sidebarAction may be unavailable or the call may race the
+    // popup closing. Silent fail — the popup itself still rendered.
   }
 }
 
@@ -74,9 +101,10 @@ async function getActiveTab(): Promise<browser.tabs.Tab | undefined> {
 
 async function loadAndRender(orgnr: string): Promise<void> {
   setState('loading');
-  statusEl.textContent = `Loading ${orgnr}…`;
+  statusEl.textContent = `Henter ${orgnr}…`;
   setBrregLink(orgnr);
   setDetailsLink(orgnr);
+  void syncSidebarIfOpen(orgnr);
   try {
     // Roller is a second API call but it lives behind the same 24h
     // session cache, and we want daglig leder visible in the quick
@@ -108,16 +136,16 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
 
   const dl = document.createElement('dl');
   addRow(dl, 'Form', enhet.organisasjonsform?.beskrivelse);
-  addRow(dl, 'Registered', enhet.registreringsdatoEnhetsregisteret);
-  addRow(dl, 'Industry', enhet.naeringskode1?.beskrivelse);
-  addRow(dl, 'Employees', enhet.antallAnsatte?.toString());
+  addRow(dl, 'Registrert', enhet.registreringsdatoEnhetsregisteret);
+  addRow(dl, 'Næring', enhet.naeringskode1?.beskrivelse);
+  addRow(dl, 'Ansatte', enhet.antallAnsatte?.toString());
   addRow(dl, 'Daglig leder', findDagligLeder(roller));
-  addRow(dl, 'Address', formatAddress(enhet.forretningsadresse));
+  addRow(dl, 'Adresse', formatAddress(enhet.forretningsadresse));
   if (enhet.hjemmeside) {
     const href = enhet.hjemmeside.startsWith('http')
       ? enhet.hjemmeside
       : `https://${enhet.hjemmeside}`;
-    addLink(dl, 'Website', href, enhet.hjemmeside);
+    addLink(dl, 'Hjemmeside', href, enhet.hjemmeside);
   }
   resultEl.appendChild(dl);
 
@@ -127,7 +155,7 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   if (enhet.underAvvikling) flags.appendChild(makeFlag('Under avvikling', 'warn'));
   if (enhet.underTvangsavviklingEllerTvangsopplosning)
     flags.appendChild(makeFlag('Tvangsavvikling', 'danger'));
-  if (enhet.registrertIMvaregisteret) flags.appendChild(makeFlag('MVA-registered'));
+  if (enhet.registrertIMvaregisteret) flags.appendChild(makeFlag('MVA-registrert'));
   if (enhet.registrertIForetaksregisteret)
     flags.appendChild(makeFlag('Foretaksregistret'));
   if (flags.childNodes.length > 0) resultEl.appendChild(flags);
@@ -180,7 +208,7 @@ function showError(err: unknown): void {
   setState('error');
   setDetailsLink();
   const message = err instanceof Error ? err.message : String(err);
-  statusEl.textContent = `Error: ${message}`;
+  statusEl.textContent = `Feil: ${message}`;
 }
 
 function setState(state: 'loading' | 'result' | 'search' | 'error'): void {
@@ -232,7 +260,7 @@ async function runSearch(query: string): Promise<void> {
     }
     if (results.length === 0) {
       const li = document.createElement('li');
-      li.textContent = 'No matches.';
+      li.textContent = 'Ingen treff.';
       searchResults.appendChild(li);
     }
   } catch (err) {

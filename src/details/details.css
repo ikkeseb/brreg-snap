@@ -6,6 +6,8 @@
   --border: #e5e7eb;
   --accent: #2563eb;
   --danger: #b91c1c;
+  --radius: 6px;
+  --radius-lg: 10px;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
     Cantarell, sans-serif;
@@ -69,6 +71,53 @@ main > header h1 {
   text-decoration: underline;
 }
 
+#refresh-button {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  font-family: inherit;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease;
+}
+
+#refresh-button:hover {
+  color: var(--fg);
+  border-color: var(--muted);
+  background: var(--bg-card);
+}
+
+#refresh-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+#refresh-button[data-spinning='true'] {
+  animation: refresh-spin 600ms linear;
+  pointer-events: none;
+}
+
+@keyframes refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 #status {
   padding: 16px 0;
   color: var(--muted);
@@ -103,7 +152,7 @@ main[data-state='error'] #status {
 .flag {
   font-size: 11px;
   padding: 2px 8px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--border);
   color: var(--fg);
 }
@@ -121,7 +170,7 @@ main[data-state='error'] #status {
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 16px 18px;
   margin-top: 14px;
 }
