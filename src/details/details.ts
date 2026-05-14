@@ -2,6 +2,7 @@ import {
   fetchEnhet,
   fetchRoller,
   fetchUnderenheter,
+  invalidateCache,
 } from '../lib/brreg.js';
 import { formatAddress } from '../lib/format.js';
 import { isValidOrgnr } from '../lib/mod11.js';
@@ -30,6 +31,19 @@ const parentBody = $('parent-body');
 const underenheterSection = $('underenheter');
 const underenheterBody = $('underenheter-body');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
+const refreshButton = $('refresh-button') as HTMLButtonElement;
+
+refreshButton.addEventListener('click', () => {
+  refreshButton.dataset.spinning = 'true';
+  const orgnr = getOrgnrFromUrl();
+  const work = orgnr ? invalidateCache(orgnr) : Promise.resolve();
+  void work.finally(() => {
+    // Reload re-runs init() which refetches everything. With the cache
+    // cleared above, that means a real round-trip to brreg.no rather
+    // than serving the same response we already had.
+    window.location.reload();
+  });
+});
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id);

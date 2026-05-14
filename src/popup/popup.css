@@ -5,6 +5,7 @@
   --border: #e5e7eb;
   --accent: #2563eb;
   --danger: #b91c1c;
+  --radius: 6px;
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
     Cantarell, sans-serif;
@@ -96,7 +97,7 @@ main[data-state='error'] #status {
 #result .flag {
   font-size: 11px;
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   background: var(--border);
   color: var(--fg);
 }
@@ -123,7 +124,7 @@ main[data-state='error'] #status {
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--fg);
-  border-radius: 4px;
+  border-radius: var(--radius);
   font-size: 13px;
 }
 
@@ -153,19 +154,28 @@ main[data-state='error'] #status {
 
 #details-link {
   display: inline-block;
-  margin-top: 10px;
-  padding: 6px 10px;
+  margin-top: 12px;
+  padding: 7px 12px;
   background: var(--accent);
   color: white;
-  border-radius: 4px;
+  border-radius: var(--radius);
   text-decoration: none;
   font-size: 12px;
   font-weight: 500;
+  transition:
+    filter 120ms ease,
+    box-shadow 120ms ease;
 }
 
 #details-link:hover {
-  filter: brightness(1.05);
+  filter: brightness(1.06);
+  box-shadow: 0 2px 6px -2px var(--accent);
   text-decoration: none;
+}
+
+#details-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 @media (prefers-color-scheme: dark) {
