@@ -1,12 +1,19 @@
 import type {
   Enhet,
+  Regnskap,
+  RegnskapResponse,
   RollerResponse,
   SearchHit,
   Underenhet,
 } from '../types/brreg.js';
 
 const API = 'https://data.brreg.no/enhetsregisteret/api';
+const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+// Cache-key prefixes used by all fetchers. invalidateCache() walks
+// these to clear everything related to a single orgnr.
+const CACHE_PREFIXES = ['enhet', 'roller', 'underenheter', 'regnskap'] as const;
 
 interface CacheEntry<T> {
   value: T;
@@ -145,4 +152,48 @@ export async function fetchUnderenheter(orgnr: string): Promise<Underenhet[]> {
   const safe = raw.filter(isUnderenhet);
   await cacheSet(key, safe);
   return safe;
+}
+
+function isRegnskap(value: unknown): value is Regnskap {
+  return typeof value === 'object' && value !== null;
+}
+
+export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
+  const key = `regnskap:${orgnr}`;
+  const cached = await cacheGet<RegnskapResponse>(key);
+  if (cached) return cached;
+
+  const res = await fetch(`${REGNSKAP_API}/${orgnr}`, {
+    headers: { Accept: 'application/json' },
+  });
+  if (res.status === 404) {
+    // Many small entities have no submitted regnskap. Cache the empty
+    // result so we don't re-fetch on every refresh.
+    const empty: RegnskapResponse = [];
+    await cacheSet(key, empty);
+    return empty;
+  }
+  if (!res.ok) {
+    throw new Error(`brreg regnskap API returned ${res.status}.`);
+  }
+  const data: unknown = await res.json();
+  const safe = Array.isArray(data) ? data.filter(isRegnskap) : [];
+  await cacheSet(key, safe);
+  return safe;
+}
+
+// NOTE: there is no fetchSignatur(). brreg's open enhetsregisteret API
+// does not expose signatur/prokura on `/api/enheter/<orgnr>` and the
+// nested `/signatur` path 404s. The full signaturrett text lives only
+// behind the paid Foretaksregisteret endpoints. The #signatur card in
+// details.html stays hidden until brreg exposes the data publicly or
+// the project adds an authenticated tier.
+
+export async function invalidateCache(orgnr: string): Promise<void> {
+  const keys = CACHE_PREFIXES.map((p) => `${p}:${orgnr}`);
+  try {
+    await browser.storage.session.remove(keys);
+  } catch {
+    /* ignore — best-effort eviction */
+  }
 }
