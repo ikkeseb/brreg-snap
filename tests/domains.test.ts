@@ -13,12 +13,14 @@ describe('domains table integrity', () => {
     const probes = [
       'dnb.no',
       'equinor.com',
+      'finn.no',
       'nrk.no',
       'orkla.no',
       'posten.no',
       'sparebank1.no',
       'telenor.no',
       'tine.no',
+      'vg.no',
       'vy.no',
     ];
     for (const domain of probes) {

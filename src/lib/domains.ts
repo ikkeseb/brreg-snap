@@ -13,12 +13,17 @@ import { isValidOrgnr } from './mod11.js';
 const TABLE: Readonly<Record<string, string>> = {
   'dnb.no': '984851006',          // DNB BANK ASA
   'equinor.com': '923609016',     // EQUINOR ASA
+  // FINN.no is operated by Vend Marketplaces AS — the brand and legal
+  // entity differ. Brreg navn search can't find "FINN.no" (the dot
+  // breaks it), so the only safe resolution is this curated entry.
+  'finn.no': '981159772',         // VEND MARKETPLACES AS
   'nrk.no': '976390512',          // NORSK RIKSKRINGKASTING AS
   'orkla.no': '910747711',        // ORKLA ASA
   'posten.no': '984661185',       // POSTEN BRING AS
   'sparebank1.no': '975966372',   // SPAREBANK 1 GRUPPEN AS
   'telenor.no': '982463718',      // TELENOR ASA
   'tine.no': '947942638',         // TINE SA
+  'vg.no': '950588063',           // VERDENS GANG AS
   'vy.no': '984661177',           // VYGRUPPEN AS
 };
 

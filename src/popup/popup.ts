@@ -24,14 +24,29 @@ function setDetailsLink(orgnr?: string): void {
   if (!orgnr) {
     detailsLink.hidden = true;
     detailsLink.removeAttribute('href');
+    detailsLink.onclick = null;
     return;
   }
   detailsLink.hidden = false;
-  detailsLink.href = browser.runtime.getURL(
+  const url = browser.runtime.getURL(
     `details/details.html?orgnr=${orgnr}`,
   );
-  detailsLink.target = '_blank';
-  detailsLink.rel = 'noopener noreferrer';
+  // Keep href so the link is keyboard-focusable and middle-click works
+  // as a fallback. Click overrides the default tab-open and spawns a
+  // standalone popup window instead — that's what users expect from a
+  // "Detaljert visning" affordance off a toolbar popup.
+  detailsLink.href = url;
+  detailsLink.onclick = (ev) => {
+    ev.preventDefault();
+    void browser.windows.create({
+      url,
+      type: 'popup',
+      width: 880,
+      height: 720,
+    });
+    // Close the toolbar popup so it doesn't linger behind the new window.
+    window.close();
+  };
 }
 
 async function init(): Promise<void> {
