@@ -111,6 +111,34 @@ main[data-state='error'] #status {
   letter-spacing: 0.02em;
 }
 
+.orgnr-copy {
+  font: inherit;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0 2px;
+  margin: 0;
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.orgnr-copy:hover {
+  color: var(--accent);
+  border-bottom-color: currentColor;
+}
+
+.orgnr-copy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.orgnr-copy.copied {
+  color: var(--success);
+  border-bottom-color: transparent;
+}
+
 .flags {
   margin-top: 12px;
   display: flex;
@@ -269,6 +297,13 @@ table.underenheter td a:hover {
   text-decoration: underline;
 }
 
+table.underenheter td.orgnr-cell {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
 footer {
   margin-top: 24px;
   padding-top: 14px;
@@ -389,6 +424,16 @@ footer a:hover {
 
 #footer-updated {
   font-variant-numeric: tabular-nums;
+}
+
+#footer-source {
+  color: var(--muted);
+}
+
+#source-host {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--fg);
 }
 
 .nokkeltall-grid {

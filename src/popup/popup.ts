@@ -1,4 +1,5 @@
 import { fetchEnhet, fetchRoller, searchEnheter } from '../lib/brreg.js';
+import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress } from '../lib/format.js';
 import { resolveOrgnr } from '../lib/orgnr.js';
 import { findDagligLeder } from '../lib/roller.js';
@@ -92,9 +93,18 @@ async function syncSidebarIfOpen(orgnr: string): Promise<void> {
     const url = browser.runtime.getURL(
       `details/details.html?orgnr=${orgnr}`,
     );
+    const tab = await getActiveTab();
+    let host: string | undefined;
+    if (tab?.url) {
+      try {
+        host = new URL(tab.url).hostname;
+      } catch {
+        /* invalid url — leave host undefined */
+      }
+    }
     await Promise.allSettled([
       browser.sidebarAction.setPanel({ panel: url }),
-      browser.runtime.sendMessage({ type: 'sync', orgnr }),
+      browser.runtime.sendMessage({ type: 'sync', orgnr, host }),
     ]);
   } catch {
     // sidebarAction may be unavailable. Silent fail — the popup
@@ -139,7 +149,7 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
 
   const orgnrEl = document.createElement('div');
   orgnrEl.className = 'orgnr';
-  orgnrEl.textContent = `Org.nr ${enhet.organisasjonsnummer}`;
+  renderOrgnrCopy(orgnrEl, enhet.organisasjonsnummer);
   resultEl.appendChild(orgnrEl);
 
   const dl = document.createElement('dl');
