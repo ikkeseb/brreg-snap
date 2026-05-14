@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "brreg-now",
+  "version": "0.1.0",
+  "description": "Look up Norwegian company info from Brønnøysundregistrene with one click.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "brreg-now@ikkeseb.github.io",
+      "strict_min_version": "115.0"
+    }
+  },
+  "action": {
+    "default_title": "brreg-now",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": ["https://data.brreg.no/*"],
+  "background": {
+    "scripts": ["background/background.js"],
+    "type": "module"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://data.brreg.no"
+  }
+}

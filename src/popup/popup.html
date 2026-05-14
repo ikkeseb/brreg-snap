@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>brreg-now</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main id="app" data-state="loading">
+      <header>
+        <h1>brreg-now</h1>
+      </header>
+      <section id="status" aria-live="polite">Looking up company…</section>
+      <section id="result" hidden></section>
+      <section id="search" hidden>
+        <label for="query">Search Brønnøysundregistrene</label>
+        <input
+          id="query"
+          type="search"
+          autocomplete="off"
+          placeholder="Company name or 9-digit orgnr"
+          spellcheck="false"
+        />
+        <ul id="search-results"></ul>
+      </section>
+      <footer>
+        <a
+          id="brreg-link"
+          href="https://data.brreg.no/enhetsregisteret/oppslag/enheter"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Open on data.brreg.no</a
+        >
+      </footer>
+    </main>
+    <script type="module" src="popup.ts"></script>
+  </body>
+</html>
