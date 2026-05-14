@@ -5,6 +5,7 @@ import {
   fetchUnderenheter,
   invalidateCache,
 } from '../lib/brreg.js';
+import { buildOrgnrCopyButton, renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress, formatNok, formatRelativeTime } from '../lib/format.js';
 import { isValidOrgnr } from '../lib/mod11.js';
 import { resolveOrgnr } from '../lib/orgnr.js';
@@ -12,7 +13,7 @@ import { findDagligLeder } from '../lib/roller.js';
 import type {
   Enhet,
   Person,
-  Regnskap,
+  RegnskapResponse,
   Rolle,
   RolleEnhet,
   RolleGruppe,
@@ -40,7 +41,10 @@ const brregLink = $('brreg-link') as HTMLAnchorElement;
 const footerUpdated = $('footer-updated');
 const updatedTime = $('updated-time') as HTMLTimeElement;
 const refreshBtn = $('refresh-btn') as HTMLButtonElement;
+const footerSource = $('footer-source');
+const sourceHostEl = $('source-host');
 let currentOrgnr: string | undefined;
+let currentSourceHost: string | undefined;
 let lastUpdatedAt: number | undefined;
 let updatedTimerId: number | undefined;
 
@@ -99,7 +103,7 @@ async function loadOrgnr(orgnr: string): Promise<void> {
       fetchEnhet(orgnr),
       fetchRoller(orgnr).catch(() => ({ rollegrupper: [] }) as RollerResponse),
       fetchUnderenheter(orgnr).catch(() => [] as Underenhet[]),
-      fetchRegnskap(orgnr).catch(() => [] as Regnskap[]),
+      fetchRegnskap(orgnr).catch(() => ({ items: [] }) as RegnskapResponse),
     ]);
     if (myRunId !== loadRunId) return;
 
@@ -151,7 +155,27 @@ async function doRefresh(orgnr: string): Promise<void> {
   }
 }
 
-async function resolveFromActiveTab(): Promise<string | undefined> {
+function setSourceHost(host: string | undefined): void {
+  currentSourceHost = host;
+  paintSourceLabel();
+}
+
+function paintSourceLabel(): void {
+  if (!currentSourceHost) {
+    footerSource.hidden = true;
+    sourceHostEl.textContent = '';
+    return;
+  }
+  footerSource.hidden = false;
+  sourceHostEl.textContent = currentSourceHost;
+}
+
+interface TabContext {
+  orgnr?: string;
+  host?: string;
+}
+
+async function resolveFromActiveTab(): Promise<TabContext> {
   // tabs.query returns the active tab's url and title only when the
   // extension holds activeTab on it — which Firefox grants on the
   // user action that toggles the sidebar (clicking the sidebar
@@ -165,13 +189,21 @@ async function resolveFromActiveTab(): Promise<string | undefined> {
       currentWindow: true,
     });
     const tab = tabs[0];
-    if (!tab) return undefined;
+    if (!tab) return {};
     const url = tab.url ?? '';
     const title = tab.title ?? '';
-    if (!url && !title) return undefined;
-    return resolveOrgnr({ url, title });
+    if (!url && !title) return {};
+    let host: string | undefined;
+    if (url) {
+      try {
+        host = new URL(url).hostname;
+      } catch {
+        /* invalid url — leave host undefined */
+      }
+    }
+    return { orgnr: resolveOrgnr({ url, title }), host };
   } catch {
-    return undefined;
+    return {};
   }
 }
 
@@ -182,7 +214,7 @@ async function init(): Promise<void> {
   // panel). Trust the tab when we can read it.
   const fromTab = await resolveFromActiveTab();
   const fromUrl = getOrgnrFromUrl();
-  const orgnr = fromTab ?? fromUrl;
+  const orgnr = fromTab.orgnr ?? fromUrl;
 
   if (!orgnr) {
     // Neither the active tab nor the URL has a company. The sidebar
@@ -192,23 +224,29 @@ async function init(): Promise<void> {
     return;
   }
 
-  if (fromTab && fromTab !== fromUrl) {
+  if (fromTab.orgnr && fromTab.orgnr !== fromUrl) {
     const url = new URL(window.location.href);
-    url.searchParams.set('orgnr', fromTab);
+    url.searchParams.set('orgnr', fromTab.orgnr);
     window.history.replaceState(null, '', url.toString());
   }
+  setSourceHost(fromTab.host);
   await loadOrgnr(orgnr);
 }
 
 interface SyncMessage {
   type: 'sync';
   orgnr: string;
+  host?: string;
 }
 
 function isSyncMessage(msg: unknown): msg is SyncMessage {
   if (typeof msg !== 'object' || msg === null) return false;
-  const m = msg as { type?: unknown; orgnr?: unknown };
-  return m.type === 'sync' && typeof m.orgnr === 'string';
+  const m = msg as { type?: unknown; orgnr?: unknown; host?: unknown };
+  return (
+    m.type === 'sync' &&
+    typeof m.orgnr === 'string' &&
+    (m.host === undefined || typeof m.host === 'string')
+  );
 }
 
 // The popup broadcasts a 'sync' message after resolving the active
@@ -219,6 +257,7 @@ function isSyncMessage(msg: unknown): msg is SyncMessage {
 browser.runtime.onMessage.addListener((msg: unknown) => {
   if (!isSyncMessage(msg)) return;
   if (!isValidOrgnr(msg.orgnr)) return;
+  setSourceHost(msg.host);
   const url = new URL(window.location.href);
   url.searchParams.set('orgnr', msg.orgnr);
   window.history.replaceState(null, '', url.toString());
@@ -227,7 +266,7 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
 
 function renderHeader(enhet: Enhet): void {
   nameEl.textContent = enhet.navn;
-  orgnrEl.textContent = `Org.nr ${enhet.organisasjonsnummer}`;
+  renderOrgnrCopy(orgnrEl, enhet.organisasjonsnummer);
   flagsEl.innerHTML = '';
   const negativeStatus =
     enhet.konkurs ||
@@ -381,12 +420,36 @@ async function renderParent(parentOrgnr: string | undefined): Promise<void> {
   }
 }
 
-function renderNokkeltall(items: Regnskap[]): void {
+function unsupportedPlanLabel(code: string): string {
+  switch (code.toUpperCase()) {
+    case 'BANK':
+      return 'bankregnskap (BANK)';
+    case 'FORS':
+      return 'forsikringsregnskap (FORS)';
+    default:
+      return `oppstillingsplan ${code}`;
+  }
+}
+
+function renderNokkeltall(response: RegnskapResponse): void {
   nokkeltallBody.innerHTML = '';
+  if (response.unsupportedPlan) {
+    // brreg's public regnskap-API only serialises the default
+    // oppstillingsplan; BANK / FORS filings exist but come back as
+    // 500. Surface that explicitly so we don't look like we missed
+    // the data.
+    nokkeltallBody.appendChild(
+      emptyLine(
+        `Filer som ${unsupportedPlanLabel(response.unsupportedPlan)} — ikke tilgjengelig i offentlig API.`,
+      ),
+    );
+    return;
+  }
+
   // brreg's regnskapsregisteret returns the array in arbitrary order;
   // pick the most recent period by `tilDato` rather than trusting
   // index 0.
-  const latest = items
+  const latest = response.items
     .filter((r) => r.regnskapsperiode?.tilDato)
     .sort((a, b) =>
       (b.regnskapsperiode!.tilDato ?? '').localeCompare(
@@ -464,8 +527,8 @@ function renderUnderenheter(items: Underenhet[]): void {
     tr.appendChild(nameCell);
 
     const orgnrCell = document.createElement('td');
-    orgnrCell.style.fontFamily = 'ui-monospace, SFMono-Regular, Menlo, monospace';
-    orgnrCell.textContent = u.organisasjonsnummer;
+    orgnrCell.className = 'orgnr-cell';
+    orgnrCell.appendChild(buildOrgnrCopyButton(u.organisasjonsnummer));
     tr.appendChild(orgnrCell);
 
     const placeCell = document.createElement('td');

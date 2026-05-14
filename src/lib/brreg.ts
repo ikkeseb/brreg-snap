@@ -158,6 +158,23 @@ function isRegnskap(value: unknown): value is Regnskap {
   return typeof value === 'object' && value !== null;
 }
 
+async function parseUnsupportedPlan(res: Response): Promise<string | undefined> {
+  // Banks (BANK) and insurance (FORS) file regnskap under specialised
+  // oppstillingsplaner that the public API refuses to serialise. The
+  // 500 body is JSON: `{"message": "Regnskapet inneholder en
+  // oppstillingsplan som ikke er stottet (BANK)", ...}`. Pull the
+  // plan code out so the UI can show "filer som bankregnskap" rather
+  // than pretending the company didn't file.
+  try {
+    const body = (await res.json()) as { message?: unknown };
+    const msg = typeof body?.message === 'string' ? body.message : '';
+    const m = msg.match(/\(([A-Z]+)\)/);
+    return m?.[1];
+  } catch {
+    return undefined;
+  }
+}
+
 export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
   const key = `regnskap:${orgnr}`;
   const cached = await cacheGet<RegnskapResponse>(key);
@@ -169,17 +186,27 @@ export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
   if (res.status === 404) {
     // Many small entities have no submitted regnskap. Cache the empty
     // result so we don't re-fetch on every refresh.
-    const empty: RegnskapResponse = [];
+    const empty: RegnskapResponse = { items: [] };
     await cacheSet(key, empty);
     return empty;
+  }
+  if (res.status === 500) {
+    const plan = await parseUnsupportedPlan(res);
+    if (plan) {
+      const response: RegnskapResponse = { items: [], unsupportedPlan: plan };
+      await cacheSet(key, response);
+      return response;
+    }
+    // Other 500s fall through to the generic error below.
   }
   if (!res.ok) {
     throw new Error(`brreg regnskap API returned ${res.status}.`);
   }
   const data: unknown = await res.json();
-  const safe = Array.isArray(data) ? data.filter(isRegnskap) : [];
-  await cacheSet(key, safe);
-  return safe;
+  const items = Array.isArray(data) ? data.filter(isRegnskap) : [];
+  const response: RegnskapResponse = { items };
+  await cacheSet(key, response);
+  return response;
 }
 
 // NOTE: there is no fetchSignatur(). brreg's open enhetsregisteret API

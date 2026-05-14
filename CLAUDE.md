@@ -104,11 +104,14 @@ sectors file under specialised oppstillingsplaner (`BANK`, `FORS`)
 that the public endpoint refuses to serialise — DNB BANK ASA
 (984851006) hits this. The body is JSON with
 `"message": "Regnskapet inneholder en oppstillingsplan som ikke er
-stottet (BANK)"` and a stack trace. The current fetcher treats any
-non-404 non-ok as a hard error which the UI swallows into "Ingen
-regnskap registrert" — misleading. If you touch this, render a
-distinct "ikke støttet i offentlig API" line instead of pretending
-the company didn't file.
+stottet (BANK)"` and a stack trace. `fetchRegnskap` returns
+`RegnskapResponse = { items: Regnskap[]; unsupportedPlan?: string }`;
+`parseUnsupportedPlan` extracts the `(BANK)` / `(FORS)` code from
+the 500 body via `/\(([A-Z]+)\)/` and stores it. The UI renders a
+distinct "Filer som bankregnskap (BANK) — ikke tilgjengelig i
+offentlig API." line instead of pretending the company didn't file.
+Both empty results and unsupported-plan results are cached so refresh
+doesn't re-hit.
 
 **Auto-sync on tab switch is blocked by the permission model — by
 design.** `activeTab` grants extension UI access to *one* tab on
@@ -118,12 +121,28 @@ gesture fires against the extension, so `tabs.query` returns empty
 URL/title for the new tab. `tabs.onActivated` fires without `tabs`
 permission but its `Tab` object is stripped of URL/title for the
 same reason. The permissionless paths out: (a) require a fresh
-gesture (click sidebar icon, ctrl+shift+B, a button inside the
-sidebar that re-queries), or (b) accept the limitation. Escalating
-to `tabs` would relax the security differentiator — see the
-constraints section. Don't burn cycles re-investigating
-`webNavigation`, `tabs.onUpdated`, or focus events; they all need
-`tabs` or content scripts.
+gesture against the *toolbar/shortcut* surface (click sidebar icon,
+ctrl+shift+B), or (b) accept the limitation. Escalating to `tabs`
+would relax the security differentiator — see the constraints
+section. Don't burn cycles re-investigating `webNavigation`,
+`tabs.onUpdated`, or focus events; they all need `tabs` or content
+scripts.
+
+**A button *inside the sidebar iframe* does NOT grant activeTab.**
+Tested empirically: a sync button rendered inside the sidebar that
+called `tabs.query({active:true, currentWindow:true})` got the same
+empty `url`/`title` as `tabs.onActivated`. The user-gesture grant is
+scoped to the toolbar/sidebar-action surface, not clicks inside the
+already-loaded panel. There used to be a sync button in the sidebar
+header for this — it was removed because the hypothesis was wrong.
+Don't re-add it.
+
+**Click-to-copy on orgnr lives in `src/lib/copy-orgnr.ts`.** Shared
+helper used by the popup result row, sidebar header, and
+underenheter table cells. `navigator.clipboard.writeText` works in
+extension contexts without `clipboardWrite` in the manifest as long
+as the call is in a user-gesture stack (i.e. inside a click handler)
+— which it is. Don't add `clipboardWrite` to the permission list.
 
 **Before curling brreg, check the official docs.** Enhetsregisteret
 API is documented at

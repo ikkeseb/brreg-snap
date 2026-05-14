@@ -119,5 +119,13 @@ export interface Regnskap {
   };
 }
 
-// The regnskapsregisteret endpoint returns an array (newest first).
-export type RegnskapResponse = Regnskap[];
+// The regnskapsregisteret endpoint returns an array of filed regnskap,
+// but order is not guaranteed — callers must sort by tilDato.
+// `unsupportedPlan` is populated when brreg refuses to serialise the
+// filing because it uses a specialised oppstillingsplan (e.g. 'BANK'
+// or 'FORS' — banks/insurance). items[] is empty in that case, and
+// the UI should explain the gap rather than imply nothing is filed.
+export interface RegnskapResponse {
+  items: Regnskap[];
+  unsupportedPlan?: string;
+}
