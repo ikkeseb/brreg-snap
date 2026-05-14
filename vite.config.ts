@@ -19,17 +19,24 @@ export default defineConfig({
     rollupOptions: {
       input: {
         popup: resolve(__dirname, 'src/popup/popup.html'),
+        details: resolve(__dirname, 'src/details/details.html'),
         background: resolve(__dirname, 'src/background/background.ts'),
       },
       output: {
         entryFileNames: (chunk) => {
           if (chunk.name === 'background') return 'background/background.js';
+          if (chunk.name === 'details') return 'details/[name].js';
           return 'popup/[name].js';
         },
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: (asset) => {
-          if (asset.name?.endsWith('.html')) return 'popup/[name][extname]';
-          if (asset.name?.endsWith('.css')) return 'popup/[name][extname]';
+          const name = asset.name ?? '';
+          if (name === 'details.html' || name === 'details.css') {
+            return 'details/[name][extname]';
+          }
+          if (name.endsWith('.html') || name.endsWith('.css')) {
+            return 'popup/[name][extname]';
+          }
           return 'assets/[name][extname]';
         },
       },
@@ -42,15 +49,13 @@ export default defineConfig({
         const dist = resolve(__dirname, 'dist');
         if (!existsSync(dist)) mkdirSync(dist, { recursive: true });
 
-        // Vite emits the HTML entry under dist/src/popup/popup.html
-        // because the input path lives at src/popup/popup.html. The
-        // manifest expects popup/popup.html, so move it and drop the
-        // empty dist/src tree.
-        const emittedHtml = resolve(dist, 'src/popup/popup.html');
-        const targetHtml = resolve(dist, 'popup/popup.html');
-        if (existsSync(emittedHtml)) {
-          mkdirSync(resolve(dist, 'popup'), { recursive: true });
-          renameSync(emittedHtml, targetHtml);
+        // Vite emits HTML entries under dist/src/<dir>/<file>.html
+        // because the input paths live under src/. The manifest and
+        // the runtime URLs expect <dir>/<file>.html — move them up
+        // and drop the empty dist/src tree.
+        relocateHtml('src/popup/popup.html', 'popup/popup.html');
+        relocateHtml('src/details/details.html', 'details/details.html');
+        if (existsSync(resolve(dist, 'src'))) {
           rmSync(resolve(dist, 'src'), { recursive: true, force: true });
         }
 
@@ -64,6 +69,14 @@ export default defineConfig({
             resolve(dist, 'icons'),
             { recursive: true },
           );
+        }
+
+        function relocateHtml(from: string, to: string): void {
+          const src = resolve(dist, from);
+          const dst = resolve(dist, to);
+          if (!existsSync(src)) return;
+          mkdirSync(resolve(dst, '..'), { recursive: true });
+          renameSync(src, dst);
         }
       },
     },

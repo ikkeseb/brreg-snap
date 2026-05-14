@@ -1,4 +1,9 @@
-import type { Enhet, SearchHit } from '../types/brreg.js';
+import type {
+  Enhet,
+  RollerResponse,
+  SearchHit,
+  Underenhet,
+} from '../types/brreg.js';
 
 const API = 'https://data.brreg.no/enhetsregisteret/api';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -78,4 +83,66 @@ export async function searchEnheter(
     _embedded?: { enheter?: SearchHit[] };
   };
   return data._embedded?.enheter ?? [];
+}
+
+function isRollerResponse(value: unknown): value is RollerResponse {
+  if (typeof value !== 'object' || value === null) return false;
+  const groups = (value as { rollegrupper?: unknown }).rollegrupper;
+  return groups === undefined || Array.isArray(groups);
+}
+
+export async function fetchRoller(orgnr: string): Promise<RollerResponse> {
+  const key = `roller:${orgnr}`;
+  const cached = await cacheGet<RollerResponse>(key);
+  if (cached) return cached;
+
+  const res = await fetch(`${API}/enheter/${orgnr}/roller`, {
+    headers: { Accept: 'application/json' },
+  });
+  if (res.status === 404) {
+    // No roles registered — treat as empty rather than a hard error.
+    const empty: RollerResponse = { rollegrupper: [] };
+    await cacheSet(key, empty);
+    return empty;
+  }
+  if (!res.ok) {
+    throw new Error(`brreg roller API returned ${res.status}.`);
+  }
+  const data: unknown = await res.json();
+  if (!isRollerResponse(data)) {
+    throw new Error('brreg roller returned an unexpected response shape.');
+  }
+  await cacheSet(key, data);
+  return data;
+}
+
+function isUnderenhet(value: unknown): value is Underenhet {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { organisasjonsnummer?: unknown }).organisasjonsnummer ===
+      'string' &&
+    typeof (value as { navn?: unknown }).navn === 'string'
+  );
+}
+
+export async function fetchUnderenheter(orgnr: string): Promise<Underenhet[]> {
+  const key = `underenheter:${orgnr}`;
+  const cached = await cacheGet<Underenhet[]>(key);
+  if (cached) return cached;
+
+  const url = new URL(`${API}/underenheter`);
+  url.searchParams.set('overordnetEnhet', orgnr);
+  url.searchParams.set('size', '100');
+  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  if (!res.ok) {
+    throw new Error(`brreg underenheter API returned ${res.status}.`);
+  }
+  const data = (await res.json()) as {
+    _embedded?: { underenheter?: unknown[] };
+  };
+  const raw = data._embedded?.underenheter ?? [];
+  const safe = raw.filter(isUnderenhet);
+  await cacheSet(key, safe);
+  return safe;
 }
