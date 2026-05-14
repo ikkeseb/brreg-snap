@@ -3,13 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>brreg-now — details</title>
+    <title>Brønnøysund Insight</title>
     <link rel="stylesheet" href="details.css" />
   </head>
   <body>
     <main id="app" data-state="loading">
       <header>
-        <h1>brreg-now</h1>
+        <h1><img id="brand-mark" class="brand-mark" alt="" />Brønnøysund Insight</h1>
       </header>
       <section id="status" aria-live="polite">Henter selskapsdata…</section>
       <section id="result" hidden>
@@ -19,39 +19,138 @@
           <div id="flags" class="flags"></div>
         </header>
 
-        <section id="overview" class="card">
-          <h3>Oversikt</h3>
-          <dl id="overview-list"></dl>
+        <nav class="tablist" role="tablist" aria-label="Selskapsdetaljer">
+          <button
+            type="button"
+            role="tab"
+            id="tab-oversikt"
+            aria-controls="panel-oversikt"
+            aria-selected="true"
+            tabindex="0"
+          >
+            Oversikt
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-personer"
+            aria-controls="panel-personer"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            Personer
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-nokkeltall"
+            aria-controls="panel-nokkeltall"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            Nøkkeltall
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-enheter"
+            aria-controls="panel-enheter"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            Enheter
+          </button>
+        </nav>
+
+        <section
+          role="tabpanel"
+          id="panel-oversikt"
+          aria-labelledby="tab-oversikt"
+        >
+          <section id="overview" class="card">
+            <h3>Oversikt</h3>
+            <dl id="overview-list"></dl>
+          </section>
+
+          <section id="contact" class="card">
+            <h3>Kontakt</h3>
+            <dl id="contact-list"></dl>
+          </section>
+
+          <section id="signatur" class="card" hidden>
+            <h3>Signaturrett</h3>
+            <div id="signatur-body"></div>
+          </section>
+
+          <section id="parent" class="card" hidden>
+            <h3>Overordnet enhet</h3>
+            <div id="parent-body"></div>
+          </section>
         </section>
 
-        <section id="contact" class="card">
-          <h3>Kontakt</h3>
-          <dl id="contact-list"></dl>
+        <section
+          role="tabpanel"
+          id="panel-personer"
+          aria-labelledby="tab-personer"
+          hidden
+        >
+          <section id="roles" class="card">
+            <h3>Roller</h3>
+            <div id="roles-body"></div>
+          </section>
         </section>
 
-        <section id="roles" class="card">
-          <h3>Roller</h3>
-          <div id="roles-body"></div>
+        <section
+          role="tabpanel"
+          id="panel-nokkeltall"
+          aria-labelledby="tab-nokkeltall"
+          hidden
+        >
+          <section id="nokkeltall" class="card">
+            <h3>Nøkkeltall</h3>
+            <div id="nokkeltall-body">
+              <p class="empty">Regnskapsdata kommer snart.</p>
+            </div>
+          </section>
         </section>
 
-        <section id="parent" class="card" hidden>
-          <h3>Overordnet enhet</h3>
-          <div id="parent-body"></div>
-        </section>
-
-        <section id="underenheter" class="card" hidden>
-          <h3>Underenheter</h3>
-          <div id="underenheter-body"></div>
+        <section
+          role="tabpanel"
+          id="panel-enheter"
+          aria-labelledby="tab-enheter"
+          hidden
+        >
+          <section id="underenheter" class="card">
+            <h3>Underenheter</h3>
+            <div id="underenheter-body">
+              <p class="empty">Ingen registrerte underenheter.</p>
+            </div>
+          </section>
         </section>
       </section>
       <footer>
-        <a
-          id="brreg-link"
-          href="https://virksomhet.brreg.no/nb/oppslag/enheter"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Åpne på brreg.no ↗</a
+        <span id="footer-meta"
+          >Kilde:
+          <a
+            id="brreg-link"
+            href="https://virksomhet.brreg.no/nb/oppslag/enheter"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Brønnøysundregistrene ↗</a
+          ></span
         >
+        <span id="footer-updated" class="footer-updated" hidden>
+          Oppdatert: <time id="updated-time"></time>
+          <button
+            type="button"
+            id="refresh-btn"
+            class="icon-btn"
+            aria-label="Oppdater data"
+            title="Oppdater data"
+          >
+            ↻
+          </button>
+        </span>
       </footer>
     </main>
     <script type="module" src="details.ts"></script>

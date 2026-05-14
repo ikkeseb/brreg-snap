@@ -86,3 +86,36 @@ export interface Underenhet {
   oppstartsdato?: string;
   nedleggelsesdato?: string;
 }
+
+export interface SignaturResponse {
+  signatur?: {
+    beskrivelse?: string;
+    signaturBestemmelser?: string;
+  };
+  prokura?: {
+    beskrivelse?: string;
+    prokuraBestemmelser?: string;
+  };
+}
+
+export interface Regnskap {
+  id?: { orgnr: string };
+  journalnr?: string;
+  regnskapsperiode?: { fraDato?: string; tilDato?: string };
+  regnkapsprinsipper?: { smaaForetak?: boolean; regnskapsregler?: string };
+  valuta?: string;
+  resultatregnskapResultat?: {
+    driftsresultat?: { driftsinntekter?: { sumDriftsinntekter?: number } };
+    ordinaertResultatFoerSkattekostnad?: number;
+    aarsresultat?: number;
+    finansresultat?: { totalresultat?: number };
+    sumDriftsresultat?: number;
+  };
+  egenkapitalGjeld?: {
+    sumEgenkapitalGjeld?: number;
+    egenkapital?: { sumEgenkapital?: number };
+  };
+}
+
+// The regnskapsregisteret endpoint returns an array (newest first).
+export type RegnskapResponse = Regnskap[];

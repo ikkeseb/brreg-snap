@@ -18,6 +18,8 @@ import type {
 } from '../types/brreg.js';
 
 const app = $('app');
+const brandMark = $('brand-mark') as HTMLImageElement;
+brandMark.src = browser.runtime.getURL('icons/icon-32.png');
 const statusEl = $('status');
 const resultEl = $('result');
 const nameEl = $('name');
@@ -31,6 +33,8 @@ const parentBody = $('parent-body');
 const underenheterSection = $('underenheter');
 const underenheterBody = $('underenheter-body');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
+
+setupTabs();
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id);
@@ -177,6 +181,11 @@ function renderHeader(enhet: Enhet): void {
   nameEl.textContent = enhet.navn;
   orgnrEl.textContent = `Org.nr ${enhet.organisasjonsnummer}`;
   flagsEl.innerHTML = '';
+  const negativeStatus =
+    enhet.konkurs ||
+    enhet.underAvvikling ||
+    enhet.underTvangsavviklingEllerTvangsopplosning;
+  if (!negativeStatus) flagsEl.appendChild(makeFlag('Aktiv', 'ok'));
   if (enhet.konkurs) flagsEl.appendChild(makeFlag('Konkurs', 'danger'));
   if (enhet.underAvvikling)
     flagsEl.appendChild(makeFlag('Under avvikling', 'warn'));
@@ -325,12 +334,13 @@ async function renderParent(parentOrgnr: string | undefined): Promise<void> {
 }
 
 function renderUnderenheter(items: Underenhet[]): void {
-  if (items.length === 0) {
-    underenheterSection.hidden = true;
-    return;
-  }
   underenheterSection.hidden = false;
   underenheterBody.innerHTML = '';
+
+  if (items.length === 0) {
+    underenheterBody.appendChild(emptyLine('Ingen registrerte underenheter.'));
+    return;
+  }
 
   const summary = document.createElement('p');
   summary.className = 'empty';
@@ -374,7 +384,10 @@ function renderUnderenheter(items: Underenhet[]): void {
   underenheterBody.appendChild(table);
 }
 
-function makeFlag(label: string, severity?: 'warn' | 'danger'): HTMLElement {
+function makeFlag(
+  label: string,
+  severity?: 'ok' | 'warn' | 'danger',
+): HTMLElement {
   const el = document.createElement('span');
   el.className = 'flag';
   if (severity) el.dataset.severity = severity;
@@ -421,6 +434,46 @@ function emptyLine(text: string): HTMLElement {
   p.className = 'empty';
   p.textContent = text;
   return p;
+}
+
+function setupTabs(): void {
+  const tabs = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+  );
+  if (tabs.length === 0) return;
+
+  function activate(id: string): void {
+    for (const tab of tabs) {
+      const selected = tab.id === id;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      const panelId = tab.getAttribute('aria-controls');
+      if (panelId) {
+        const panel = document.getElementById(panelId);
+        if (panel) panel.hidden = !selected;
+      }
+    }
+  }
+
+  for (const tab of tabs) {
+    tab.addEventListener('click', () => {
+      activate(tab.id);
+      tab.focus();
+    });
+    tab.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
+      ev.preventDefault();
+      const idx = tabs.indexOf(tab);
+      const nextIdx =
+        ev.key === 'ArrowRight'
+          ? (idx + 1) % tabs.length
+          : (idx - 1 + tabs.length) % tabs.length;
+      const next = tabs[nextIdx];
+      if (!next) return;
+      activate(next.id);
+      next.focus();
+    });
+  }
 }
 
 void init();

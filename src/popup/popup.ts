@@ -5,6 +5,8 @@ import { findDagligLeder } from '../lib/roller.js';
 import type { Enhet, RollerResponse } from '../types/brreg.js';
 
 const app = document.getElementById('app') as HTMLElement;
+const brandMark = document.getElementById('brand-mark') as HTMLImageElement;
+brandMark.src = browser.runtime.getURL('icons/icon-32.png');
 const statusEl = document.getElementById('status') as HTMLElement;
 const resultEl = document.getElementById('result') as HTMLElement;
 const searchEl = document.getElementById('search') as HTMLElement;
@@ -157,6 +159,11 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
 
   const flags = document.createElement('div');
   flags.className = 'flags';
+  const negativeStatus =
+    enhet.konkurs ||
+    enhet.underAvvikling ||
+    enhet.underTvangsavviklingEllerTvangsopplosning;
+  if (!negativeStatus) flags.appendChild(makeFlag('Aktiv', 'ok'));
   if (enhet.konkurs) flags.appendChild(makeFlag('Konkurs', 'danger'));
   if (enhet.underAvvikling) flags.appendChild(makeFlag('Under avvikling', 'warn'));
   if (enhet.underTvangsavviklingEllerTvangsopplosning)
@@ -167,7 +174,10 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   if (flags.childNodes.length > 0) resultEl.appendChild(flags);
 }
 
-function makeFlag(label: string, severity?: 'warn' | 'danger'): HTMLElement {
+function makeFlag(
+  label: string,
+  severity?: 'ok' | 'warn' | 'danger',
+): HTMLElement {
   const el = document.createElement('span');
   el.className = 'flag';
   if (severity) el.dataset.severity = severity;

@@ -1,124 +1,88 @@
-// Generates public/icons/icon-{16,32,48,128}.png from a single
-// vector description, using only Node built-ins (no `sharp` or
-// ImageMagick devDep). Re-run after editing the design.
+// Downsamples the source brand PNG to the manifest icon sizes
+// (16, 32, 48, 128) using box-filter area averaging.
 //
 //   node scripts/generate-icons.mjs
 //
-// Design: Norwegian-flag-inspired cross — red field, white cross,
-// blue inset. Centered (square icon, not flag proportions) so it
-// reads cleanly at 16px. Colors per the official spec (PMS 200 red,
-// PMS 281 blue).
+// Source: docs/brand-b.png — the high-resolution "B" mark, RGBA.
+// Output: public/icons/icon-{size}.png — RGBA PNGs consumed by the
+// extension manifest. The source stays out of public/ so it doesn't
+// end up packed into the .xpi.
 
-import { writeFileSync, mkdirSync } from "node:fs";
-import { deflateSync } from "node:zlib";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const RED = [186, 12, 47];
-const WHITE = [255, 255, 255];
-const BLUE = [0, 32, 91];
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { PNG } from 'pngjs';
 
 const SIZES = [16, 32, 48, 128];
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUT_DIR = resolve(__dirname, "..", "public", "icons");
+const REPO_ROOT = resolve(__dirname, '..');
+const SOURCE = resolve(REPO_ROOT, 'docs', 'brand-b.png');
+const OUT_DIR = resolve(REPO_ROOT, 'public', 'icons');
 
-// PNG CRC-32 table.
-const CRC_TABLE = (() => {
-  const table = new Uint32Array(256);
-  for (let n = 0; n < 256; n++) {
-    let c = n;
-    for (let k = 0; k < 8; k++) {
-      c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    }
-    table[n] = c >>> 0;
-  }
-  return table;
-})();
+const source = PNG.sync.read(readFileSync(SOURCE));
+const { width: srcW, height: srcH, data: srcData } = source;
 
-function crc32(buf) {
-  let crc = 0xffffffff;
-  for (let i = 0; i < buf.length; i++) {
-    crc = CRC_TABLE[(crc ^ buf[i]) & 0xff] ^ (crc >>> 8);
-  }
-  return (crc ^ 0xffffffff) >>> 0;
+// Center-crop to a square viewport so non-square art doesn't get
+// distorted on downsample. The B mark sits roughly centered in the
+// source PNG; if that changes, retune cropY.
+const square = Math.min(srcW, srcH);
+const cropX = Math.floor((srcW - square) / 2);
+const cropY = Math.floor((srcH - square) / 2);
+
+function sampleSource(x, y) {
+  const sx = cropX + x;
+  const sy = cropY + y;
+  const off = (sy * srcW + sx) * 4;
+  return [srcData[off], srcData[off + 1], srcData[off + 2], srcData[off + 3]];
 }
 
-function chunk(type, data) {
-  const len = Buffer.alloc(4);
-  len.writeUInt32BE(data.length, 0);
-  const typeBuf = Buffer.from(type, "ascii");
-  const crcBuf = Buffer.alloc(4);
-  crcBuf.writeUInt32BE(crc32(Buffer.concat([typeBuf, data])), 0);
-  return Buffer.concat([len, typeBuf, data, crcBuf]);
-}
-
-// Pixel function: cross arms with white outer band and blue inner band,
-// centered on a red field. Thickness scales with size so the cross stays
-// readable from 16px up to 128px.
-function pixel(x, y, size) {
-  const cx = (size - 1) / 2;
-  const cy = (size - 1) / 2;
-
-  // Cross arm half-widths. Tuned per size: at 16px the inner blue is
-  // a 2px stripe inside a 6px white cross. Scales proportionally.
-  const whiteHalf = Math.max(1, Math.round((size * 3) / 16));
-  const blueHalf = Math.max(0, Math.round((size * 1) / 16));
-
-  const dx = Math.abs(x - cx);
-  const dy = Math.abs(y - cy);
-
-  const onVerticalArm = dx <= whiteHalf;
-  const onHorizontalArm = dy <= whiteHalf;
-  if (!onVerticalArm && !onHorizontalArm) return RED;
-
-  const inBlueV = dx <= blueHalf;
-  const inBlueH = dy <= blueHalf;
-  if (inBlueV || inBlueH) return BLUE;
-
-  return WHITE;
-}
-
-function makePng(size) {
-  const signature = Buffer.from([
-    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-  ]);
-
-  const ihdr = Buffer.alloc(13);
-  ihdr.writeUInt32BE(size, 0);
-  ihdr.writeUInt32BE(size, 4);
-  ihdr[8] = 8; // bit depth
-  ihdr[9] = 2; // color type: truecolor RGB
-  ihdr[10] = 0; // compression
-  ihdr[11] = 0; // filter
-  ihdr[12] = 0; // interlace
-
-  const stride = 1 + size * 3;
-  const raw = Buffer.alloc(size * stride);
+function downsample(size) {
+  const out = new PNG({ width: size, height: size, colorType: 6 });
+  const scale = square / size;
   for (let y = 0; y < size; y++) {
-    raw[y * stride] = 0; // filter type: None
     for (let x = 0; x < size; x++) {
-      const [r, g, b] = pixel(x, y, size);
-      const off = y * stride + 1 + x * 3;
-      raw[off] = r;
-      raw[off + 1] = g;
-      raw[off + 2] = b;
+      const x0 = Math.floor(x * scale);
+      const y0 = Math.floor(y * scale);
+      const x1 = Math.min(square, Math.floor((x + 1) * scale));
+      const y1 = Math.min(square, Math.floor((y + 1) * scale));
+      let r = 0, g = 0, b = 0, a = 0, n = 0;
+      for (let sy = y0; sy < y1; sy++) {
+        for (let sx = x0; sx < x1; sx++) {
+          const [sr, sg, sb, sa] = sampleSource(sx, sy);
+          // Premultiply alpha so semi-transparent edges blend cleanly
+          // against the destination. Un-premultiply at the end.
+          const fa = sa / 255;
+          r += sr * fa;
+          g += sg * fa;
+          b += sb * fa;
+          a += sa;
+          n += 1;
+        }
+      }
+      if (n === 0) continue;
+      const aAvg = a / n;
+      const off = (y * size + x) * 4;
+      if (aAvg === 0) {
+        out.data[off] = 0;
+        out.data[off + 1] = 0;
+        out.data[off + 2] = 0;
+        out.data[off + 3] = 0;
+      } else {
+        const aFactor = (aAvg / 255) * n;
+        out.data[off] = Math.round(r / aFactor);
+        out.data[off + 1] = Math.round(g / aFactor);
+        out.data[off + 2] = Math.round(b / aFactor);
+        out.data[off + 3] = Math.round(aAvg);
+      }
     }
   }
-
-  const idat = deflateSync(raw);
-
-  return Buffer.concat([
-    signature,
-    chunk("IHDR", ihdr),
-    chunk("IDAT", idat),
-    chunk("IEND", Buffer.alloc(0)),
-  ]);
+  return PNG.sync.write(out);
 }
 
 mkdirSync(OUT_DIR, { recursive: true });
 for (const size of SIZES) {
-  const png = makePng(size);
+  const png = downsample(size);
   const path = resolve(OUT_DIR, `icon-${size}.png`);
   writeFileSync(path, png);
   console.log(`wrote ${path} (${png.length} bytes)`);
