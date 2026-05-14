@@ -30,18 +30,18 @@ Total reviewable surface is intentionally small (~200 LOC core).
 
 ## Install — development
 
-Requires Node 18+ and Firefox.
+Requires Node 18+, [pnpm](https://pnpm.io/) 10.33+, and Firefox.
 
 ```bash
-npm install
-npm run dev          # builds + launches Firefox dev profile with the extension loaded
+pnpm install
+pnpm dev             # builds + launches Firefox dev profile with the extension loaded
 ```
 
 To produce a distributable `.xpi`:
 
 ```bash
-npm run build
-npm run package      # produces web-ext-artifacts/brreg-now-X.Y.Z.xpi
+pnpm build
+pnpm package         # produces web-ext-artifacts/brreg-now-X.Y.Z.xpi
 ```
 
 Load the `.xpi` via `about:debugging` → "This Firefox" → "Load Temporary
