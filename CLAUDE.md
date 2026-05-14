@@ -84,6 +84,14 @@ expects `popup/popup.html`. `vite.config.ts` `closeBundle` relocates
 the file and deletes `dist/src/`. Removing this hook breaks the
 packaged extension silently.
 
+**No signatur fetcher — endpoint doesn't exist publicly.** The brreg
+open API does not expose signaturrett/prokura on `/api/enheter/<orgnr>`
+and the nested `/signatur` path returns 404. The data lives only
+behind paid Foretaksregisteret endpoints. `src/lib/brreg.ts` has a
+comment marking this; `details.html` keeps a hidden `#signatur` card
+in case the field becomes available. Don't waste a session trying to
+re-discover the gap.
+
 ## Curator discipline for `src/lib/domains.ts`
 
 mod-11 validity is necessary but **not sufficient** — an orgnr can

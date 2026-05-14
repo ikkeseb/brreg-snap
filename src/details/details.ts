@@ -1,15 +1,18 @@
 import {
   fetchEnhet,
+  fetchRegnskap,
   fetchRoller,
   fetchUnderenheter,
+  invalidateCache,
 } from '../lib/brreg.js';
-import { formatAddress } from '../lib/format.js';
+import { formatAddress, formatNok, formatRelativeTime } from '../lib/format.js';
 import { isValidOrgnr } from '../lib/mod11.js';
 import { resolveOrgnr } from '../lib/orgnr.js';
 import { findDagligLeder } from '../lib/roller.js';
 import type {
   Enhet,
   Person,
+  Regnskap,
   Rolle,
   RolleEnhet,
   RolleGruppe,
@@ -32,9 +35,17 @@ const parentSection = $('parent');
 const parentBody = $('parent-body');
 const underenheterSection = $('underenheter');
 const underenheterBody = $('underenheter-body');
+const nokkeltallBody = $('nokkeltall-body');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
+const footerUpdated = $('footer-updated');
+const updatedTime = $('updated-time') as HTMLTimeElement;
+const refreshBtn = $('refresh-btn') as HTMLButtonElement;
+let currentOrgnr: string | undefined;
+let lastUpdatedAt: number | undefined;
+let updatedTimerId: number | undefined;
 
 setupTabs();
+setupRefresh();
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id);
@@ -74,6 +85,7 @@ async function loadOrgnr(orgnr: string): Promise<void> {
   // first is still in flight, the older fetches must not overwrite
   // the newer ones when they land out of order.
   const myRunId = ++loadRunId;
+  currentOrgnr = orgnr;
 
   brregLink.href = `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`;
 
@@ -81,12 +93,13 @@ async function loadOrgnr(orgnr: string): Promise<void> {
   statusEl.textContent = `Henter ${orgnr}…`;
 
   try {
-    // Run in parallel — roller and underenheter don't depend on the
-    // enhet response and the user is waiting on the slowest of three.
-    const [enhet, roller, underenheter] = await Promise.all([
+    // Run in parallel — none of these depend on each other and the
+    // user is waiting on the slowest of four.
+    const [enhet, roller, underenheter, regnskap] = await Promise.all([
       fetchEnhet(orgnr),
       fetchRoller(orgnr).catch(() => ({ rollegrupper: [] }) as RollerResponse),
       fetchUnderenheter(orgnr).catch(() => [] as Underenhet[]),
+      fetchRegnskap(orgnr).catch(() => [] as Regnskap[]),
     ]);
     if (myRunId !== loadRunId) return;
 
@@ -96,10 +109,45 @@ async function loadOrgnr(orgnr: string): Promise<void> {
     renderRoles(roller);
     void renderParent(enhet.overordnetEnhet);
     renderUnderenheter(underenheter);
+    renderNokkeltall(regnskap);
     setState('result');
+    markUpdated();
   } catch (err) {
     if (myRunId !== loadRunId) return;
     showError(err);
+  }
+}
+
+function markUpdated(): void {
+  lastUpdatedAt = Date.now();
+  footerUpdated.hidden = false;
+  paintUpdatedLabel();
+  // Refresh the relative label every 30s so "akkurat nå" → "for 1 min siden"
+  // transitions don't look stuck.
+  if (updatedTimerId !== undefined) clearInterval(updatedTimerId);
+  updatedTimerId = window.setInterval(paintUpdatedLabel, 30_000);
+}
+
+function paintUpdatedLabel(): void {
+  if (lastUpdatedAt === undefined) return;
+  updatedTime.dateTime = new Date(lastUpdatedAt).toISOString();
+  updatedTime.textContent = formatRelativeTime(lastUpdatedAt);
+}
+
+function setupRefresh(): void {
+  refreshBtn.addEventListener('click', () => {
+    if (!currentOrgnr || refreshBtn.disabled) return;
+    void doRefresh(currentOrgnr);
+  });
+}
+
+async function doRefresh(orgnr: string): Promise<void> {
+  refreshBtn.disabled = true;
+  try {
+    await invalidateCache(orgnr);
+    await loadOrgnr(orgnr);
+  } finally {
+    refreshBtn.disabled = false;
   }
 }
 
@@ -331,6 +379,58 @@ async function renderParent(parentOrgnr: string | undefined): Promise<void> {
   } catch {
     // Already rendered fallback link with just the orgnr.
   }
+}
+
+function renderNokkeltall(items: Regnskap[]): void {
+  nokkeltallBody.innerHTML = '';
+  // brreg's regnskapsregisteret returns the array in arbitrary order;
+  // pick the most recent period by `tilDato` rather than trusting
+  // index 0.
+  const latest = items
+    .filter((r) => r.regnskapsperiode?.tilDato)
+    .sort((a, b) =>
+      (b.regnskapsperiode!.tilDato ?? '').localeCompare(
+        a.regnskapsperiode!.tilDato ?? '',
+      ),
+    )[0];
+  if (!latest) {
+    nokkeltallBody.appendChild(emptyLine('Ingen regnskap registrert.'));
+    return;
+  }
+
+  const tilDato = latest.regnskapsperiode?.tilDato ?? '';
+  const year = tilDato.slice(0, 4);
+  const header = document.createElement('p');
+  header.className = 'nokkeltall-year';
+  header.textContent = year ? `Regnskap ${year}` : 'Siste regnskap';
+  nokkeltallBody.appendChild(header);
+
+  const dl = document.createElement('dl');
+  dl.className = 'nokkeltall-grid';
+  const res = latest.resultatregnskapResultat;
+  addRow(
+    dl,
+    'Driftsinntekter',
+    formatNok(res?.driftsresultat?.driftsinntekter?.sumDriftsinntekter),
+  );
+  addRow(dl, 'Driftsresultat', formatNok(res?.driftsresultat?.driftsresultat));
+  addRow(
+    dl,
+    'Resultat før skatt',
+    formatNok(res?.ordinaertResultatFoerSkattekostnad),
+  );
+  addRow(dl, 'Årsresultat', formatNok(res?.aarsresultat));
+  addRow(
+    dl,
+    'Egenkapital',
+    formatNok(latest.egenkapitalGjeld?.egenkapital?.sumEgenkapital),
+  );
+
+  if (dl.children.length === 0) {
+    nokkeltallBody.appendChild(emptyLine('Regnskap registrert, men uten utdrag.'));
+    return;
+  }
+  nokkeltallBody.appendChild(dl);
 }
 
 function renderUnderenheter(items: Underenhet[]): void {

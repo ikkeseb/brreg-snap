@@ -105,11 +105,13 @@ export interface Regnskap {
   regnkapsprinsipper?: { smaaForetak?: boolean; regnskapsregler?: string };
   valuta?: string;
   resultatregnskapResultat?: {
-    driftsresultat?: { driftsinntekter?: { sumDriftsinntekter?: number } };
+    driftsresultat?: {
+      driftsresultat?: number;
+      driftsinntekter?: { sumDriftsinntekter?: number };
+      driftskostnad?: { sumDriftskostnad?: number };
+    };
     ordinaertResultatFoerSkattekostnad?: number;
     aarsresultat?: number;
-    finansresultat?: { totalresultat?: number };
-    sumDriftsresultat?: number;
   };
   egenkapitalGjeld?: {
     sumEgenkapitalGjeld?: number;
