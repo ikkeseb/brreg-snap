@@ -92,6 +92,49 @@ comment marking this; `details.html` keeps a hidden `#signatur` card
 in case the field becomes available. Don't waste a session trying to
 re-discover the gap.
 
+**Regnskap is on a different API base.** Enhetsregisteret lives at
+`data.brreg.no/enhetsregisteret/api`, but Regnskapsregisteret is on
+`data.brreg.no/regnskapsregisteret/regnskap/<orgnr>` (no `/api/`,
+different sub-host). Response is an array (one entry per filed
+year, order is *not* guaranteed — sort by `regnskapsperiode.tilDato`
+before picking "latest"). 404 is normal: many small AS-er don't
+file separately. Cache the empty array so refresh doesn't re-hit.
+**500 is its own category:** banks, insurance and similar regulated
+sectors file under specialised oppstillingsplaner (`BANK`, `FORS`)
+that the public endpoint refuses to serialise — DNB BANK ASA
+(984851006) hits this. The body is JSON with
+`"message": "Regnskapet inneholder en oppstillingsplan som ikke er
+stottet (BANK)"` and a stack trace. The current fetcher treats any
+non-404 non-ok as a hard error which the UI swallows into "Ingen
+regnskap registrert" — misleading. If you touch this, render a
+distinct "ikke støttet i offentlig API" line instead of pretending
+the company didn't file.
+
+**Auto-sync on tab switch is blocked by the permission model — by
+design.** `activeTab` grants extension UI access to *one* tab on
+user gesture (popup click, sidebar toggle, shortcut). When the
+sidebar is open and the user switches tabs in Firefox, no new
+gesture fires against the extension, so `tabs.query` returns empty
+URL/title for the new tab. `tabs.onActivated` fires without `tabs`
+permission but its `Tab` object is stripped of URL/title for the
+same reason. The permissionless paths out: (a) require a fresh
+gesture (click sidebar icon, ctrl+shift+B, a button inside the
+sidebar that re-queries), or (b) accept the limitation. Escalating
+to `tabs` would relax the security differentiator — see the
+constraints section. Don't burn cycles re-investigating
+`webNavigation`, `tabs.onUpdated`, or focus events; they all need
+`tabs` or content scripts.
+
+**Before curling brreg, check the official docs.** Enhetsregisteret
+API is documented at
+`https://data.brreg.no/enhetsregisteret/api/dokumentasjon/no/index.html`
+(Norwegian; English at `/en/index.html`). The overall dataset and
+API catalogue — including Regnskapsregisteret, Frivillighetsregister
+and others — lives at
+`https://www.brreg.no/bruke-data-fra-bronnoysundregistrene/datasett-og-api/`.
+Reach for these before probing endpoints by trial-and-error — most
+field shapes and pagination quirks are spelled out there.
+
 ## Curator discipline for `src/lib/domains.ts`
 
 mod-11 validity is necessary but **not sufficient** — an orgnr can
