@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>brreg-now — details</title>
+    <link rel="stylesheet" href="details.css" />
+  </head>
+  <body>
+    <main id="app" data-state="loading">
+      <header>
+        <h1>brreg-now</h1>
+      </header>
+      <section id="status" aria-live="polite">Henter selskapsdata…</section>
+      <section id="result" hidden>
+        <header id="result-head">
+          <h2 id="name"></h2>
+          <div id="orgnr" class="orgnr"></div>
+          <div id="flags" class="flags"></div>
+        </header>
+
+        <section id="overview" class="card">
+          <h3>Oversikt</h3>
+          <dl id="overview-list"></dl>
+        </section>
+
+        <section id="contact" class="card">
+          <h3>Kontakt</h3>
+          <dl id="contact-list"></dl>
+        </section>
+
+        <section id="roles" class="card">
+          <h3>Roller</h3>
+          <div id="roles-body"></div>
+        </section>
+
+        <section id="parent" class="card" hidden>
+          <h3>Overordnet enhet</h3>
+          <div id="parent-body"></div>
+        </section>
+
+        <section id="underenheter" class="card" hidden>
+          <h3>Underenheter</h3>
+          <div id="underenheter-body"></div>
+        </section>
+      </section>
+      <footer>
+        <a
+          id="brreg-link"
+          href="https://virksomhet.brreg.no/nb/oppslag/enheter"
+          target="_blank"
+          rel="noopener noreferrer"
+          >Åpne på brreg.no ↗</a
+        >
+      </footer>
+    </main>
+    <script type="module" src="details.ts"></script>
+  </body>
+</html>

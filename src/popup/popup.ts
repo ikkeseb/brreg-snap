@@ -8,6 +8,31 @@ const resultEl = document.getElementById('result') as HTMLElement;
 const searchEl = document.getElementById('search') as HTMLElement;
 const queryInput = document.getElementById('query') as HTMLInputElement;
 const searchResults = document.getElementById('search-results') as HTMLUListElement;
+const brregLink = document.getElementById('brreg-link') as HTMLAnchorElement;
+const detailsLink = document.getElementById('details-link') as HTMLAnchorElement;
+
+const BRREG_LINK_FALLBACK =
+  'https://virksomhet.brreg.no/nb/oppslag/enheter';
+
+function setBrregLink(orgnr?: string): void {
+  brregLink.href = orgnr
+    ? `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`
+    : BRREG_LINK_FALLBACK;
+}
+
+function setDetailsLink(orgnr?: string): void {
+  if (!orgnr) {
+    detailsLink.hidden = true;
+    detailsLink.removeAttribute('href');
+    return;
+  }
+  detailsLink.hidden = false;
+  detailsLink.href = browser.runtime.getURL(
+    `details/details.html?orgnr=${orgnr}`,
+  );
+  detailsLink.target = '_blank';
+  detailsLink.rel = 'noopener noreferrer';
+}
 
 async function init(): Promise<void> {
   try {
@@ -35,6 +60,8 @@ async function getActiveTab(): Promise<browser.tabs.Tab | undefined> {
 async function loadAndRender(orgnr: string): Promise<void> {
   setState('loading');
   statusEl.textContent = `Loading ${orgnr}…`;
+  setBrregLink(orgnr);
+  setDetailsLink(orgnr);
   try {
     const enhet = await fetchEnhet(orgnr);
     renderEnhet(enhet);
@@ -101,17 +128,23 @@ function addRow(dl: HTMLDListElement, label: string, value?: string): void {
 function showSearch(message: string): void {
   setState('search');
   statusEl.textContent = message;
+  setBrregLink();
+  setDetailsLink();
   queryInput.focus();
 }
 
 function showError(err: unknown): void {
   setState('error');
+  setDetailsLink();
   const message = err instanceof Error ? err.message : String(err);
   statusEl.textContent = `Error: ${message}`;
 }
 
 function setState(state: 'loading' | 'result' | 'search' | 'error'): void {
   app.dataset.state = state;
+  // In the result state we have a full company panel; the lingering
+  // "Loading …" status would just stack on top of it. Hide it.
+  statusEl.hidden = state === 'result';
   resultEl.hidden = state !== 'result';
   searchEl.hidden = state !== 'search';
 }
