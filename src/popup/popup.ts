@@ -71,26 +71,32 @@ async function syncSidebarIfOpen(orgnr: string): Promise<void> {
   // The popup runs with activeTab grant on the current tab — it can
   // read the URL and resolve the orgnr. The sidebar, opened earlier
   // on a different tab, holds stale data until something tells it
-  // to repaint. We do that here: if the sidebar is open, swap its
-  // panel to the orgnr the popup just resolved.
+  // to repaint.
+  //
+  // Two parallel mechanisms:
+  //   1. setPanel updates the sidebar's panel URL so the next open
+  //      (from the View > Sidebars menu) lands on this orgnr.
+  //   2. runtime.sendMessage broadcasts a 'sync' notification that
+  //      the open details page picks up and uses to re-render in
+  //      place — this is what actually repaints the visible sidebar.
+  //      setPanel alone is not enough; Firefox doesn't reliably
+  //      repaint an open sidebar when its panel URL changes.
   //
   // Fire-and-forget — popup rendering shouldn't block on this, and
-  // setPanel survives the popup closing.
-  //
-  // Note: this does not consistently re-render the open sidebar in
-  // Firefox today (the trigger for the actual visible refresh is
-  // unclear). The user-facing fallback is the refresh button in the
-  // sidebar header.
+  // both calls survive the popup closing.
   try {
     const open = await browser.sidebarAction.isOpen({});
     if (!open) return;
     const url = browser.runtime.getURL(
       `details/details.html?orgnr=${orgnr}`,
     );
-    await browser.sidebarAction.setPanel({ panel: url });
+    await Promise.allSettled([
+      browser.sidebarAction.setPanel({ panel: url }),
+      browser.runtime.sendMessage({ type: 'sync', orgnr }),
+    ]);
   } catch {
-    // sidebarAction may be unavailable or the call may race the
-    // popup closing. Silent fail — the popup itself still rendered.
+    // sidebarAction may be unavailable. Silent fail — the popup
+    // itself still rendered.
   }
 }
 

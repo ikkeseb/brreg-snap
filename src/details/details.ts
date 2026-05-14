@@ -2,10 +2,10 @@ import {
   fetchEnhet,
   fetchRoller,
   fetchUnderenheter,
-  invalidateCache,
 } from '../lib/brreg.js';
 import { formatAddress } from '../lib/format.js';
 import { isValidOrgnr } from '../lib/mod11.js';
+import { resolveOrgnr } from '../lib/orgnr.js';
 import { findDagligLeder } from '../lib/roller.js';
 import type {
   Enhet,
@@ -31,19 +31,6 @@ const parentBody = $('parent-body');
 const underenheterSection = $('underenheter');
 const underenheterBody = $('underenheter-body');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
-const refreshButton = $('refresh-button') as HTMLButtonElement;
-
-refreshButton.addEventListener('click', () => {
-  refreshButton.dataset.spinning = 'true';
-  const orgnr = getOrgnrFromUrl();
-  const work = orgnr ? invalidateCache(orgnr) : Promise.resolve();
-  void work.finally(() => {
-    // Reload re-runs init() which refetches everything. With the cache
-    // cleared above, that means a real round-trip to brreg.no rather
-    // than serving the same response we already had.
-    window.location.reload();
-  });
-});
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id);
@@ -76,15 +63,14 @@ function showEmptyState(): void {
     'Klikk verktøylinjeikonet på en bedriftsside og velg «Detaljert visning» for å vise et selskap her.';
 }
 
-async function init(): Promise<void> {
-  const orgnr = getOrgnrFromUrl();
-  if (!orgnr) {
-    // No orgnr in the URL means the sidebar was opened manually
-    // (Firefox View Sidebars menu) before any company was selected.
-    // Show a hint, not a hard error.
-    showEmptyState();
-    return;
-  }
+let loadRunId = 0;
+
+async function loadOrgnr(orgnr: string): Promise<void> {
+  // Monotonic guard — if the popup pushes a second sync while the
+  // first is still in flight, the older fetches must not overwrite
+  // the newer ones when they land out of order.
+  const myRunId = ++loadRunId;
+
   brregLink.href = `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`;
 
   setState('loading');
@@ -98,6 +84,7 @@ async function init(): Promise<void> {
       fetchRoller(orgnr).catch(() => ({ rollegrupper: [] }) as RollerResponse),
       fetchUnderenheter(orgnr).catch(() => [] as Underenhet[]),
     ]);
+    if (myRunId !== loadRunId) return;
 
     renderHeader(enhet);
     renderOverview(enhet, roller);
@@ -107,9 +94,84 @@ async function init(): Promise<void> {
     renderUnderenheter(underenheter);
     setState('result');
   } catch (err) {
+    if (myRunId !== loadRunId) return;
     showError(err);
   }
 }
+
+async function resolveFromActiveTab(): Promise<string | undefined> {
+  // tabs.query returns the active tab's url and title only when the
+  // extension holds activeTab on it — which Firefox grants on the
+  // user action that toggles the sidebar (clicking the sidebar
+  // icon, our toolbar action, or a keyboard shortcut). When grant
+  // is absent (e.g. tab switched after the sidebar was opened from
+  // the Firefox View menu), url and title come back empty and we
+  // silently fall back to whatever was in the URL param.
+  try {
+    const tabs = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    const tab = tabs[0];
+    if (!tab) return undefined;
+    const url = tab.url ?? '';
+    const title = tab.title ?? '';
+    if (!url && !title) return undefined;
+    return resolveOrgnr({ url, title });
+  } catch {
+    return undefined;
+  }
+}
+
+async function init(): Promise<void> {
+  // Prefer the active tab over the URL param. The sidebar may have
+  // been opened with a stale orgnr (e.g. last popup-click was on
+  // DNB, user has since switched to VG and re-toggled the sidebar
+  // panel). Trust the tab when we can read it.
+  const fromTab = await resolveFromActiveTab();
+  const fromUrl = getOrgnrFromUrl();
+  const orgnr = fromTab ?? fromUrl;
+
+  if (!orgnr) {
+    // Neither the active tab nor the URL has a company. The sidebar
+    // was opened manually (Firefox View > Sidebars) on a page brreg-now
+    // does not recognise. Show a hint, not a hard error.
+    showEmptyState();
+    return;
+  }
+
+  if (fromTab && fromTab !== fromUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('orgnr', fromTab);
+    window.history.replaceState(null, '', url.toString());
+  }
+  await loadOrgnr(orgnr);
+}
+
+interface SyncMessage {
+  type: 'sync';
+  orgnr: string;
+}
+
+function isSyncMessage(msg: unknown): msg is SyncMessage {
+  if (typeof msg !== 'object' || msg === null) return false;
+  const m = msg as { type?: unknown; orgnr?: unknown };
+  return m.type === 'sync' && typeof m.orgnr === 'string';
+}
+
+// The popup broadcasts a 'sync' message after resolving the active
+// tab's orgnr. sidebarAction.setPanel alone does not reliably repaint
+// an already-open sidebar in Firefox, so we listen here and repaint
+// ourselves. history.replaceState keeps the URL in sync without a
+// full document reload (which would flicker and reset scroll).
+browser.runtime.onMessage.addListener((msg: unknown) => {
+  if (!isSyncMessage(msg)) return;
+  if (!isValidOrgnr(msg.orgnr)) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set('orgnr', msg.orgnr);
+  window.history.replaceState(null, '', url.toString());
+  void loadOrgnr(msg.orgnr);
+});
 
 function renderHeader(enhet: Enhet): void {
   nameEl.textContent = enhet.navn;

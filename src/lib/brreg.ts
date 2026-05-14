@@ -48,17 +48,6 @@ async function cacheSet<T>(key: string, value: T): Promise<void> {
   await browser.storage.session.set({ [key]: entry });
 }
 
-export async function invalidateCache(orgnr: string): Promise<void> {
-  // Strip every cached response tied to this orgnr so the next
-  // fetchEnhet / fetchRoller / fetchUnderenheter actually hits
-  // brreg.no instead of returning the 24h-fresh session entry.
-  await browser.storage.session.remove([
-    `enhet:${orgnr}`,
-    `roller:${orgnr}`,
-    `underenheter:${orgnr}`,
-  ]);
-}
-
 export async function fetchEnhet(orgnr: string): Promise<Enhet> {
   const key = `enhet:${orgnr}`;
   const cached = await cacheGet<Enhet>(key);

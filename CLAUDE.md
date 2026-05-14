@@ -52,6 +52,31 @@ monotonic `searchRunId` token to drop stale `runSearch` results when
 the user keeps typing — the network can land calls out of order
 otherwise. Don't simplify this away.
 
+**Sidebar sync = `runtime.sendMessage`, not `setPanel`.**
+`sidebarAction.setPanel({panel: url})` *should* repaint an open
+sidebar per MDN, but in Firefox 115+ it doesn't — the panel URL is
+updated for the next open, the visible iframe stays put. The popup
+therefore broadcasts a `{type:'sync', orgnr}` `runtime.sendMessage`
+in addition to `setPanel`, and `src/details/details.ts` listens for
+it, calls `history.replaceState`, and re-runs its loader.
+`Promise.allSettled` over the two calls because a missing listener
+(sidebar closed) rejects `sendMessage` — that's expected, not a
+failure.
+
+**Sidebar resolves the active tab on load.** `details.ts` `init()`
+calls `tabs.query` first and only falls back to the `?orgnr=` URL
+param if no orgnr could be resolved from the active tab. The
+sidebar gets an `activeTab` grant when Firefox toggles it (clicking
+the sidebar icon, the toolbar action, or a shortcut), so URL/title
+are readable in that window. Without grant the call silently
+returns empty fields and we fall through to the URL param — no
+permission relaxation involved.
+
+**Sidebar load-run-id guard.** `details.ts` uses a monotonic
+`loadRunId` token (same pattern as `searchRunId` in the popup) so a
+sync push that arrives while a previous `loadOrgnr` is still
+fetching doesn't get overwritten by the older response. Keep it.
+
 **Vite popup.html path quirk.** Vite emits HTML entries at the same
 relative path they live at in the source (so
 `src/popup/popup.html` → `dist/src/popup/popup.html`). The manifest
