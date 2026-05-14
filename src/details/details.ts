@@ -3,6 +3,7 @@ import {
   fetchRoller,
   fetchUnderenheter,
 } from '../lib/brreg.js';
+import { formatAddress } from '../lib/format.js';
 import { isValidOrgnr } from '../lib/mod11.js';
 import { findDagligLeder } from '../lib/roller.js';
 import type {
@@ -55,10 +56,19 @@ function showError(err: unknown): void {
   statusEl.textContent = `Feil: ${message}`;
 }
 
+function showEmptyState(): void {
+  setState('error');
+  statusEl.textContent =
+    'Klikk verktøylinjeikonet på en bedriftsside og velg «Detaljert visning» for å vise et selskap her.';
+}
+
 async function init(): Promise<void> {
   const orgnr = getOrgnrFromUrl();
   if (!orgnr) {
-    showError(new Error('Ugyldig eller manglende orgnr i URL.'));
+    // No orgnr in the URL means the sidebar was opened manually
+    // (Firefox View Sidebars menu) before any company was selected.
+    // Show a hint, not a hard error.
+    showEmptyState();
     return;
   }
   brregLink.href = `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`;
@@ -328,16 +338,6 @@ function addLink(
   }
   dd.appendChild(a);
   dl.append(dt, dd);
-}
-
-function formatAddress(addr: Enhet['forretningsadresse']): string | undefined {
-  if (!addr) return undefined;
-  const lines = [
-    ...(addr.adresse ?? []),
-    [addr.postnummer, addr.poststed].filter(Boolean).join(' '),
-    addr.land,
-  ].filter((s): s is string => Boolean(s && s.trim()));
-  return lines.length > 0 ? lines.join(', ') : undefined;
 }
 
 function emptyLine(text: string): HTMLElement {

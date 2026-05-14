@@ -1,6 +1,8 @@
-import { fetchEnhet, searchEnheter } from '../lib/brreg.js';
+import { fetchEnhet, fetchRoller, searchEnheter } from '../lib/brreg.js';
+import { formatAddress } from '../lib/format.js';
 import { resolveOrgnr } from '../lib/orgnr.js';
-import type { Enhet } from '../types/brreg.js';
+import { findDagligLeder } from '../lib/roller.js';
+import type { Enhet, RollerResponse } from '../types/brreg.js';
 
 const app = document.getElementById('app') as HTMLElement;
 const statusEl = document.getElementById('status') as HTMLElement;
@@ -31,20 +33,18 @@ function setDetailsLink(orgnr?: string): void {
   const url = browser.runtime.getURL(
     `details/details.html?orgnr=${orgnr}`,
   );
-  // Keep href so the link is keyboard-focusable and middle-click works
-  // as a fallback. Click overrides the default tab-open and spawns a
-  // standalone popup window instead — that's what users expect from a
-  // "Detaljert visning" affordance off a toolbar popup.
+  // Keep href so middle-click and keyboard activation still open the
+  // details page somewhere. The onclick swaps to a Firefox sidebar so
+  // the panel docks into the browser chrome instead of stealing focus
+  // into a new tab or popup window.
   detailsLink.href = url;
   detailsLink.onclick = (ev) => {
     ev.preventDefault();
-    void browser.windows.create({
-      url,
-      type: 'popup',
-      width: 880,
-      height: 720,
-    });
-    // Close the toolbar popup so it doesn't linger behind the new window.
+    // setPanel + open must both fire inside the user-gesture context
+    // of this click. setPanel is promise-based but fire-and-forget is
+    // fine — open() picks up the new panel URL when the sidebar paints.
+    void browser.sidebarAction.setPanel({ panel: url });
+    void browser.sidebarAction.open();
     window.close();
   };
 }
@@ -78,14 +78,22 @@ async function loadAndRender(orgnr: string): Promise<void> {
   setBrregLink(orgnr);
   setDetailsLink(orgnr);
   try {
-    const enhet = await fetchEnhet(orgnr);
-    renderEnhet(enhet);
+    // Roller is a second API call but it lives behind the same 24h
+    // session cache, and we want daglig leder visible in the quick
+    // glance — not just in the sidebar details view.
+    const [enhet, roller] = await Promise.all([
+      fetchEnhet(orgnr),
+      fetchRoller(orgnr).catch(
+        () => ({ rollegrupper: [] }) as RollerResponse,
+      ),
+    ]);
+    renderEnhet(enhet, roller);
   } catch (err) {
     showError(err);
   }
 }
 
-function renderEnhet(enhet: Enhet): void {
+function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   setState('result');
   resultEl.innerHTML = '';
 
@@ -103,12 +111,14 @@ function renderEnhet(enhet: Enhet): void {
   addRow(dl, 'Registered', enhet.registreringsdatoEnhetsregisteret);
   addRow(dl, 'Industry', enhet.naeringskode1?.beskrivelse);
   addRow(dl, 'Employees', enhet.antallAnsatte?.toString());
-  addRow(
-    dl,
-    'Address',
-    enhet.forretningsadresse?.adresse?.join(', ') ??
-      enhet.forretningsadresse?.poststed,
-  );
+  addRow(dl, 'Daglig leder', findDagligLeder(roller));
+  addRow(dl, 'Address', formatAddress(enhet.forretningsadresse));
+  if (enhet.hjemmeside) {
+    const href = enhet.hjemmeside.startsWith('http')
+      ? enhet.hjemmeside
+      : `https://${enhet.hjemmeside}`;
+    addLink(dl, 'Website', href, enhet.hjemmeside);
+  }
   resultEl.appendChild(dl);
 
   const flags = document.createElement('div');
@@ -137,6 +147,24 @@ function addRow(dl: HTMLDListElement, label: string, value?: string): void {
   dt.textContent = label;
   const dd = document.createElement('dd');
   dd.textContent = value;
+  dl.append(dt, dd);
+}
+
+function addLink(
+  dl: HTMLDListElement,
+  label: string,
+  href: string,
+  text: string,
+): void {
+  const dt = document.createElement('dt');
+  dt.textContent = label;
+  const dd = document.createElement('dd');
+  const a = document.createElement('a');
+  a.href = href;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.textContent = text;
+  dd.appendChild(a);
   dl.append(dt, dd);
 }
 
