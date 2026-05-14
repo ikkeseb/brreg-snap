@@ -4,6 +4,7 @@ import {
   fetchUnderenheter,
 } from '../lib/brreg.js';
 import { isValidOrgnr } from '../lib/mod11.js';
+import { findDagligLeder } from '../lib/roller.js';
 import type {
   Enhet,
   Person,
@@ -75,7 +76,7 @@ async function init(): Promise<void> {
     ]);
 
     renderHeader(enhet);
-    renderOverview(enhet);
+    renderOverview(enhet, roller);
     renderContact(enhet);
     renderRoles(roller);
     void renderParent(enhet.overordnetEnhet);
@@ -105,7 +106,7 @@ function renderHeader(enhet: Enhet): void {
     flagsEl.appendChild(makeFlag('Frivillighetsregistret'));
 }
 
-function renderOverview(enhet: Enhet): void {
+function renderOverview(enhet: Enhet, roller: RollerResponse): void {
   overviewList.innerHTML = '';
   addRow(overviewList, 'Organisasjonsform', enhet.organisasjonsform?.beskrivelse);
   addRow(
@@ -115,6 +116,7 @@ function renderOverview(enhet: Enhet): void {
   );
   addRow(overviewList, 'Næring', enhet.naeringskode1?.beskrivelse);
   addRow(overviewList, 'Antall ansatte', enhet.antallAnsatte?.toString());
+  addRow(overviewList, 'Daglig leder', findDagligLeder(roller));
 }
 
 function renderContact(enhet: Enhet): void {
