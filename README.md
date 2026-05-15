@@ -73,23 +73,38 @@ When you click the toolbar icon:
 Responses are cached in `storage.session` for 24 hours, so repeated
 lookups don't hammer the API.
 
+A sidebar panel (toolbar sidebar icon or "Vis i brreg-now sidebar"
+from the page right-click menu) renders the same data with a deeper
+layout — board members, signaturrett, regnskap, underenheter. With
+"Auto-oppdater ved fane-bytte" enabled the sidebar requests the
+`tabs` permission at runtime and re-resolves the orgnr whenever you
+switch tabs.
+
 ## Project layout
 
 ```
 src/
-  background/           service worker (popup wake-up only)
-  popup/                popup.html + popup.ts + popup.css
+  background/                 service worker; reconciles tab listeners when `tabs` is granted
+  popup/                      popup.html + popup.ts + popup.css (toolbar action)
+  details/                    sidebar panel (sidebar_action: details.html/ts/css)
   lib/
-    brreg.ts            data.brreg.no API client
-    orgnr.ts            URL/title → orgnr extraction
-    domains.ts          domain → orgnr lookup table
+    auto-sync-controller.ts   pure decision logic for the auto-sync toggle
+    auto-sync-settings.ts     storage.local persistence for the toggle
+    brreg.ts                  data.brreg.no API client
+    copy-orgnr.ts             click-to-copy helper for orgnr digits
+    domains.ts                domain → orgnr lookup table
+    format.ts                 display formatters (addresses, etc.)
+    mod11.ts                  mod-11 checksum (own module to break an ESM cycle)
+    orgnr.ts                  URL/title → orgnr extraction
+    roller.ts                 board-role normalisation
+    tab-sync.ts               {type:'sync', orgnr, host} broadcast helper
   types/
-    brreg.ts            response type definitions
+    brreg.ts                  response type definitions
 public/
-  manifest.json         MV3 manifest
-  icons/                toolbar icon set
+  manifest.json               MV3 manifest
+  icons/                      toolbar icon set
 tests/
-  *.test.ts             Vitest unit tests
+  *.test.ts                   Vitest unit tests
 ```
 
 ## Distribution
