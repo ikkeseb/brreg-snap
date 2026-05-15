@@ -92,6 +92,29 @@ export async function searchEnheter(
   return data._embedded?.enheter ?? [];
 }
 
+// Multi-parameter search for the hostname-resolution pipeline. Callers
+// pass a fully constructed URLSearchParams so they can mix
+// `hjemmeside`, `navn`, `navnMetodeForSoek`, `organisasjonsform`,
+// `sort`, `size`, etc. without an option-soup signature. Failures and
+// non-2xx responses return [] — the pipeline aggregates across several
+// calls and a single hiccup shouldn't poison the whole result.
+export async function searchEnheterWithParams(
+  params: URLSearchParams,
+): Promise<SearchHit[]> {
+  const url = new URL(`${API}/enheter`);
+  for (const [k, v] of params) url.searchParams.set(k, v);
+  try {
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!res.ok) return [];
+    const data = (await res.json()) as {
+      _embedded?: { enheter?: SearchHit[] };
+    };
+    return data._embedded?.enheter ?? [];
+  } catch {
+    return [];
+  }
+}
+
 function isRollerResponse(value: unknown): value is RollerResponse {
   if (typeof value !== 'object' || value === null) return false;
   const groups = (value as { rollegrupper?: unknown }).rollegrupper;
