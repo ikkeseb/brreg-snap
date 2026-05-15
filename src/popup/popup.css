@@ -26,6 +26,18 @@
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
+/* Accent overrides mirror details.css so popup and sidebar stay in
+   visual sync. Set <main data-accent="teal|sky"> to swap. */
+main[data-accent='teal'] {
+  --accent: #5eead4;
+  --accent-strong: #99f6e4;
+}
+
+main[data-accent='sky'] {
+  --accent: #7dd3fc;
+  --accent-strong: #bae6fd;
+}
+
 * {
   box-sizing: border-box;
 }
