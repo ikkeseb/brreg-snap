@@ -1,16 +1,16 @@
 {
   "manifest_version": 3,
-  "name": "brreg-now",
-  "version": "0.1.0",
-  "description": "Look up Norwegian company info from Brønnøysundregistrene with one click.",
+  "name": "brreg-snap",
+  "version": "1.0.0",
+  "description": "Slå opp norske bedrifter i Brønnøysundregistrene med ett klikk.",
   "browser_specific_settings": {
     "gecko": {
-      "id": "brreg-now@ikkeseb.github.io",
+      "id": "brreg-snap@ikkeseb.github.io",
       "strict_min_version": "115.0"
     }
   },
   "action": {
-    "default_title": "brreg-now",
+    "default_title": "brreg-snap",
     "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",
@@ -19,7 +19,7 @@
     }
   },
   "sidebar_action": {
-    "default_title": "brreg-now",
+    "default_title": "brreg-snap",
     "default_panel": "details/details.html",
     "default_icon": {
       "16": "icons/icon-16.png",

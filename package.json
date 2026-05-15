@@ -1,7 +1,7 @@
 {
-  "name": "brreg-now",
-  "version": "0.1.0",
-  "description": "Firefox extension that surfaces Brønnøysundregistrene company info from any Norwegian company site.",
+  "name": "brreg-snap",
+  "version": "1.0.0",
+  "description": "Firefox-utvidelse som henter bedriftsinfo fra Brønnøysundregistrene med ett klikk.",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ikkeseb/brreg-now.git"
+    "url": "https://github.com/ikkeseb/brreg-snap.git"
   },
   "license": "MIT"
 }

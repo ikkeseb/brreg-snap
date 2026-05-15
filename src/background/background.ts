@@ -19,7 +19,7 @@ function registerMenu(): void {
   // single create call from each is safe.
   browser.menus.create({
     id: MENU_ID,
-    title: 'Vis i brreg-now sidebar',
+    title: 'Vis i brreg-snap sidebar',
     contexts: ['page'],
   });
 }

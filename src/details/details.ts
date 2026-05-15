@@ -738,7 +738,7 @@ async function init(): Promise<void> {
       return;
     }
     // Neither the active tab nor the URL has a company. The sidebar
-    // was opened manually (Firefox View > Sidebars) on a page brreg-now
+    // was opened manually (Firefox View > Sidebars) on a page brreg-snap
     // does not recognise. Show a hint, not a hard error.
     showEmptyState(fromTab.host);
     return;
@@ -794,7 +794,7 @@ function isNoMatchMessage(msg: unknown): msg is NoMatchMessage {
 // ourselves. history.replaceState keeps the URL in sync without a
 // full document reload (which would flicker and reset scroll).
 // 'no-match' is the counterpart: a deliberate trigger (menu, tab
-// switch with auto-sync on) landed on a page brreg-now can't resolve
+// switch with auto-sync on) landed on a page brreg-snap can't resolve
 // — we clear the sidebar instead of leaving stale company data up.
 browser.runtime.onMessage.addListener((msg: unknown) => {
   if (isNoMatchMessage(msg)) {

@@ -75,7 +75,7 @@ See `docs/notes/resolution.md` § bands + § picker-choice and
 
 Both paths from the original backlog landed in commit `ed5bb74`:
 
-- **Context-menu trigger** — `menus` permission + "Vis i brreg-now
+- **Context-menu trigger** — `menus` permission + "Vis i brreg-snap
   sidebar" right-click item on every http(s) page. Handler reads
   URL/title via `tabs.query`, resolves orgnr, broadcasts
   `{type:'sync', orgnr, host}` to the sidebar listener.
@@ -99,33 +99,6 @@ path" and § Security constraints for the shipped contract.
   user discovers it via `about:addons` → manage shortcuts. Worth
   adding as a power-user follow-up — handler logic from the context
   menu and the auto-sync toggle is reusable.
-
-- **Domain-match signal in hostname scoring.** Brand-only hostnames
-  where the brand isn't in the legal name fall through the AUTO band
-  today — nrk.no matches `NRK BARNEHAGEN OSLO SA` and other navn-`nrk`
-  hits, but never `NORSK RIKSKRINGKASTING AS` whose registered email
-  is `dokumentarkivet@NRK.no`. brreg's API refuses an `epostadresse`
-  filter (`'epostadresse' er ikke et støttet parameter`, confirmed
-  2026-05-16), so a direct query is out. Two viable shapes:
-
-  **(a) Post-filter on search hits.** Run a broader name query, then
-  hit `/enheter/{orgnr}` per candidate to read `epostadresse` and
-  drop hits whose domain doesn't match. Adds one full-enhet fetch
-  per candidate — expensive when the candidate set is large.
-
-  **(b) Domain-match as a scoring boost (recommended).** Keep the
-  current pipeline, but in `hostname-score.ts` fetch full `Enhet`
-  for the top-N candidates (cached) and award a large boost when
-  `enhet.epostadresse` or `enhet.hjemmeside` ends with the same
-  registered-domain suffix as the hostname. Lets brand-only entities
-  surface without inventing new query stages, and integrates
-  cleanly with the existing AUTO / PICKER / NONE banding. Cost: a
-  few extra fetches on cold candidate sets, no extra cost on cached
-  ones.
-
-  Trade-off: fan-out grows with candidate count. Keep N small (top
-  4–6 by base score before applying the boost) and cache aggressively
-  to bound it.
 
 - **Title parsing for hostnames that collapse spaces.** rema1000.no
   → "REMA 1000", detnorsketeatret.no → "DET NORSKE TEATRET",
@@ -170,6 +143,23 @@ path" and § Security constraints for the shipped contract.
 - **`webNavigation` as a middle-ground permission.** Fires on
   navigation events, not on switching to an already-loaded tab.
   Partial fit only; not worth the prompt for the gap it leaves.
+- **Domain-match signal in hostname scoring.** Considered as a way
+  to surface brand-only hostnames whose legal name doesn't carry
+  the brand token (nrk.no → NORSK RIKSKRINGKASTING AS). brreg's
+  API refuses an `epostadresse` filter (confirmed 2026-05-16) and
+  the obvious shape — boost candidates whose `epostadresse` or
+  `hjemmeside` ends with the hostname's registered domain — only
+  helps when the right candidate is already in the search pool.
+  Verified against the trigger case: `?hjemmeside=nrk.no` returns
+  zero NRK-correct hits and `?navn=nrk&FORTLOEPENDE` returns 31
+  satellite orgs (B.I.L., veterankor, journalistlag) but never
+  NORSK RIKSKRINGKASTING itself — it has no `hjemmeside` field and
+  the legal name is not substring-matchable from "nrk". Scoring
+  cannot promote a candidate that isn't in the pool. The acronym
+  case would need a different mechanism (acronym expansion or
+  email-domain query, neither cheap) and the manual sidebar search
+  already handles these hosts per the "no curated data → fall
+  through to manual search" principle in CLAUDE.md. Closed.
 
 ### Sources
 
