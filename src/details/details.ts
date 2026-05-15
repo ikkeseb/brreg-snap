@@ -9,8 +9,12 @@ import {
 } from '../lib/brreg.js';
 import { buildOrgnrCopyButton, renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress, formatNok, formatRelativeTime } from '../lib/format.js';
+import {
+  searchByHostnameDetailed,
+  setPickerChoice,
+} from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
-import { resolveOrgnrAsync } from '../lib/orgnr.js';
+import { resolveOrgnr } from '../lib/orgnr.js';
 import { findDagligLeder } from '../lib/roller.js';
 import type {
   Enhet,
@@ -20,6 +24,7 @@ import type {
   RolleEnhet,
   RolleGruppe,
   RollerResponse,
+  SearchHit,
   Underenhet,
 } from '../types/brreg.js';
 
@@ -47,6 +52,9 @@ const autoSyncToggle = $('auto-sync-toggle') as HTMLInputElement;
 const autoSyncStatus = $('auto-sync-status');
 const footerSource = $('footer-source');
 const sourceHostEl = $('source-host');
+const pickerEl = $('picker');
+const pickerListEl = $('picker-list') as HTMLUListElement;
+const pickerNoneBtn = $('picker-none') as HTMLButtonElement;
 let currentOrgnr: string | undefined;
 let currentSourceHost: string | undefined;
 let lastUpdatedAt: number | undefined;
@@ -75,10 +83,13 @@ function getNoMatchHostFromUrl(): string | undefined {
   return host ?? undefined;
 }
 
-function setState(state: 'loading' | 'result' | 'error'): void {
+function setState(
+  state: 'loading' | 'result' | 'error' | 'picker',
+): void {
   app.dataset.state = state;
-  statusEl.hidden = state === 'result';
+  statusEl.hidden = state === 'result' || state === 'picker';
   resultEl.hidden = state !== 'result';
+  pickerEl.hidden = state !== 'picker';
 }
 
 function showError(err: unknown): void {
@@ -100,6 +111,69 @@ function showEmptyState(host?: string): void {
     ? `Ingen bedrift identifisert på ${host}. Klikk verktøylinjeikonet for å søke manuelt.`
     : 'Klikk verktøylinjeikonet på en bedriftsside og velg «Detaljert visning» for å vise et selskap her.';
 }
+
+function showPicker(host: string, candidates: SearchHit[]): void {
+  setState('picker');
+  setSourceHost(host);
+  // Bump loadRunId so any in-flight loadOrgnr from a previous tab
+  // can't overwrite the picker when its fetches land.
+  ++loadRunId;
+  currentOrgnr = undefined;
+  // Clear any orgnr in the URL so a panel reload doesn't re-fetch.
+  const url = new URL(window.location.href);
+  url.searchParams.delete('orgnr');
+  window.history.replaceState(null, '', url.toString());
+
+  pickerListEl.innerHTML = '';
+  for (const cand of candidates.slice(0, 4)) {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'picker-item';
+    btn.addEventListener('click', () => {
+      void handlePickerChoice(host, cand.organisasjonsnummer);
+    });
+
+    const name = document.createElement('span');
+    name.className = 'picker-item-name';
+    name.textContent = cand.navn;
+    btn.appendChild(name);
+
+    const meta = document.createElement('span');
+    meta.className = 'picker-item-meta';
+    const ansatte = cand.antallAnsatte;
+    const ansatteLabel =
+      typeof ansatte === 'number' && ansatte > 0
+        ? `, ${ansatte} ansatte`
+        : '';
+    meta.textContent = `${cand.organisasjonsnummer}${ansatteLabel}`;
+    btn.appendChild(meta);
+
+    li.appendChild(btn);
+    pickerListEl.appendChild(li);
+  }
+}
+
+async function handlePickerChoice(
+  host: string,
+  orgnr: string,
+): Promise<void> {
+  await setPickerChoice(host, orgnr);
+  const url = new URL(window.location.href);
+  url.searchParams.set('orgnr', orgnr);
+  window.history.replaceState(null, '', url.toString());
+  await loadOrgnr(orgnr);
+}
+
+async function handlePickerNone(host: string): Promise<void> {
+  await setPickerChoice(host, null);
+  showEmptyState(host);
+}
+
+pickerNoneBtn.addEventListener('click', () => {
+  if (!currentSourceHost) return;
+  void handlePickerNone(currentSourceHost);
+});
 
 let loadRunId = 0;
 
@@ -185,8 +259,14 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
         await loadOrgnr(fromTab.orgnr);
         return;
       }
-      // No orgnr on the active tab — fall through to refetch
-      // whatever's displayed.
+      if (fromTab.pickerCandidates && fromTab.host) {
+        showPicker(fromTab.host, fromTab.pickerCandidates);
+        return;
+      }
+      if (fromTab.host) {
+        showEmptyState(fromTab.host);
+        return;
+      }
     }
     if (!currentOrgnrArg) return;
     await invalidateCache(currentOrgnrArg);
@@ -335,6 +415,7 @@ function paintSourceLabel(): void {
 interface TabContext {
   orgnr?: string;
   host?: string;
+  pickerCandidates?: SearchHit[];
 }
 
 async function resolveFromActiveTab(): Promise<TabContext> {
@@ -363,7 +444,21 @@ async function resolveFromActiveTab(): Promise<TabContext> {
         /* invalid url — leave host undefined */
       }
     }
-    return { orgnr: await resolveOrgnrAsync({ url, title }), host };
+    // Sync cascade first — fast, no network. Covers URL/title regex
+    // and the curated domains table.
+    const sync = resolveOrgnr({ url, title });
+    if (sync) return { orgnr: sync, host };
+    if (!host) return { host };
+    // Sync miss → hostname-based brreg search with band awareness.
+    const detailed = await searchByHostnameDetailed(host);
+    if (!detailed) return { host };
+    if (detailed.band === 'auto') {
+      return { orgnr: detailed.choice, host };
+    }
+    if (detailed.band === 'picker') {
+      return { host, pickerCandidates: detailed.candidates };
+    }
+    return { host };
   } catch {
     return {};
   }
@@ -371,13 +466,12 @@ async function resolveFromActiveTab(): Promise<TabContext> {
 
 async function init(): Promise<void> {
   // ?nomatch=<host> means a deliberate trigger (menu, fresh sidebar
-  // open) landed on a page with no resolvable orgnr. Skip the active-
-  // tab probe — the caller already told us there's nothing to find,
-  // and rendering an empty state with the host is more useful than
-  // chasing tabs.query for a definitely-empty answer.
+  // open) landed on a page with no resolvable orgnr. Re-probe via
+  // picker-aware resolver so an ambiguous host gets the picker UI
+  // instead of the bare empty state.
   const noMatchHost = getNoMatchHostFromUrl();
   if (noMatchHost !== undefined) {
-    showEmptyState(noMatchHost);
+    await handleNoMatchBroadcast(noMatchHost);
     return;
   }
 
@@ -390,6 +484,10 @@ async function init(): Promise<void> {
   const orgnr = fromTab.orgnr ?? fromUrl;
 
   if (!orgnr) {
+    if (fromTab.pickerCandidates && fromTab.host) {
+      showPicker(fromTab.host, fromTab.pickerCandidates);
+      return;
+    }
     // Neither the active tab nor the URL has a company. The sidebar
     // was opened manually (Firefox View > Sidebars) on a page brreg-now
     // does not recognise. Show a hint, not a hard error.
@@ -447,9 +545,9 @@ function isNoMatchMessage(msg: unknown): msg is NoMatchMessage {
 browser.runtime.onMessage.addListener((msg: unknown) => {
   if (isNoMatchMessage(msg)) {
     // Bump loadRunId so any in-flight loadOrgnr from a previous sync
-    // doesn't overwrite the empty state when its fetches land.
+    // doesn't overwrite the picker / empty state when it lands.
     ++loadRunId;
-    showEmptyState(msg.host);
+    void handleNoMatchBroadcast(msg.host);
     return;
   }
   if (!isSyncMessage(msg)) return;
@@ -460,6 +558,34 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
   window.history.replaceState(null, '', url.toString());
   void loadOrgnr(msg.orgnr);
 });
+
+async function handleNoMatchBroadcast(
+  host: string | undefined,
+): Promise<void> {
+  // Background broadcasts no-match when the sync cascade (and the
+  // AUTO band of hostname-search) couldn't resolve. Re-run the
+  // picker-aware resolver here — cache hits make this nearly free,
+  // and it surfaces the picker for ambiguous sites instead of the
+  // bare empty state.
+  if (!host) {
+    showEmptyState(undefined);
+    return;
+  }
+  const detailed = await searchByHostnameDetailed(host);
+  if (detailed?.band === 'picker') {
+    showPicker(host, detailed.candidates);
+    return;
+  }
+  if (detailed?.band === 'auto' && detailed.choice) {
+    setSourceHost(host);
+    const url = new URL(window.location.href);
+    url.searchParams.set('orgnr', detailed.choice);
+    window.history.replaceState(null, '', url.toString());
+    await loadOrgnr(detailed.choice);
+    return;
+  }
+  showEmptyState(host);
+}
 
 function renderHeader(enhet: Enhet): void {
   nameEl.textContent = enhet.navn;
