@@ -4,7 +4,17 @@ import {
   foldNordic,
   generateNordicVariants,
   hostnameLabel,
+  scoreCandidate,
 } from '../src/lib/hostname-score.js';
+import type { SearchHit } from '../src/types/brreg.js';
+
+function cand(over: Partial<SearchHit> & { navn: string }): SearchHit {
+  return {
+    organisasjonsnummer: '999999999',
+    organisasjonsform: { kode: 'AS' },
+    ...over,
+  } as SearchHit;
+}
 
 describe('foldNordic', () => {
   it('folds ø/Ø to o/O', () => {
@@ -81,5 +91,112 @@ describe('hostnameLabel', () => {
 
   it('returns undefined when the brand label is shorter than 2 chars', () => {
     expect(hostnameLabel('a.no')).toBeUndefined();
+  });
+});
+
+describe('scoreCandidate', () => {
+  it('returns 0 for a candidate with neither name nor hjemmeside relation', () => {
+    const c = cand({ navn: 'NORDAN AS' });
+    const { score } = scoreCandidate(c, 'norden', 'norden.org');
+    expect(score).toBe(0);
+  });
+
+  it('rewards exact-name match with the highest prefix bonus', () => {
+    const c = cand({ navn: 'ORKLA', organisasjonsform: { kode: 'ASA' } });
+    const { score } = scoreCandidate(c, 'orkla', 'orkla.com');
+    expect(score).toBeGreaterThanOrEqual(73);
+  });
+
+  it('scores a 2-word prefix higher than a 4-word prefix', () => {
+    const two = cand({ navn: 'ORKLA ASA', organisasjonsform: { kode: 'ASA' } });
+    const four = cand({
+      navn: 'ORKLA FOODS NORGE AS',
+      organisasjonsform: { kode: 'AS' },
+    });
+    const sTwo = scoreCandidate(two, 'orkla', 'orkla.com').score;
+    const sFour = scoreCandidate(four, 'orkla', 'orkla.com').score;
+    expect(sTwo).toBeGreaterThan(sFour);
+  });
+
+  it('matches Nordic-folded names against an ASCII label', () => {
+    const c = cand({
+      navn: 'ELKJØP NORGE AS',
+      organisasjonsform: { kode: 'AS' },
+      antallAnsatte: 2573,
+    });
+    const { score } = scoreCandidate(c, 'elkjop', 'elkjop.no');
+    expect(score).toBeGreaterThan(0);
+  });
+
+  it('penalises noise words like VENNELAG', () => {
+    const noisy = cand({
+      navn: 'SHELL VENNELAG',
+      organisasjonsform: { kode: 'FLI' },
+    });
+    const clean = cand({
+      navn: 'A/S NORSKE SHELL',
+      organisasjonsform: { kode: 'AS' },
+    });
+    expect(scoreCandidate(noisy, 'shell', 'shell.no').score).toBeLessThan(
+      scoreCandidate(clean, 'shell', 'shell.no').score,
+    );
+  });
+
+  it('penalises konkurs / underAvvikling', () => {
+    const live = cand({ navn: 'TV2 AS', organisasjonsform: { kode: 'AS' } });
+    const dead = cand({
+      navn: 'TV2 AS',
+      organisasjonsform: { kode: 'AS' },
+      konkurs: true,
+    });
+    expect(scoreCandidate(dead, 'tv2', 'tv2.no').score).toBeLessThan(
+      scoreCandidate(live, 'tv2', 'tv2.no').score,
+    );
+  });
+
+  it('rewards hjemmeside-exact match even without a name match', () => {
+    const c = cand({
+      navn: 'UNRELATED MEDIA AS',
+      organisasjonsform: { kode: 'AS' },
+      hjemmeside: 'finansavisen.no',
+    });
+    const { score } = scoreCandidate(c, 'unrelated', 'finansavisen.no');
+    expect(score).toBeGreaterThan(0);
+  });
+
+  it('penalises subsidiaries via overordnetEnhet', () => {
+    const parent = cand({
+      navn: 'YARA INTERNATIONAL ASA',
+      organisasjonsform: { kode: 'ASA' },
+    });
+    const subsidiary = cand({
+      navn: 'YARA INTERNATIONAL ASA',
+      organisasjonsform: { kode: 'ASA' },
+      overordnetEnhet: '123456789',
+    });
+    expect(scoreCandidate(subsidiary, 'yara', 'yara.com').score).toBeLessThan(
+      scoreCandidate(parent, 'yara', 'yara.com').score,
+    );
+  });
+
+  it('penalises subsidiary keywords like INVEST and FOODS', () => {
+    const plain = cand({ navn: 'ORKLA ASA', organisasjonsform: { kode: 'ASA' } });
+    const sub = cand({
+      navn: 'ORKLA FOODS AS',
+      organisasjonsform: { kode: 'AS' },
+    });
+    expect(scoreCandidate(sub, 'orkla', 'orkla.com').score).toBeLessThan(
+      scoreCandidate(plain, 'orkla', 'orkla.com').score,
+    );
+  });
+
+  it('does NOT penalise NORGE / NORDIC / GROUP as subsidiary keywords', () => {
+    const norge = cand({
+      navn: 'ELKJØP NORGE AS',
+      organisasjonsform: { kode: 'AS' },
+      antallAnsatte: 2573,
+    });
+    const score = scoreCandidate(norge, 'elkjop', 'elkjop.no').score;
+    expect(score).toBeGreaterThan(50);
   });
 });
