@@ -222,3 +222,31 @@ export function scoreCandidate(
 
   return { score, reasons };
 }
+
+// Thresholds — tuned against scripts/benchmark-hostname.mjs.
+//
+// AUTO: top must be confidently above the noise floor (75) AND
+// clearly ahead of the runner-up (+10) so kjedebutikker (ELKJØP
+// LEKNES vs ELKJØP SVOLVÆR, both 111 via hjemmeside-exact) don't
+// auto-resolve.
+//
+// PICKER: top must be plausible (45) but not confident — surface
+// the top 4 with "Ingen av disse" instead of guessing.
+const AUTO_THRESHOLD = 75;
+const AUTO_MARGIN = 10;
+const PICKER_THRESHOLD = 45;
+
+export type ResolutionBand = 'auto' | 'picker' | 'none';
+
+export function decideBand(
+  topScore: number,
+  runnerUpScore: number | undefined,
+): ResolutionBand {
+  if (topScore <= 0) return 'none';
+  const runner = runnerUpScore ?? 0;
+  if (topScore >= AUTO_THRESHOLD && topScore - runner >= AUTO_MARGIN) {
+    return 'auto';
+  }
+  if (topScore >= PICKER_THRESHOLD) return 'picker';
+  return 'none';
+}

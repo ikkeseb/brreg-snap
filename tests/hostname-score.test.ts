@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  decideBand,
   foldNordic,
   generateNordicVariants,
   hostnameLabel,
@@ -198,5 +199,35 @@ describe('scoreCandidate', () => {
     });
     const score = scoreCandidate(norge, 'elkjop', 'elkjop.no').score;
     expect(score).toBeGreaterThan(50);
+  });
+});
+
+describe('decideBand', () => {
+  it('returns auto when top score >= 75 and margin >= 10', () => {
+    expect(decideBand(80, 60)).toBe('auto');
+    expect(decideBand(75, 65)).toBe('auto');
+  });
+
+  it('returns picker when top score >= 75 but margin < 10', () => {
+    expect(decideBand(80, 75)).toBe('picker');
+  });
+
+  it('returns picker when top score is in [45, 75)', () => {
+    expect(decideBand(50, 30)).toBe('picker');
+    expect(decideBand(74, 0)).toBe('picker');
+  });
+
+  it('returns none when top score < 45', () => {
+    expect(decideBand(40, 0)).toBe('none');
+  });
+
+  it('returns none when top score is 0 or negative', () => {
+    expect(decideBand(0, 0)).toBe('none');
+    expect(decideBand(-5, -10)).toBe('none');
+  });
+
+  it('treats missing runner-up as score 0 for the margin check', () => {
+    expect(decideBand(80, undefined)).toBe('auto');
+    expect(decideBand(70, undefined)).toBe('picker');
   });
 });
