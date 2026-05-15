@@ -33,7 +33,7 @@ note before reading the source file.
 
 | Concern                                       | Source                          | Note                              |
 | --------------------------------------------- | ------------------------------- | --------------------------------- |
-| Resolution cascade, mod-11 cycle, sync↔async  | `src/lib/orgnr.ts`, `mod11.ts`, `domains.ts`, `hostname-search.ts` | `docs/notes/resolution.md`        |
+| Resolution cascade, mod-11 cycle, sync↔async, scoring bands, picker-choice cache | `src/lib/orgnr.ts`, `mod11.ts`, `domains.ts`, `hostname-search.ts`, `hostname-score.ts` | `docs/notes/resolution.md`        |
 | 24h cache, race guards (`searchRunId`, `loadRunId`) | `src/lib/brreg.ts`, `popup.ts`, `details.ts` | `docs/notes/cache.md`             |
 | Sidebar sync (`sendMessage` vs `setPanel`, `no-match`) | `src/details/details.ts`, `popup/popup.ts`, `background/background.ts` | `docs/notes/sidebar-sync.md`      |
 | Permissions: `activeTab` limits, runtime `tabs` opt-in, gesture-stack rules | `manifest.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts` | `docs/notes/permissions-model.md` |

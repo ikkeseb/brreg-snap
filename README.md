@@ -65,8 +65,14 @@ When you click the toolbar icon:
    - **Org-nr regex** — 9-digit pattern in URL path/query or title
    - **Domain → orgnr table** — curated list of common Norwegian
      companies (`src/lib/domains.ts`)
-   - **Free-text search fallback** — if neither matches, the popup
-     shows a search box that hits brreg's search endpoint
+   - **Hostname → brreg search** — multi-query pipeline (hjemmeside
+     field + Nordic-folded name search) with confidence scoring
+     (`src/lib/hostname-search.ts`, `src/lib/hostname-score.ts`).
+     Auto-resolves only when one candidate is clearly ahead; the
+     sidebar surfaces a "Mente du …?" picker when several plausible
+     companies tie, and refuses rather than guess wrong.
+   - **Free-text search fallback** — if nothing else matches, the
+     popup shows a search box that hits brreg's search endpoint.
 3. Fetch the entity from `data.brreg.no/enhetsregisteret/api/enheter/<orgnr>`.
 4. Render the result in the popup. Nothing else is touched.
 
@@ -94,6 +100,8 @@ src/
     copy-orgnr.ts             click-to-copy helper for orgnr digits
     domains.ts                domain → orgnr lookup table
     format.ts                 display formatters (addresses, etc.)
+    hostname-score.ts         pure scoring + 3-band decision for hostname matches
+    hostname-search.ts        multi-query brreg pipeline + picker-choice cache
     mod11.ts                  mod-11 checksum (own module to break an ESM cycle)
     orgnr.ts                  URL/title → orgnr extraction
     roller.ts                 board-role normalisation

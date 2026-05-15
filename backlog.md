@@ -3,6 +3,24 @@
 Decisions and deferred work that doesn't fit in CLAUDE.md (which
 documents shipped state) or commit messages.
 
+## Hostname-resolution v2 (multi-query + scoring + picker) — shipped 2026-05-15
+
+Replaced the "first prefix match wins" hostname resolver with a
+multi-query + confidence-scoring pipeline (Q1 hjemmeside, Q2 navn
+FORTLOEPENDE with Nordic-folded variants and org-form filter, Q3
+fallback). Three-band outcome: AUTO (top ≥ 75 AND margin ≥ 10),
+PICKER (top ≥ 45), NONE.
+
+Picker UI lives in the sidebar (`data-state="picker"`) — "Mente du
+…?" with the top 4 candidates and "Ingen av disse". User choice
+caches under `picker-choice:<host>` for 24h.
+
+Benchmark against 17-hostname test set:
+6 auto-correct, 4 refuse-correct, 3 picker-with-right, **0 AUTO-WRONG**.
+
+See `docs/notes/resolution.md` § bands + § picker-choice and
+`docs/superpowers/specs/2026-05-15-hostname-resolution-design.md`.
+
 ## Sidebar auto-sync on tab switch — shipped 2026-05-15
 
 Both paths from the original backlog landed in commit `ed5bb74`:
@@ -32,16 +50,22 @@ path" and § Security constraints for the shipped contract.
   adding as a power-user follow-up — handler logic from the context
   menu and the auto-sync toggle is reusable.
 
-- **Picker UX for hostname-search ambiguity (follow-up to shipped Bug 1).**
-  `hostname-search.ts` now picks the first prefix-matching plausible
-  hit (or first plausible if no prefix match) and otherwise returns
-  undefined. That auto-resolves Yara, Shell, Tomra etc. but can pick
-  wrong when the brand name is generic ("posten" matches both POSTEN
-  BRING and a dozen other entities). A picker — sidebar lists the
-  top 5 plausibles with confidence cues (organisasjonsform,
-  antallAnsatte, registreringsdato) and the user clicks — is the
-  next step if false matches surface. Track impact via the existing
-  ?nomatch flow before building this.
+- **Title parsing for hostnames that collapse spaces.** rema1000.no
+  → "REMA 1000", detnorsketeatret.no → "DET NORSKE TEATRET",
+  lieoverflate.no → "LIE OVERFLATE" — the page `<title>` carries the
+  right tokens with correct spacing but the hostname doesn't. A
+  follow-up could parse the active tab's title and use those tokens
+  as a secondary brreg query in the resolution pipeline. Requires no
+  new permissions (`activeTab` already covers it) but adds a new
+  pipeline stage. Would also help brand≠entity cases (Finansavisen
+  → HEGNAR MEDIA AS) when the title carries the legal name. See
+  `docs/superpowers/specs/2026-05-15-hostname-resolution-design.md`
+  § Out of scope / backlog.
+
+- **Picker UX polish.** v1 picker (shipped 2026-05-15) renders the
+  top 4 candidates as click targets. Backlogged: keyboard
+  navigation, last-used-orgnr at the top, "show more" beyond top 4.
+  Defer to a follow-up once we have feedback on the v1 picker.
 
 - **Split `src/details/details.ts` into smaller modules
   (segmentation phase B).** Phase A (routing table + docs/notes/)
