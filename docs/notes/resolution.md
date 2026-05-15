@@ -44,4 +44,41 @@ context menu handler is the canonical example: it sync-resolves for
 for the broadcast.
 
 Everything else (popup init, sidebar `resolveFromActiveTab`,
-background tab listeners) uses the async variant.
+background tab listeners) uses the async variant. The sidebar calls
+`searchByHostnameDetailed` directly so it can branch on the resolution
+band (see § bands below) and render the picker for ambiguous hosts.
+
+<!-- SECTION: bands -->
+## Resolution bands
+
+`hostname-search.ts` exposes two entry points:
+
+- `searchByHostname(host)` returns `string | undefined` — only AUTO
+  matches resolve. Used by the sync cascade in `orgnr.ts` and by
+  background/popup flows that just want a confident orgnr.
+- `searchByHostnameDetailed(host)` returns `{band, candidates, choice?}`
+  — used by the sidebar so it can render the picker UI for the
+  `'picker'` band.
+
+Bands are decided in `hostname-score.ts:decideBand`:
+
+| Band | Condition | Outcome |
+|---|---|---|
+| `auto` | top ≥ 75 AND top − runner-up ≥ 10 | resolve to top candidate |
+| `picker` | top ≥ 45 | sidebar shows top-4 + "Ingen av disse" |
+| `none` | otherwise | sidebar shows empty state |
+
+The AUTO margin requirement is what prevents kjedebutikker (ELKJØP
+LEKNES vs ELKJØP SVOLVÆR, both 111 via hjemmeside-exact) from
+auto-resolving.
+
+<!-- SECTION: picker-choice -->
+## Picker choice cache
+
+When the user picks from the sidebar's "Mente du…?" list,
+`setPickerChoice(host, orgnr)` writes a 24h entry under
+`picker-choice:<host>`. The next visit short-circuits both bands and
+the network — `searchByHostnameDetailed` returns `{band:'auto',
+candidates:[], choice}`. `setPickerChoice(host, null)` ("Ingen av
+disse") caches a negative choice that returns `{band:'none'}` on the
+next visit. Clears with the existing `storage.session` lifetime.

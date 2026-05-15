@@ -15,9 +15,21 @@ the response shape via `isEnhet` / `isUnderenhet` /
 
 `fetchRegnskap` caches both empty results (404, normal for small AS)
 and "unsupported plan" results (500 from BANK/FORS filings) so a
-refresh doesn't re-hit. `hostname-search.ts` caches positive results
-*and* negative results (as `null`) under `hostname:<host>` keys so
-browsing back to mdn.mozilla.org doesn't re-search every visit.
+refresh doesn't re-hit.
+
+`hostname-search.ts` caches under two keys:
+
+- `hostname:<host>` → `HostnameResult` = `{band: 'auto' | 'picker' |
+  'none', candidates: SearchHit[]}` (orgnr is included on the auto
+  variant). Replaces the older `string | null` shape.
+- `picker-choice:<host>` → `string | null` (null = "Ingen av disse").
+  Set by the sidebar when the user resolves a picker prompt. Wins
+  over the band cache: if a choice is cached, both
+  `searchByHostname` and `searchByHostnameDetailed` short-circuit
+  before running the pipeline.
+
+Both keys honor the same 24h TTL. Network errors still bypass caching
+so the next visit retries.
 
 <!-- SECTION: search-runid -->
 ## Search debounce + race guard
