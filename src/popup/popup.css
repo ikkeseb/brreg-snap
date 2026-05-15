@@ -251,6 +251,14 @@ main[data-state='error'] #status {
     transform 120ms ease;
 }
 
+/* ID specificity beats the UA [hidden] rule, so the hidden attribute
+   needs an explicit reset for #details-link. Without this the link
+   stays visible in the search/error states with onclick=null and no
+   href — clicks do nothing, which reads as a broken button. */
+#details-link[hidden] {
+  display: none;
+}
+
 #details-link:hover {
   background: var(--accent-strong);
   text-decoration: none;
