@@ -1,3 +1,5 @@
+import { decideToggle } from '../lib/auto-sync-controller.js';
+import { getAutoSync, setAutoSync } from '../lib/auto-sync-settings.js';
 import {
   fetchEnhet,
   fetchRegnskap,
@@ -41,6 +43,8 @@ const brregLink = $('brreg-link') as HTMLAnchorElement;
 const footerUpdated = $('footer-updated');
 const updatedTime = $('updated-time') as HTMLTimeElement;
 const refreshBtn = $('refresh-btn') as HTMLButtonElement;
+const autoSyncToggle = $('auto-sync-toggle') as HTMLInputElement;
+const autoSyncStatus = $('auto-sync-status');
 const footerSource = $('footer-source');
 const sourceHostEl = $('source-host');
 let currentOrgnr: string | undefined;
@@ -50,6 +54,7 @@ let updatedTimerId: number | undefined;
 
 setupTabs();
 setupRefresh();
+void setupAutoSyncToggle();
 
 function $(id: string): HTMLElement {
   const el = document.getElementById(id);
@@ -140,19 +145,147 @@ function paintUpdatedLabel(): void {
 
 function setupRefresh(): void {
   refreshBtn.addEventListener('click', () => {
-    if (!currentOrgnr || refreshBtn.disabled) return;
-    void doRefresh(currentOrgnr);
+    if (refreshBtn.disabled) return;
+    // currentOrgnr may be empty if the sidebar opened on an
+    // unrecognised page. doRefresh will try the active tab if
+    // tabs is granted; otherwise it's a no-op when there's nothing
+    // to re-fetch.
+    void doRefresh(currentOrgnr ?? '');
   });
 }
 
-async function doRefresh(orgnr: string): Promise<void> {
+async function doRefresh(currentOrgnrArg: string): Promise<void> {
   refreshBtn.disabled = true;
   try {
-    await invalidateCache(orgnr);
-    await loadOrgnr(orgnr);
+    const hasTabs = await browser.permissions.contains({
+      permissions: ['tabs'],
+    });
+    if (hasTabs) {
+      const fromTab = await resolveFromActiveTab();
+      if (fromTab.orgnr) {
+        setSourceHost(fromTab.host);
+        const url = new URL(window.location.href);
+        url.searchParams.set('orgnr', fromTab.orgnr);
+        window.history.replaceState(null, '', url.toString());
+        await invalidateCache(fromTab.orgnr);
+        await loadOrgnr(fromTab.orgnr);
+        return;
+      }
+      // No orgnr on the active tab — fall through to refetch
+      // whatever's displayed.
+    }
+    if (!currentOrgnrArg) return;
+    await invalidateCache(currentOrgnrArg);
+    await loadOrgnr(currentOrgnrArg);
   } finally {
     refreshBtn.disabled = false;
   }
+}
+
+async function setupAutoSyncToggle(): Promise<void> {
+  // Reconcile UI state with reality on load. The toggle is "on" only
+  // if both storage says so AND the tabs permission is currently
+  // granted (the user can revoke externally via about:addons).
+  const [storedOn, hasTabs] = await Promise.all([
+    getAutoSync(),
+    browser.permissions.contains({ permissions: ['tabs'] }),
+  ]);
+  const effective = storedOn && hasTabs;
+  autoSyncToggle.checked = effective;
+  if (storedOn && !hasTabs) {
+    // Storage said on but permission was revoked externally. Reset.
+    await setAutoSync(false);
+  }
+
+  autoSyncToggle.addEventListener('change', () => {
+    void handleToggleChange(autoSyncToggle.checked);
+  });
+
+  // External revoke (about:addons) — flip the checkbox live and
+  // clear stored state so the UI doesn't lie next reload. Sync shim
+  // around the async handler so addListener gets a void-returning
+  // function (same pattern as background.ts).
+  browser.permissions.onRemoved.addListener(onPermissionsRemoved);
+}
+
+function onPermissionsRemoved(perms: browser.permissions.Permissions): void {
+  void handlePermissionsRemoved(perms);
+}
+
+async function handlePermissionsRemoved(
+  perms: browser.permissions.Permissions,
+): Promise<void> {
+  if (!perms.permissions?.includes('tabs')) return;
+  autoSyncToggle.checked = false;
+  await setAutoSync(false);
+  showAutoSyncStatus(null);
+}
+
+let toggleInFlight = false;
+
+async function handleToggleChange(desired: boolean): Promise<void> {
+  // Guard against rapid double-clicks racing the permissions.request
+  // prompt. Without this, a second click while the first await is
+  // pending interleaves the two decisions and the final visible state
+  // can contradict what the user last clicked. Same shape as the
+  // refresh button's disabled-flip in doRefresh.
+  if (toggleInFlight) return;
+  toggleInFlight = true;
+  autoSyncToggle.disabled = true;
+  try {
+    const currentlyEnabled = await getAutoSync();
+
+    let grantOutcome: 'granted' | 'denied' | 'n/a' = 'n/a';
+    if (desired && !currentlyEnabled) {
+      try {
+        const granted = await browser.permissions.request({
+          permissions: ['tabs'],
+        });
+        grantOutcome = granted ? 'granted' : 'denied';
+      } catch {
+        grantOutcome = 'denied';
+      }
+    }
+
+    const decision = decideToggle({
+      desired,
+      currentlyEnabled,
+      grantOutcome,
+    });
+
+    // Visual checkbox state always follows the decision — important
+    // when the user denied the prompt and we need to revert the tick.
+    autoSyncToggle.checked = decision.nextEnabled;
+
+    if (decision.persist) {
+      await setAutoSync(decision.nextEnabled);
+    }
+
+    if (decision.removePermission) {
+      try {
+        await browser.permissions.remove({ permissions: ['tabs'] });
+      } catch {
+        // Best-effort: any failure here leaves the permission granted
+        // but storage already says off. User can revoke manually from
+        // about:addons if the inconsistency matters.
+      }
+    }
+
+    showAutoSyncStatus(decision.uiMessage);
+  } finally {
+    autoSyncToggle.disabled = false;
+    toggleInFlight = false;
+  }
+}
+
+function showAutoSyncStatus(message: string | null): void {
+  if (!message) {
+    autoSyncStatus.hidden = true;
+    autoSyncStatus.textContent = '';
+    return;
+  }
+  autoSyncStatus.hidden = false;
+  autoSyncStatus.textContent = message;
 }
 
 function setSourceHost(host: string | undefined): void {

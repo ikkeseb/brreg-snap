@@ -127,10 +127,24 @@ permission but its `Tab` object is stripped of URL/title for the
 same reason. The permissionless paths out: (a) require a fresh
 gesture against the *toolbar/shortcut* surface (click sidebar icon,
 ctrl+shift+B), or (b) accept the limitation. Escalating to `tabs`
-would relax the security differentiator — see the constraints
-section. Don't burn cycles re-investigating `webNavigation`,
+as a static install-time permission would relax the security
+differentiator — see the constraints section. Don't burn cycles re-investigating `webNavigation`,
 `tabs.onUpdated`, or focus events; they all need `tabs` or content
 scripts.
+
+**Tab-sync via runtime `tabs` opt-in is the supported path.** The
+sidebar exposes an "Auto-oppdater ved fane-bytte" toggle that
+requests `tabs` at runtime. With grant, background.ts attaches
+`tabs.onActivated`/`onUpdated` listeners and broadcasts the same
+`{type:'sync', orgnr, host}` shape the popup uses. MV3 kills and
+respawns the service worker on idle, so listener registration must
+run on every boot — see `reconcileListeners()` in
+`src/background/background.ts`. The same function is called from a
+`storage.onChanged` handler (gated on `areaName === 'local'` and
+the relevant key) so external revoke / toggle flips also reconcile
+without a reload. Settings live in `storage.local` (survives
+browser restarts); the response cache stays on `storage.session`
+(in-memory).
 
 **A button *inside the sidebar iframe* does NOT grant activeTab.**
 Tested empirically: a sync button rendered inside the sidebar that
@@ -181,8 +195,15 @@ These are the product differentiator, not preferences. See
 
 - No content scripts. `manifest.json` has none and must continue to.
 - Only `data.brreg.no` in `host_permissions`. No new hosts.
-- Permissions are `activeTab` + `storage`. No `tabs`, no
-  `<all_urls>`, no `cookies`.
+- Install-time permissions are `activeTab` + `storage` + `menus`.
+  `tabs` lives in `optional_permissions` and is *runtime opt-in only*:
+  the user must flip "Auto-oppdater ved fane-bytte" in the sidebar,
+  which calls `permissions.request({permissions: ['tabs']})` on
+  click. Flipping off calls `permissions.remove`. No `<all_urls>`,
+  no `cookies`, no `webRequest`. `menus` is on Mozilla's no-prompt
+  list (silent at install). The install dialog therefore advertises
+  only `activeTab` + storage + brreg host — `tabs` does not appear
+  until the user explicitly grants it.
 - CSP keeps `default-src 'self'` with `base-uri`, `form-action`, and
   `frame-ancestors` all `'none'`. Don't add `'unsafe-inline'`, remote
   script hosts, or relax these directives.

@@ -33,7 +33,8 @@
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "menus"],
+  "optional_permissions": ["tabs"],
   "host_permissions": ["https://data.brreg.no/*"],
   "background": {
     "scripts": ["background/background.js"],

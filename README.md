@@ -14,9 +14,11 @@ pages you browse and never reads their DOM.
 
 | Permission | Why |
 |---|---|
-| `activeTab` | Read URL + title of the current tab **only when you click the icon** |
-| `storage` | Cache brreg responses locally (`storage.session`, 24h TTL) |
+| `activeTab` | Read URL + title of the current tab **only when you click the icon, the sidebar icon, or a context-menu item** |
+| `storage` | Cache brreg responses locally (`storage.session`, 24h TTL) and persist the "Auto-oppdater" toggle (`storage.local`) |
+| `menus` | Register the "Vis i brreg-now sidebar" right-click item. On Mozilla's no-prompt list — silent at install, does not grant tab snooping (activeTab still required, granted per click). |
 | `host_permissions: https://data.brreg.no/*` | Fetch from the public brreg API. Only domain we contact. |
+| `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater ved fane-bytte" in the sidebar. Requested at runtime via a Firefox prompt; revocable from `about:addons` or by flipping the toggle off (which calls `permissions.remove`). Install dialog stays silent. |
 
 What this rules out:
 
@@ -25,6 +27,12 @@ What this rules out:
 - No `eval` or remote-loaded code
 - No third-party analytics or telemetry
 - No DOM access on the pages you visit
+
+The optional `tabs` permission grants nothing by itself: the extension
+only reads `tab.url` and `tab.title` on switch/update events to resolve
+an org-number, and only while the user-facing toggle is on. There is
+no `cookies`, `webRequest`, or `<all_urls>` access — the security
+posture stays "no DOM, no network beyond data.brreg.no".
 
 Total reviewable surface is intentionally small (~200 LOC core).
 
