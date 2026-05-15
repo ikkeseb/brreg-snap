@@ -17,9 +17,18 @@ const TABLE: Readonly<Record<string, string>> = {
   // entity differ. Brreg navn search can't find "FINN.no" (the dot
   // breaks it), so the only safe resolution is this curated entry.
   'finn.no': '981159772',         // VEND MARKETPLACES AS
+  // brreg's `hjemmeside` field for www.nho.no points at the eiendom
+  // subsidiary (NHO EIENDOM AS, 989524046). The publisher of nho.no is
+  // the parent interest organisation, which has no hjemmeside set, so
+  // hostname search can't reach it.
+  'nho.no': '955600436',          // NÆRINGSLIVETS HOVEDORGANISASJON FLI
   'nrk.no': '976390512',          // NORSK RIKSKRINGKASTING AS
   'orkla.no': '910747711',        // ORKLA ASA
   'posten.no': '984661185',       // POSTEN BRING AS
+  // A/S Norske Shell does not register a hjemmeside in brreg, so
+  // `hjemmeside=www.shell.no` returns its pensjonskasse + an unrelated
+  // eiendomsselskap + the employee club instead. Curate the parent.
+  'shell.no': '914807077',        // A/S NORSKE SHELL
   'sparebank1.no': '975966372',   // SPAREBANK 1 GRUPPEN AS
   'telenor.no': '982463718',      // TELENOR ASA
   'tine.no': '947942638',         // TINE SA
