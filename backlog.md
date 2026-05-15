@@ -74,6 +74,26 @@ path" and § Security constraints for the shipped contract.
   No new permissions needed (`data.brreg.no` already in
   `host_permissions`).
 
+- **Repo segmentation / routing table for fast Claude lookups.**
+  CLAUDE.md is ~220 lines of dense gotchas and `details.ts` is ~800
+  lines — every Claude session pays a context tax to read them in
+  full. Goal: a routing-table approach where a small top-level index
+  (CLAUDE.md or a new `MAP.md`) points at narrowly-scoped files for
+  each concern (security, brreg-API quirks, sidebar/permissions,
+  resolution cascade, UI rendering). Then grep/glob can target the
+  exact file instead of paging through one giant document. Concrete
+  starting moves:
+  - Split `details.ts` into smaller modules — renderers (`render-*`)
+    separated from message-handling and lifecycle.
+  - Move the "Architecture" gotchas in CLAUDE.md into per-topic
+    files under `docs/notes/` (e.g. `regnskap-api.md`,
+    `permissions-model.md`, `sidebar-sync.md`); keep CLAUDE.md as a
+    one-line-per-topic index with `[[link]]`s.
+  - Tag each architecture note with a stable anchor so
+    `Grep --glob docs/notes/permissions-model.md` lands first try.
+  - Consider section anchors like `<!-- SECTION: permissions -->`
+    that grep can target instead of full-file reads.
+
 ### Rejected / not pursued
 
 - **Iframe button inside the sidebar.** Falsified empirically — see

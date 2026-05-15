@@ -64,11 +64,30 @@ function hostFromUrl(url: string | undefined): string | undefined {
 browser.menus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID) return;
   const sync = deriveSync(tab?.url, tab?.title);
+  const host = hostFromUrl(tab?.url);
+
+  // Encode the target state into the panel URL so a fresh sidebar
+  // opens on the right page even if the broadcast races the panel's
+  // listener registration. setPanel + open both fire from this
+  // user-gesture stack — required for sidebarAction.open() to work.
+  const panelUrl = sync
+    ? browser.runtime.getURL(`details/details.html?orgnr=${sync.orgnr}`)
+    : host
+      ? browser.runtime.getURL(
+          `details/details.html?nomatch=${encodeURIComponent(host)}`,
+        )
+      : browser.runtime.getURL('details/details.html');
+  void browser.sidebarAction.setPanel({ panel: panelUrl });
+  void browser.sidebarAction.open();
+
+  // For the already-open case: setPanel doesn't reliably repaint a
+  // visible sidebar in Firefox 115+, so broadcast a message that the
+  // live panel listens for and re-renders in place.
   if (sync) {
     void broadcastSync(sync.orgnr, sync.host);
-    return;
+  } else {
+    void broadcastNoMatch(host);
   }
-  void broadcastNoMatch(hostFromUrl(tab?.url));
 });
 
 // --- auto-sync tab listeners --------------------------------------

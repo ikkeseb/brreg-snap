@@ -69,6 +69,12 @@ function getOrgnrFromUrl(): string | undefined {
   return undefined;
 }
 
+function getNoMatchHostFromUrl(): string | undefined {
+  const params = new URLSearchParams(window.location.search);
+  const host = params.get('nomatch');
+  return host ?? undefined;
+}
+
 function setState(state: 'loading' | 'result' | 'error'): void {
   app.dataset.state = state;
   statusEl.hidden = state === 'result';
@@ -364,6 +370,17 @@ async function resolveFromActiveTab(): Promise<TabContext> {
 }
 
 async function init(): Promise<void> {
+  // ?nomatch=<host> means a deliberate trigger (menu, fresh sidebar
+  // open) landed on a page with no resolvable orgnr. Skip the active-
+  // tab probe — the caller already told us there's nothing to find,
+  // and rendering an empty state with the host is more useful than
+  // chasing tabs.query for a definitely-empty answer.
+  const noMatchHost = getNoMatchHostFromUrl();
+  if (noMatchHost !== undefined) {
+    showEmptyState(noMatchHost);
+    return;
+  }
+
   // Prefer the active tab over the URL param. The sidebar may have
   // been opened with a stale orgnr (e.g. last popup-click was on
   // DNB, user has since switched to VG and re-toggled the sidebar
@@ -376,7 +393,7 @@ async function init(): Promise<void> {
     // Neither the active tab nor the URL has a company. The sidebar
     // was opened manually (Firefox View > Sidebars) on a page brreg-now
     // does not recognise. Show a hint, not a hard error.
-    showEmptyState();
+    showEmptyState(fromTab.host);
     return;
   }
 
