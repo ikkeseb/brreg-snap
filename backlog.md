@@ -3,6 +3,28 @@
 Decisions and deferred work that doesn't fit in CLAUDE.md (which
 documents shipped state) or commit messages.
 
+## details.ts render slice extracted — shipped 2026-05-15
+
+The 1227-line `src/details/details.ts` had ~15 render functions inline
+(header, overview, contact, roles, parent, underenheter, nokkeltall)
+plus shared DOM helpers (`addRow`, `addLink`, `emptyLine`, `makeFlag`,
+`$`). They moved to `src/details/render/*.ts` as pure DOM writers —
+each module owns its DOM refs via the shared `$` helper in
+`render/dom.ts`. `details.ts` is now 880 lines and imports the render
+functions instead of defining them.
+
+What was safe to extract: render fns have no shared mutable state
+(no `currentOrgnr` / `loadRunId` / `currentResolutionMethod` reads).
+They take typed data, write to DOM, return void. Same module-load
+discipline as the rest of the codebase — `$()` runs on import, but
+`details.html` loads scripts at body end (ESM defer semantics), so
+DOM is ready.
+
+Not extracted in the same pass: lifecycle (`init`, `loadOrgnr`),
+state mutation (`setSourceHost`, `setState`), message handling
+(`onMessage` listener), auto-sync UI plumbing. Those share mutable
+state and need a design pass — see "Still open" below.
+
 ## Sidebar inline search + Feil bedrift? override — shipped 2026-05-15
 
 Two follow-ups to the v2 picker, addressing real friction Seb hit on
@@ -95,24 +117,23 @@ path" and § Security constraints for the shipped contract.
   navigation, last-used-orgnr at the top, "show more" beyond top 4.
   Defer to a follow-up once we have feedback on the v1 picker.
 
-- **Split `src/details/details.ts` into smaller modules
-  (segmentation phase B).** Phase A (routing table + docs/notes/)
-  shipped with the same commit as Bug 1 wiring. The 835-line file
-  still mixes lifecycle, message handling, and ~15 render functions.
-  Natural seams:
-  - `src/details/render/` — `header.ts`, `overview.ts`, `roles.ts`,
-    `parent.ts`, `underenheter.ts`, `nokkeltall.ts`. Each a pure
-    render function.
-  - `src/details/state.ts` — `loadOrgnr`, `loadRunId`, `currentOrgnr`.
+- **Split `src/details/details.ts` further (segmentation phase B
+  remainder).** Render slice landed (`src/details/render/*.ts` —
+  see below). Remaining seams still inline in details.ts:
+  - `src/details/state.ts` — `loadOrgnr`, `loadRunId`, `currentOrgnr`,
+    `currentResolutionMethod`. Shared mutable state, needs a design
+    pass before extraction (loadRunId is bumped by both `loadOrgnr`
+    and `showPicker`/`onMessage`, so ownership boundary isn't trivial).
   - `src/details/auto-sync-ui.ts` — toggle handling, permissions
     plumbing (already partially independent via auto-sync-controller
-    + auto-sync-settings).
-  - `src/details/main.ts` — boots, wires listeners, owns `init()`.
+    + auto-sync-settings). Coupled to `autoSyncToggle` element +
+    `currentAutoSyncEnabled` cache + `toggleInFlight` guard.
+  - `src/details/main.ts` — boots, wires listeners, owns `init()` and
+    the top-level setup* calls.
 
-  Skipped in the segmentation session because it touches shipped
-  behaviour and risks regressions. Worth doing when next adding a
-  render concern (e.g. picker UI from above) — splitting first
-  shrinks the surface that change has to read.
+  Deferred: each of these moves shared mutable state across a
+  module boundary; the render slice was safe because render fns are
+  pure DOM writers with no state coupling.
 
 ### Rejected / not pursued
 

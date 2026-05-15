@@ -39,6 +39,7 @@ note before reading the source file.
 | Permissions: `activeTab` limits, runtime `tabs` opt-in, gesture-stack rules | `manifest.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts` | `docs/notes/permissions-model.md` |
 | brreg API: regnskap base URL, 500 = unsupported plan, no signatur, search drops dots | `src/lib/brreg.ts`              | `docs/notes/brreg-api.md`         |
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
+| Sidebar render layer (pure DOM writers for header/overview/roles/parent/underenheter/nokkeltall) | `src/details/render/*.ts` | — (modules are self-contained; each owns its DOM refs via shared `$` in `render/dom.ts`) |
 
 Targeted lookups:
 
