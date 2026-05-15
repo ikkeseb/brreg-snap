@@ -29,6 +29,13 @@
         <p id="auto-sync-status" class="auto-sync-status" role="status" aria-live="polite" hidden></p>
       </header>
       <section id="status" aria-live="polite">Henter selskapsdata…</section>
+      <section id="picker" hidden>
+        <p class="picker-intro">Vi fant flere mulige treff på denne siden:</p>
+        <ul id="picker-list" class="picker-list"></ul>
+        <button type="button" id="picker-none" class="picker-none">
+          Ingen av disse
+        </button>
+      </section>
       <section id="result" hidden>
         <header id="result-head">
           <h2 id="name"></h2>
