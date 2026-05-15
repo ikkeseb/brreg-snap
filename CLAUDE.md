@@ -146,6 +146,15 @@ without a reload. Settings live in `storage.local` (survives
 browser restarts); the response cache stays on `storage.session`
 (in-memory).
 
+**`pnpm lint:ext` will warn `ANDROID_INCOMPATIBLE_API` on
+`permissions.request` — expected, not a regression.** The extension
+is desktop-only by design: `sidebar_action` isn't implemented on
+Firefox for Android, and the whole UX is built around the sidebar.
+The warning is noise; don't try to silence it by dropping the
+optional `tabs` permission or the runtime opt-in flow. If we ever
+target Android, the entire surface needs a re-think, not a manifest
+tweak.
+
 **A button *inside the sidebar iframe* does NOT grant activeTab.**
 Tested empirically: a sync button rendered inside the sidebar that
 called `tabs.query({active:true, currentWindow:true})` got the same
