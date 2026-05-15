@@ -468,18 +468,27 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
   refreshBtn.disabled = true;
   refreshBtn.setAttribute('aria-busy', 'true');
   void startRefreshSpin();
+  // Snapshot loadRunId so any path that bumps it during one of our
+  // awaits (sync broadcast from popup, no-match broadcast, picker
+  // path) wins over the refresh. Without this guard, refresh's
+  // terminal loadOrgnr/showPicker/showEmptyState would overwrite a
+  // newer state that landed concurrently.
+  const startRunId = loadRunId;
   try {
     const hasTabs = await browser.permissions.contains({
       permissions: ['tabs'],
     });
+    if (loadRunId !== startRunId) return;
     if (hasTabs) {
       const fromTab = await resolveFromActiveTab();
+      if (loadRunId !== startRunId) return;
       if (fromTab.orgnr) {
         setSourceHost(fromTab.host);
         const url = new URL(window.location.href);
         url.searchParams.set('orgnr', fromTab.orgnr);
         window.history.replaceState(null, '', url.toString());
         await invalidateCache(fromTab.orgnr);
+        if (loadRunId !== startRunId) return;
         await loadOrgnr(fromTab.orgnr, fromTab.method);
         return;
       }
@@ -494,6 +503,7 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
     }
     if (!currentOrgnrArg) return;
     await invalidateCache(currentOrgnrArg);
+    if (loadRunId !== startRunId) return;
     // Refresh of an existing orgnr — keep its current resolution
     // method so the override button remains visible/hidden as before.
     await loadOrgnr(currentOrgnrArg, currentResolutionMethod);
