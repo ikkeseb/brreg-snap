@@ -27,12 +27,9 @@ See `docs/notes/resolution.md` § reject-override and
 
 ## Curated domain table removed — shipped 2026-05-15
 
-`src/lib/domains.ts` and its hand-maintained host → orgnr table are
-gone. Resolution is now pure brreg API: URL/title regex →
-hostname-search pipeline → manual search fallback. Hosts brreg can't
-disambiguate (FINN.no, sparebank1.no, etc.) simply don't auto-resolve
-and the sidebar's manual search covers the gap. See CLAUDE.md
-§ "No curated domain table".
+`src/lib/domains.ts` deleted. Cascade is now URL/title regex →
+hostname-search pipeline → manual search fallback. Principle in
+CLAUDE.md § "No curated data".
 
 ## Hostname-resolution v2 (multi-query + scoring + picker) — shipped 2026-05-15
 

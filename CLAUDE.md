@@ -48,22 +48,12 @@ grep -n 'SECTION: regnskap-500-unsupported-plan' docs/notes/brreg-api.md
 # Or just read the topic file end-to-end — they're short.
 ```
 
-## No curated domain table — pure brreg API
+## No curated data
 
-The extension resolves orgnrs only via URL/title regex and live
-brreg lookups (`searchByHostname`'s multi-query pipeline with
-3-band scoring). A static hostname → orgnr map used to live in
-`src/lib/domains.ts`; it was removed because mod-11 validity is
-**not** semantic correctness (caught in audit:
-`sparebank1.no → 975966453` resolved to "KREDITTBANKEN ASA") and
-hand-curation is a maintenance liability the product doesn't need.
-
-Hosts brreg's own data can't disambiguate (e.g. `finn.no` — the
-search index drops periods, so `?navn=FINN.no` returns garbage)
-simply don't resolve. That's accepted — the sidebar's inline manual
-search covers the gap and the user stays in control. Do **not**
-re-introduce a curated table for "just the hard cases". Zero
-curation is the principle, not a budget.
+Every orgnr resolves via the live brreg API only — no static
+hostname → orgnr table, even for hard cases (FINN.no, regulated
+subsidiaries). Hosts brreg can't disambiguate fall through to the
+sidebar's manual search.
 
 ## Security constraints (non-negotiable)
 
