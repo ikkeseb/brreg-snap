@@ -40,11 +40,35 @@ async function broadcastSync(
   }
 }
 
+async function broadcastNoMatch(host: string | undefined): Promise<void> {
+  // Sent when a deliberate trigger (menu click, tab activate / update
+  // with auto-sync on) lands on a page where we can't resolve an
+  // orgnr. Lets the sidebar clear stale state instead of pretending
+  // the previous company is still relevant.
+  try {
+    await browser.runtime.sendMessage({ type: 'no-match', host });
+  } catch {
+    // Sidebar closed — nothing to update.
+  }
+}
+
+function hostFromUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return undefined;
+  }
+}
+
 browser.menus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID) return;
   const sync = deriveSync(tab?.url, tab?.title);
-  if (!sync) return;
-  void broadcastSync(sync.orgnr, sync.host);
+  if (sync) {
+    void broadcastSync(sync.orgnr, sync.host);
+    return;
+  }
+  void broadcastNoMatch(hostFromUrl(tab?.url));
 });
 
 // --- auto-sync tab listeners --------------------------------------
@@ -55,8 +79,11 @@ async function handleActivated(
   try {
     const tab = await browser.tabs.get(info.tabId);
     const sync = deriveSync(tab.url, tab.title);
-    if (!sync) return;
-    await broadcastSync(sync.orgnr, sync.host);
+    if (sync) {
+      await broadcastSync(sync.orgnr, sync.host);
+      return;
+    }
+    await broadcastNoMatch(hostFromUrl(tab.url));
   } catch {
     // Tab gone, permission revoked mid-flight, etc. — drop silently.
   }
@@ -72,8 +99,11 @@ function handleUpdated(
   if (!changeInfo.url) return;
   if (!tab.active) return;
   const sync = deriveSync(tab.url, tab.title);
-  if (!sync) return;
-  void broadcastSync(sync.orgnr, sync.host);
+  if (sync) {
+    void broadcastSync(sync.orgnr, sync.host);
+    return;
+  }
+  void broadcastNoMatch(hostFromUrl(tab.url));
 }
 
 // Sync wrappers around the async handlers so addListener gets a

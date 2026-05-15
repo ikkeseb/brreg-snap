@@ -81,10 +81,18 @@ function showError(err: unknown): void {
   statusEl.textContent = `Feil: ${message}`;
 }
 
-function showEmptyState(): void {
+function showEmptyState(host?: string): void {
   setState('error');
-  statusEl.textContent =
-    'Klikk verktøylinjeikonet på en bedriftsside og velg «Detaljert visning» for å vise et selskap her.';
+  // Clear any orgnr left in the URL so a panel reload doesn't re-fetch
+  // the stale company.
+  const url = new URL(window.location.href);
+  url.searchParams.delete('orgnr');
+  window.history.replaceState(null, '', url.toString());
+  currentOrgnr = undefined;
+  setSourceHost(host);
+  statusEl.textContent = host
+    ? `Ingen bedrift identifisert på ${host}. Klikk verktøylinjeikonet for å søke manuelt.`
+    : 'Klikk verktøylinjeikonet på en bedriftsside og velg «Detaljert visning» for å vise et selskap her.';
 }
 
 let loadRunId = 0;
@@ -182,6 +190,15 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
   }
 }
 
+// Cached effective state of the toggle. Kept in sync with
+// storage + permission grant so handleToggleChange can call
+// browser.permissions.request *without* an await between the
+// click handler and the request — Firefox consumes the user
+// activation token across the first await, and consumed activation
+// makes permissions.request reject with "Firefox blokkerte
+// forespørselen".
+let currentAutoSyncEnabled = false;
+
 async function setupAutoSyncToggle(): Promise<void> {
   // Reconcile UI state with reality on load. The toggle is "on" only
   // if both storage says so AND the tabs permission is currently
@@ -190,8 +207,8 @@ async function setupAutoSyncToggle(): Promise<void> {
     getAutoSync(),
     browser.permissions.contains({ permissions: ['tabs'] }),
   ]);
-  const effective = storedOn && hasTabs;
-  autoSyncToggle.checked = effective;
+  currentAutoSyncEnabled = storedOn && hasTabs;
+  autoSyncToggle.checked = currentAutoSyncEnabled;
   if (storedOn && !hasTabs) {
     // Storage said on but permission was revoked externally. Reset.
     await setAutoSync(false);
@@ -216,6 +233,7 @@ async function handlePermissionsRemoved(
   perms: browser.permissions.Permissions,
 ): Promise<void> {
   if (!perms.permissions?.includes('tabs')) return;
+  currentAutoSyncEnabled = false;
   autoSyncToggle.checked = false;
   await setAutoSync(false);
   showAutoSyncStatus(null);
@@ -232,11 +250,15 @@ async function handleToggleChange(desired: boolean): Promise<void> {
   if (toggleInFlight) return;
   toggleInFlight = true;
   autoSyncToggle.disabled = true;
+  // Capture before any awaits — currentAutoSyncEnabled is module-level
+  // and can be flipped by onPermissionsRemoved between calls.
+  const wasEnabled = currentAutoSyncEnabled;
   try {
-    const currentlyEnabled = await getAutoSync();
-
     let grantOutcome: 'granted' | 'denied' | 'n/a' = 'n/a';
-    if (desired && !currentlyEnabled) {
+    if (desired && !wasEnabled) {
+      // CRITICAL: permissions.request must be the first async call
+      // after the user's click. Any await before this consumes the
+      // user-activation token and Firefox blocks the prompt.
       try {
         const granted = await browser.permissions.request({
           permissions: ['tabs'],
@@ -249,7 +271,7 @@ async function handleToggleChange(desired: boolean): Promise<void> {
 
     const decision = decideToggle({
       desired,
-      currentlyEnabled,
+      currentlyEnabled: wasEnabled,
       grantOutcome,
     });
 
@@ -259,6 +281,7 @@ async function handleToggleChange(desired: boolean): Promise<void> {
 
     if (decision.persist) {
       await setAutoSync(decision.nextEnabled);
+      currentAutoSyncEnabled = decision.nextEnabled;
     }
 
     if (decision.removePermission) {
@@ -372,6 +395,11 @@ interface SyncMessage {
   host?: string;
 }
 
+interface NoMatchMessage {
+  type: 'no-match';
+  host?: string;
+}
+
 function isSyncMessage(msg: unknown): msg is SyncMessage {
   if (typeof msg !== 'object' || msg === null) return false;
   const m = msg as { type?: unknown; orgnr?: unknown; host?: unknown };
@@ -382,12 +410,31 @@ function isSyncMessage(msg: unknown): msg is SyncMessage {
   );
 }
 
+function isNoMatchMessage(msg: unknown): msg is NoMatchMessage {
+  if (typeof msg !== 'object' || msg === null) return false;
+  const m = msg as { type?: unknown; host?: unknown };
+  return (
+    m.type === 'no-match' &&
+    (m.host === undefined || typeof m.host === 'string')
+  );
+}
+
 // The popup broadcasts a 'sync' message after resolving the active
 // tab's orgnr. sidebarAction.setPanel alone does not reliably repaint
 // an already-open sidebar in Firefox, so we listen here and repaint
 // ourselves. history.replaceState keeps the URL in sync without a
 // full document reload (which would flicker and reset scroll).
+// 'no-match' is the counterpart: a deliberate trigger (menu, tab
+// switch with auto-sync on) landed on a page brreg-now can't resolve
+// — we clear the sidebar instead of leaving stale company data up.
 browser.runtime.onMessage.addListener((msg: unknown) => {
+  if (isNoMatchMessage(msg)) {
+    // Bump loadRunId so any in-flight loadOrgnr from a previous sync
+    // doesn't overwrite the empty state when its fetches land.
+    ++loadRunId;
+    showEmptyState(msg.host);
+    return;
+  }
   if (!isSyncMessage(msg)) return;
   if (!isValidOrgnr(msg.orgnr)) return;
   setSourceHost(msg.host);
