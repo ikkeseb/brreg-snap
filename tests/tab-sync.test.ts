@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { SearchHit } from '../src/types/brreg.js';
 
 vi.mock('../src/lib/brreg.js', () => ({
-  searchEnheter: vi.fn(),
+  searchEnheterWithParams: vi.fn(),
 }));
 
-import { searchEnheter } from '../src/lib/brreg.js';
+import { searchEnheterWithParams } from '../src/lib/brreg.js';
 import { deriveSync, deriveSyncAsync } from '../src/lib/tab-sync.js';
 
-const searchEnheterMock = vi.mocked(searchEnheter);
+const searchMock = vi.mocked(searchEnheterWithParams);
 
 type StorageMap = Record<string, unknown>;
 
@@ -38,11 +38,15 @@ function installStorageMock(): void {
   };
 }
 
-function hit(navn: string, organisasjonsnummer: string): SearchHit {
+function hit(
+  navn: string,
+  organisasjonsnummer: string,
+  formKode = 'AS',
+): SearchHit {
   return {
     navn,
     organisasjonsnummer,
-    organisasjonsform: { kode: 'AS', beskrivelse: 'AS' },
+    organisasjonsform: { kode: formKode, beskrivelse: formKode },
   } as SearchHit;
 }
 
@@ -81,18 +85,18 @@ describe('deriveSync', () => {
 describe('deriveSyncAsync', () => {
   beforeEach(() => {
     installStorageMock();
-    searchEnheterMock.mockReset();
+    searchMock.mockReset();
   });
 
   it('returns the sync result without hitting the network when domain is curated', async () => {
     const result = await deriveSyncAsync('https://www.dnb.no/privat', 'DNB');
     expect(result).toEqual({ orgnr: '984851006', host: 'www.dnb.no' });
-    expect(searchEnheterMock).not.toHaveBeenCalled();
+    expect(searchMock).not.toHaveBeenCalled();
   });
 
   it('falls back to hostname search when sync misses, populating host', async () => {
-    searchEnheterMock.mockResolvedValue([
-      hit('YARA INTERNATIONAL ASA', '986228608'),
+    searchMock.mockResolvedValue([
+      hit('YARA INTERNATIONAL ASA', '986228608', 'ASA'),
     ]);
     const result = await deriveSyncAsync(
       'https://www.yara.com/about',
@@ -102,7 +106,7 @@ describe('deriveSyncAsync', () => {
   });
 
   it('returns null when both sync and search miss', async () => {
-    searchEnheterMock.mockResolvedValue([]);
+    searchMock.mockResolvedValue([]);
     expect(
       await deriveSyncAsync('https://random-unknown-blog.example/', ''),
     ).toBeNull();
@@ -110,6 +114,6 @@ describe('deriveSyncAsync', () => {
 
   it('returns null when url is undefined', async () => {
     expect(await deriveSyncAsync(undefined, 'DNB')).toBeNull();
-    expect(searchEnheterMock).not.toHaveBeenCalled();
+    expect(searchMock).not.toHaveBeenCalled();
   });
 });

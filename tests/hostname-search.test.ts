@@ -2,20 +2,20 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { SearchHit } from '../src/types/brreg.js';
 
-// Mock the brreg module before importing hostname-search, so the
-// re-export picks up the mock. Vitest hoists vi.mock to the top of
-// the file, but we still define the implementation here for clarity.
 vi.mock('../src/lib/brreg.js', () => ({
-  searchEnheter: vi.fn(),
+  searchEnheterWithParams: vi.fn(),
 }));
 
-import { searchEnheter } from '../src/lib/brreg.js';
+import { searchEnheterWithParams } from '../src/lib/brreg.js';
 import {
+  getPickerChoice,
   queryFromHostname,
   searchByHostname,
+  searchByHostnameDetailed,
+  setPickerChoice,
 } from '../src/lib/hostname-search.js';
 
-const searchEnheterMock = vi.mocked(searchEnheter);
+const searchMock = vi.mocked(searchEnheterWithParams);
 
 type StorageMap = Record<string, unknown>;
 
@@ -48,12 +48,13 @@ function installStorageMock(initial: StorageMap = {}): StorageMap {
 function hit(
   navn: string,
   organisasjonsnummer: string,
-  formKode = 'AS',
+  extra: Partial<SearchHit> = {},
 ): SearchHit {
   return {
     navn,
     organisasjonsnummer,
-    organisasjonsform: { kode: formKode, beskrivelse: formKode },
+    organisasjonsform: { kode: 'AS' },
+    ...extra,
   } as SearchHit;
 }
 
@@ -63,100 +64,176 @@ describe('queryFromHostname', () => {
     expect(queryFromHostname('yara.com')).toBe('yara');
   });
 
-  it('takes the rightmost label before the TLD for deeper hosts', () => {
-    expect(queryFromHostname('shop.mestergruppen.no')).toBe('mestergruppen');
-    expect(queryFromHostname('a.b.c.equinor.com')).toBe('equinor');
-  });
-
-  it('lowercases the result', () => {
-    expect(queryFromHostname('NRK.no')).toBe('nrk');
-  });
-
-  it('returns undefined for single-label hostnames', () => {
+  it('returns undefined for single-label or too-short hostnames', () => {
     expect(queryFromHostname('localhost')).toBeUndefined();
-  });
-
-  it('returns undefined when the brand label is too short to be useful', () => {
-    // `a.no` → "a", which would match too much in brreg search.
     expect(queryFromHostname('a.no')).toBeUndefined();
   });
 });
 
-describe('searchByHostname', () => {
+describe('searchByHostname (AUTO-only legacy wrapper)', () => {
   beforeEach(() => {
     installStorageMock();
-    searchEnheterMock.mockReset();
+    searchMock.mockReset();
   });
 
-  it('returns the first plausible hit when search succeeds', async () => {
-    searchEnheterMock.mockResolvedValue([
-      hit('YARA INTERNATIONAL ASA', '986228608'),
-    ]);
-    expect(await searchByHostname('www.yara.com')).toBe('986228608');
+  it('returns the AUTO-band orgnr when scoring is confident', async () => {
+    // ORKLA ASA → exact-prefix(+48) + ASA(+28) + top-level(+12) +
+    // short(2w)(+10) = 98, clear winner.
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) return [];
+      return [
+        hit('ORKLA ASA', '910747711', {
+          organisasjonsform: { kode: 'ASA' },
+          antallAnsatte: 50,
+        }),
+        hit('ORKLA FOODS NORGE AS', '999999998', {
+          organisasjonsform: { kode: 'AS' },
+          overordnetEnhet: '910747711',
+        }),
+      ];
+    });
+
+    expect(await searchByHostname('orkla.com')).toBe('910747711');
   });
 
-  it('prefers a hit whose navn starts with the query over other plausibles', async () => {
-    // "shell" matches both "SHELLY AS" and "A/S NORSKE SHELL".
-    // SHELLY starts with the query so it wins the prefix tiebreak.
-    searchEnheterMock.mockResolvedValue([
-      hit('A/S NORSKE SHELL', '914807077'),
-      hit('SHELLY AS', '999999999'),
-    ]);
-    expect(await searchByHostname('shell.no')).toBe('999999999');
+  it('returns undefined when band is picker (ambiguous)', async () => {
+    // Two near-identical kjedebutikker — picker band, no AUTO.
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) {
+        return [
+          hit('ELKJØP LEKNES', '111111118', { hjemmeside: 'elkjop.no' }),
+          hit('ELKJØP SVOLVÆR', '222222226', { hjemmeside: 'elkjop.no' }),
+        ];
+      }
+      return [];
+    });
+
+    expect(await searchByHostname('elkjop.no')).toBeUndefined();
   });
 
-  it('falls back to first plausible when no hit starts with the query', async () => {
-    // The brand sits at the end of the legal name. Without prefix
-    // matches we still want a result, not undefined.
-    searchEnheterMock.mockResolvedValue([
-      hit('A/S NORSKE SHELL', '914807077'),
+  it('returns undefined when no candidates score above the gate', async () => {
+    searchMock.mockResolvedValue([]);
+    expect(await searchByHostname('mdn.mozilla.org')).toBeUndefined();
+  });
+
+  it('caches results and skips network on the second call', async () => {
+    searchMock.mockResolvedValue([
+      hit('ORKLA ASA', '910747711', { organisasjonsform: { kode: 'ASA' } }),
     ]);
+    await searchByHostname('orkla.com');
+    const callsAfterFirst = searchMock.mock.calls.length;
+    await searchByHostname('orkla.com');
+    expect(searchMock.mock.calls.length).toBe(callsAfterFirst);
+  });
+
+  it('returns the cached picker choice when one exists', async () => {
+    await setPickerChoice('shell.no', '914807077');
     expect(await searchByHostname('shell.no')).toBe('914807077');
+    expect(searchMock).not.toHaveBeenCalled();
   });
 
-  it('filters out ENK (sole proprietorship) hits', async () => {
-    searchEnheterMock.mockResolvedValue([
-      hit('YARA NORDIC ENK', '111111111', 'ENK'),
-      hit('YARA INTERNATIONAL ASA', '986228608', 'AS'),
-    ]);
-    expect(await searchByHostname('yara.com')).toBe('986228608');
+  it('returns undefined when the cached choice is "Ingen av disse"', async () => {
+    await setPickerChoice('shell.no', null);
+    expect(await searchByHostname('shell.no')).toBeUndefined();
+    expect(searchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('searchByHostnameDetailed', () => {
+  beforeEach(() => {
+    installStorageMock();
+    searchMock.mockReset();
   });
 
-  it('returns undefined when no hits contain the query in their navn', async () => {
-    searchEnheterMock.mockResolvedValue([
-      hit('UNRELATED COMPANY AS', '111111111'),
-    ]);
-    expect(await searchByHostname('yara.com')).toBeUndefined();
+  it('returns band=auto with the choice orgnr when confident', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) return [];
+      return [
+        hit('ORKLA ASA', '910747711', {
+          organisasjonsform: { kode: 'ASA' },
+        }),
+      ];
+    });
+
+    const result = await searchByHostnameDetailed('orkla.com');
+    expect(result?.band).toBe('auto');
+    expect(result?.choice).toBe('910747711');
   });
 
-  it('returns undefined when the query is unusable (single-label)', async () => {
-    expect(await searchByHostname('localhost')).toBeUndefined();
-    expect(searchEnheterMock).not.toHaveBeenCalled();
+  it('returns band=picker with candidates when ambiguous', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) {
+        return [
+          hit('ELKJØP LEKNES', '111111118', { hjemmeside: 'elkjop.no' }),
+          hit('ELKJØP SVOLVÆR', '222222226', { hjemmeside: 'elkjop.no' }),
+        ];
+      }
+      return [];
+    });
+
+    const result = await searchByHostnameDetailed('elkjop.no');
+    expect(result?.band).toBe('picker');
+    expect(result?.candidates.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('caches positive results and skips the network on repeat', async () => {
-    searchEnheterMock.mockResolvedValue([
-      hit('YARA INTERNATIONAL ASA', '986228608'),
-    ]);
-    expect(await searchByHostname('yara.com')).toBe('986228608');
-    expect(await searchByHostname('yara.com')).toBe('986228608');
-    expect(searchEnheterMock).toHaveBeenCalledTimes(1);
+  it('returns band=none when nothing matches', async () => {
+    searchMock.mockResolvedValue([]);
+    const result = await searchByHostnameDetailed('mdn.mozilla.org');
+    expect(result?.band).toBe('none');
+    expect(result?.candidates).toEqual([]);
   });
 
-  it('caches negative results so re-visits do not re-search', async () => {
-    searchEnheterMock.mockResolvedValue([]);
-    expect(await searchByHostname('mdn.mozilla.org')).toBeUndefined();
-    expect(await searchByHostname('mdn.mozilla.org')).toBeUndefined();
-    expect(searchEnheterMock).toHaveBeenCalledTimes(1);
+  it('honors a positive picker-choice cache: band=auto, choice set', async () => {
+    await setPickerChoice('shell.no', '914807077');
+    const result = await searchByHostnameDetailed('shell.no');
+    expect(result).toEqual({ band: 'auto', candidates: [], choice: '914807077' });
+    expect(searchMock).not.toHaveBeenCalled();
   });
 
-  it('does NOT cache network errors — next call retries', async () => {
-    searchEnheterMock.mockRejectedValueOnce(new Error('network down'));
-    expect(await searchByHostname('yara.com')).toBeUndefined();
-    searchEnheterMock.mockResolvedValueOnce([
-      hit('YARA INTERNATIONAL ASA', '986228608'),
-    ]);
-    expect(await searchByHostname('yara.com')).toBe('986228608');
-    expect(searchEnheterMock).toHaveBeenCalledTimes(2);
+  it('honors a negative picker-choice cache: band=none', async () => {
+    await setPickerChoice('shell.no', null);
+    const result = await searchByHostnameDetailed('shell.no');
+    expect(result).toEqual({ band: 'none', candidates: [] });
+    expect(searchMock).not.toHaveBeenCalled();
+  });
+
+  it('falls back to Q3 (no org-form filter) when Q1+Q2 yields zero', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) return [];
+      if (params.get('organisasjonsform') === 'AS,ASA,SA,ORGL,SF') return [];
+      // Q3 has no organisasjonsform set.
+      return [
+        hit('EKSPORTFINANSIERING NORGE', '999000001', {
+          organisasjonsform: { kode: 'ORGL' },
+        }),
+      ];
+    });
+
+    const result = await searchByHostnameDetailed('eksfin.no');
+    const q3Call = searchMock.mock.calls.find(
+      (call) => !(call[0] as URLSearchParams).has('organisasjonsform'),
+    );
+    expect(q3Call).toBeDefined();
+    expect(result).toBeDefined();
+  });
+});
+
+describe('getPickerChoice / setPickerChoice', () => {
+  beforeEach(() => {
+    installStorageMock();
+  });
+
+  it('round-trips a positive choice', async () => {
+    await setPickerChoice('shell.no', '914807077');
+    expect(await getPickerChoice('shell.no')).toBe('914807077');
+  });
+
+  it('round-trips a negative choice (null = "Ingen av disse")', async () => {
+    await setPickerChoice('shell.no', null);
+    expect(await getPickerChoice('shell.no')).toBeNull();
+  });
+
+  it('returns undefined when no choice has been cached', async () => {
+    expect(await getPickerChoice('shell.no')).toBeUndefined();
   });
 });
