@@ -390,6 +390,7 @@ function setupRefresh(): void {
 async function doRefresh(currentOrgnrArg: string): Promise<void> {
   refreshBtn.disabled = true;
   refreshBtn.setAttribute('aria-busy', 'true');
+  const startedAt = performance.now();
   try {
     const hasTabs = await browser.permissions.contains({
       permissions: ['tabs'],
@@ -420,6 +421,14 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
     // method so the override button remains visible/hidden as before.
     await loadOrgnr(currentOrgnrArg, currentResolutionMethod);
   } finally {
+    // Ensure the spin animation is actually visible: on a cache hit
+    // the fetch can settle in <50ms, which would just flash. Hold
+    // aria-busy long enough to register one near-full rotation.
+    const minSpinMs = 500;
+    const elapsed = performance.now() - startedAt;
+    if (elapsed < minSpinMs) {
+      await new Promise((resolve) => setTimeout(resolve, minSpinMs - elapsed));
+    }
     refreshBtn.disabled = false;
     refreshBtn.removeAttribute('aria-busy');
   }
