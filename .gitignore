@@ -11,6 +11,7 @@ Thumbs.db
 
 .vscode/
 .idea/
+.claude/
 
 coverage/
 .vitest-cache/
