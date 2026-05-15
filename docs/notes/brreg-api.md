@@ -46,10 +46,12 @@ waste a session trying to re-discover the gap.
 ## Brreg name search drops periods
 
 `?navn=FINN.no` returns garbage — the search index normalises away
-punctuation. For domains with periods in the legal name, the curated
-`domains.ts` override is the only resolution path. Don't try to
-"fix" hostname-search to handle this by quoting or escaping; the API
-itself drops the dot internally.
+punctuation. There's no client-side workaround: quoting and escaping
+both fail because the API drops the dot internally. Hostnames whose
+legal name contains punctuation (FINN.no is the canonical case)
+therefore don't resolve via brreg; the sidebar's manual search box
+is the fallback. The extension does not carry a curated override
+table to paper over this — see CLAUDE.md § "No curated domain table".
 
 <!-- SECTION: docs-links -->
 ## Check the docs before curling

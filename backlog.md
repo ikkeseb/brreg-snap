@@ -22,13 +22,17 @@ the first manual smoke test:
   pre-rejection cache entry isn't served. Empty after filter falls
   back to the inline search above.
 
-Curated entries for **shell.no → 914807077** and **nho.no →
-955600436** added to `domains.ts` for the two specific hosts where
-brreg's own `hjemmeside` field assigns the wrong subsidiary (eiendom
-or pensjonskasse) to the parent's website.
-
 See `docs/notes/resolution.md` § reject-override and
 `docs/notes/cache.md` for the new keys.
+
+## Curated domain table removed — shipped 2026-05-15
+
+`src/lib/domains.ts` and its hand-maintained host → orgnr table are
+gone. Resolution is now pure brreg API: URL/title regex →
+hostname-search pipeline → manual search fallback. Hosts brreg can't
+disambiguate (FINN.no, sparebank1.no, etc.) simply don't auto-resolve
+and the sidebar's manual search covers the gap. See CLAUDE.md
+§ "No curated domain table".
 
 ## Hostname-resolution v2 (multi-query + scoring + picker) — shipped 2026-05-15
 

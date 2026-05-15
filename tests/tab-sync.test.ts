@@ -51,11 +51,6 @@ function hit(
 }
 
 describe('deriveSync', () => {
-  it('resolves orgnr from domain and returns hostname', () => {
-    const result = deriveSync('https://www.dnb.no/privat', 'DNB');
-    expect(result).toEqual({ orgnr: '984851006', host: 'www.dnb.no' });
-  });
-
   it('resolves orgnr from url path even when title is empty', () => {
     // brreg's own canonical orgnr appears in path; resolver picks it up
     const result = deriveSync('https://example.com/foo/950588063', '');
@@ -88,9 +83,12 @@ describe('deriveSyncAsync', () => {
     searchMock.mockReset();
   });
 
-  it('returns the sync result without hitting the network when domain is curated', async () => {
-    const result = await deriveSyncAsync('https://www.dnb.no/privat', 'DNB');
-    expect(result).toEqual({ orgnr: '984851006', host: 'www.dnb.no' });
+  it('returns the sync result without hitting the network when URL carries an orgnr', async () => {
+    const result = await deriveSyncAsync(
+      'https://example.com/foo/984851006',
+      'DNB',
+    );
+    expect(result).toEqual({ orgnr: '984851006', host: 'example.com' });
     expect(searchMock).not.toHaveBeenCalled();
   });
 

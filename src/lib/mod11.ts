@@ -1,7 +1,8 @@
 // Mod-11 check digit for Norwegian organisasjonsnummer.
 //
-// Lives in its own module so both orgnr.ts (validation) and domains.ts
-// (curator-table integrity) can import without forming a cycle.
+// Standalone module: consumed by orgnr.ts (URL/title resolution) and
+// details.ts (validating ?orgnr= URL params). Zero-dep keeps the
+// graph trivial — no risk of an import cycle when more callers land.
 
 const WEIGHTS = [3, 2, 7, 6, 5, 4, 3, 2] as const;
 

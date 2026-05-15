@@ -1,6 +1,6 @@
 # Resolution cascade
 
-Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`, `src/lib/domains.ts`,
+Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`,
 `src/lib/hostname-search.ts`.
 
 <!-- SECTION: cascade -->
@@ -10,28 +10,27 @@ Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`, `src/lib/domains.ts`,
 
 1. URL regex
 2. Title regex
-3. Domain table (`domainToOrgnr` from `domains.ts`)
 
-`resolveOrgnrAsync` runs the same cascade then falls back to a
+`resolveOrgnrAsync` runs the same sync cascade then falls back to a
 hostname-based brreg search (`searchByHostname` in
-`hostname-search.ts`). The domain override stays *before* the search
-on purpose — the search can't find FINN.no (brreg name search drops
-the dot) or sparebank1.no (legal entity name diverges from the
-brand), so manual entries take precedence.
+`hostname-search.ts`). There is no static domain → orgnr table —
+every resolution decision is a live brreg API call. Hosts brreg's
+data can't disambiguate (e.g. `finn.no`, whose legal name "FINN.no"
+loses its period in the search index) simply don't resolve, and the
+sidebar falls back to inline manual search.
 
 The regex iterates every 9-digit run via `matchAll` and accepts the
 first mod-11 valid candidate — needed because an upstream phone
 number or article id can shadow a real orgnr in the same string.
 
-<!-- SECTION: mod11-cycle -->
+<!-- SECTION: mod11-module -->
 ## Why `mod11.ts` is its own module
 
-`domains.ts` runs a module-load invariant that every table entry
-passes mod-11, which means it must import `isValidOrgnr`. `orgnr.ts`
-imports `domainToOrgnr` for the fallback cascade. If mod-11 lives in
-`orgnr.ts` directly, those modules cycle and the invariant crashes
-with "isValidOrgnr is not a function" at test-run time. Keep mod-11
-in its own zero-dependency module.
+`isValidOrgnr` is consumed by `orgnr.ts` (URL/title cascade) and
+`details.ts` (validating the `?orgnr=` URL param before fetching).
+Keeping it in a zero-dependency module means new callers can pull
+it in without dragging the rest of `orgnr.ts` along and without
+risking an import cycle.
 
 <!-- SECTION: sync-vs-async -->
 ## Sync vs async — when to call which
@@ -103,5 +102,5 @@ candidates (even when filtering leaves a single AUTO winner — the
 user just expressed doubt, the picker requires explicit confirmation).
 Empty after filtering → `showEmptyState` with inline manual search.
 
-URL-derived and curated-table orgnrs do not show the override —
-they're authoritative for the domain.
+URL-derived orgnrs (regex hit in path or title) do not show the
+override — they're authoritative for the domain.

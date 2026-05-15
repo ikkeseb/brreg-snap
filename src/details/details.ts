@@ -66,12 +66,12 @@ const rejectChoiceBtn = $('reject-choice') as HTMLButtonElement;
 let currentOrgnr: string | undefined;
 let currentSourceHost: string | undefined;
 // Why the current orgnr is on screen. Only host-resolved orgnrs are
-// overridable via the "Feil bedrift?" button — URL-derived or curated
-// orgnrs are authoritative for their domain.
+// overridable via the "Feil bedrift?" button — URL-derived orgnrs
+// (regex hit in path or title) are authoritative for their domain.
 type ResolutionMethod =
   | 'host-auto'
   | 'host-pick'
-  | 'curated-or-url'
+  | 'url'
   | 'manual'
   | 'sync-broadcast';
 let currentResolutionMethod: ResolutionMethod | undefined;
@@ -550,8 +550,8 @@ interface TabContext {
   host?: string;
   pickerCandidates?: SearchHit[];
   // Why we landed on this orgnr — drives whether the "Feil bedrift?"
-  // override is offered. Sync (URL/curated) is authoritative; host-auto
-  // is the only one the user can dispute via this code path.
+  // override is offered. Sync (URL/title regex) is authoritative;
+  // host-auto is the only one the user can dispute via this code path.
   method?: ResolutionMethod;
 }
 
@@ -581,10 +581,10 @@ async function resolveFromActiveTab(): Promise<TabContext> {
         /* invalid url — leave host undefined */
       }
     }
-    // Sync cascade first — fast, no network. Covers URL/title regex
-    // and the curated domains table.
+    // Sync cascade first — fast, no network. Covers URL and title
+    // regex only.
     const sync = resolveOrgnr({ url, title });
-    if (sync) return { orgnr: sync, host, method: 'curated-or-url' };
+    if (sync) return { orgnr: sync, host, method: 'url' };
     if (!host) return { host };
     // Sync miss → hostname-based brreg search with band awareness.
     const detailed = await searchByHostnameDetailed(host);
@@ -645,10 +645,10 @@ async function init(): Promise<void> {
   setSourceHost(fromTab.host);
   // fromTab.orgnr was set by resolveFromActiveTab and carries a
   // method; an orgnr inherited only from ?orgnr= in the URL has no
-  // tab-resolution context and is treated as 'curated-or-url' so the
-  // override button stays hidden (we don't know if the param
-  // originated from a host-resolution).
-  await loadOrgnr(orgnr, fromTab.orgnr ? fromTab.method : 'curated-or-url');
+  // tab-resolution context and is treated as 'url' so the override
+  // button stays hidden (we don't know if the param originated from
+  // a host-resolution).
+  await loadOrgnr(orgnr, fromTab.orgnr ? fromTab.method : 'url');
 }
 
 interface SyncMessage {
@@ -705,7 +705,7 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
   window.history.replaceState(null, '', url.toString());
   // Sync messages from the popup don't carry the original
   // resolution method. Hide the override button rather than risk
-  // exposing it on a curated/URL pick the user can't actually
+  // exposing it on a URL-derived pick the user can't actually
   // override.
   void loadOrgnr(msg.orgnr, 'sync-broadcast');
 });

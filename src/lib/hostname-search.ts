@@ -1,5 +1,5 @@
 // Hostname → brreg resolution. Last tier of the resolve cascade,
-// after URL regex / title regex / curated domain override all miss.
+// after URL regex and title regex both miss.
 //
 // Runs three parallel brreg queries (hjemmeside, navn FORTLOEPENDE
 // with org-form filter, fallback navn without filter), aggregates +

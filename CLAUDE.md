@@ -33,7 +33,7 @@ note before reading the source file.
 
 | Concern                                       | Source                          | Note                              |
 | --------------------------------------------- | ------------------------------- | --------------------------------- |
-| Resolution cascade, mod-11 cycle, sync↔async, scoring bands, picker-choice cache | `src/lib/orgnr.ts`, `mod11.ts`, `domains.ts`, `hostname-search.ts`, `hostname-score.ts` | `docs/notes/resolution.md`        |
+| Resolution cascade, sync↔async, scoring bands, picker-choice cache | `src/lib/orgnr.ts`, `mod11.ts`, `hostname-search.ts`, `hostname-score.ts` | `docs/notes/resolution.md`        |
 | 24h cache, race guards (`searchRunId`, `loadRunId`) | `src/lib/brreg.ts`, `popup.ts`, `details.ts` | `docs/notes/cache.md`             |
 | Sidebar sync (`sendMessage` vs `setPanel`, `no-match`) | `src/details/details.ts`, `popup/popup.ts`, `background/background.ts` | `docs/notes/sidebar-sync.md`      |
 | Permissions: `activeTab` limits, runtime `tabs` opt-in, gesture-stack rules | `manifest.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts` | `docs/notes/permissions-model.md` |
@@ -48,21 +48,22 @@ grep -n 'SECTION: regnskap-500-unsupported-plan' docs/notes/brreg-api.md
 # Or just read the topic file end-to-end — they're short.
 ```
 
-## Curator discipline for `src/lib/domains.ts`
+## No curated domain table — pure brreg API
 
-mod-11 validity is necessary but **not sufficient** — an orgnr can
-pass mod-11 and still point at the wrong entity (caught in audit:
-`sparebank1.no → 975966453` resolved to "KREDITTBANKEN ASA"). When
-adding entries, always:
+The extension resolves orgnrs only via URL/title regex and live
+brreg lookups (`searchByHostname`'s multi-query pipeline with
+3-band scoring). A static hostname → orgnr map used to live in
+`src/lib/domains.ts`; it was removed because mod-11 validity is
+**not** semantic correctness (caught in audit:
+`sparebank1.no → 975966453` resolved to "KREDITTBANKEN ASA") and
+hand-curation is a maintenance liability the product doesn't need.
 
-1. Verify via `GET https://data.brreg.no/enhetsregisteret/api/enheter/<orgnr>`
-2. Confirm `navn` matches the company that owns the domain
-3. Brreg's name search drops periods — `?navn=FINN.no` returns
-   garbage. For domains with periods in the legal name, fall back
-   to proff.no or manual register lookup.
-
-The module-load invariant in `domains.ts` catches checksum typos.
-Semantic correctness is on the curator.
+Hosts brreg's own data can't disambiguate (e.g. `finn.no` — the
+search index drops periods, so `?navn=FINN.no` returns garbage)
+simply don't resolve. That's accepted — the sidebar's inline manual
+search covers the gap and the user stays in control. Do **not**
+re-introduce a curated table for "just the hard cases". Zero
+curation is the principle, not a budget.
 
 ## Security constraints (non-negotiable)
 

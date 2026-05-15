@@ -109,20 +109,12 @@ describe('resolveOrgnr', () => {
     expect(result).toBe('982463718');
   });
 
-  it('falls back to domain table when URL has no orgnr', () => {
+  it('returns undefined when neither URL nor title carry an orgnr', () => {
     const result = resolveOrgnr({
       url: 'https://www.telenor.no/privat',
       title: 'Telenor',
     });
-    expect(result).toBe('982463718');
-  });
-
-  it('handles subdomains via parent-domain lookup', () => {
-    const result = resolveOrgnr({
-      url: 'https://shop.telenor.no/abonnement',
-      title: '',
-    });
-    expect(result).toBe('982463718');
+    expect(result).toBeUndefined();
   });
 
   it('returns undefined for unknown domain without orgnr in text', () => {
@@ -148,15 +140,6 @@ describe('resolveOrgnrAsync', () => {
   it('short-circuits to the sync result and skips search when URL has an orgnr', async () => {
     const result = await resolveOrgnrAsync({
       url: 'https://example.com/about/982463718',
-      title: '',
-    });
-    expect(result).toBe('982463718');
-    expect(searchMock).not.toHaveBeenCalled();
-  });
-
-  it('short-circuits to the sync result on a curated domain', async () => {
-    const result = await resolveOrgnrAsync({
-      url: 'https://www.telenor.no/privat',
       title: '',
     });
     expect(result).toBe('982463718');

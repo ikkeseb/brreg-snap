@@ -63,8 +63,6 @@ When you click the toolbar icon:
 1. Popup opens and reads the current tab's URL + title (`activeTab`).
 2. Extract an organisation number using:
    - **Org-nr regex** — 9-digit pattern in URL path/query or title
-   - **Domain → orgnr table** — curated list of common Norwegian
-     companies (`src/lib/domains.ts`)
    - **Hostname → brreg search** — multi-query pipeline (hjemmeside
      field + Nordic-folded name search) with confidence scoring
      (`src/lib/hostname-search.ts`, `src/lib/hostname-score.ts`).
@@ -98,11 +96,10 @@ src/
     auto-sync-settings.ts     storage.local persistence for the toggle
     brreg.ts                  data.brreg.no API client
     copy-orgnr.ts             click-to-copy helper for orgnr digits
-    domains.ts                domain → orgnr lookup table
     format.ts                 display formatters (addresses, etc.)
     hostname-score.ts         pure scoring + 3-band decision for hostname matches
     hostname-search.ts        multi-query brreg pipeline + picker-choice cache
-    mod11.ts                  mod-11 checksum (own module to break an ESM cycle)
+    mod11.ts                  mod-11 checksum (zero-dep, shared by orgnr.ts and details.ts)
     orgnr.ts                  URL/title → orgnr extraction
     roller.ts                 board-role normalisation
     tab-sync.ts               {type:'sync', orgnr, host} broadcast helper

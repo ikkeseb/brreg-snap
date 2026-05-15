@@ -1,4 +1,3 @@
-import { domainToOrgnr } from './domains.js';
 import { searchByHostname } from './hostname-search.js';
 import { isValidOrgnr } from './mod11.js';
 
@@ -37,26 +36,16 @@ export function resolveOrgnr(ctx: ResolveContext): string | undefined {
   const fromTitle = extractOrgnrFromText(ctx.title);
   if (fromTitle) return fromTitle;
 
-  const hostname = hostnameFrom(ctx.url);
-  if (hostname) {
-    const fromDomain = domainToOrgnr(hostname);
-    if (fromDomain) return fromDomain;
-  }
-
   return undefined;
 }
 
-// Async variant that adds a final hostname-based brreg search after
-// the sync cascade misses. The domain override stays *before* search
-// on purpose — search can't find FINN.no (brreg name search drops the
-// dot) or sparebank1.no (brand ≠ legal name), so manual entries take
-// precedence.
-//
-// Callers that run inside a user-gesture stack (context menu →
-// sidebarAction.open, click → permissions.request) must NOT await on
-// this — the first await consumes the activation token and Firefox
-// blocks the next browser API call. Those callers sync-resolve first,
-// then run this on a detached promise for the broadcast.
+// Async variant that adds a hostname-based brreg search after the
+// sync cascade misses. Callers that run inside a user-gesture stack
+// (context menu → sidebarAction.open, click → permissions.request)
+// must NOT await on this — the first await consumes the activation
+// token and Firefox blocks the next browser API call. Those callers
+// sync-resolve first, then run this on a detached promise for the
+// broadcast.
 export async function resolveOrgnrAsync(
   ctx: ResolveContext,
 ): Promise<string | undefined> {
