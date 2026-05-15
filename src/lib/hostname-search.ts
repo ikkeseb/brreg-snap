@@ -27,6 +27,7 @@ import type { SearchHit } from '../types/brreg.js';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const KEY_PREFIX = 'hostname:';
 const CHOICE_KEY_PREFIX = 'picker-choice:';
+const REJECTED_KEY_PREFIX = 'rejected:';
 const MAX_CANDIDATES_IN_CACHE = 4;
 
 export type HostnameResult =
@@ -88,6 +89,39 @@ export async function setPickerChoice(
   await cacheSet(`${CHOICE_KEY_PREFIX}${host}`, value);
 }
 
+// Rejected orgnrs the user said "stemmer ikke" on for this host. Kept
+// separate from picker-choice so the latter stays a simple
+// string|null. The pipeline filters these out before scoring, and the
+// band cache key folds in the set so a fresh rejection doesn't serve
+// a stale pre-rejection result.
+export async function getRejectedChoices(host: string): Promise<string[]> {
+  return (
+    (await cacheGet<string[]>(`${REJECTED_KEY_PREFIX}${host}`)) ?? []
+  );
+}
+
+export async function addRejectedChoice(
+  host: string,
+  orgnr: string,
+): Promise<void> {
+  const current = await getRejectedChoices(host);
+  if (!current.includes(orgnr)) {
+    await cacheSet(`${REJECTED_KEY_PREFIX}${host}`, [...current, orgnr]);
+  }
+  // If a positive picker-choice equals this orgnr it would otherwise
+  // keep short-circuiting all future resolutions to the rejected
+  // entity — drop it so the next call re-runs the pipeline with the
+  // rejection in effect.
+  const choice = await getPickerChoice(host);
+  if (choice === orgnr) {
+    try {
+      await browser.storage.session.remove(`${CHOICE_KEY_PREFIX}${host}`);
+    } catch {
+      /* best-effort — TTL will sweep it eventually */
+    }
+  }
+}
+
 // Pull the brandable label out of a hostname for use as a search
 // query. Re-exported from hostname-score so existing callers
 // (tests, etc.) don't need a different import.
@@ -141,6 +175,7 @@ function dedupeByOrgnr(hits: SearchHit[]): SearchHit[] {
 async function runPipeline(
   host: string,
   label: string,
+  rejected: string[] = [],
 ): Promise<HostnameResult> {
   const [byHj, byNavn] = await Promise.all([
     queryByHjemmeside(host),
@@ -154,6 +189,13 @@ async function runPipeline(
   // re-adding the FLI/ENK noise we filtered out otherwise.
   if (candidates.length === 0) {
     candidates = dedupeByOrgnr(await queryByNavn(label, false));
+  }
+
+  if (rejected.length > 0) {
+    const rejSet = new Set(rejected);
+    candidates = candidates.filter(
+      (c) => !rejSet.has(c.organisasjonsnummer),
+    );
   }
 
   if (candidates.length === 0) {
@@ -185,25 +227,34 @@ async function runPipeline(
   return { band: 'none', candidates: [] };
 }
 
+function bandCacheKey(host: string, rejected: string[]): string {
+  if (rejected.length === 0) return `${KEY_PREFIX}${host}`;
+  // Sort so two callers passing the same set in different orders hit
+  // the same cache entry. `|` is safe — orgnrs are 9 digits.
+  const sorted = [...rejected].sort().join('|');
+  return `${KEY_PREFIX}${host}:rej:${sorted}`;
+}
+
 // Internal: resolve via cache + pipeline. Returns the rich result; the
 // public wrappers below adapt it to their own return shapes.
 async function resolveInternal(
   hostname: string,
+  rejected: string[] = [],
 ): Promise<HostnameResult | undefined> {
   const label = queryFromHostname(hostname);
   if (!label) {
     const empty: HostnameResult = { band: 'none', candidates: [] };
-    await cacheSet(`${KEY_PREFIX}${hostname}`, empty);
+    await cacheSet(bandCacheKey(hostname, rejected), empty);
     return empty;
   }
 
-  const cacheKey = `${KEY_PREFIX}${hostname}`;
+  const cacheKey = bandCacheKey(hostname, rejected);
   const cached = await cacheGet<HostnameResult>(cacheKey);
   if (cached) return cached;
 
   let result: HostnameResult;
   try {
-    result = await runPipeline(hostname, label);
+    result = await runPipeline(hostname, label, rejected);
   } catch {
     // Network glitch — don't cache, next visit retries. The popup /
     // sidebar already handle undefined gracefully.
@@ -226,7 +277,8 @@ export async function searchByHostname(
     // orgnr; negative choice (null) → no match.
     return choice ?? undefined;
   }
-  const result = await resolveInternal(hostname);
+  const rejected = await getRejectedChoices(hostname);
+  const result = await resolveInternal(hostname, rejected);
   if (!result) return undefined;
   return result.band === 'auto' ? result.orgnr : undefined;
 }
@@ -243,7 +295,8 @@ export async function searchByHostnameDetailed(
     }
     return { band: 'auto', candidates: [], choice };
   }
-  const result = await resolveInternal(hostname);
+  const rejected = await getRejectedChoices(hostname);
+  const result = await resolveInternal(hostname, rejected);
   if (!result) return undefined;
   if (result.band === 'auto') {
     return {

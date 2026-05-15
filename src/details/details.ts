@@ -11,6 +11,7 @@ import {
 import { buildOrgnrCopyButton, renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress, formatNok, formatRelativeTime } from '../lib/format.js';
 import {
+  addRejectedChoice,
   searchByHostnameDetailed,
   setPickerChoice,
 } from '../lib/hostname-search.js';
@@ -60,14 +61,27 @@ const emptyStateEl = $('empty-state');
 const emptyMessageEl = $('empty-message');
 const manualQueryEl = $('manual-query') as HTMLInputElement;
 const manualResultsEl = $('manual-results') as HTMLUListElement;
+const resolutionActionsEl = $('resolution-actions');
+const rejectChoiceBtn = $('reject-choice') as HTMLButtonElement;
 let currentOrgnr: string | undefined;
 let currentSourceHost: string | undefined;
+// Why the current orgnr is on screen. Only host-resolved orgnrs are
+// overridable via the "Feil bedrift?" button — URL-derived or curated
+// orgnrs are authoritative for their domain.
+type ResolutionMethod =
+  | 'host-auto'
+  | 'host-pick'
+  | 'curated-or-url'
+  | 'manual'
+  | 'sync-broadcast';
+let currentResolutionMethod: ResolutionMethod | undefined;
 let lastUpdatedAt: number | undefined;
 let updatedTimerId: number | undefined;
 
 setupTabs();
 setupRefresh();
 setupManualSearch();
+setupRejectChoice();
 void setupAutoSyncToggle();
 
 function $(id: string): HTMLElement {
@@ -183,7 +197,7 @@ async function handlePickerChoice(
   const url = new URL(window.location.href);
   url.searchParams.set('orgnr', orgnr);
   window.history.replaceState(null, '', url.toString());
-  await loadOrgnr(orgnr);
+  await loadOrgnr(orgnr, 'host-pick');
 }
 
 async function handlePickerNone(host: string): Promise<void> {
@@ -195,6 +209,40 @@ pickerNoneBtn.addEventListener('click', () => {
   if (!currentSourceHost) return;
   void handlePickerNone(currentSourceHost);
 });
+
+function setupRejectChoice(): void {
+  rejectChoiceBtn.addEventListener('click', () => {
+    if (rejectChoiceBtn.disabled) return;
+    void handleRejectChoice();
+  });
+}
+
+async function handleRejectChoice(): Promise<void> {
+  const host = currentSourceHost;
+  const orgnr = currentOrgnr;
+  if (!host || !orgnr) return;
+  rejectChoiceBtn.disabled = true;
+  try {
+    await addRejectedChoice(host, orgnr);
+    const detailed = await searchByHostnameDetailed(host);
+    if (detailed && detailed.candidates.length > 0) {
+      // Always show picker (even if a single candidate now wins
+      // band='auto') — the user just expressed doubt; let them confirm.
+      showPicker(host, detailed.candidates);
+      return;
+    }
+    showEmptyState(host);
+  } finally {
+    rejectChoiceBtn.disabled = false;
+  }
+}
+
+function updateRejectButtonVisibility(): void {
+  const overridable =
+    currentResolutionMethod === 'host-auto' ||
+    currentResolutionMethod === 'host-pick';
+  resolutionActionsEl.hidden = !(overridable && currentSourceHost);
+}
 
 // Manual search inside the empty state. Mirrors popup's runSearch:
 // 250ms debounce, monotonic runId so out-of-order responses drop, min
@@ -239,7 +287,7 @@ async function runManualSearch(query: string): Promise<void> {
         const url = new URL(window.location.href);
         url.searchParams.set('orgnr', item.organisasjonsnummer);
         window.history.replaceState(null, '', url.toString());
-        void loadOrgnr(item.organisasjonsnummer);
+        void loadOrgnr(item.organisasjonsnummer, 'manual');
       };
       li.addEventListener('click', select);
       li.addEventListener('keydown', (ev) => {
@@ -255,12 +303,16 @@ async function runManualSearch(query: string): Promise<void> {
 
 let loadRunId = 0;
 
-async function loadOrgnr(orgnr: string): Promise<void> {
+async function loadOrgnr(
+  orgnr: string,
+  method?: ResolutionMethod,
+): Promise<void> {
   // Monotonic guard — if the popup pushes a second sync while the
   // first is still in flight, the older fetches must not overwrite
   // the newer ones when they land out of order.
   const myRunId = ++loadRunId;
   currentOrgnr = orgnr;
+  if (method !== undefined) currentResolutionMethod = method;
 
   brregLink.href = `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`;
 
@@ -286,6 +338,7 @@ async function loadOrgnr(orgnr: string): Promise<void> {
     renderUnderenheter(underenheter);
     renderNokkeltall(regnskap);
     setState('result');
+    updateRejectButtonVisibility();
     markUpdated();
   } catch (err) {
     if (myRunId !== loadRunId) return;
@@ -334,7 +387,7 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
         url.searchParams.set('orgnr', fromTab.orgnr);
         window.history.replaceState(null, '', url.toString());
         await invalidateCache(fromTab.orgnr);
-        await loadOrgnr(fromTab.orgnr);
+        await loadOrgnr(fromTab.orgnr, fromTab.method);
         return;
       }
       if (fromTab.pickerCandidates && fromTab.host) {
@@ -348,7 +401,9 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
     }
     if (!currentOrgnrArg) return;
     await invalidateCache(currentOrgnrArg);
-    await loadOrgnr(currentOrgnrArg);
+    // Refresh of an existing orgnr — keep its current resolution
+    // method so the override button remains visible/hidden as before.
+    await loadOrgnr(currentOrgnrArg, currentResolutionMethod);
   } finally {
     refreshBtn.disabled = false;
   }
@@ -494,6 +549,10 @@ interface TabContext {
   orgnr?: string;
   host?: string;
   pickerCandidates?: SearchHit[];
+  // Why we landed on this orgnr — drives whether the "Feil bedrift?"
+  // override is offered. Sync (URL/curated) is authoritative; host-auto
+  // is the only one the user can dispute via this code path.
+  method?: ResolutionMethod;
 }
 
 async function resolveFromActiveTab(): Promise<TabContext> {
@@ -525,13 +584,18 @@ async function resolveFromActiveTab(): Promise<TabContext> {
     // Sync cascade first — fast, no network. Covers URL/title regex
     // and the curated domains table.
     const sync = resolveOrgnr({ url, title });
-    if (sync) return { orgnr: sync, host };
+    if (sync) return { orgnr: sync, host, method: 'curated-or-url' };
     if (!host) return { host };
     // Sync miss → hostname-based brreg search with band awareness.
     const detailed = await searchByHostnameDetailed(host);
     if (!detailed) return { host };
     if (detailed.band === 'auto') {
-      return { orgnr: detailed.choice, host };
+      // detailed.choice may have been written by an earlier picker
+      // pick (positive picker-choice short-circuit) — both deserve
+      // the override button, so distinguish via candidates.
+      const method: ResolutionMethod =
+        detailed.candidates.length === 0 ? 'host-pick' : 'host-auto';
+      return { orgnr: detailed.choice, host, method };
     }
     if (detailed.band === 'picker') {
       return { host, pickerCandidates: detailed.candidates };
@@ -579,7 +643,12 @@ async function init(): Promise<void> {
     window.history.replaceState(null, '', url.toString());
   }
   setSourceHost(fromTab.host);
-  await loadOrgnr(orgnr);
+  // fromTab.orgnr was set by resolveFromActiveTab and carries a
+  // method; an orgnr inherited only from ?orgnr= in the URL has no
+  // tab-resolution context and is treated as 'curated-or-url' so the
+  // override button stays hidden (we don't know if the param
+  // originated from a host-resolution).
+  await loadOrgnr(orgnr, fromTab.orgnr ? fromTab.method : 'curated-or-url');
 }
 
 interface SyncMessage {
@@ -634,7 +703,11 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
   const url = new URL(window.location.href);
   url.searchParams.set('orgnr', msg.orgnr);
   window.history.replaceState(null, '', url.toString());
-  void loadOrgnr(msg.orgnr);
+  // Sync messages from the popup don't carry the original
+  // resolution method. Hide the override button rather than risk
+  // exposing it on a curated/URL pick the user can't actually
+  // override.
+  void loadOrgnr(msg.orgnr, 'sync-broadcast');
 });
 
 async function handleNoMatchBroadcast(
@@ -659,7 +732,9 @@ async function handleNoMatchBroadcast(
     const url = new URL(window.location.href);
     url.searchParams.set('orgnr', detailed.choice);
     window.history.replaceState(null, '', url.toString());
-    await loadOrgnr(detailed.choice);
+    const method: ResolutionMethod =
+      detailed.candidates.length === 0 ? 'host-pick' : 'host-auto';
+    await loadOrgnr(detailed.choice, method);
     return;
   }
   showEmptyState(host);

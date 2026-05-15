@@ -82,3 +82,26 @@ the network — `searchByHostnameDetailed` returns `{band:'auto',
 candidates:[], choice}`. `setPickerChoice(host, null)` ("Ingen av
 disse") caches a negative choice that returns `{band:'none'}` on the
 next visit. Clears with the existing `storage.session` lifetime.
+
+<!-- SECTION: reject-override -->
+## Reject override (`Feil bedrift?`)
+
+The sidebar shows a "Feil bedrift? Vis alternativer" link on the
+result panel whenever the current orgnr was resolved by hostname
+search (`host-auto` or `host-pick` resolution method). Clicking it
+calls `addRejectedChoice(host, orgnr)` which:
+
+1. Appends the orgnr to `rejected:<host>` (24h TTL).
+2. Clears `picker-choice:<host>` if it equals the rejected orgnr.
+
+The next `searchByHostnameDetailed` reads the rejected list, passes
+it through `runPipeline` which filters rejected candidates before
+scoring, and stores the result under
+`hostname:<host>:rej:<sorted>` so the pre-rejection cache entry
+isn't served. The sidebar then shows the picker over the remaining
+candidates (even when filtering leaves a single AUTO winner — the
+user just expressed doubt, the picker requires explicit confirmation).
+Empty after filtering → `showEmptyState` with inline manual search.
+
+URL-derived and curated-table orgnrs do not show the override —
+they're authoritative for the domain.

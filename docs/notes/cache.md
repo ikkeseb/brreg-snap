@@ -27,9 +27,17 @@ refresh doesn't re-hit.
   over the band cache: if a choice is cached, both
   `searchByHostname` and `searchByHostnameDetailed` short-circuit
   before running the pipeline.
+- `rejected:<host>` → `string[]`. Orgnrs the user said "Feil bedrift?"
+  on for this host. The pipeline filters these out before scoring,
+  and the band cache key folds the sorted set in
+  (`hostname:<host>:rej:<a>|<b>`) so a fresh rejection doesn't serve
+  the stale pre-rejection result. `addRejectedChoice` also clears the
+  positive `picker-choice:<host>` if it equals the rejected orgnr —
+  otherwise the choice would keep short-circuiting future
+  resolutions back to the rejected entity.
 
-Both keys honor the same 24h TTL. Network errors still bypass caching
-so the next visit retries.
+All three keys honor the same 24h TTL. Network errors still bypass
+caching so the next visit retries.
 
 <!-- SECTION: search-runid -->
 ## Search debounce + race guard
