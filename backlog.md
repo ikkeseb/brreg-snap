@@ -100,6 +100,33 @@ path" and § Security constraints for the shipped contract.
   adding as a power-user follow-up — handler logic from the context
   menu and the auto-sync toggle is reusable.
 
+- **Domain-match signal in hostname scoring.** Brand-only hostnames
+  where the brand isn't in the legal name fall through the AUTO band
+  today — nrk.no matches `NRK BARNEHAGEN OSLO SA` and other navn-`nrk`
+  hits, but never `NORSK RIKSKRINGKASTING AS` whose registered email
+  is `dokumentarkivet@NRK.no`. brreg's API refuses an `epostadresse`
+  filter (`'epostadresse' er ikke et støttet parameter`, confirmed
+  2026-05-16), so a direct query is out. Two viable shapes:
+
+  **(a) Post-filter on search hits.** Run a broader name query, then
+  hit `/enheter/{orgnr}` per candidate to read `epostadresse` and
+  drop hits whose domain doesn't match. Adds one full-enhet fetch
+  per candidate — expensive when the candidate set is large.
+
+  **(b) Domain-match as a scoring boost (recommended).** Keep the
+  current pipeline, but in `hostname-score.ts` fetch full `Enhet`
+  for the top-N candidates (cached) and award a large boost when
+  `enhet.epostadresse` or `enhet.hjemmeside` ends with the same
+  registered-domain suffix as the hostname. Lets brand-only entities
+  surface without inventing new query stages, and integrates
+  cleanly with the existing AUTO / PICKER / NONE banding. Cost: a
+  few extra fetches on cold candidate sets, no extra cost on cached
+  ones.
+
+  Trade-off: fan-out grows with candidate count. Keep N small (top
+  4–6 by base score before applying the boost) and cache aggressively
+  to bound it.
+
 - **Title parsing for hostnames that collapse spaces.** rema1000.no
   → "REMA 1000", detnorsketeatret.no → "DET NORSKE TEATRET",
   lieoverflate.no → "LIE OVERFLATE" — the page `<title>` carries the
