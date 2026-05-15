@@ -6,10 +6,10 @@ import type { SearchHit } from '../src/types/brreg.js';
 // search fallback offline. Sync tests don't touch this path, so the
 // mock stays inert for them.
 vi.mock('../src/lib/brreg.js', () => ({
-  searchEnheter: vi.fn(),
+  searchEnheterWithParams: vi.fn(),
 }));
 
-import { searchEnheter } from '../src/lib/brreg.js';
+import { searchEnheterWithParams } from '../src/lib/brreg.js';
 import {
   extractOrgnrFromText,
   isValidOrgnr,
@@ -17,7 +17,7 @@ import {
   resolveOrgnrAsync,
 } from '../src/lib/orgnr.js';
 
-const searchEnheterMock = vi.mocked(searchEnheter);
+const searchMock = vi.mocked(searchEnheterWithParams);
 
 type StorageMap = Record<string, unknown>;
 
@@ -46,11 +46,15 @@ function installStorageMock(): void {
   };
 }
 
-function hit(navn: string, organisasjonsnummer: string): SearchHit {
+function hit(
+  navn: string,
+  organisasjonsnummer: string,
+  formKode = 'AS',
+): SearchHit {
   return {
     navn,
     organisasjonsnummer,
-    organisasjonsform: { kode: 'AS', beskrivelse: 'AS' },
+    organisasjonsform: { kode: formKode, beskrivelse: formKode },
   } as SearchHit;
 }
 
@@ -138,7 +142,7 @@ describe('resolveOrgnr', () => {
 describe('resolveOrgnrAsync', () => {
   beforeEach(() => {
     installStorageMock();
-    searchEnheterMock.mockReset();
+    searchMock.mockReset();
   });
 
   it('short-circuits to the sync result and skips search when URL has an orgnr', async () => {
@@ -147,7 +151,7 @@ describe('resolveOrgnrAsync', () => {
       title: '',
     });
     expect(result).toBe('982463718');
-    expect(searchEnheterMock).not.toHaveBeenCalled();
+    expect(searchMock).not.toHaveBeenCalled();
   });
 
   it('short-circuits to the sync result on a curated domain', async () => {
@@ -156,23 +160,25 @@ describe('resolveOrgnrAsync', () => {
       title: '',
     });
     expect(result).toBe('982463718');
-    expect(searchEnheterMock).not.toHaveBeenCalled();
+    expect(searchMock).not.toHaveBeenCalled();
   });
 
   it('falls back to hostname search when the sync cascade misses', async () => {
-    searchEnheterMock.mockResolvedValue([
-      hit('YARA INTERNATIONAL ASA', '986228608'),
+    searchMock.mockResolvedValue([
+      hit('YARA INTERNATIONAL ASA', '986228608', 'ASA'),
     ]);
     const result = await resolveOrgnrAsync({
       url: 'https://www.yara.com/about',
       title: 'Yara — global crop nutrition',
     });
     expect(result).toBe('986228608');
-    expect(searchEnheterMock).toHaveBeenCalledTimes(1);
+    // Pipeline issues multiple parallel queries (hjemmeside variants
+    // + navn variants); we don't pin the exact count.
+    expect(searchMock).toHaveBeenCalled();
   });
 
   it('returns undefined when both sync and search miss', async () => {
-    searchEnheterMock.mockResolvedValue([]);
+    searchMock.mockResolvedValue([]);
     const result = await resolveOrgnrAsync({
       url: 'https://random-unknown-blog.example/',
       title: 'Random',
@@ -183,6 +189,6 @@ describe('resolveOrgnrAsync', () => {
   it('returns undefined for malformed URLs without hitting the network', async () => {
     const result = await resolveOrgnrAsync({ url: 'about:newtab', title: '' });
     expect(result).toBeUndefined();
-    expect(searchEnheterMock).not.toHaveBeenCalled();
+    expect(searchMock).not.toHaveBeenCalled();
   });
 });

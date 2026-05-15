@@ -1,36 +1,57 @@
-// Hostname → brreg search resolution. Last tier of the resolve cascade,
+// Hostname → brreg resolution. Last tier of the resolve cascade,
 // after URL regex / title regex / curated domain override all miss.
 //
-// Strips `www.` and the TLD segment to derive a query, hits the brreg
-// search endpoint, and picks the most plausible hit. Returns undefined
-// if nothing confidently matches — the caller then falls through to
-// "no match" / manual search UX.
+// Runs three parallel brreg queries (hjemmeside, navn FORTLOEPENDE
+// with org-form filter, fallback navn without filter), aggregates +
+// scores candidates via src/lib/hostname-score.ts, and picks one of
+// three outcomes:
 //
-// Caches per hostname in storage.session (24h) so re-visits don't churn
-// the API. Negative results are cached too, with a `null` marker, so
-// browsing back to e.g. mdn.mozilla.org doesn't re-search every time.
+//   - 'auto'   → confident match, resolves to a single orgnr
+//   - 'picker' → ambiguous, return top candidates for sidebar UI
+//   - 'none'   → no plausible match, surface manual-search UX
+//
+// Cached per hostname in storage.session (24h) so re-visits don't
+// churn the API. User picker choices cache separately under
+// `picker-choice:<host>` and win over any cached band.
 
-import { searchEnheter } from './brreg.js';
+import { searchEnheterWithParams } from './brreg.js';
+import {
+  decideBand,
+  generateNordicVariants,
+  hostnameLabel,
+  scoreCandidate,
+  type ResolutionBand,
+} from './hostname-score.js';
+import type { SearchHit } from '../types/brreg.js';
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const KEY_PREFIX = 'hostname:';
+const CHOICE_KEY_PREFIX = 'picker-choice:';
+const MAX_CANDIDATES_IN_CACHE = 4;
 
-// Organisasjonsformer that almost certainly aren't the entity behind a
-// company website. ENK = enkeltpersonforetak (sole proprietorship,
-// often a private individual's side gig); PERS = used internally for
-// physical persons. Filtering them out drops a lot of noise from
-// generic searches like "shell" → 30+ ENK hits before the AS appears.
-const NON_COMPANY_FORMS = new Set(['ENK', 'PERS']);
+export type HostnameResult =
+  | { band: 'auto'; orgnr: string; candidates: SearchHit[] }
+  | { band: 'picker'; candidates: SearchHit[] }
+  | { band: 'none'; candidates: [] };
 
-interface CacheEntry {
-  value: string | null;
+export interface DetailedResult {
+  band: ResolutionBand;
+  candidates: SearchHit[];
+  // Populated when the user has previously picked a candidate for
+  // this host. band is 'auto' in that case; sidebar loads `choice`
+  // directly. A cached negative choice ("Ingen av disse") becomes
+  // band='none' with `choice` undefined.
+  choice?: string;
+}
+
+interface CacheEntry<T> {
+  value: T;
   expiresAt: number;
 }
 
-async function cacheGet(host: string): Promise<string | null | undefined> {
-  const key = `${KEY_PREFIX}${host}`;
+async function cacheGet<T>(key: string): Promise<T | undefined> {
   const store = await browser.storage.session.get(key);
-  const entry = store[key] as CacheEntry | undefined;
+  const entry = store[key] as CacheEntry<T> | undefined;
   if (!entry) return undefined;
   if (entry.expiresAt < Date.now()) {
     try {
@@ -43,91 +64,196 @@ async function cacheGet(host: string): Promise<string | null | undefined> {
   return entry.value;
 }
 
-async function cacheSet(host: string, value: string | null): Promise<void> {
-  const key = `${KEY_PREFIX}${host}`;
-  const entry: CacheEntry = { value, expiresAt: Date.now() + CACHE_TTL_MS };
+async function cacheSet<T>(key: string, value: T): Promise<void> {
+  const entry: CacheEntry<T> = {
+    value,
+    expiresAt: Date.now() + CACHE_TTL_MS,
+  };
   await browser.storage.session.set({ [key]: entry });
 }
 
-// Pull the brandable part out of a hostname for use as a search query.
-// `www.yara.com` → `yara`, `shop.mestergruppen.no` → `mestergruppen`,
-// `nrk.no` → `nrk`. Strips `www.` and the final TLD segment, then takes
-// the rightmost remaining label (which is the registrable domain in
-// the common case — good enough; tweaking subdomain handling is a
-// future refinement). Returns undefined if the result is empty or
-// shorter than 2 chars (would match too much).
+// Public helpers for the sidebar to read/write the user's picker
+// choice. `value=null` represents "Ingen av disse" — a deliberate
+// negative answer, distinct from "no cache entry".
+export async function getPickerChoice(
+  host: string,
+): Promise<string | null | undefined> {
+  return cacheGet<string | null>(`${CHOICE_KEY_PREFIX}${host}`);
+}
+
+export async function setPickerChoice(
+  host: string,
+  value: string | null,
+): Promise<void> {
+  await cacheSet(`${CHOICE_KEY_PREFIX}${host}`, value);
+}
+
+// Pull the brandable label out of a hostname for use as a search
+// query. Re-exported from hostname-score so existing callers
+// (tests, etc.) don't need a different import.
 export function queryFromHostname(hostname: string): string | undefined {
-  const stripped = hostname.replace(/^www\./, '').toLowerCase();
-  const parts = stripped.split('.');
-  if (parts.length < 2) return undefined;
-  // Drop the TLD (last segment). For two-label domains this leaves
-  // a single label; for deeper hosts we keep the last label before
-  // the TLD as the brand candidate.
-  const base = parts[parts.length - 2];
-  if (!base || base.length < 2) return undefined;
-  return base;
+  return hostnameLabel(hostname);
 }
 
-function isPlausibleMatch(
-  hit: { navn: string; organisasjonsform?: { kode?: string } },
-  query: string,
-): boolean {
-  const form = hit.organisasjonsform?.kode;
-  if (form && NON_COMPANY_FORMS.has(form)) return false;
-  // Navn must contain the query as a substring, case-insensitive. A
-  // match where the query appears anywhere is sometimes wrong (e.g.
-  // "shell" matching "SHELLY AS") but the alternative — strict prefix
-  // match — drops legitimate hits like "A/S NORSKE SHELL" where the
-  // brand sits at the end of the legal name.
-  return hit.navn.toLowerCase().includes(query);
+async function queryByHjemmeside(host: string): Promise<SearchHit[]> {
+  const bare = host.replace(/^www\./i, '').toLowerCase();
+  const variants = [bare, `www.${bare}`];
+  const results = await Promise.all(
+    variants.map((v) => {
+      const params = new URLSearchParams();
+      params.set('hjemmeside', v);
+      params.set('size', '10');
+      return searchEnheterWithParams(params);
+    }),
+  );
+  return results.flat();
 }
 
-// Search brreg for the most plausible entity matching this hostname.
-// Returns the orgnr if exactly one hit looks right, or the first hit
-// where the brand sits at the start of the legal name (tightest
-// signal). Otherwise undefined — better to show the search UI than
-// auto-load a guess.
+async function queryByNavn(
+  label: string,
+  withFilter: boolean,
+): Promise<SearchHit[]> {
+  const variants = generateNordicVariants(label);
+  const results = await Promise.all(
+    variants.map((v) => {
+      const params = new URLSearchParams();
+      params.set('navn', v);
+      params.set('navnMetodeForSoek', 'FORTLOEPENDE');
+      params.set('size', '20');
+      if (withFilter) {
+        params.set('organisasjonsform', 'AS,ASA,SA,ORGL,SF');
+        params.set('sort', 'antallAnsatte,DESC');
+      }
+      return searchEnheterWithParams(params);
+    }),
+  );
+  return results.flat();
+}
+
+function dedupeByOrgnr(hits: SearchHit[]): SearchHit[] {
+  const seen = new Map<string, SearchHit>();
+  for (const h of hits) {
+    if (!seen.has(h.organisasjonsnummer)) seen.set(h.organisasjonsnummer, h);
+  }
+  return [...seen.values()];
+}
+
+async function runPipeline(
+  host: string,
+  label: string,
+): Promise<HostnameResult> {
+  const [byHj, byNavn] = await Promise.all([
+    queryByHjemmeside(host),
+    queryByNavn(label, true),
+  ]);
+
+  let candidates = dedupeByOrgnr([...byHj, ...byNavn]);
+
+  // Q3 fallback — drop the org-form filter only if Q1+Q2 yielded zero.
+  // Catches ORGL/SF entities like EKSPORTFINANSIERING NORGE without
+  // re-adding the FLI/ENK noise we filtered out otherwise.
+  if (candidates.length === 0) {
+    candidates = dedupeByOrgnr(await queryByNavn(label, false));
+  }
+
+  if (candidates.length === 0) {
+    return { band: 'none', candidates: [] };
+  }
+
+  const scored = candidates
+    .map((c) => ({ cand: c, ...scoreCandidate(c, label, host) }))
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  const top = scored[0];
+  const runnerUp = scored[1];
+  const band = decideBand(top?.score ?? 0, runnerUp?.score);
+
+  if (band === 'auto' && top) {
+    return {
+      band: 'auto',
+      orgnr: top.cand.organisasjonsnummer,
+      candidates: scored.slice(0, MAX_CANDIDATES_IN_CACHE).map((s) => s.cand),
+    };
+  }
+  if (band === 'picker') {
+    return {
+      band: 'picker',
+      candidates: scored.slice(0, MAX_CANDIDATES_IN_CACHE).map((s) => s.cand),
+    };
+  }
+  return { band: 'none', candidates: [] };
+}
+
+// Internal: resolve via cache + pipeline. Returns the rich result; the
+// public wrappers below adapt it to their own return shapes.
+async function resolveInternal(
+  hostname: string,
+): Promise<HostnameResult | undefined> {
+  const label = queryFromHostname(hostname);
+  if (!label) {
+    const empty: HostnameResult = { band: 'none', candidates: [] };
+    await cacheSet(`${KEY_PREFIX}${hostname}`, empty);
+    return empty;
+  }
+
+  const cacheKey = `${KEY_PREFIX}${hostname}`;
+  const cached = await cacheGet<HostnameResult>(cacheKey);
+  if (cached) return cached;
+
+  let result: HostnameResult;
+  try {
+    result = await runPipeline(hostname, label);
+  } catch {
+    // Network glitch — don't cache, next visit retries. The popup /
+    // sidebar already handle undefined gracefully.
+    return undefined;
+  }
+
+  await cacheSet(cacheKey, result);
+  return result;
+}
+
+// Backwards-compatible AUTO-only resolver. Used by the sync cascade
+// in src/lib/orgnr.ts and by the popup/background flows that only
+// want a confident orgnr or nothing.
 export async function searchByHostname(
   hostname: string,
 ): Promise<string | undefined> {
-  const cached = await cacheGet(hostname);
-  if (cached !== undefined) return cached ?? undefined;
-
-  const query = queryFromHostname(hostname);
-  if (!query) {
-    await cacheSet(hostname, null);
-    return undefined;
+  const choice = await getPickerChoice(hostname);
+  if (choice !== undefined) {
+    // User explicitly chose for this host. Positive choice → that
+    // orgnr; negative choice (null) → no match.
+    return choice ?? undefined;
   }
+  const result = await resolveInternal(hostname);
+  if (!result) return undefined;
+  return result.band === 'auto' ? result.orgnr : undefined;
+}
 
-  let hits;
-  try {
-    hits = await searchEnheter(query, 10);
-  } catch {
-    // Network error / API hiccup — don't cache, just bail. Next visit
-    // will retry. The popup/sidebar already handles undefined gracefully.
-    return undefined;
+// Picker-aware resolver. Returns the band + candidates so the sidebar
+// can render the picker UI directly.
+export async function searchByHostnameDetailed(
+  hostname: string,
+): Promise<DetailedResult | undefined> {
+  const choice = await getPickerChoice(hostname);
+  if (choice !== undefined) {
+    if (choice === null) {
+      return { band: 'none', candidates: [] };
+    }
+    return { band: 'auto', candidates: [], choice };
   }
-
-  const plausible = hits.filter((h) => isPlausibleMatch(h, query));
-  if (plausible.length === 0) {
-    await cacheSet(hostname, null);
-    return undefined;
+  const result = await resolveInternal(hostname);
+  if (!result) return undefined;
+  if (result.band === 'auto') {
+    return {
+      band: 'auto',
+      candidates: result.candidates,
+      choice: result.orgnr,
+    };
   }
-
-  // Prefer a hit whose navn *starts* with the query — that's the brand
-  // sitting at the head of the legal name, which is the strongest signal
-  // we can get without a curated table. Falls back to first plausible
-  // hit otherwise (e.g. "shell" → "A/S NORSKE SHELL"), but only if
-  // there's no competing prefix-match.
-  const prefixMatches = plausible.filter((h) =>
-    h.navn.toLowerCase().startsWith(query),
-  );
-  const picked = prefixMatches[0] ?? plausible[0];
-  if (!picked) {
-    await cacheSet(hostname, null);
-    return undefined;
+  if (result.band === 'picker') {
+    return { band: 'picker', candidates: result.candidates };
   }
-
-  await cacheSet(hostname, picked.organisasjonsnummer);
-  return picked.organisasjonsnummer;
+  return { band: 'none', candidates: [] };
 }
