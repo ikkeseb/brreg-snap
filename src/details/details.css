@@ -619,3 +619,92 @@ main[data-state='picker'] #result {
   border-color: var(--border-strong);
   outline: none;
 }
+
+/* --- empty state with manual search ---------------------------- */
+
+main[data-state='empty'] #status,
+main[data-state='empty'] #result,
+main[data-state='empty'] #picker {
+  display: none;
+}
+
+#empty-state {
+  padding: 16px 0 8px;
+}
+
+.empty-message {
+  margin: 0 0 14px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.manual-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.manual-search-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+#manual-query {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+#manual-query::placeholder {
+  color: var(--muted);
+}
+
+#manual-query:focus {
+  border-color: var(--accent);
+}
+
+.manual-results {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.manual-results li {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--fg);
+  transition: border-color 120ms ease;
+}
+
+.manual-results li:hover,
+.manual-results li:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.manual-results li.empty-result {
+  color: var(--muted);
+  font-style: italic;
+  cursor: default;
+  border-style: dashed;
+}
+
+.manual-results li.empty-result:hover {
+  border-color: var(--border);
+}

@@ -6,6 +6,7 @@ import {
   fetchRoller,
   fetchUnderenheter,
   invalidateCache,
+  searchEnheter,
 } from '../lib/brreg.js';
 import { buildOrgnrCopyButton, renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress, formatNok, formatRelativeTime } from '../lib/format.js';
@@ -55,6 +56,10 @@ const sourceHostEl = $('source-host');
 const pickerEl = $('picker');
 const pickerListEl = $('picker-list') as HTMLUListElement;
 const pickerNoneBtn = $('picker-none') as HTMLButtonElement;
+const emptyStateEl = $('empty-state');
+const emptyMessageEl = $('empty-message');
+const manualQueryEl = $('manual-query') as HTMLInputElement;
+const manualResultsEl = $('manual-results') as HTMLUListElement;
 let currentOrgnr: string | undefined;
 let currentSourceHost: string | undefined;
 let lastUpdatedAt: number | undefined;
@@ -62,6 +67,7 @@ let updatedTimerId: number | undefined;
 
 setupTabs();
 setupRefresh();
+setupManualSearch();
 void setupAutoSyncToggle();
 
 function $(id: string): HTMLElement {
@@ -84,12 +90,13 @@ function getNoMatchHostFromUrl(): string | undefined {
 }
 
 function setState(
-  state: 'loading' | 'result' | 'error' | 'picker',
+  state: 'loading' | 'result' | 'error' | 'picker' | 'empty',
 ): void {
   app.dataset.state = state;
-  statusEl.hidden = state === 'result' || state === 'picker';
+  statusEl.hidden = state !== 'loading' && state !== 'error';
   resultEl.hidden = state !== 'result';
   pickerEl.hidden = state !== 'picker';
+  emptyStateEl.hidden = state !== 'empty';
 }
 
 function showError(err: unknown): void {
@@ -99,7 +106,7 @@ function showError(err: unknown): void {
 }
 
 function showEmptyState(host?: string): void {
-  setState('error');
+  setState('empty');
   // Clear any orgnr left in the URL so a panel reload doesn't re-fetch
   // the stale company.
   const url = new URL(window.location.href);
@@ -107,9 +114,23 @@ function showEmptyState(host?: string): void {
   window.history.replaceState(null, '', url.toString());
   currentOrgnr = undefined;
   setSourceHost(host);
-  statusEl.textContent = host
-    ? `Ingen bedrift identifisert på ${host}. Klikk verktøylinjeikonet for å søke manuelt.`
-    : 'Klikk verktøylinjeikonet på en bedriftsside og velg «Detaljert visning» for å vise et selskap her.';
+  emptyMessageEl.textContent = host
+    ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
+    : 'Sidepanelet ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
+  resetManualSearch();
+  // Focus only when the panel is actually visible — focusing a hidden
+  // input is a no-op and steals the cursor needlessly otherwise.
+  manualQueryEl.focus();
+}
+
+function resetManualSearch(): void {
+  manualQueryEl.value = '';
+  manualResultsEl.innerHTML = '';
+  manualSearchRunId += 1;
+  if (manualSearchTimer) {
+    clearTimeout(manualSearchTimer);
+    manualSearchTimer = undefined;
+  }
 }
 
 function showPicker(host: string, candidates: SearchHit[]): void {
@@ -174,6 +195,63 @@ pickerNoneBtn.addEventListener('click', () => {
   if (!currentSourceHost) return;
   void handlePickerNone(currentSourceHost);
 });
+
+// Manual search inside the empty state. Mirrors popup's runSearch:
+// 250ms debounce, monotonic runId so out-of-order responses drop, min
+// 2 chars, capped to 100 before reaching brreg.
+let manualSearchTimer: ReturnType<typeof setTimeout> | undefined;
+let manualSearchRunId = 0;
+
+function setupManualSearch(): void {
+  manualQueryEl.addEventListener('input', () => {
+    if (manualSearchTimer) clearTimeout(manualSearchTimer);
+    manualSearchRunId += 1;
+    const value = manualQueryEl.value.trim();
+    if (value.length < 2) {
+      manualResultsEl.innerHTML = '';
+      return;
+    }
+    const capped = value.slice(0, 100);
+    manualSearchTimer = setTimeout(() => {
+      void runManualSearch(capped);
+    }, 250);
+  });
+}
+
+async function runManualSearch(query: string): Promise<void> {
+  const myRunId = ++manualSearchRunId;
+  try {
+    const results = await searchEnheter(query, 10);
+    if (myRunId !== manualSearchRunId) return;
+    manualResultsEl.innerHTML = '';
+    if (results.length === 0) {
+      const li = document.createElement('li');
+      li.className = 'empty-result';
+      li.textContent = 'Ingen treff.';
+      manualResultsEl.appendChild(li);
+      return;
+    }
+    for (const item of results) {
+      const li = document.createElement('li');
+      li.tabIndex = 0;
+      li.textContent = `${item.navn} (${item.organisasjonsnummer})`;
+      const select = (): void => {
+        const url = new URL(window.location.href);
+        url.searchParams.set('orgnr', item.organisasjonsnummer);
+        window.history.replaceState(null, '', url.toString());
+        void loadOrgnr(item.organisasjonsnummer);
+      };
+      li.addEventListener('click', select);
+      li.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter') select();
+      });
+      manualResultsEl.appendChild(li);
+    }
+  } catch (err) {
+    if (myRunId !== manualSearchRunId) return;
+    showError(err);
+  }
+}
 
 let loadRunId = 0;
 

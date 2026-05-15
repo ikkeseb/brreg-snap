@@ -29,6 +29,22 @@
         <p id="auto-sync-status" class="auto-sync-status" role="status" aria-live="polite" hidden></p>
       </header>
       <section id="status" aria-live="polite">Henter selskapsdata…</section>
+      <section id="empty-state" hidden>
+        <p id="empty-message" class="empty-message"></p>
+        <div class="manual-search">
+          <label for="manual-query" class="manual-search-label"
+            >Søk i Brønnøysundregistrene</label
+          >
+          <input
+            id="manual-query"
+            type="search"
+            autocomplete="off"
+            placeholder="Bedriftsnavn eller 9-sifret orgnr"
+            spellcheck="false"
+          />
+          <ul id="manual-results" class="manual-results"></ul>
+        </div>
+      </section>
       <section id="picker" hidden>
         <p class="picker-intro">Vi fant flere mulige treff på denne siden:</p>
         <ul id="picker-list" class="picker-list"></ul>
