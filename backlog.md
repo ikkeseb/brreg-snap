@@ -3,6 +3,33 @@
 Decisions and deferred work that doesn't fit in CLAUDE.md (which
 documents shipped state) or commit messages.
 
+## Sidebar inline search + Feil bedrift? override — shipped 2026-05-15
+
+Two follow-ups to the v2 picker, addressing real friction Seb hit on
+the first manual smoke test:
+
+- **Inline manual search in the sidebar empty state** replaces the
+  "Klikk verktøylinjeikonet for å søke manuelt" hint. The empty
+  state now hosts its own debounced search input + result list
+  mirroring the popup's runId pattern. Sidebar is self-sufficient
+  once open. New `data-state="empty"` distinct from `error` so
+  genuine fetch failures still display only the error text.
+- **"Feil bedrift? Vis alternativer"** override on host-resolved
+  results. Click writes the orgnr to `rejected:<host>` (24h, separate
+  from picker-choice), drops a positive picker-choice if it equals
+  the rejected orgnr, and re-runs the pipeline with rejected filtered
+  before scoring. Band cache key folds the sorted rejected set so the
+  pre-rejection cache entry isn't served. Empty after filter falls
+  back to the inline search above.
+
+Curated entries for **shell.no → 914807077** and **nho.no →
+955600436** added to `domains.ts` for the two specific hosts where
+brreg's own `hjemmeside` field assigns the wrong subsidiary (eiendom
+or pensjonskasse) to the parent's website.
+
+See `docs/notes/resolution.md` § reject-override and
+`docs/notes/cache.md` for the new keys.
+
 ## Hostname-resolution v2 (multi-query + scoring + picker) — shipped 2026-05-15
 
 Replaced the "first prefix match wins" hostname resolver with a
