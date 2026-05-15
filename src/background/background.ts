@@ -73,7 +73,9 @@ browser.menus.onClicked.addListener((info, tab) => {
   // opens on the right page even if the broadcast races the panel's
   // listener registration.
   const panelUrl = sync
-    ? browser.runtime.getURL(`details/details.html?orgnr=${sync.orgnr}`)
+    ? browser.runtime.getURL(
+        `details/details.html?orgnr=${encodeURIComponent(sync.orgnr)}`,
+      )
     : host
       ? browser.runtime.getURL(
           `details/details.html?nomatch=${encodeURIComponent(host)}`,
