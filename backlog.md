@@ -32,6 +32,48 @@ path" and § Security constraints for the shipped contract.
   adding as a power-user follow-up — handler logic from the context
   menu and the auto-sync toggle is reusable.
 
+- **Hostname → brreg search as primary resolution (BIG ONE).**
+  Current cascade is URL regex → title regex → curated `domains.ts`
+  table. The curated table has ~12 entries and was misread by a
+  previous Claude session as the intended primary path — it is not.
+  The point of the extension is *automatic* lookup against the brreg
+  API for whatever site the user is on. Right now Yara, Shell, Tomra,
+  Mestergruppen, Øyehaug, Finansavisen and the vast majority of
+  Norwegian company sites get no hit in the sidebar.
+
+  Redesign sketch:
+  1. URL regex (keep)
+  2. Title regex (keep)
+  3. Hostname-based brreg search: strip `www.`, drop the TLD, hit
+     `data.brreg.no/enhetsregisteret/api/enheter?navn=<query>&size=5`.
+     The `domains.ts` curated table becomes a *tiebreaker* for cases
+     where the brand name and legal-entity name diverge (FINN.no →
+     VEND MARKETPLACES AS, finn.no doesn't get a clean hit by `navn`
+     because the public search drops the dot).
+  4. If single confident match → load it. If multiple plausible
+     candidates → render a picker in the sidebar (same shape as the
+     popup's free-text search results) rather than the current dead
+     "no hit" state.
+  5. Domain-keyed cache so the same hostname doesn't re-hit search on
+     every tab switch (storage.session, 24h TTL — same pattern as
+     `fetchEnhet`).
+
+  Open design questions:
+  - How aggressive about disambiguation? Pure top-1 will be wrong
+    often; always-picker is annoying for unambiguous cases. Probably
+    "single result above a confidence bar → auto; otherwise picker."
+    Confidence bar TBD — name similarity, organisasjonsform filter
+    (skip ENK/personlig), antallAnsatte>0, etc.
+  - Domain table fate. Probably keep as a small hand-curated
+    override list (FINN.no class of problems) rather than delete.
+    Rename to make role clear — `domains-override.ts` or similar.
+  - Should the popup `showSearch` fallback go away too, replaced by
+    pre-populating the search box with the stripped hostname? Likely
+    yes — same logic, less surface.
+
+  No new permissions needed (`data.brreg.no` already in
+  `host_permissions`).
+
 ### Rejected / not pursued
 
 - **Iframe button inside the sidebar.** Falsified empirically — see
