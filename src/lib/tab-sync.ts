@@ -1,14 +1,24 @@
-import { resolveOrgnr } from './orgnr.js';
+import { resolveOrgnr, resolveOrgnrAsync } from './orgnr.js';
 
 export interface TabSync {
   orgnr: string;
   host: string | undefined;
 }
 
+function hostFrom(tabUrl: string): string | undefined {
+  try {
+    return new URL(tabUrl).hostname;
+  } catch {
+    return undefined;
+  }
+}
+
 // Pure derivation from raw tab fields → broadcast payload. Used by
-// the context menu, the sidebar refresh button, and the auto-sync
-// tab listeners. Side effects (browser.runtime.sendMessage,
-// browser.tabs.*) stay in their respective call sites.
+// the context menu (inside the user-gesture stack — see
+// permissions-model.md § gesture-stack), the sidebar refresh button,
+// and the auto-sync tab listeners. Side effects
+// (browser.runtime.sendMessage, browser.tabs.*) stay in their
+// respective call sites.
 export function deriveSync(
   tabUrl: string | undefined,
   tabTitle: string | undefined,
@@ -16,11 +26,22 @@ export function deriveSync(
   if (!tabUrl) return null;
   const orgnr = resolveOrgnr({ url: tabUrl, title: tabTitle ?? '' });
   if (!orgnr) return null;
-  let host: string | undefined;
-  try {
-    host = new URL(tabUrl).hostname;
-  } catch {
-    /* invalid url — leave host undefined */
-  }
-  return { orgnr, host };
+  return { orgnr, host: hostFrom(tabUrl) };
+}
+
+// Async variant — runs the full cascade including hostname-based
+// brreg search. Callers outside the user-gesture stack (popup init,
+// sidebar resolveFromActiveTab, background tab listeners) should
+// prefer this so e.g. yara.com gets resolved without a curated entry.
+export async function deriveSyncAsync(
+  tabUrl: string | undefined,
+  tabTitle: string | undefined,
+): Promise<TabSync | null> {
+  if (!tabUrl) return null;
+  const orgnr = await resolveOrgnrAsync({
+    url: tabUrl,
+    title: tabTitle ?? '',
+  });
+  if (!orgnr) return null;
+  return { orgnr, host: hostFrom(tabUrl) };
 }

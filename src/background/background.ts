@@ -8,7 +8,7 @@
 // because the service worker dies and respawns under MV3.
 
 import { AUTO_SYNC_STORAGE_KEY, getAutoSync } from '../lib/auto-sync-settings.js';
-import { deriveSync } from '../lib/tab-sync.js';
+import { deriveSync, deriveSyncAsync } from '../lib/tab-sync.js';
 
 const MENU_ID = 'show-in-brreg-sidebar';
 
@@ -63,13 +63,15 @@ function hostFromUrl(url: string | undefined): string | undefined {
 
 browser.menus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID) return;
+  // SYNC resolve only — setPanel + open must fire inside the user-
+  // gesture stack and the first await would consume the activation
+  // token. See docs/notes/permissions-model.md § gesture-stack.
   const sync = deriveSync(tab?.url, tab?.title);
   const host = hostFromUrl(tab?.url);
 
   // Encode the target state into the panel URL so a fresh sidebar
   // opens on the right page even if the broadcast races the panel's
-  // listener registration. setPanel + open both fire from this
-  // user-gesture stack — required for sidebarAction.open() to work.
+  // listener registration.
   const panelUrl = sync
     ? browser.runtime.getURL(`details/details.html?orgnr=${sync.orgnr}`)
     : host
@@ -82,12 +84,25 @@ browser.menus.onClicked.addListener((info, tab) => {
 
   // For the already-open case: setPanel doesn't reliably repaint a
   // visible sidebar in Firefox 115+, so broadcast a message that the
-  // live panel listens for and re-renders in place.
+  // live panel listens for and re-renders in place. Now safe to
+  // await — the gesture-stack work is done.
   if (sync) {
     void broadcastSync(sync.orgnr, sync.host);
-  } else {
-    void broadcastNoMatch(host);
+    return;
   }
+  // Sync miss: kick the async resolver (hostname-based brreg search).
+  // If it finds a match, broadcast sync — the sidebar's onMessage
+  // listener will swap from the no-match empty state to the company
+  // panel without a reload. If it also misses, broadcast no-match so
+  // an already-open sidebar clears stale state.
+  void (async () => {
+    const asyncSync = await deriveSyncAsync(tab?.url, tab?.title);
+    if (asyncSync) {
+      await broadcastSync(asyncSync.orgnr, asyncSync.host);
+      return;
+    }
+    await broadcastNoMatch(host);
+  })();
 });
 
 // --- auto-sync tab listeners --------------------------------------
@@ -97,7 +112,7 @@ async function handleActivated(
 ): Promise<void> {
   try {
     const tab = await browser.tabs.get(info.tabId);
-    const sync = deriveSync(tab.url, tab.title);
+    const sync = await deriveSyncAsync(tab.url, tab.title);
     if (sync) {
       await broadcastSync(sync.orgnr, sync.host);
       return;
@@ -108,21 +123,21 @@ async function handleActivated(
   }
 }
 
-function handleUpdated(
+async function handleUpdated(
   _tabId: number,
   changeInfo: browser.tabs._OnUpdatedChangeInfo,
   tab: browser.tabs.Tab,
-): void {
+): Promise<void> {
   // Only fire on URL transitions; title-only updates from media
   // playback or notification badges shouldn't churn the sidebar.
   if (!changeInfo.url) return;
   if (!tab.active) return;
-  const sync = deriveSync(tab.url, tab.title);
+  const sync = await deriveSyncAsync(tab.url, tab.title);
   if (sync) {
-    void broadcastSync(sync.orgnr, sync.host);
+    await broadcastSync(sync.orgnr, sync.host);
     return;
   }
-  void broadcastNoMatch(hostFromUrl(tab.url));
+  await broadcastNoMatch(hostFromUrl(tab.url));
 }
 
 // Sync wrappers around the async handlers so addListener gets a
@@ -133,19 +148,27 @@ function onActivatedListener(info: browser.tabs._OnActivatedActiveInfo): void {
   void handleActivated(info);
 }
 
+function onUpdatedListener(
+  tabId: number,
+  changeInfo: browser.tabs._OnUpdatedChangeInfo,
+  tab: browser.tabs.Tab,
+): void {
+  void handleUpdated(tabId, changeInfo, tab);
+}
+
 let listenersAttached = false;
 
 function attachTabListeners(): void {
   if (listenersAttached) return;
   browser.tabs.onActivated.addListener(onActivatedListener);
-  browser.tabs.onUpdated.addListener(handleUpdated);
+  browser.tabs.onUpdated.addListener(onUpdatedListener);
   listenersAttached = true;
 }
 
 function detachTabListeners(): void {
   if (!listenersAttached) return;
   browser.tabs.onActivated.removeListener(onActivatedListener);
-  browser.tabs.onUpdated.removeListener(handleUpdated);
+  browser.tabs.onUpdated.removeListener(onUpdatedListener);
   listenersAttached = false;
 }
 

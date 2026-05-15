@@ -1,9 +1,58 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { SearchHit } from '../src/types/brreg.js';
+
+// Mock the brreg module so resolveOrgnrAsync can run its hostname-
+// search fallback offline. Sync tests don't touch this path, so the
+// mock stays inert for them.
+vi.mock('../src/lib/brreg.js', () => ({
+  searchEnheter: vi.fn(),
+}));
+
+import { searchEnheter } from '../src/lib/brreg.js';
 import {
   extractOrgnrFromText,
   isValidOrgnr,
   resolveOrgnr,
+  resolveOrgnrAsync,
 } from '../src/lib/orgnr.js';
+
+const searchEnheterMock = vi.mocked(searchEnheter);
+
+type StorageMap = Record<string, unknown>;
+
+function installStorageMock(): void {
+  const store: StorageMap = {};
+  (globalThis as { browser?: unknown }).browser = {
+    storage: {
+      session: {
+        get: vi.fn(async (keys: string | string[]) => {
+          const list = Array.isArray(keys) ? keys : [keys];
+          const out: StorageMap = {};
+          for (const k of list) {
+            if (k in store) out[k] = store[k];
+          }
+          return out;
+        }),
+        set: vi.fn(async (entries: StorageMap) => {
+          Object.assign(store, entries);
+        }),
+        remove: vi.fn(async (keys: string | string[]) => {
+          const list = Array.isArray(keys) ? keys : [keys];
+          for (const k of list) delete store[k];
+        }),
+      },
+    },
+  };
+}
+
+function hit(navn: string, organisasjonsnummer: string): SearchHit {
+  return {
+    navn,
+    organisasjonsnummer,
+    organisasjonsform: { kode: 'AS', beskrivelse: 'AS' },
+  } as SearchHit;
+}
 
 describe('isValidOrgnr', () => {
   it('accepts valid 9-digit orgnr with correct mod-11 check digit', () => {
@@ -83,5 +132,57 @@ describe('resolveOrgnr', () => {
   it('gracefully handles malformed URLs', () => {
     const result = resolveOrgnr({ url: 'about:newtab', title: '' });
     expect(result).toBeUndefined();
+  });
+});
+
+describe('resolveOrgnrAsync', () => {
+  beforeEach(() => {
+    installStorageMock();
+    searchEnheterMock.mockReset();
+  });
+
+  it('short-circuits to the sync result and skips search when URL has an orgnr', async () => {
+    const result = await resolveOrgnrAsync({
+      url: 'https://example.com/about/982463718',
+      title: '',
+    });
+    expect(result).toBe('982463718');
+    expect(searchEnheterMock).not.toHaveBeenCalled();
+  });
+
+  it('short-circuits to the sync result on a curated domain', async () => {
+    const result = await resolveOrgnrAsync({
+      url: 'https://www.telenor.no/privat',
+      title: '',
+    });
+    expect(result).toBe('982463718');
+    expect(searchEnheterMock).not.toHaveBeenCalled();
+  });
+
+  it('falls back to hostname search when the sync cascade misses', async () => {
+    searchEnheterMock.mockResolvedValue([
+      hit('YARA INTERNATIONAL ASA', '986228608'),
+    ]);
+    const result = await resolveOrgnrAsync({
+      url: 'https://www.yara.com/about',
+      title: 'Yara — global crop nutrition',
+    });
+    expect(result).toBe('986228608');
+    expect(searchEnheterMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns undefined when both sync and search miss', async () => {
+    searchEnheterMock.mockResolvedValue([]);
+    const result = await resolveOrgnrAsync({
+      url: 'https://random-unknown-blog.example/',
+      title: 'Random',
+    });
+    expect(result).toBeUndefined();
+  });
+
+  it('returns undefined for malformed URLs without hitting the network', async () => {
+    const result = await resolveOrgnrAsync({ url: 'about:newtab', title: '' });
+    expect(result).toBeUndefined();
+    expect(searchEnheterMock).not.toHaveBeenCalled();
   });
 });

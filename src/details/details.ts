@@ -10,7 +10,7 @@ import {
 import { buildOrgnrCopyButton, renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress, formatNok, formatRelativeTime } from '../lib/format.js';
 import { isValidOrgnr } from '../lib/mod11.js';
-import { resolveOrgnr } from '../lib/orgnr.js';
+import { resolveOrgnrAsync } from '../lib/orgnr.js';
 import { findDagligLeder } from '../lib/roller.js';
 import type {
   Enhet,
@@ -363,7 +363,7 @@ async function resolveFromActiveTab(): Promise<TabContext> {
         /* invalid url — leave host undefined */
       }
     }
-    return { orgnr: resolveOrgnr({ url, title }), host };
+    return { orgnr: await resolveOrgnrAsync({ url, title }), host };
   } catch {
     return {};
   }

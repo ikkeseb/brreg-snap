@@ -1,7 +1,7 @@
 import { fetchEnhet, fetchRoller, searchEnheter } from '../lib/brreg.js';
 import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress } from '../lib/format.js';
-import { resolveOrgnr } from '../lib/orgnr.js';
+import { resolveOrgnrAsync } from '../lib/orgnr.js';
 import { findDagligLeder } from '../lib/roller.js';
 import type { Enhet, RollerResponse } from '../types/brreg.js';
 
@@ -55,7 +55,7 @@ function setDetailsLink(orgnr?: string): void {
 async function init(): Promise<void> {
   try {
     const tab = await getActiveTab();
-    const orgnr = resolveOrgnr({
+    const orgnr = await resolveOrgnrAsync({
       url: tab?.url ?? '',
       title: tab?.title ?? '',
     });

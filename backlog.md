@@ -32,67 +32,35 @@ path" and § Security constraints for the shipped contract.
   adding as a power-user follow-up — handler logic from the context
   menu and the auto-sync toggle is reusable.
 
-- **Hostname → brreg search as primary resolution (BIG ONE).**
-  Current cascade is URL regex → title regex → curated `domains.ts`
-  table. The curated table has ~12 entries and was misread by a
-  previous Claude session as the intended primary path — it is not.
-  The point of the extension is *automatic* lookup against the brreg
-  API for whatever site the user is on. Right now Yara, Shell, Tomra,
-  Mestergruppen, Øyehaug, Finansavisen and the vast majority of
-  Norwegian company sites get no hit in the sidebar.
+- **Picker UX for hostname-search ambiguity (follow-up to shipped Bug 1).**
+  `hostname-search.ts` now picks the first prefix-matching plausible
+  hit (or first plausible if no prefix match) and otherwise returns
+  undefined. That auto-resolves Yara, Shell, Tomra etc. but can pick
+  wrong when the brand name is generic ("posten" matches both POSTEN
+  BRING and a dozen other entities). A picker — sidebar lists the
+  top 5 plausibles with confidence cues (organisasjonsform,
+  antallAnsatte, registreringsdato) and the user clicks — is the
+  next step if false matches surface. Track impact via the existing
+  ?nomatch flow before building this.
 
-  Redesign sketch:
-  1. URL regex (keep)
-  2. Title regex (keep)
-  3. Hostname-based brreg search: strip `www.`, drop the TLD, hit
-     `data.brreg.no/enhetsregisteret/api/enheter?navn=<query>&size=5`.
-     The `domains.ts` curated table becomes a *tiebreaker* for cases
-     where the brand name and legal-entity name diverge (FINN.no →
-     VEND MARKETPLACES AS, finn.no doesn't get a clean hit by `navn`
-     because the public search drops the dot).
-  4. If single confident match → load it. If multiple plausible
-     candidates → render a picker in the sidebar (same shape as the
-     popup's free-text search results) rather than the current dead
-     "no hit" state.
-  5. Domain-keyed cache so the same hostname doesn't re-hit search on
-     every tab switch (storage.session, 24h TTL — same pattern as
-     `fetchEnhet`).
+- **Split `src/details/details.ts` into smaller modules
+  (segmentation phase B).** Phase A (routing table + docs/notes/)
+  shipped with the same commit as Bug 1 wiring. The 835-line file
+  still mixes lifecycle, message handling, and ~15 render functions.
+  Natural seams:
+  - `src/details/render/` — `header.ts`, `overview.ts`, `roles.ts`,
+    `parent.ts`, `underenheter.ts`, `nokkeltall.ts`. Each a pure
+    render function.
+  - `src/details/state.ts` — `loadOrgnr`, `loadRunId`, `currentOrgnr`.
+  - `src/details/auto-sync-ui.ts` — toggle handling, permissions
+    plumbing (already partially independent via auto-sync-controller
+    + auto-sync-settings).
+  - `src/details/main.ts` — boots, wires listeners, owns `init()`.
 
-  Open design questions:
-  - How aggressive about disambiguation? Pure top-1 will be wrong
-    often; always-picker is annoying for unambiguous cases. Probably
-    "single result above a confidence bar → auto; otherwise picker."
-    Confidence bar TBD — name similarity, organisasjonsform filter
-    (skip ENK/personlig), antallAnsatte>0, etc.
-  - Domain table fate. Probably keep as a small hand-curated
-    override list (FINN.no class of problems) rather than delete.
-    Rename to make role clear — `domains-override.ts` or similar.
-  - Should the popup `showSearch` fallback go away too, replaced by
-    pre-populating the search box with the stripped hostname? Likely
-    yes — same logic, less surface.
-
-  No new permissions needed (`data.brreg.no` already in
-  `host_permissions`).
-
-- **Repo segmentation / routing table for fast Claude lookups.**
-  CLAUDE.md is ~220 lines of dense gotchas and `details.ts` is ~800
-  lines — every Claude session pays a context tax to read them in
-  full. Goal: a routing-table approach where a small top-level index
-  (CLAUDE.md or a new `MAP.md`) points at narrowly-scoped files for
-  each concern (security, brreg-API quirks, sidebar/permissions,
-  resolution cascade, UI rendering). Then grep/glob can target the
-  exact file instead of paging through one giant document. Concrete
-  starting moves:
-  - Split `details.ts` into smaller modules — renderers (`render-*`)
-    separated from message-handling and lifecycle.
-  - Move the "Architecture" gotchas in CLAUDE.md into per-topic
-    files under `docs/notes/` (e.g. `regnskap-api.md`,
-    `permissions-model.md`, `sidebar-sync.md`); keep CLAUDE.md as a
-    one-line-per-topic index with `[[link]]`s.
-  - Tag each architecture note with a stable anchor so
-    `Grep --glob docs/notes/permissions-model.md` lands first try.
-  - Consider section anchors like `<!-- SECTION: permissions -->`
-    that grep can target instead of full-file reads.
+  Skipped in the segmentation session because it touches shipped
+  behaviour and risks regressions. Worth doing when next adding a
+  render concern (e.g. picker UI from above) — splitting first
+  shrinks the surface that change has to read.
 
 ### Rejected / not pursued
 

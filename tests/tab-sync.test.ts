@@ -1,5 +1,50 @@
-import { describe, expect, it } from 'vitest';
-import { deriveSync } from '../src/lib/tab-sync.js';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { SearchHit } from '../src/types/brreg.js';
+
+vi.mock('../src/lib/brreg.js', () => ({
+  searchEnheter: vi.fn(),
+}));
+
+import { searchEnheter } from '../src/lib/brreg.js';
+import { deriveSync, deriveSyncAsync } from '../src/lib/tab-sync.js';
+
+const searchEnheterMock = vi.mocked(searchEnheter);
+
+type StorageMap = Record<string, unknown>;
+
+function installStorageMock(): void {
+  const store: StorageMap = {};
+  (globalThis as { browser?: unknown }).browser = {
+    storage: {
+      session: {
+        get: vi.fn(async (keys: string | string[]) => {
+          const list = Array.isArray(keys) ? keys : [keys];
+          const out: StorageMap = {};
+          for (const k of list) {
+            if (k in store) out[k] = store[k];
+          }
+          return out;
+        }),
+        set: vi.fn(async (entries: StorageMap) => {
+          Object.assign(store, entries);
+        }),
+        remove: vi.fn(async (keys: string | string[]) => {
+          const list = Array.isArray(keys) ? keys : [keys];
+          for (const k of list) delete store[k];
+        }),
+      },
+    },
+  };
+}
+
+function hit(navn: string, organisasjonsnummer: string): SearchHit {
+  return {
+    navn,
+    organisasjonsnummer,
+    organisasjonsform: { kode: 'AS', beskrivelse: 'AS' },
+  } as SearchHit;
+}
 
 describe('deriveSync', () => {
   it('resolves orgnr from domain and returns hostname', () => {
@@ -30,5 +75,41 @@ describe('deriveSync', () => {
     // Edge case: resolver finds orgnr in title even though URL is junk
     const result = deriveSync('not-a-url', 'DNB BANK ASA orgnr 984851006');
     expect(result).toEqual({ orgnr: '984851006', host: undefined });
+  });
+});
+
+describe('deriveSyncAsync', () => {
+  beforeEach(() => {
+    installStorageMock();
+    searchEnheterMock.mockReset();
+  });
+
+  it('returns the sync result without hitting the network when domain is curated', async () => {
+    const result = await deriveSyncAsync('https://www.dnb.no/privat', 'DNB');
+    expect(result).toEqual({ orgnr: '984851006', host: 'www.dnb.no' });
+    expect(searchEnheterMock).not.toHaveBeenCalled();
+  });
+
+  it('falls back to hostname search when sync misses, populating host', async () => {
+    searchEnheterMock.mockResolvedValue([
+      hit('YARA INTERNATIONAL ASA', '986228608'),
+    ]);
+    const result = await deriveSyncAsync(
+      'https://www.yara.com/about',
+      'Yara — global crop nutrition',
+    );
+    expect(result).toEqual({ orgnr: '986228608', host: 'www.yara.com' });
+  });
+
+  it('returns null when both sync and search miss', async () => {
+    searchEnheterMock.mockResolvedValue([]);
+    expect(
+      await deriveSyncAsync('https://random-unknown-blog.example/', ''),
+    ).toBeNull();
+  });
+
+  it('returns null when url is undefined', async () => {
+    expect(await deriveSyncAsync(undefined, 'DNB')).toBeNull();
+    expect(searchEnheterMock).not.toHaveBeenCalled();
   });
 });
