@@ -605,25 +605,13 @@ footer a:hover {
   cursor: default;
 }
 
-.icon-btn[aria-busy='true'] svg {
-  animation: spin 0.8s linear infinite;
-}
+/* Spin animation is driven from details.ts via the Web Animations
+   API (intro ease-out -> linear loop -> outro ease-in) so the
+   rotation can wind down to a neutral resting angle. */
 
 .icon-btn[disabled]:not([aria-busy='true']) {
   opacity: 0.4;
   cursor: not-allowed;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .icon-btn[aria-busy='true'] svg {
-    animation: none;
-  }
 }
 
 #footer-updated {

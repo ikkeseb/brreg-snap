@@ -387,10 +387,104 @@ function setupRefresh(): void {
   });
 }
 
+// Refresh spin: three-phase rotation via Web Animations API.
+// CSS-only `animation: spin linear infinite` couldn't ease in or out
+// without a visible seam at the loop boundary. With WAAPI we run an
+// ease-out intro (one rotation, slow start), a perfect linear loop
+// while data is in flight, and an ease-in outro that settles at the
+// next 360°-multiple — so the icon always lands neutral.
+let spinState: 'idle' | 'intro' | 'loop' | 'outro' = 'idle';
+let spinAnim: Animation | undefined;
+
+function refreshSvgEl(): SVGElement | null {
+  return refreshBtn.querySelector('svg');
+}
+
+function prefersReducedMotion(): boolean {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+function readRotation(svg: SVGElement): number {
+  // getComputedStyle returns "matrix(a, b, ...)" while a WAAPI rotate
+  // animation is active. atan2(b, a) recovers the angle in radians.
+  try {
+    const tr = window.getComputedStyle(svg).transform;
+    if (!tr || tr === 'none') return 0;
+    const m = new DOMMatrixReadOnly(tr);
+    const deg = (Math.atan2(m.b, m.a) * 180) / Math.PI;
+    return ((deg % 360) + 360) % 360;
+  } catch {
+    return 0;
+  }
+}
+
+async function startRefreshSpin(): Promise<void> {
+  if (spinState !== 'idle') return;
+  if (prefersReducedMotion()) return;
+  const svg = refreshSvgEl();
+  if (!svg) return;
+  spinState = 'intro';
+  const intro = svg.animate(
+    [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+    {
+      duration: 320,
+      iterations: 1,
+      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+    },
+  );
+  spinAnim = intro;
+  try {
+    await intro.finished;
+  } catch {
+    return;
+  }
+  if (spinState !== 'intro') return;
+  spinState = 'loop';
+  spinAnim = svg.animate(
+    [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
+    { duration: 800, iterations: Infinity, easing: 'linear' },
+  );
+}
+
+async function stopRefreshSpin(): Promise<void> {
+  if (spinState === 'idle') return;
+  const svg = refreshSvgEl();
+  if (!svg) {
+    spinState = 'idle';
+    spinAnim = undefined;
+    return;
+  }
+  const startAngle = readRotation(svg);
+  spinState = 'outro';
+  if (spinAnim) {
+    spinAnim.cancel();
+    spinAnim = undefined;
+  }
+  const outro = svg.animate(
+    [
+      { transform: `rotate(${startAngle}deg)` },
+      { transform: `rotate(${startAngle + (360 - startAngle)}deg)` },
+    ],
+    {
+      duration: 380,
+      iterations: 1,
+      easing: 'cubic-bezier(0.33, 1, 0.68, 1)',
+    },
+  );
+  spinAnim = outro;
+  try {
+    await outro.finished;
+  } catch {
+    // ignored
+  }
+  spinAnim = undefined;
+  spinState = 'idle';
+}
+
 async function doRefresh(currentOrgnrArg: string): Promise<void> {
   refreshBtn.disabled = true;
   refreshBtn.setAttribute('aria-busy', 'true');
-  const startedAt = performance.now();
+  void startRefreshSpin();
   try {
     const hasTabs = await browser.permissions.contains({
       permissions: ['tabs'],
@@ -421,14 +515,9 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
     // method so the override button remains visible/hidden as before.
     await loadOrgnr(currentOrgnrArg, currentResolutionMethod);
   } finally {
-    // Ensure the spin animation is actually visible: on a cache hit
-    // the fetch can settle in <50ms, which would just flash. Hold
-    // aria-busy long enough to register one near-full rotation.
-    const minSpinMs = 500;
-    const elapsed = performance.now() - startedAt;
-    if (elapsed < minSpinMs) {
-      await new Promise((resolve) => setTimeout(resolve, minSpinMs - elapsed));
-    }
+    // Outro phase (~380ms) gives the spin a visible wind-down even
+    // on cache hits — no separate min-hold needed.
+    await stopRefreshSpin();
     refreshBtn.disabled = false;
     refreshBtn.removeAttribute('aria-busy');
   }
