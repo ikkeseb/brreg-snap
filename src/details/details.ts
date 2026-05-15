@@ -34,6 +34,7 @@ const app = $('app');
 const brandMark = $('brand-mark') as HTMLImageElement;
 brandMark.src = browser.runtime.getURL('icons/icon-48.png');
 const statusEl = $('status');
+const skeletonEl = $('skeleton');
 const resultEl = $('result');
 const nameEl = $('name');
 const orgnrEl = $('orgnr');
@@ -107,7 +108,20 @@ function setState(
   state: 'loading' | 'result' | 'error' | 'picker' | 'empty',
 ): void {
   app.dataset.state = state;
-  statusEl.hidden = state !== 'loading' && state !== 'error';
+  skeletonEl.hidden = state !== 'loading';
+  // statusEl carries the aria-live polite announcement during loading
+  // (kept off-screen, not display:none, so screen readers still read it)
+  // and becomes the visible error message during state='error'.
+  if (state === 'loading') {
+    statusEl.hidden = false;
+    statusEl.classList.add('visually-hidden');
+  } else if (state === 'error') {
+    statusEl.hidden = false;
+    statusEl.classList.remove('visually-hidden');
+  } else {
+    statusEl.hidden = true;
+    statusEl.classList.remove('visually-hidden');
+  }
   resultEl.hidden = state !== 'result';
   pickerEl.hidden = state !== 'picker';
   emptyStateEl.hidden = state !== 'empty';
@@ -375,6 +389,7 @@ function setupRefresh(): void {
 
 async function doRefresh(currentOrgnrArg: string): Promise<void> {
   refreshBtn.disabled = true;
+  refreshBtn.setAttribute('aria-busy', 'true');
   try {
     const hasTabs = await browser.permissions.contains({
       permissions: ['tabs'],
@@ -406,6 +421,7 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
     await loadOrgnr(currentOrgnrArg, currentResolutionMethod);
   } finally {
     refreshBtn.disabled = false;
+    refreshBtn.removeAttribute('aria-busy');
   }
 }
 
