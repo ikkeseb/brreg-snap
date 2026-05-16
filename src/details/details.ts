@@ -55,6 +55,11 @@ const resolutionActionsEl = $('resolution-actions');
 const rejectChoiceBtn = $('reject-choice') as HTMLButtonElement;
 let currentOrgnr: string | undefined;
 let currentSourceHost: string | undefined;
+// Picker state held at module scope so the document-level keydown
+// handler can look up which candidate maps to keys 1-4 without
+// re-reading the DOM.
+let currentPickerHost: string | undefined;
+let currentPickerCandidates: SearchHit[] = [];
 // Why the current orgnr is on screen. Only host-resolved orgnrs are
 // overridable via the "Feil bedrift?" button — URL-derived orgnrs
 // (regex hit in path or title) are authoritative for their domain.
@@ -90,6 +95,12 @@ function getNoMatchHostFromUrl(): string | undefined {
 function setState(
   state: 'loading' | 'result' | 'error' | 'picker' | 'empty',
 ): void {
+  // Leaving the picker — clear candidate state so a stray keydown
+  // can't fire handlePickerChoice on a previous host's list.
+  if (state !== 'picker') {
+    currentPickerHost = undefined;
+    currentPickerCandidates = [];
+  }
   app.dataset.state = state;
   skeletonEl.hidden = state !== 'loading';
   // statusEl carries the aria-live polite announcement during loading
@@ -145,6 +156,8 @@ function resetManualSearch(): void {
 }
 
 function showPicker(host: string, candidates: SearchHit[]): void {
+  currentPickerHost = host;
+  currentPickerCandidates = candidates.slice(0, 4);
   setState('picker');
   setSourceHost(host);
   // Bump loadRunId so any in-flight loadOrgnr from a previous tab
@@ -156,8 +169,8 @@ function showPicker(host: string, candidates: SearchHit[]): void {
   url.searchParams.delete('orgnr');
   window.history.replaceState(null, '', url.toString());
 
-  pickerListEl.innerHTML = '';
-  for (const cand of candidates.slice(0, 4)) {
+  pickerListEl.replaceChildren();
+  for (const cand of currentPickerCandidates) {
     const li = document.createElement('li');
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -170,6 +183,18 @@ function showPicker(host: string, candidates: SearchHit[]): void {
     name.className = 'picker-item-name';
     name.textContent = cand.navn;
     btn.appendChild(name);
+
+    // Næring disambiguates rows that share a name root — "VG CONSULT",
+    // "VG BYGG", "VGTV" all start with VG but the industry tells the
+    // user which is the media house. Optional field, skip silently when
+    // brreg has no NACE on record.
+    const naering = cand.naeringskode1?.beskrivelse;
+    if (naering) {
+      const naeringEl = document.createElement('span');
+      naeringEl.className = 'picker-item-naering';
+      naeringEl.textContent = naering;
+      btn.appendChild(naeringEl);
+    }
 
     const meta = document.createElement('span');
     meta.className = 'picker-item-meta';
@@ -279,7 +304,25 @@ async function runManualSearch(query: string): Promise<void> {
     for (const item of results) {
       const li = document.createElement('li');
       li.tabIndex = 0;
-      li.textContent = `${item.navn} (${item.organisasjonsnummer})`;
+
+      const name = document.createElement('span');
+      name.className = 'picker-item-name';
+      name.textContent = item.navn;
+      li.appendChild(name);
+
+      const naering = item.naeringskode1?.beskrivelse;
+      if (naering) {
+        const naeringEl = document.createElement('span');
+        naeringEl.className = 'picker-item-naering';
+        naeringEl.textContent = naering;
+        li.appendChild(naeringEl);
+      }
+
+      const meta = document.createElement('span');
+      meta.className = 'picker-item-meta';
+      meta.textContent = item.organisasjonsnummer;
+      li.appendChild(meta);
+
       const select = (): void => {
         const url = new URL(window.location.href);
         url.searchParams.set('orgnr', item.organisasjonsnummer);
@@ -886,5 +929,36 @@ function setupTabs(): void {
     });
   }
 }
+
+// Keyboard shortcuts when the picker is active: digits 1-4 pick the
+// corresponding row, 0 or Escape triggers "Ingen av disse". Bail when
+// the picker isn't visible or when the user is typing into a form
+// control (manual-search input is in a different state, but defensive
+// against future additions). Modifier keys also bail so OS shortcuts
+// (cmd+w, ctrl+a) keep working.
+document.addEventListener('keydown', (ev) => {
+  if (app.dataset.state !== 'picker') return;
+  if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
+  const target = ev.target;
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement
+  ) {
+    return;
+  }
+  const host = currentPickerHost;
+  if (!host) return;
+  if (ev.key === '0' || ev.key === 'Escape') {
+    ev.preventDefault();
+    void handlePickerNone(host);
+    return;
+  }
+  const idx = '1234'.indexOf(ev.key);
+  if (idx === -1) return;
+  const cand = currentPickerCandidates[idx];
+  if (!cand) return;
+  ev.preventDefault();
+  void handlePickerChoice(host, cand.organisasjonsnummer);
+});
 
 void init();

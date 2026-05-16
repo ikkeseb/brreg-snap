@@ -13,12 +13,11 @@
       </header>
       <section id="status" aria-live="polite">Slår opp bedrift…</section>
       <section id="result" hidden></section>
-      <a
-        id="details-link"
-        href="#"
-        hidden
-        >Detaljert visning ↗</a
-      >
+      <div id="resolution-actions" class="resolution-actions" hidden>
+        <button type="button" id="reject-choice" class="ghost-link">
+          Feil treff? Vis alternativer
+        </button>
+      </div>
       <section id="picker" hidden>
         <p class="picker-intro">Vi fant flere mulige treff på denne siden:</p>
         <ul id="picker-list" class="picker-list"></ul>
@@ -41,6 +40,10 @@
           />
           <ul id="manual-results" class="manual-results"></ul>
         </div>
+        <section id="recent-section" class="recent-section" hidden>
+          <h3 class="recent-title">Nylig sett</h3>
+          <ul id="recent-list" class="recent-list"></ul>
+        </section>
       </section>
       <footer>
         <a
@@ -50,6 +53,10 @@
           rel="noopener noreferrer"
           >Åpne på brreg.no ↗</a
         >
+        <a id="details-link" href="#" hidden>Vis i sidebar ↗</a>
+        <span id="footer-source" hidden
+          >kilde: <span id="source-host"></span
+        ></span>
       </footer>
     </main>
     <script type="module" src="popup.ts"></script>

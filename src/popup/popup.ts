@@ -2,18 +2,26 @@ import { fetchEnhet, fetchRoller, searchEnheter } from '../lib/brreg.js';
 import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress } from '../lib/format.js';
 import {
+  addRejectedChoice,
   searchByHostnameDetailed,
   setPickerChoice,
 } from '../lib/hostname-search.js';
 import { resolveOrgnr } from '../lib/orgnr.js';
 import { findDagligLeder } from '../lib/roller.js';
 import type { Enhet, RollerResponse, SearchHit } from '../types/brreg.js';
+import { getRecent, pushRecent } from './recent.js';
 
 const app = document.getElementById('app') as HTMLElement;
 const brandMark = document.getElementById('brand-mark') as HTMLImageElement;
 brandMark.src = browser.runtime.getURL('icons/icon-32.png');
 const statusEl = document.getElementById('status') as HTMLElement;
 const resultEl = document.getElementById('result') as HTMLElement;
+const resolutionActionsEl = document.getElementById(
+  'resolution-actions',
+) as HTMLElement;
+const rejectChoiceBtn = document.getElementById(
+  'reject-choice',
+) as HTMLButtonElement;
 const pickerEl = document.getElementById('picker') as HTMLElement;
 const pickerListEl = document.getElementById('picker-list') as HTMLUListElement;
 const pickerNoneBtn = document.getElementById(
@@ -27,13 +35,35 @@ const manualQueryEl = document.getElementById(
 const manualResultsEl = document.getElementById(
   'manual-results',
 ) as HTMLUListElement;
+const recentSectionEl = document.getElementById(
+  'recent-section',
+) as HTMLElement;
+const recentListEl = document.getElementById('recent-list') as HTMLUListElement;
 const brregLink = document.getElementById('brreg-link') as HTMLAnchorElement;
 const detailsLink = document.getElementById('details-link') as HTMLAnchorElement;
+const footerSourceEl = document.getElementById('footer-source') as HTMLElement;
+const sourceHostEl = document.getElementById('source-host') as HTMLElement;
 
 const BRREG_LINK_FALLBACK =
   'https://virksomhet.brreg.no/nb/oppslag/enheter';
 
+// Why the current orgnr is on screen. Only host-resolved orgnrs are
+// overridable via the "Feil treff?" button — URL-derived orgnrs
+// (regex hit in path or title) are authoritative for their domain.
+type ResolutionMethod =
+  | 'host-auto'
+  | 'host-pick'
+  | 'url'
+  | 'manual';
+
+let currentOrgnr: string | undefined;
 let currentSourceHost: string | undefined;
+let currentResolutionMethod: ResolutionMethod | undefined;
+// Picker state held at module scope so the document-level keydown
+// handler can look up which candidate maps to keys 1-4 without
+// re-reading the DOM.
+let currentPickerHost: string | undefined;
+let currentPickerCandidates: SearchHit[] = [];
 
 function setBrregLink(orgnr?: string): void {
   brregLink.href = orgnr
@@ -41,17 +71,29 @@ function setBrregLink(orgnr?: string): void {
     : BRREG_LINK_FALLBACK;
 }
 
-function setDetailsLink(orgnr?: string): void {
-  if (!orgnr) {
+function setDetailsLink(): void {
+  // Visible in every state where the sidebar can do something useful:
+  // resolved orgnr → ?orgnr=, or host-without-pick → ?nomatch= so the
+  // sidebar opens on the picker/empty surface for the same host
+  // instead of stale state. Only hidden when we have neither — popup
+  // opened on about:blank or an unresolvable URL.
+  let url: string | undefined;
+  if (currentOrgnr) {
+    url = browser.runtime.getURL(
+      `details/details.html?orgnr=${currentOrgnr}`,
+    );
+  } else if (currentSourceHost) {
+    url = browser.runtime.getURL(
+      `details/details.html?nomatch=${encodeURIComponent(currentSourceHost)}`,
+    );
+  }
+  if (!url) {
     detailsLink.hidden = true;
     detailsLink.removeAttribute('href');
     detailsLink.onclick = null;
     return;
   }
   detailsLink.hidden = false;
-  const url = browser.runtime.getURL(
-    `details/details.html?orgnr=${orgnr}`,
-  );
   // Keep href so middle-click and keyboard activation still open the
   // details page somewhere. The onclick swaps to a Firefox sidebar so
   // the panel docks into the browser chrome instead of stealing focus
@@ -68,10 +110,37 @@ function setDetailsLink(orgnr?: string): void {
   };
 }
 
+function paintSourceLabel(): void {
+  if (!currentSourceHost) {
+    footerSourceEl.hidden = true;
+    sourceHostEl.textContent = '';
+    return;
+  }
+  footerSourceEl.hidden = false;
+  sourceHostEl.textContent = currentSourceHost;
+}
+
+function updateRejectButtonVisibility(): void {
+  // Only host-resolved orgnrs are disputable. URL-derived orgnrs are
+  // authoritative for their domain; manual picks are the user's own
+  // explicit choice and not subject to the "Feil treff?" reframe.
+  const overridable =
+    app.dataset.state === 'result' &&
+    (currentResolutionMethod === 'host-auto' ||
+      currentResolutionMethod === 'host-pick') &&
+    currentSourceHost !== undefined &&
+    currentOrgnr !== undefined;
+  resolutionActionsEl.hidden = !overridable;
+}
+
 interface TabContext {
   orgnr?: string;
   host?: string;
   pickerCandidates?: SearchHit[];
+  // Why we landed on this orgnr — drives whether the "Feil treff?"
+  // override is offered. Sync (URL/title regex) is authoritative;
+  // host-auto is the only one the user can dispute via this code path.
+  method?: ResolutionMethod;
 }
 
 async function getActiveTab(): Promise<browser.tabs.Tab | undefined> {
@@ -96,11 +165,18 @@ async function resolveFromActiveTab(): Promise<TabContext> {
     }
   }
   const sync = resolveOrgnr({ url, title });
-  if (sync) return { orgnr: sync, host };
+  if (sync) return { orgnr: sync, host, method: 'url' };
   if (!host) return {};
   const detailed = await searchByHostnameDetailed(host);
   if (!detailed) return { host };
-  if (detailed.band === 'auto') return { orgnr: detailed.choice, host };
+  if (detailed.band === 'auto') {
+    // detailed.choice may have been written by an earlier picker pick
+    // (positive picker-choice short-circuit) — both deserve the
+    // override button, so distinguish via candidates.
+    const method: ResolutionMethod =
+      detailed.candidates.length === 0 ? 'host-pick' : 'host-auto';
+    return { orgnr: detailed.choice, host, method };
+  }
   if (detailed.band === 'picker') {
     return { host, pickerCandidates: detailed.candidates };
   }
@@ -111,8 +187,9 @@ async function init(): Promise<void> {
   try {
     const ctx = await resolveFromActiveTab();
     currentSourceHost = ctx.host;
+    paintSourceLabel();
     if (ctx.orgnr) {
-      await loadAndRender(ctx.orgnr);
+      await loadAndRender(ctx.orgnr, ctx.method);
       return;
     }
     if (ctx.pickerCandidates && ctx.host) {
@@ -185,11 +262,16 @@ async function syncSidebarNoMatch(host: string | undefined): Promise<void> {
   }
 }
 
-async function loadAndRender(orgnr: string): Promise<void> {
+async function loadAndRender(
+  orgnr: string,
+  method?: ResolutionMethod,
+): Promise<void> {
+  currentOrgnr = orgnr;
+  if (method !== undefined) currentResolutionMethod = method;
   setState('loading');
   statusEl.textContent = `Henter ${orgnr}…`;
   setBrregLink(orgnr);
-  setDetailsLink(orgnr);
+  setDetailsLink();
   void syncSidebarIfOpen(orgnr);
   try {
     // Roller is a second API call but it lives behind the same 24h
@@ -209,7 +291,12 @@ async function loadAndRender(orgnr: string): Promise<void> {
 
 function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   setState('result');
-  resultEl.innerHTML = '';
+  resultEl.replaceChildren();
+
+  // Stamp the recent stack as soon as we have a confirmed Enhet — earlier
+  // than this we don't know the navn, later (in init or loadAndRender)
+  // would also persist orgnrs that failed to fetch.
+  void pushRecent(enhet.organisasjonsnummer, enhet.navn);
 
   const heading = document.createElement('h2');
   heading.textContent = enhet.navn;
@@ -225,7 +312,11 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   addRow(dl, 'Registrert', enhet.registreringsdatoEnhetsregisteret);
   addRow(dl, 'Næring', enhet.naeringskode1?.beskrivelse);
   addRow(dl, 'Ansatte', enhet.antallAnsatte?.toString());
-  addRow(dl, 'Daglig leder', findDagligLeder(roller));
+  // Always render daglig leder, even when missing, so the user sees we
+  // looked — empty fallback distinguishes "no role registered" from
+  // "we forgot to check". Other rows can legitimately be missing on
+  // certain forms (ENK has no Form-suffix, foreign entities lack næring).
+  addRow(dl, 'Daglig leder', findDagligLeder(roller) ?? '—');
   addRow(dl, 'Adresse', formatAddress(enhet.forretningsadresse));
   if (enhet.hjemmeside) {
     const href = enhet.hjemmeside.startsWith('http')
@@ -250,6 +341,8 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   if (enhet.registrertIForetaksregisteret)
     flags.appendChild(makeFlag('Foretaksregistret'));
   if (flags.childNodes.length > 0) resultEl.appendChild(flags);
+
+  updateRejectButtonVisibility();
 }
 
 function makeFlag(
@@ -291,11 +384,14 @@ function addLink(
 }
 
 function showPicker(host: string, candidates: SearchHit[]): void {
+  currentOrgnr = undefined;
+  currentPickerHost = host;
+  currentPickerCandidates = candidates.slice(0, 4);
   setState('picker');
   setBrregLink();
   setDetailsLink();
-  pickerListEl.innerHTML = '';
-  for (const cand of candidates.slice(0, 4)) {
+  pickerListEl.replaceChildren();
+  for (const cand of currentPickerCandidates) {
     const li = document.createElement('li');
     const btn = document.createElement('button');
     btn.type = 'button';
@@ -308,6 +404,18 @@ function showPicker(host: string, candidates: SearchHit[]): void {
     name.className = 'picker-item-name';
     name.textContent = cand.navn;
     btn.appendChild(name);
+
+    // Næring disambiguates rows that share a name root — "VG CONSULT",
+    // "VG BYGG", "VGTV" all start with VG but the industry tells the
+    // user which is the media house. Optional field, skip silently when
+    // brreg has no NACE on record.
+    const naering = cand.naeringskode1?.beskrivelse;
+    if (naering) {
+      const naeringEl = document.createElement('span');
+      naeringEl.className = 'picker-item-naering';
+      naeringEl.textContent = naering;
+      btn.appendChild(naeringEl);
+    }
 
     const meta = document.createElement('span');
     meta.className = 'picker-item-meta';
@@ -326,7 +434,7 @@ function showPicker(host: string, candidates: SearchHit[]): void {
 
 async function handlePickerChoice(host: string, orgnr: string): Promise<void> {
   await setPickerChoice(host, orgnr);
-  await loadAndRender(orgnr);
+  await loadAndRender(orgnr, 'host-pick');
 }
 
 async function handlePickerNone(host: string): Promise<void> {
@@ -335,12 +443,39 @@ async function handlePickerNone(host: string): Promise<void> {
   showEmptyState(host);
 }
 
+async function handleRejectChoice(): Promise<void> {
+  const host = currentSourceHost;
+  const orgnr = currentOrgnr;
+  if (!host || !orgnr) return;
+  rejectChoiceBtn.disabled = true;
+  try {
+    await addRejectedChoice(host, orgnr);
+    const detailed = await searchByHostnameDetailed(host);
+    if (detailed && detailed.candidates.length > 0) {
+      // Always show picker (even if a single candidate now wins
+      // band='auto') — the user just expressed doubt; let them confirm.
+      showPicker(host, detailed.candidates);
+      return;
+    }
+    showEmptyState(host);
+  } finally {
+    rejectChoiceBtn.disabled = false;
+  }
+}
+
 pickerNoneBtn.addEventListener('click', () => {
   if (!currentSourceHost) return;
   void handlePickerNone(currentSourceHost);
 });
 
+rejectChoiceBtn.addEventListener('click', () => {
+  if (rejectChoiceBtn.disabled) return;
+  void handleRejectChoice();
+});
+
 function showEmptyState(host: string | undefined): void {
+  currentOrgnr = undefined;
+  currentResolutionMethod = undefined;
   setState('empty');
   setBrregLink();
   setDetailsLink();
@@ -348,8 +483,42 @@ function showEmptyState(host: string | undefined): void {
     ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
     : 'Popup-en ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
   manualQueryEl.value = '';
-  manualResultsEl.innerHTML = '';
+  manualResultsEl.replaceChildren();
+  void renderRecentList();
   manualQueryEl.focus();
+}
+
+async function renderRecentList(): Promise<void> {
+  const entries = await getRecent();
+  recentListEl.replaceChildren();
+  if (entries.length === 0) {
+    recentSectionEl.hidden = true;
+    return;
+  }
+  recentSectionEl.hidden = false;
+  for (const entry of entries) {
+    const li = document.createElement('li');
+    li.tabIndex = 0;
+
+    const name = document.createElement('span');
+    name.className = 'recent-name';
+    name.textContent = entry.navn;
+    li.appendChild(name);
+
+    const orgnr = document.createElement('span');
+    orgnr.className = 'recent-orgnr';
+    orgnr.textContent = entry.orgnr;
+    li.appendChild(orgnr);
+
+    const select = (): void => {
+      void loadAndRender(entry.orgnr, 'manual');
+    };
+    li.addEventListener('click', select);
+    li.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') select();
+    });
+    recentListEl.appendChild(li);
+  }
 }
 
 function showError(err: unknown): void {
@@ -362,6 +531,12 @@ function showError(err: unknown): void {
 function setState(
   state: 'loading' | 'result' | 'picker' | 'empty' | 'error',
 ): void {
+  // Leaving the picker — clear candidate state so a stray keydown
+  // can't fire handlePickerChoice on a previous host's list.
+  if (state !== 'picker') {
+    currentPickerHost = undefined;
+    currentPickerCandidates = [];
+  }
   app.dataset.state = state;
   // statusEl is the loading and error surface. Hide it on the data
   // states ('result', 'picker', 'empty') so the previous status text
@@ -370,6 +545,7 @@ function setState(
   resultEl.hidden = state !== 'result';
   pickerEl.hidden = state !== 'picker';
   emptyStateEl.hidden = state !== 'empty';
+  updateRejectButtonVisibility();
 }
 
 // Manual search inside the empty state. Mirrors sidebar's runManualSearch:
@@ -383,9 +559,13 @@ manualQueryEl.addEventListener('input', () => {
   manualSearchRunId += 1;
   const value = manualQueryEl.value.trim();
   if (value.length < 2) {
-    manualResultsEl.innerHTML = '';
+    manualResultsEl.replaceChildren();
+    // Empty query restores the recent list; an active query hides it
+    // so manual-search results don't share airspace with stale recents.
+    void renderRecentList();
     return;
   }
+  recentSectionEl.hidden = true;
   const capped = value.slice(0, 100);
   manualSearchTimer = setTimeout(() => {
     void runManualSearch(capped);
@@ -397,7 +577,7 @@ async function runManualSearch(query: string): Promise<void> {
   try {
     const results = await searchEnheter(query, 10);
     if (myRunId !== manualSearchRunId) return;
-    manualResultsEl.innerHTML = '';
+    manualResultsEl.replaceChildren();
     if (results.length === 0) {
       const li = document.createElement('li');
       li.className = 'empty-result';
@@ -408,9 +588,27 @@ async function runManualSearch(query: string): Promise<void> {
     for (const item of results) {
       const li = document.createElement('li');
       li.tabIndex = 0;
-      li.textContent = `${item.navn} (${item.organisasjonsnummer})`;
+
+      const name = document.createElement('span');
+      name.className = 'picker-item-name';
+      name.textContent = item.navn;
+      li.appendChild(name);
+
+      const naering = item.naeringskode1?.beskrivelse;
+      if (naering) {
+        const naeringEl = document.createElement('span');
+        naeringEl.className = 'picker-item-naering';
+        naeringEl.textContent = naering;
+        li.appendChild(naeringEl);
+      }
+
+      const meta = document.createElement('span');
+      meta.className = 'picker-item-meta';
+      meta.textContent = item.organisasjonsnummer;
+      li.appendChild(meta);
+
       const select = (): void => {
-        void loadAndRender(item.organisasjonsnummer);
+        void loadAndRender(item.organisasjonsnummer, 'manual');
       };
       li.addEventListener('click', select);
       li.addEventListener('keydown', (ev) => {
@@ -423,5 +621,36 @@ async function runManualSearch(query: string): Promise<void> {
     showError(err);
   }
 }
+
+// Keyboard shortcuts when the picker is active: digits 1-4 pick the
+// corresponding row, 0 or Escape triggers "Ingen av disse". Bail when
+// the picker isn't visible or when the user is typing into a form
+// control (no inputs in picker state today, but defensive against
+// future additions). Modifier keys also bail so OS shortcuts (cmd+w,
+// ctrl+a) keep working.
+document.addEventListener('keydown', (ev) => {
+  if (app.dataset.state !== 'picker') return;
+  if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
+  const target = ev.target;
+  if (
+    target instanceof HTMLInputElement ||
+    target instanceof HTMLTextAreaElement
+  ) {
+    return;
+  }
+  const host = currentPickerHost;
+  if (!host) return;
+  if (ev.key === '0' || ev.key === 'Escape') {
+    ev.preventDefault();
+    void handlePickerNone(host);
+    return;
+  }
+  const idx = '1234'.indexOf(ev.key);
+  if (idx === -1) return;
+  const cand = currentPickerCandidates[idx];
+  if (!cand) return;
+  ev.preventDefault();
+  void handlePickerChoice(host, cand.organisasjonsnummer);
+});
 
 void init();

@@ -255,6 +255,19 @@ main[data-state='picker'] #result {
   font-size: 12.5px;
 }
 
+.picker-item-naering {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--fg);
+  /* Single-line ellipsis — næring descriptions can be 60+ chars
+     ("Konsulentvirksomhet innenfor informasjonsteknologi") and would
+     wrap two/three lines in a 320px popup, blowing up row height. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .picker-item-meta {
   display: block;
   margin-top: 3px;
@@ -374,38 +387,92 @@ main[data-state='empty'] #picker {
   border-color: var(--border);
 }
 
-#details-link {
-  display: inline-block;
+.resolution-actions {
+  margin-top: 10px;
+}
+
+/* --- recent companies (inside empty state) --------------------- */
+
+.recent-section {
   margin-top: 14px;
-  padding: 8px 14px;
-  background: var(--accent);
-  color: #1a1208;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.recent-title {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 160px;
+  overflow: auto;
+}
+
+.recent-list li {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  text-decoration: none;
+  padding: 6px 10px;
+  cursor: pointer;
   font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  transition:
-    background 120ms ease,
-    transform 120ms ease;
+  color: var(--fg);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  transition: border-color 120ms ease;
 }
 
-/* ID specificity beats the UA [hidden] rule, so the hidden attribute
-   needs an explicit reset for #details-link. Without this the link
-   stays visible in the search/error states with onclick=null and no
-   href — clicks do nothing, which reads as a broken button. */
-#details-link[hidden] {
-  display: none;
+.recent-list li:hover,
+.recent-list li:focus-visible {
+  border-color: var(--accent);
+  outline: none;
 }
 
-#details-link:hover {
-  background: var(--accent-strong);
-  text-decoration: none;
+.recent-list .recent-name {
+  flex: 1 1 auto;
+  font-weight: 500;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-#details-link:focus-visible {
-  outline: 2px solid var(--accent-strong);
-  outline-offset: 2px;
+.recent-list .recent-orgnr {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.ghost-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.ghost-link:hover,
+.ghost-link:focus-visible {
+  color: var(--accent);
+  border-bottom-color: currentColor;
+  outline: none;
 }
 
 footer {
@@ -414,6 +481,10 @@ footer {
   border-top: 1px solid var(--border);
   font-size: 11.5px;
   color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
 }
 
 footer a {
@@ -424,4 +495,15 @@ footer a {
 footer a:hover {
   color: var(--accent-strong);
   text-decoration: underline;
+}
+
+#footer-source {
+  color: var(--muted);
+  margin-left: auto;
+}
+
+#source-host {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg);
 }
