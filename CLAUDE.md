@@ -58,7 +58,10 @@ grep -n 'SECTION: regnskap-500-unsupported-plan' docs/notes/brreg-api.md
 Every orgnr resolves via the live brreg API only — no static
 hostname → orgnr table, even for hard cases (FINN.no, regulated
 subsidiaries). Hosts brreg can't disambiguate fall through to the
-sidebar's manual search.
+inline manual search in both popup and sidebar empty states. The
+popup empty state also surfaces a `storage.session`-scoped recents
+list (`src/popup/recent.ts`, max 5) so the user can re-open a
+recently viewed orgnr without re-typing.
 
 ## Security constraints (non-negotiable)
 

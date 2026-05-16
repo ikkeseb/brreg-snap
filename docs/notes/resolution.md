@@ -64,12 +64,19 @@ Bands are decided in `hostname-score.ts:decideBand`:
 | Band | Condition | Outcome |
 |---|---|---|
 | `auto` | top ≥ 75 AND top − runner-up ≥ 10 | resolve to top candidate |
-| `picker` | top ≥ 45 | sidebar shows top-4 + "Ingen av disse" |
+| `picker` | top ≥ 45 | popup + sidebar show top-N + "Ingen av disse" |
 | `none` | otherwise | sidebar shows empty state |
 
 The AUTO margin requirement is what prevents kjedebutikker (ELKJØP
 LEKNES vs ELKJØP SVOLVÆR, both 111 via hjemmeside-exact) from
 auto-resolving.
+
+The picker row count is `MAX_PICKER_CANDIDATES` exported from
+`hostname-search.ts` — currently 4. The constant is tied to the
+keyboard shortcuts (1-4 select the corresponding row, 0/Esc triggers
+"Ingen av disse") both popup and sidebar register at module load.
+Bumping the constant requires extending the digit-key handler in
+`popup.ts` and `details.ts`.
 
 <!-- SECTION: picker-choice -->
 ## Picker choice cache
@@ -83,12 +90,13 @@ disse") caches a negative choice that returns `{band:'none'}` on the
 next visit. Clears with the existing `storage.session` lifetime.
 
 <!-- SECTION: reject-override -->
-## Reject override (`Feil bedrift?`)
+## Reject override (`Feil bedrift?` / `Feil treff?`)
 
-The sidebar shows a "Feil bedrift? Vis alternativer" link on the
-result panel whenever the current orgnr was resolved by hostname
-search (`host-auto` or `host-pick` resolution method). Clicking it
-calls `addRejectedChoice(host, orgnr)` which:
+Both popup ("Feil treff? Vis alternativer") and sidebar ("Feil
+bedrift? Vis alternativer") expose this link on the result panel
+whenever the current orgnr was resolved by hostname search
+(`host-auto` or `host-pick` resolution method). Clicking it calls
+`addRejectedChoice(host, orgnr)` which:
 
 1. Appends the orgnr to `rejected:<host>` (24h TTL).
 2. Clears `picker-choice:<host>` if it equals the rejected orgnr.
@@ -97,10 +105,10 @@ The next `searchByHostnameDetailed` reads the rejected list, passes
 it through `runPipeline` which filters rejected candidates before
 scoring, and stores the result under
 `hostname:<host>:rej:<sorted>` so the pre-rejection cache entry
-isn't served. The sidebar then shows the picker over the remaining
-candidates (even when filtering leaves a single AUTO winner — the
-user just expressed doubt, the picker requires explicit confirmation).
-Empty after filtering → `showEmptyState` with inline manual search.
+isn't served. The picker then opens over the remaining candidates
+(even when filtering leaves a single AUTO winner — the user just
+expressed doubt, the picker requires explicit confirmation). Empty
+after filtering → empty state with inline manual search.
 
 URL-derived orgnrs (regex hit in path or title) do not show the
 override — they're authoritative for the domain.

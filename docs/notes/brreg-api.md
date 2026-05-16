@@ -37,10 +37,11 @@ doesn't re-hit.
 
 The brreg open API does not expose signaturrett/prokura on
 `/api/enheter/<orgnr>` and the nested `/signatur` path returns 404.
-The data lives only behind paid Foretaksregisteret endpoints.
-`src/lib/brreg.ts` has a comment marking this; `details.html` keeps
-a hidden `#signatur` card in case the field becomes available. Don't
-waste a session trying to re-discover the gap.
+The data lives only behind paid Foretaksregisteret endpoints. The
+project used to carry a `SignaturResponse` type and a hidden
+`#signatur` card in `details.html` as scaffolding; both were deleted
+in `db2f24e` since they were dead code. Don't reintroduce them — and
+don't waste a session trying to re-discover the gap.
 
 <!-- SECTION: search-drops-dots -->
 ## Brreg name search drops periods

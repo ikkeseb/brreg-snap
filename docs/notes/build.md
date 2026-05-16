@@ -11,6 +11,16 @@ The manifest expects `popup/popup.html`. `vite.config.ts`
 `closeBundle` relocates the file and deletes `dist/src/`. Removing
 this hook breaks the packaged extension silently.
 
+<!-- SECTION: minify -->
+## esbuild minify is on by default
+
+`vite.config.ts` sets `build.minify: 'esbuild'`. Source maps stay
+enabled so AMO review can map the minified bundle back to TypeScript.
+Don't switch to terser unless you have a reason — esbuild minify is
+fast enough that watch-mode stays responsive, and the codebase has
+no name-sensitive reflection (no `eval`, no `Function`, no string
+dispatch on identifier names) for terser to do anything extra with.
+
 <!-- SECTION: clipboard-no-permission -->
 ## Click-to-copy without `clipboardWrite`
 
