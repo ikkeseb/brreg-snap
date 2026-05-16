@@ -7,6 +7,8 @@ signaturrett, status flags, key figures — straight from the toolbar.
 Click the icon while on a company website, get the brreg snapshot in a
 popup. No content scripts, no page DOM access, no third-party calls.
 
+![brreg-snap sidebar showing ORKLA ASA overview, opened on orkla.com](docs/screenshots/01-sidebar-overview.png)
+
 ## Security model
 
 Popup-only architecture. The extension never injects code into the
@@ -114,8 +116,22 @@ tests/
 
 ## Distribution
 
-- **GitHub release with signed `.xpi`** — primary, immediate.
-- **AMO submission** — under evaluation post-v0.1.
+- **[addons.mozilla.org](https://addons.mozilla.org/firefox/addon/brreg-snap/)**
+  — primary distribution. Auto-updates via Firefox.
+- **[GitHub releases](https://github.com/ikkeseb/brreg-snap/releases)**
+  — signed `.xpi` available as a backup for users who prefer
+  side-loading. Manual updates only.
+
+For AMO reviewers: see [BUILD.md](BUILD.md) for reproducible build
+instructions.
+
+## Privacy
+
+The extension only contacts `data.brreg.no` (the public API of the
+Norwegian Brønnøysund Register Centre). No content scripts, no
+third-party calls, no analytics, no telemetry. See
+[PRIVACY.md](PRIVACY.md) for the full data flow, what is stored
+locally, and what permissions are used for.
 
 ## Contributing
 
