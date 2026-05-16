@@ -25,18 +25,33 @@ focus events; they all need `tabs` or content scripts.
 ## Tab-sync via runtime `tabs` opt-in is the supported path
 
 The sidebar exposes an "Auto-oppdater ved fane-bytte" toggle that
-requests `tabs` at runtime. With grant, background.ts attaches
-`tabs.onActivated`/`onUpdated` listeners and broadcasts the same
-`{type:'sync', orgnr, host}` shape the popup uses. MV3 kills and
-respawns the service worker on idle, so listener registration must
-run on every boot — see `reconcileListeners()` in
-`src/background/background.ts`.
+requests `tabs` at runtime. `background.ts` registers
+`tabs.onActivated`/`onUpdated` unconditionally at top level (see
+§ event-page-wakeup) and broadcasts the same
+`{type:'sync', orgnr, host}` shape the popup uses. Settings live in
+`storage.local` (survives browser restarts); the response cache stays
+on `storage.session` (in-memory).
 
-The same function is called from a `storage.onChanged` handler
-(gated on `areaName === 'local'` and the relevant key) so external
-revoke / toggle flips also reconcile without a reload. Settings live
-in `storage.local` (survives browser restarts); the response cache
-stays on `storage.session` (in-memory).
+<!-- SECTION: event-page-wakeup -->
+## Tab listeners must register synchronously at top level
+
+The background is a non-persistent event page. For Firefox to wake
+the script for a tab event, the corresponding `addListener` call has
+to run synchronously during module evaluation — not after an awaited
+permission/storage check. Async registration leaves the runtime
+unaware that this script should be dispatched the event, so events
+are silently dropped while the script is idle.
+
+We register `tabs.onActivated` and `tabs.onUpdated` unconditionally
+and gate inside the handler on an in-memory `autoSyncEnabled` cache
+(refreshed via `permissions.onAdded/onRemoved` and `storage.onChanged`,
+plus a one-time seed on module load). The cache is the hot path; the
+listener body stays a synchronous boolean check after first wake.
+
+Symptom of getting this wrong: auto-sync works only while
+about:debugging Inspector is open (the inspector keeps the script
+alive), then breaks after idle. If you see that pattern again, the
+fix is top-level addListener, not more reconciliation.
 
 <!-- SECTION: gesture-stack -->
 ## Never await between a user gesture and `permissions.request`

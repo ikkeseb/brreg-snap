@@ -1,13 +1,14 @@
-// The popup is the entire toolbar UI surface. The service worker
-// hosts the context-menu handler and (when granted) the tab-switch
-// listeners that drive sidebar auto-refresh.
+// The popup is the entire toolbar UI surface. The background script
+// hosts the context-menu handler and the tab-switch listeners that
+// drive sidebar auto-refresh.
 //
-// `tabs` is in optional_permissions. Listeners are attached only
-// when the user has both (a) granted tabs and (b) flipped the
-// auto-sync toggle on. Both conditions are re-checked at boot
-// because the service worker dies and respawns under MV3.
+// `tabs` is in optional_permissions. The tab-event listeners are
+// registered unconditionally at top level (required for MV3-style
+// event-page wakeup — see § event-page-wakeup below) and gate on
+// permission + toggle internally. Without both, the handler returns
+// before touching tab.url/title.
 
-import { AUTO_SYNC_STORAGE_KEY, getAutoSync } from '../lib/auto-sync-settings.js';
+import { getAutoSync } from '../lib/auto-sync-settings.js';
 import { deriveSync, deriveSyncAsync } from '../lib/tab-sync.js';
 
 const MENU_ID = 'show-in-brreg-sidebar';
@@ -108,6 +109,36 @@ browser.menus.onClicked.addListener((info, tab) => {
 });
 
 // --- auto-sync tab listeners --------------------------------------
+//
+// SECTION: event-page-wakeup
+// The background is a non-persistent event page; Firefox kills it on
+// idle and re-evaluates the module on wakeup. For the runtime to wake
+// us for a tab event, `addListener` must run synchronously at module
+// top level — async registration (e.g. inside an awaited permission
+// check) leaves the runtime unaware that this script should be
+// dispatched the event, so events are silently dropped.
+//
+// Concretely: previous wiring did `void reconcileListeners()` at the
+// bottom of the module, attaching `tabs.onActivated/onUpdated` only
+// after awaiting `permissions.contains` and `getAutoSync()`. The
+// script then went idle, was killed, and the next tab switch failed
+// to wake it because no top-level addListener call was recorded.
+// Auto-sync only worked while the inspector held the script alive.
+//
+// The fix: register unconditionally at top level, gate per-event on
+// permission + toggle inside the handler. The permission/storage
+// state is cached in-memory and refreshed via the change listeners
+// below, so the hot path is a synchronous boolean check.
+
+let autoSyncEnabled = false;
+
+async function refreshAutoSyncEnabled(): Promise<void> {
+  const [hasTabs, toggleOn] = await Promise.all([
+    browser.permissions.contains({ permissions: ['tabs'] }),
+    getAutoSync(),
+  ]);
+  autoSyncEnabled = hasTabs && toggleOn;
+}
 
 async function handleActivated(
   info: browser.tabs._OnActivatedActiveInfo,
@@ -142,84 +173,52 @@ async function handleUpdated(
   await broadcastNoMatch(hostFromUrl(tab.url));
 }
 
-// Sync wrappers around the async handlers so addListener gets a
-// void-returning function (browser event listeners are fire-and-forget;
-// returning a Promise would mislead the type system). Module-level so
-// addListener / removeListener see the same reference.
-function onActivatedListener(info: browser.tabs._OnActivatedActiveInfo): void {
-  void handleActivated(info);
-}
+// Top-level synchronous registration. The handler gates on the
+// in-memory `autoSyncEnabled` cache; on cold start the cache is
+// false, so the first event after wakeup awaits a refresh before
+// dispatching. Subsequent events hit the cached value synchronously.
+browser.tabs.onActivated.addListener((info) => {
+  void (async () => {
+    if (!autoSyncEnabled) await refreshAutoSyncEnabled();
+    if (!autoSyncEnabled) return;
+    await handleActivated(info);
+  })();
+});
 
-function onUpdatedListener(
-  tabId: number,
-  changeInfo: browser.tabs._OnUpdatedChangeInfo,
-  tab: browser.tabs.Tab,
-): void {
-  void handleUpdated(tabId, changeInfo, tab);
-}
+// Firefox-specific filter so the listener fires only on url changes.
+// handleUpdated() already bails on !changeInfo.url, so the filter is
+// pure overhead reduction — no behavior change. Skips noise from
+// favicon, title, status, mutedInfo and audible updates.
+browser.tabs.onUpdated.addListener(
+  (tabId, changeInfo, tab) => {
+    void (async () => {
+      if (!autoSyncEnabled) await refreshAutoSyncEnabled();
+      if (!autoSyncEnabled) return;
+      await handleUpdated(tabId, changeInfo, tab);
+    })();
+  },
+  { properties: ['url'] },
+);
 
-let listenersAttached = false;
-
-function attachTabListeners(): void {
-  if (listenersAttached) return;
-  browser.tabs.onActivated.addListener(onActivatedListener);
-  // Firefox-specific filter so the listener fires only on url changes.
-  // handleUpdated() already bails on !changeInfo.url, so the filter is
-  // pure overhead reduction — no behavior change. Skips noise from
-  // favicon, title, status, mutedInfo and audible updates.
-  browser.tabs.onUpdated.addListener(onUpdatedListener, {
-    properties: ['url'],
-  });
-  listenersAttached = true;
-}
-
-function detachTabListeners(): void {
-  if (!listenersAttached) return;
-  browser.tabs.onActivated.removeListener(onActivatedListener);
-  browser.tabs.onUpdated.removeListener(onUpdatedListener);
-  listenersAttached = false;
-}
-
-async function reconcileListeners(): Promise<void> {
-  const [hasTabs, toggleOn] = await Promise.all([
-    browser.permissions.contains({ permissions: ['tabs'] }),
-    getAutoSync(),
-  ]);
-  if (hasTabs && toggleOn) {
-    attachTabListeners();
-  } else {
-    detachTabListeners();
-  }
-}
-
+// Keep the cache in sync with permission and toggle changes so the
+// hot path stays a synchronous boolean. The events below are top-level
+// for the same wakeup reason as the tab listeners.
 browser.permissions.onAdded.addListener((perms) => {
   if (!perms.permissions?.includes('tabs')) return;
-  void reconcileListeners();
+  void refreshAutoSyncEnabled();
 });
 
 browser.permissions.onRemoved.addListener((perms) => {
   if (!perms.permissions?.includes('tabs')) return;
-  // Belt-and-braces: detach immediately even before reconcile lands,
-  // so a stray tab event between revoke and storage flush can't fire.
-  detachTabListeners();
-  void reconcileListeners();
+  autoSyncEnabled = false;
+  void refreshAutoSyncEnabled();
 });
 
-// React to the toggle being flipped in the sidebar (storage.local
-// write). storage.onChanged fires for both local and session areas;
-// gate on areaName to avoid waking on cache writes.
-browser.storage.onChanged.addListener((changes, areaName) => {
+browser.storage.onChanged.addListener((_changes, areaName) => {
   if (areaName !== 'local') return;
-  if (!(AUTO_SYNC_STORAGE_KEY in changes)) return;
-  void reconcileListeners();
+  void refreshAutoSyncEnabled();
 });
 
-// Boot reconciliation — MV3 service workers die and respawn; we
-// can't rely on listener registration from a previous session.
-browser.runtime.onInstalled.addListener(() => void reconcileListeners());
-browser.runtime.onStartup.addListener(() => void reconcileListeners());
-
-// Also reconcile on cold start of this module (covers the case where
-// the worker wakes from an event without firing onStartup, e.g. a
-// runtime.onMessage). Best-effort; harmless if it runs twice.
-void reconcileListeners();
+// Seed the cache on module load so the very first tab event after a
+// cold wakeup doesn't have to wait on storage/permission lookups.
+void refreshAutoSyncEnabled();
