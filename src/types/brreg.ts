@@ -87,16 +87,6 @@ export interface Underenhet {
   nedleggelsesdato?: string;
 }
 
-export interface SignaturResponse {
-  signatur?: {
-    beskrivelse?: string;
-    signaturBestemmelser?: string;
-  };
-  prokura?: {
-    beskrivelse?: string;
-    prokuraBestemmelser?: string;
-  };
-}
 
 export interface Regnskap {
   id?: { orgnr: string };

@@ -28,7 +28,10 @@ const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const KEY_PREFIX = 'hostname:';
 const CHOICE_KEY_PREFIX = 'picker-choice:';
 const REJECTED_KEY_PREFIX = 'rejected:';
-const MAX_CANDIDATES_IN_CACHE = 4;
+// Single source of truth for the picker-candidate cap. Tied to the
+// keyboard shortcuts (1-4) the popup and sidebar expose for the picker
+// — bumping this number requires extending the shortcut handler too.
+export const MAX_PICKER_CANDIDATES = 4;
 
 export type HostnameResult =
   | { band: 'auto'; orgnr: string; candidates: SearchHit[] }
@@ -215,13 +218,13 @@ async function runPipeline(
     return {
       band: 'auto',
       orgnr: top.cand.organisasjonsnummer,
-      candidates: scored.slice(0, MAX_CANDIDATES_IN_CACHE).map((s) => s.cand),
+      candidates: scored.slice(0, MAX_PICKER_CANDIDATES).map((s) => s.cand),
     };
   }
   if (band === 'picker') {
     return {
       band: 'picker',
-      candidates: scored.slice(0, MAX_CANDIDATES_IN_CACHE).map((s) => s.cand),
+      candidates: scored.slice(0, MAX_PICKER_CANDIDATES).map((s) => s.cand),
     };
   }
   return { band: 'none', candidates: [] };

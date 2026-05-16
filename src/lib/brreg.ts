@@ -232,13 +232,6 @@ export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
   return response;
 }
 
-// NOTE: there is no fetchSignatur(). brreg's open enhetsregisteret API
-// does not expose signatur/prokura on `/api/enheter/<orgnr>` and the
-// nested `/signatur` path 404s. The full signaturrett text lives only
-// behind the paid Foretaksregisteret endpoints. The #signatur card in
-// details.html stays hidden until brreg exposes the data publicly or
-// the project adds an authenticated tier.
-
 export async function invalidateCache(orgnr: string): Promise<void> {
   const keys = CACHE_PREFIXES.map((p) => `${p}:${orgnr}`);
   try {

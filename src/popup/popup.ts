@@ -3,6 +3,7 @@ import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress } from '../lib/format.js';
 import {
   addRejectedChoice,
+  MAX_PICKER_CANDIDATES,
   searchByHostnameDetailed,
   setPickerChoice,
 } from '../lib/hostname-search.js';
@@ -386,7 +387,7 @@ function addLink(
 function showPicker(host: string, candidates: SearchHit[]): void {
   currentOrgnr = undefined;
   currentPickerHost = host;
-  currentPickerCandidates = candidates.slice(0, 4);
+  currentPickerCandidates = candidates.slice(0, MAX_PICKER_CANDIDATES);
   setState('picker');
   setBrregLink();
   setDetailsLink();

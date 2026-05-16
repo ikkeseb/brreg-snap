@@ -14,7 +14,11 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     target: 'firefox115',
-    minify: false,
+    // esbuild minify is fast and produces correct output for our DOM
+    // code (no eval, no Function constructor, no name-sensitive
+    // reflection). Source maps stay enabled so AMO review can map
+    // minified output back to the original TS.
+    minify: 'esbuild',
     sourcemap: true,
     rollupOptions: {
       input: {

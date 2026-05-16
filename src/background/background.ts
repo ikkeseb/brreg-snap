@@ -163,7 +163,13 @@ let listenersAttached = false;
 function attachTabListeners(): void {
   if (listenersAttached) return;
   browser.tabs.onActivated.addListener(onActivatedListener);
-  browser.tabs.onUpdated.addListener(onUpdatedListener);
+  // Firefox-specific filter so the listener fires only on url changes.
+  // handleUpdated() already bails on !changeInfo.url, so the filter is
+  // pure overhead reduction — no behavior change. Skips noise from
+  // favicon, title, status, mutedInfo and audible updates.
+  browser.tabs.onUpdated.addListener(onUpdatedListener, {
+    properties: ['url'],
+  });
   listenersAttached = true;
 }
 

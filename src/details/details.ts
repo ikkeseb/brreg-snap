@@ -11,6 +11,7 @@ import {
 import { formatRelativeTime } from '../lib/format.js';
 import {
   addRejectedChoice,
+  MAX_PICKER_CANDIDATES,
   searchByHostnameDetailed,
   setPickerChoice,
 } from '../lib/hostname-search.js';
@@ -157,7 +158,7 @@ function resetManualSearch(): void {
 
 function showPicker(host: string, candidates: SearchHit[]): void {
   currentPickerHost = host;
-  currentPickerCandidates = candidates.slice(0, 4);
+  currentPickerCandidates = candidates.slice(0, MAX_PICKER_CANDIDATES);
   setState('picker');
   setSourceHost(host);
   // Bump loadRunId so any in-flight loadOrgnr from a previous tab
