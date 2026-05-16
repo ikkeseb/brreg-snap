@@ -27,7 +27,7 @@ MIT (matches `LICENSE` in the repo).
 
 ## Support contact
 
-- **Email**: _to be filled by Seb at submission time._
+- **Email**: `sebbe.nuez@gmail.com`
 - **Website**: `https://github.com/ikkeseb/brreg-snap`
 - **Support site**: `https://github.com/ikkeseb/brreg-snap/issues`
 
