@@ -2,6 +2,33 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Active long-running branches
+
+### `chrome-port`
+
+Chrome / Chromium support port in progress. Full WIP plan at
+`docs/chrome-port.md` on the `chrome-port` branch — read with
+`git show chrome-port:docs/chrome-port.md` (no checkout needed).
+
+**Do NOT merge `chrome-port` into `main`** until all three hold:
+
+1. Mozilla AMO has approved Firefox `v1.0.0`.
+2. Firefox `v1.0.0` has been live on AMO for at least 7 days
+   without unaddressed bug reports.
+3. Chrome MVP has passed the Phase 4 smoke-test matrix in the
+   plan doc.
+
+Reason: `main` mirrors the AMO submission (tag
+`amo-submission-1.0.0` at `d98dc69`). Mozilla may request source
+clarifications during review; `main` should match submitted source
+until that channel is closed. The tag is the canonical reference
+regardless of where `main` HEAD moves.
+
+While AMO review is open, the only changes that may land on `main`
+are: (a) Mozilla-requested fixes (tagged `v1.0.1` etc), (b) docs
+that don't affect the `.xpi` (like this section). All Chrome-port
+work stays on `chrome-port`.
+
 ## Commands
 
 This project uses **pnpm** (pinned via `packageManager` in
