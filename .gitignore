@@ -18,3 +18,9 @@ coverage/
 
 .env
 .env.local
+
+# AI-process artifacts and unshipped concept assets — kept locally for
+# cross-machine sync via Claude state, not for public repo display.
+docs/superpowers/
+docs/brand-b.png
+docs/concept.png

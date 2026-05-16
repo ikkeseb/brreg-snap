@@ -199,52 +199,179 @@ main[data-state='error'] #status {
   border-color: rgba(248, 113, 113, 0.28);
 }
 
-#search label {
-  display: block;
+/* --- picker (data-state='picker') ------------------------------- */
+
+main[data-state='picker'] #status,
+main[data-state='picker'] #result {
+  display: none;
+}
+
+#picker {
+  padding: 8px 0 4px;
+}
+
+.picker-intro {
+  margin: 0 0 10px;
   color: var(--muted);
-  margin-bottom: 6px;
-  font-size: 12px;
+  font-size: 12.5px;
 }
 
-#search input {
-  width: 100%;
-  padding: 7px 10px;
-  border: 1px solid var(--border-strong);
-  background: var(--bg-card);
-  color: var(--fg);
-  border-radius: var(--radius);
-  font-size: 13px;
-  font-family: var(--font-sans);
-}
-
-#search input::placeholder {
-  color: var(--muted);
-}
-
-#search input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(212, 165, 116, 0.18);
-}
-
-#search-results {
+.picker-list {
   list-style: none;
+  margin: 0 0 10px;
   padding: 0;
-  margin: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 260px;
+  overflow: auto;
+}
+
+.picker-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--fg);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+  width: 100%;
+}
+
+.picker-item:hover,
+.picker-item:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.picker-item-name {
+  display: block;
+  font-weight: 500;
+  color: var(--fg-strong);
+  font-size: 12.5px;
+}
+
+.picker-item-meta {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.picker-none {
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--muted);
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  width: 100%;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.picker-none:hover,
+.picker-none:focus-visible {
+  color: var(--fg);
+  border-color: var(--border-strong);
+  outline: none;
+}
+
+/* --- empty state with manual search ---------------------------- */
+
+main[data-state='empty'] #status,
+main[data-state='empty'] #result,
+main[data-state='empty'] #picker {
+  display: none;
+}
+
+#empty-state {
+  padding: 8px 0 4px;
+}
+
+.empty-message {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.manual-search {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.manual-search-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#manual-query {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+#manual-query::placeholder {
+  color: var(--muted);
+}
+
+#manual-query:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(94, 234, 212, 0.18);
+}
+
+.manual-results {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   max-height: 200px;
   overflow: auto;
 }
 
-#search-results li {
-  padding: 7px 8px;
-  border-bottom: 1px solid var(--border);
-  cursor: pointer;
+.manual-results li {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--fg);
+  transition: border-color 120ms ease;
 }
 
-#search-results li:hover,
-#search-results li:focus {
-  background: var(--bg-card);
+.manual-results li:hover,
+.manual-results li:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.manual-results li.empty-result {
+  color: var(--muted);
+  font-style: italic;
+  cursor: default;
+  border-style: dashed;
+}
+
+.manual-results li.empty-result:hover {
+  border-color: var(--border);
 }
 
 #details-link {
