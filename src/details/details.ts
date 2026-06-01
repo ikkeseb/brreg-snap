@@ -1,3 +1,7 @@
+// Side-effect import: aliases `globalThis.browser = chrome` on Chromium
+// before any `browser.*` access. Must stay the first import.
+import '../lib/platform/globals.js';
+import { isFirefox } from '../lib/platform/engine.js';
 import { decideToggle } from '../lib/auto-sync-controller.js';
 import { getAutoSync, setAutoSync } from '../lib/auto-sync-settings.js';
 import {
@@ -570,6 +574,17 @@ async function doRefresh(currentOrgnrArg: string): Promise<void> {
 let currentAutoSyncEnabled = false;
 
 async function setupAutoSyncToggle(): Promise<void> {
+  if (!isFirefox) {
+    // Auto-sync (the `tabs` opt-in) is Firefox-only for now — the Chrome
+    // side-panel permission-grant gesture path is deferred to a
+    // post-launch update (docs/chrome-port.md Phase 6). Hide the toggle
+    // so the Chrome MVP doesn't surface an inactive control, and skip
+    // the permission probe (`tabs` isn't declared in the Chrome
+    // manifest).
+    const toggleLabel = autoSyncToggle.closest<HTMLElement>('.toggle');
+    if (toggleLabel) toggleLabel.style.display = 'none';
+    return;
+  }
   // Reconcile UI state with reality on load. The toggle is "on" only
   // if both storage says so AND the tabs permission is currently
   // granted (the user can revoke externally via about:addons).

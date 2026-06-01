@@ -1,3 +1,7 @@
+// Side-effect import: aliases `globalThis.browser = chrome` on Chromium
+// before any `browser.*` access. Must stay the first import.
+import '../lib/platform/globals.js';
+import { sidebar } from '../lib/platform/sidebar.js';
 import { fetchEnhet, fetchRoller, searchEnheter } from '../lib/brreg.js';
 import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress } from '../lib/format.js';
@@ -60,6 +64,12 @@ type ResolutionMethod =
 let currentOrgnr: string | undefined;
 let currentSourceHost: string | undefined;
 let currentResolutionMethod: ResolutionMethod | undefined;
+// Active tab/window ids captured during resolution so the "open in
+// side panel" click can pass them to sidebar.open() synchronously —
+// Chrome's sidePanel.open needs a windowId/tabId and can't await a
+// tabs.query inside the gesture. Unused by the Firefox adapter.
+let currentWindowId: number | undefined;
+let currentTabId: number | undefined;
 // Picker state held at module scope so the document-level keydown
 // handler can look up which candidate maps to keys 1-4 without
 // re-reading the DOM.
@@ -78,35 +88,34 @@ function setDetailsLink(): void {
   // sidebar opens on the picker/empty surface for the same host
   // instead of stale state. Only hidden when we have neither — popup
   // opened on about:blank or an unresolvable URL.
-  let url: string | undefined;
+  let relPath: string | undefined;
   if (currentOrgnr) {
-    url = browser.runtime.getURL(
-      `details/details.html?orgnr=${currentOrgnr}`,
-    );
+    relPath = `details/details.html?orgnr=${currentOrgnr}`;
   } else if (currentSourceHost) {
-    url = browser.runtime.getURL(
-      `details/details.html?nomatch=${encodeURIComponent(currentSourceHost)}`,
-    );
+    relPath = `details/details.html?nomatch=${encodeURIComponent(currentSourceHost)}`;
   }
-  if (!url) {
+  if (!relPath) {
     detailsLink.hidden = true;
     detailsLink.removeAttribute('href');
     detailsLink.onclick = null;
     return;
   }
+  const path = relPath;
   detailsLink.hidden = false;
   // Keep href so middle-click and keyboard activation still open the
-  // details page somewhere. The onclick swaps to a Firefox sidebar so
-  // the panel docks into the browser chrome instead of stealing focus
-  // into a new tab or popup window.
-  detailsLink.href = url;
+  // details page somewhere. The onclick docks it into the browser's
+  // sidebar / side panel instead of stealing focus into a new tab or
+  // popup window.
+  detailsLink.href = browser.runtime.getURL(path);
   detailsLink.onclick = (ev) => {
     ev.preventDefault();
-    // setPanel + open must both fire inside the user-gesture context
-    // of this click. setPanel is promise-based but fire-and-forget is
-    // fine — open() picks up the new panel URL when the sidebar paints.
-    void browser.sidebarAction.setPanel({ panel: url });
-    void browser.sidebarAction.open();
+    // setPanel + open must both fire inside this click's gesture stack.
+    // No await before open() — both engines consume the activation
+    // token on the first await, and Chrome's sidePanel.open hard-
+    // requires a live gesture. open() picks up the panel path setPanel
+    // just queued.
+    sidebar.setPanel(path);
+    sidebar.open({ windowId: currentWindowId, tabId: currentTabId });
     window.close();
   };
 }
@@ -146,7 +155,12 @@ interface TabContext {
 
 async function getActiveTab(): Promise<browser.tabs.Tab | undefined> {
   const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-  return tabs[0];
+  const tab = tabs[0];
+  // Capture for the gesture-bound side-panel open (Chrome). Harmless on
+  // Firefox, whose adapter ignores the target.
+  currentWindowId = tab?.windowId;
+  currentTabId = tab?.id;
+  return tab;
 }
 
 async function resolveFromActiveTab(): Promise<TabContext> {
@@ -221,22 +235,21 @@ async function syncSidebarIfOpen(orgnr: string): Promise<void> {
   // Fire-and-forget — popup rendering shouldn't block on this, and
   // both calls survive the popup closing.
   try {
-    const open = await browser.sidebarAction.isOpen({});
-    if (!open) return;
-    const url = browser.runtime.getURL(
-      `details/details.html?orgnr=${orgnr}`,
-    );
-    await Promise.allSettled([
-      browser.sidebarAction.setPanel({ panel: url }),
-      browser.runtime.sendMessage({
-        type: 'sync',
-        orgnr,
-        host: currentSourceHost,
-      }),
-    ]);
+    if (!(await sidebar.isOpen())) return;
   } catch {
-    // sidebarAction may be unavailable. Silent fail — the popup
-    // itself still rendered.
+    // Sidebar API unavailable / errored — the popup itself still
+    // rendered; nothing more to do.
+    return;
+  }
+  sidebar.setPanel(`details/details.html?orgnr=${orgnr}`);
+  try {
+    await browser.runtime.sendMessage({
+      type: 'sync',
+      orgnr,
+      host: currentSourceHost,
+    });
+  } catch {
+    // No listener (sidebar closed) — sendMessage rejects; expected.
   }
 }
 
@@ -247,19 +260,19 @@ async function syncSidebarNoMatch(host: string | undefined): Promise<void> {
   // picker / result up. setPanel resets the panel URL so a fresh
   // open lands on the empty state, not the prior orgnr.
   try {
-    const open = await browser.sidebarAction.isOpen({});
-    if (!open) return;
-    const blank = browser.runtime.getURL(
-      host
-        ? `details/details.html?nomatch=${encodeURIComponent(host)}`
-        : 'details/details.html',
-    );
-    await Promise.allSettled([
-      browser.sidebarAction.setPanel({ panel: blank }),
-      browser.runtime.sendMessage({ type: 'no-match', host }),
-    ]);
+    if (!(await sidebar.isOpen())) return;
   } catch {
-    /* silent — popup still rendered */
+    return; /* silent — popup still rendered */
+  }
+  sidebar.setPanel(
+    host
+      ? `details/details.html?nomatch=${encodeURIComponent(host)}`
+      : 'details/details.html',
+  );
+  try {
+    await browser.runtime.sendMessage({ type: 'no-match', host });
+  } catch {
+    // No listener (sidebar closed) — expected.
   }
 }
 

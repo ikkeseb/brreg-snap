@@ -8,21 +8,35 @@
 // permission + toggle internally. Without both, the handler returns
 // before touching tab.url/title.
 
+// Side-effect import: aliases `globalThis.browser = chrome` on Chromium
+// before any `browser.*` access. Must stay the first import.
+import '../lib/platform/globals.js';
+import { sidebar } from '../lib/platform/sidebar.js';
+import { isFirefox } from '../lib/platform/engine.js';
 import { getAutoSync } from '../lib/auto-sync-settings.js';
 import { deriveSync, deriveSyncAsync } from '../lib/tab-sync.js';
 
 const MENU_ID = 'show-in-brreg-sidebar';
 
 function registerMenu(): void {
-  // menus.create is idempotent only across browser restarts, not within
-  // the same session — calling it twice with the same id throws. Both
-  // onInstalled and onStartup fire once per session at most, so a
-  // single create call from each is safe.
-  browser.menus.create({
-    id: MENU_ID,
-    title: 'Vis i brreg-snap sidebar',
-    contexts: ['page'],
-  });
+  // Use `contextMenus` (not Firefox's `menus` alias) so the same call
+  // works on Chromium, where `browser.menus` is undefined; Firefox
+  // exposes `contextMenus` too under the `menus` permission.
+  //
+  // The trailing callback reads runtime.lastError to swallow Chrome's
+  // async "Cannot create item with duplicate id" — context menus
+  // persist across service-worker restarts there, and onInstalled /
+  // onStartup can each re-run this. On Firefox the callback is a no-op
+  // (create is idempotent across restarts; only one of onInstalled /
+  // onStartup fires per session). Result: one menu item either way.
+  browser.contextMenus.create(
+    {
+      id: MENU_ID,
+      title: 'Vis i brreg-snap sidebar',
+      contexts: ['page'],
+    },
+    () => void browser.runtime.lastError,
+  );
 }
 
 browser.runtime.onInstalled.addListener(registerMenu);
@@ -62,28 +76,26 @@ function hostFromUrl(url: string | undefined): string | undefined {
   }
 }
 
-browser.menus.onClicked.addListener((info, tab) => {
+browser.contextMenus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID) return;
   // SYNC resolve only — setPanel + open must fire inside the user-
   // gesture stack and the first await would consume the activation
   // token. See docs/notes/permissions-model.md § gesture-stack.
+  // (Chrome's sidePanel.open enforces the same live-gesture rule.)
   const sync = deriveSync(tab?.url, tab?.title);
   const host = hostFromUrl(tab?.url);
 
-  // Encode the target state into the panel URL so a fresh sidebar
+  // Encode the target state into the panel path so a fresh sidebar
   // opens on the right page even if the broadcast races the panel's
-  // listener registration.
-  const panelUrl = sync
-    ? browser.runtime.getURL(
-        `details/details.html?orgnr=${encodeURIComponent(sync.orgnr)}`,
-      )
+  // listener registration. The adapter resolves this relative path to
+  // an absolute URL on Firefox and feeds it to setOptions on Chrome.
+  const panelPath = sync
+    ? `details/details.html?orgnr=${encodeURIComponent(sync.orgnr)}`
     : host
-      ? browser.runtime.getURL(
-          `details/details.html?nomatch=${encodeURIComponent(host)}`,
-        )
-      : browser.runtime.getURL('details/details.html');
-  void browser.sidebarAction.setPanel({ panel: panelUrl });
-  void browser.sidebarAction.open();
+      ? `details/details.html?nomatch=${encodeURIComponent(host)}`
+      : 'details/details.html';
+  sidebar.setPanel(panelPath);
+  sidebar.open({ windowId: tab?.windowId, tabId: tab?.id });
 
   // For the already-open case: setPanel doesn't reliably repaint a
   // visible sidebar in Firefox 115+, so broadcast a message that the
@@ -133,6 +145,15 @@ browser.menus.onClicked.addListener((info, tab) => {
 let autoSyncEnabled = false;
 
 async function refreshAutoSyncEnabled(): Promise<void> {
+  if (!isFirefox) {
+    // Auto-sync (the `tabs` opt-in) ships Firefox-only for now. On
+    // Chrome `tabs` isn't declared, so skip the permission probe and
+    // keep it disabled — the tab listeners stay registered but bail on
+    // this flag. Chrome auto-sync is deferred (docs/chrome-port.md
+    // Phase 6).
+    autoSyncEnabled = false;
+    return;
+  }
   const [hasTabs, toggleOn] = await Promise.all([
     browser.permissions.contains({ permissions: ['tabs'] }),
     getAutoSync(),

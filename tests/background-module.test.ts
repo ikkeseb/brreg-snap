@@ -45,8 +45,9 @@ function installBrowserMock(opts: BrowserMockOptions = {}) {
       onStartup: makeListenerSpy(),
       sendMessage: vi.fn(async () => undefined),
       getURL: vi.fn((p: string) => `moz-extension://test/${p}`),
+      lastError: undefined,
     },
-    menus: {
+    contextMenus: {
       create: vi.fn(),
       onClicked: makeListenerSpy(),
     },
@@ -137,12 +138,12 @@ describe('background module load — top-level listener registration', () => {
     expect(mock.storage.onChanged.addListener).toHaveBeenCalledTimes(1);
   });
 
-  it('registers runtime.onInstalled, onStartup, and menus.onClicked at top level', async () => {
+  it('registers runtime.onInstalled, onStartup, and contextMenus.onClicked at top level', async () => {
     const mock = installBrowserMock();
     await loadBackground();
     expect(mock.runtime.onInstalled.addListener).toHaveBeenCalled();
     expect(mock.runtime.onStartup.addListener).toHaveBeenCalled();
-    expect(mock.menus.onClicked.addListener).toHaveBeenCalledTimes(1);
+    expect(mock.contextMenus.onClicked.addListener).toHaveBeenCalledTimes(1);
   });
 });
 
