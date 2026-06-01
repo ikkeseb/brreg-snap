@@ -55,14 +55,19 @@ function chromeSidePanel(): ChromeSidePanel {
     .chrome.sidePanel;
 }
 
+// Fire-and-forget calls swallow their own rejection (.catch) rather
+// than relying on `void`, which would surface a transient panel-state
+// error as an unhandledrejection. The shipped 1.0.0 swallowed these via
+// Promise.allSettled in the popup; keeping the swallow here preserves
+// that and is correct for genuinely best-effort calls.
 const firefoxSidebar: SidebarAdapter = {
   setPanel(relativePath) {
-    void browser.sidebarAction.setPanel({
-      panel: browser.runtime.getURL(relativePath),
-    });
+    void browser.sidebarAction
+      .setPanel({ panel: browser.runtime.getURL(relativePath) })
+      .catch(() => {});
   },
   open() {
-    void browser.sidebarAction.open();
+    void browser.sidebarAction.open().catch(() => {});
   },
   isOpen() {
     return browser.sidebarAction.isOpen({});
@@ -71,18 +76,22 @@ const firefoxSidebar: SidebarAdapter = {
 
 const chromeSidebar: SidebarAdapter = {
   setPanel(relativePath) {
-    void chromeSidePanel().setOptions({ path: relativePath, enabled: true });
+    void chromeSidePanel()
+      .setOptions({ path: relativePath, enabled: true })
+      .catch(() => {});
   },
   open(target) {
     if (target.windowId === undefined && target.tabId === undefined) return;
     // {windowId} opens the global panel window-wide (matches Firefox's
     // single shared sidebar); fall back to {tabId} when no window id is
     // available. Never await before this call — see open()'s contract.
-    void chromeSidePanel().open(
-      target.windowId !== undefined
-        ? { windowId: target.windowId }
-        : { tabId: target.tabId },
-    );
+    void chromeSidePanel()
+      .open(
+        target.windowId !== undefined
+          ? { windowId: target.windowId }
+          : { tabId: target.tabId },
+      )
+      .catch(() => {});
   },
   isOpen() {
     return Promise.resolve(true);
