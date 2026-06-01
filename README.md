@@ -1,11 +1,21 @@
 # brreg-snap
 
-Firefox extension that surfaces Norwegian company information from
-[Brønnøysundregistrene](https://data.brreg.no/) — CEO, board members,
-signaturrett, status flags, key figures — straight from the toolbar.
+Browser extension (Firefox + Chrome/Chromium) that surfaces Norwegian
+company information from [Brønnøysundregistrene](https://data.brreg.no/)
+— CEO, board members, signaturrett, status flags, key figures —
+straight from the toolbar.
 
 Click the icon while on a company website, get the brreg snapshot in a
 popup. No content scripts, no page DOM access, no third-party calls.
+
+> One source tree, two targets. Firefox is live on AMO; the Chrome
+> build is feature-complete bar the tab-switch auto-update (a follow-up)
+> and pending Chrome Web Store submission — see
+> [docs/chrome-port.md](docs/chrome-port.md). The engine differences
+> (sidebar vs. side panel, `menus` vs. `contextMenus`, event page vs.
+> service worker) are isolated in `src/lib/platform/` behind a runtime
+> feature check, with **no third-party polyfill** — the zero-runtime-
+> dependency guarantee holds on both engines.
 
 ![brreg-snap sidebar showing ORKLA ASA overview, opened on orkla.com](docs/screenshots/01-sidebar-overview.png)
 
@@ -21,6 +31,12 @@ pages you browse and never reads their DOM.
 | `menus` | Register the "Vis i brreg-snap sidebar" right-click item. On Mozilla's no-prompt list — silent at install, does not grant tab snooping (activeTab still required, granted per click). |
 | `host_permissions: https://data.brreg.no/*` | Fetch from the public brreg API. Only domain we contact. |
 | `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater ved fane-bytte" in the sidebar. Requested at runtime via a Firefox prompt; revocable from `about:addons` or by flipping the toggle off (which calls `permissions.remove`). Install dialog stays silent. |
+
+On Chrome the equivalent install set is `activeTab` + `storage` +
+`contextMenus` + `sidePanel` + the same `data.brreg.no` host — all on
+Chrome's no-prompt list. The Chrome MVP omits `tabs`/auto-sync
+entirely (deferred to a follow-up), so its install footprint is even
+narrower than Firefox's.
 
 What this rules out:
 
@@ -40,23 +56,28 @@ Total reviewable surface is intentionally small (~200 LOC core).
 
 ## Install — development
 
-Requires Node 18+, [pnpm](https://pnpm.io/) 10.33+, and Firefox.
+Requires Node 18+, [pnpm](https://pnpm.io/) 10.33+, and Firefox and/or
+Chrome.
 
 ```bash
 pnpm install
-pnpm dev             # builds + launches Firefox dev profile with the extension loaded
+pnpm dev             # builds + launches a Firefox dev profile with the extension loaded
+pnpm dev:chrome      # builds the Chrome target + web-ext run -t chromium
 ```
 
-To produce a distributable `.xpi`:
+To produce distributable packages:
 
 ```bash
-pnpm build
-pnpm package         # produces web-ext-artifacts/brreg-snap-X.Y.Z.xpi
+pnpm package          # Firefox -> web-ext-artifacts/brreg-snap-X.Y.Z.zip (.xpi)
+pnpm package:chrome   # Chrome  -> web-ext-artifacts/brreg-snap-chrome-X.Y.Z.zip
 ```
 
-Load the `.xpi` via `about:debugging` → "This Firefox" → "Load Temporary
-Add-on". For permanent install you need the AMO-signed build (see
-[Distribution](#distribution)).
+**Firefox:** load the `.xpi` via `about:debugging` → "This Firefox" →
+"Load Temporary Add-on". For permanent install you need the AMO-signed
+build (see [Distribution](#distribution)).
+
+**Chrome:** `pnpm build:chrome`, then `chrome://extensions` → enable
+"Developer mode" → "Load unpacked" → select `dist-chrome/`.
 
 ## How it works
 
@@ -90,10 +111,14 @@ switch tabs.
 
 ```
 src/
-  background/                 service worker; reconciles tab listeners when `tabs` is granted
+  background/                 FF event page / Chrome service worker; context menu + tab listeners
   popup/                      popup.html + popup.ts + popup.css (toolbar action)
-  details/                    sidebar panel (sidebar_action: details.html/ts/css)
+  details/                    detail panel (FF sidebar_action / Chrome side_panel)
   lib/
+    platform/
+      globals.ts              aliases globalThis.browser = chrome on Chromium (no polyfill)
+      engine.ts               isFirefox feature detection
+      sidebar.ts              sidebarAction (FF) vs sidePanel (Chrome) adapter
     auto-sync-controller.ts   pure decision logic for the auto-sync toggle
     auto-sync-settings.ts     storage.local persistence for the toggle
     brreg.ts                  data.brreg.no API client
@@ -108,7 +133,8 @@ src/
   types/
     brreg.ts                  response type definitions
 public/
-  manifest.json               MV3 manifest
+  manifest.firefox.json       Firefox MV3 manifest (sidebar_action, menus, gecko settings)
+  manifest.chrome.json        Chrome MV3 manifest (side_panel, service_worker, contextMenus)
   icons/                      toolbar icon set
 tests/
   *.test.ts                   Vitest unit tests

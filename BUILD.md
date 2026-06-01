@@ -28,22 +28,27 @@ From the repository root:
 
 ```bash
 pnpm install --frozen-lockfile      # uses pnpm-lock.yaml exactly
-pnpm test                           # 105 unit tests (vitest)
+pnpm test                           # unit tests (vitest)
 pnpm typecheck                      # tsc --noEmit, zero errors
 pnpm lint:ts                        # eslint, zero warnings
-pnpm package                        # builds + produces .xpi
+pnpm package                        # builds Firefox + produces .xpi
 ```
+
+`pnpm package` is an alias for `pnpm package:firefox`. The repository
+also builds a Chrome target (`pnpm package:chrome`); the two share the
+same `src/` and differ only in `public/manifest.<browser>.json` and a
+3-line `browser` shim. The Firefox `manifest.json` in the package is
+byte-identical to the one submitted to AMO. See `docs/chrome-port.md`.
 
 The final artifact lands at
 `web-ext-artifacts/brreg-snap-<version>.zip`. (web-ext writes the
 package as `.zip`; AMO accepts both extensions interchangeably.)
 
 The **contents** of the package — every file under the archive
-root — are bit-for-bit identical to the file submitted to AMO when
-run on the same Node/pnpm combination. We verified this by running
-`pnpm package` in two separate working trees from the same source
-and comparing `dist/` recursively with `diff -rq` (zero
-differences).
+root — are reproducible bit-for-bit when run on the same Node/pnpm
+combination. We verified this by running `pnpm package` in two
+separate working trees from the same source and comparing
+`dist-firefox/` recursively with `diff -rq` (zero differences).
 
 The zip envelope itself has different SHA-256 hashes between builds
 because `web-ext` records each file's modification time in the
@@ -56,20 +61,25 @@ outer envelope.
 
 `pnpm package` is the composite of two steps:
 
-1. **`pnpm build`** (Vite) — compiles TypeScript sources under
-   `src/` to JavaScript, copies static assets from `public/` (the
-   manifest and toolbar icons), relocates the popup/details HTML
-   entries to their manifest-expected paths, and writes everything
-   to `dist/`.
-2. **`web-ext build`** — packages the contents of `dist/` into a
-   `.zip` file with the `.xpi` extension. No code transformation.
+1. **`pnpm build:firefox`** (Vite) — compiles TypeScript sources
+   under `src/` to JavaScript, copies the Firefox manifest
+   (`public/manifest.firefox.json` → `manifest.json`) and toolbar
+   icons, relocates the popup/details HTML entries to their
+   manifest-expected paths, and writes everything to `dist-firefox/`.
+2. **`web-ext build`** — packages the contents of `dist-firefox/`
+   into a `.zip` file with the `.xpi` extension, excluding sourcemaps
+   (`*.map`) and `icons/README.md`. No code transformation.
 
 ## Minification
 
 The build uses esbuild's minifier (default Vite production setting).
-Source maps are emitted for every JavaScript bundle so the minified
-code can be mapped back to the original TypeScript at review time.
-The full original source is also in this submission for reference.
+Source maps are emitted for every JavaScript bundle into
+`dist-firefox/` for local debugging, but are **excluded from the
+packaged `.zip`/`.xpi`** (they are dead weight for end users — the
+maps were ~66% of an earlier package). The minified code can still be
+mapped back to the original TypeScript at review time: the full
+original source ships in the source submission
+(`brreg-snap-source-<version>.zip`), which is what AMO review uses.
 
 No obfuscation, no name mangling beyond standard minification, no
 runtime code generation. The codebase does not use `eval` or the

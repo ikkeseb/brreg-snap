@@ -2,6 +2,34 @@
 
 All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
+Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
+
+## [Unreleased]
+
+### Added
+
+- `[chrome]` Chrome / Chromium support from the same source tree
+  (`BROWSER=chrome` build). Chrome's side panel (`sidePanel`) replaces
+  the Firefox sidebar; popup lookup, context menu, manual search,
+  picker, recents and click-to-copy all work. Engine differences are
+  isolated in `src/lib/platform/` with no third-party polyfill (a
+  ~3-line `browser`→`chrome` shim), preserving the zero-runtime-
+  dependency guarantee. Tab-switch auto-update stays Firefox-only for
+  now (a follow-up). Pending Chrome Web Store review.
+
+### Changed
+
+- `[firefox]` Packaged `.xpi` no longer ships sourcemaps or
+  `icons/README.md` (~263 KB → 43 KB). No change to executed code —
+  maps remain in the build dir for local debugging and the full
+  TypeScript source ships in the source zip used for AMO review.
+
+### Internal
+
+- Characterization tests for `format` and `recent`, plus tests for the
+  platform layer (engine detection + sidebar adapter). 105 → 170 tests.
+- Removed an inert `web-ext-config.cjs` (was never loaded; packaging
+  options are now explicit CLI flags).
 
 ## [1.0.0] — 2026-05-16
 

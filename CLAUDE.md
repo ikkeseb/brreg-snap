@@ -6,9 +6,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### `chrome-port`
 
-Chrome / Chromium support port in progress. Full WIP plan at
-`docs/chrome-port.md` on the `chrome-port` branch — read with
-`git show chrome-port:docs/chrome-port.md` (no checkout needed).
+Chrome / Chromium support port in progress. Full plan +
+session-resumable status at `docs/chrome-port.md`.
+
+**State (2026-06-01):** Phases 1–3 done on branch `chrome-port-mvp`
+(off `chrome-port`). Chrome MVP builds/lints/type-checks/tests (170)
+clean and packages to a CWS-ready zip; only the Phase 4 live smoke
+test remains. Key build-time deviations from the original plan are
+recorded as D8–D12 in the plan doc (in-house shim over polyfill,
+runtime detection over build-alias, Chrome auto-sync deferred).
+CWS submission steps: `docs/cws-submission.md`.
 
 **Do NOT merge `chrome-port` into `main`** until all three hold:
 
@@ -38,19 +45,36 @@ This project uses **pnpm** (pinned via `packageManager` in
 ```bash
 pnpm typecheck                             # tsc --noEmit
 pnpm lint:ts                               # ESLint on src/**/*.ts
-pnpm lint:ext                              # web-ext lint on dist/ (run build first)
+pnpm lint:ext                              # web-ext lint on dist-firefox/ (run build first)
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
 pnpm exec vitest run tests/orgnr.test.ts   # single file
 pnpm exec vitest run -t "rejects cd=10"    # single test by name
-pnpm build                                 # production build to dist/
-pnpm watch                                 # vite build --watch
-pnpm dev                                   # build + web-ext run (Firefox dev profile)
-pnpm package                               # build + .xpi to web-ext-artifacts/
+pnpm build                                 # = build:firefox (default target)
+pnpm build:firefox                         # BROWSER=firefox -> dist-firefox/
+pnpm build:chrome                          # BROWSER=chrome   -> dist-chrome/
+pnpm watch                                 # vite build --watch (firefox target)
+pnpm dev                                   # = dev:firefox (build + web-ext run, FF profile)
+pnpm dev:chrome                            # build:chrome + web-ext run -t chromium
+pnpm package                               # = package:firefox (.xpi/.zip, maps stripped)
+pnpm package:chrome                        # dist-chrome/ -> CWS-ready .zip (manifest at root)
 ```
 
 `pnpm dev` is the only way to exercise the popup — there is no Vite
-dev server for popup-only extensions.
+dev server for popup-only extensions. Chrome has no `web-ext run`
+parity for the side panel; load `dist-chrome/` unpacked via
+`chrome://extensions` → Developer mode → "Load unpacked" instead.
+
+### Dual-browser build (chrome-port)
+
+One source tree, two targets via `BROWSER=firefox|chrome`. Outputs go
+to `dist-firefox/` and `dist-chrome/`; the matching
+`public/manifest.<browser>.json` is copied to `manifest.json` by the
+`copy-static-assets` plugin in `vite.config.ts` (`publicDir` is
+disabled so the source manifests don't leak). The Firefox
+`manifest.json` stays byte-identical to the AMO submission. Engine
+differences are isolated in `src/lib/platform/` — see
+`docs/chrome-port.md`.
 
 ## Architecture — routing table
 

@@ -13,15 +13,34 @@ phase.
 
 ## Status
 
-- **Current phase:** Phase 0 (prep) — done. Phase 1 not yet started.
-- **Branch:** `chrome-port` off `d98dc69` (== `v1.0.0` == AMO
-  submission snapshot).
-- **AMO review:** pending (as of 2026-05-16). Do NOT merge this
-  branch to `main` until AMO is green AND we have at least one
-  stable week of Firefox 1.0.0 in the field.
-- **Next action:** Start Phase 1 — extract `src/lib/platform/`
-  adapter module, with Firefox-only implementations. Output `.xpi`
-  must remain byte-equivalent in behaviour to the AMO submission.
+- **Current phase:** Phases 1–3 **done** (2026-06-01). Chrome MVP
+  builds, type-checks, lints, and passes the full unit suite (170
+  tests). Phase 4 (live Chrome smoke test) is the only thing between
+  here and a CWS submission — and it needs a human at a Chrome window.
+- **Branch:** `chrome-port-mvp`, off `chrome-port` (which is off
+  `d98dc69` == `v1.0.0` == AMO submission snapshot). All Chrome work
+  lives here; merge `chrome-port-mvp` → `chrome-port` once Phase 4 is
+  green, then follow the CLAUDE.md embargo before `chrome-port` → `main`.
+- **AMO review:** approved 2026-05-19; the 7-day-stable window passed
+  2026-05-26. Embargo conditions 1 & 2 are met; condition 3 (this
+  Chrome MVP passing Phase 4) is the last gate before a `main` merge.
+  Merging is **Seb's call** — not done autonomously.
+- **What deviates from the original plan (decided during build):**
+  D3 (webextension-polyfill) → **in-house shim** (see D8); build-time
+  module aliasing → **runtime feature detection** (see D9); D4
+  (auto-sync deferred on Chrome) **kept** — toggle hidden, `tabs`
+  dropped from the Chrome manifest.
+- **Next action:** run the Phase 4 manual smoke matrix below in Chrome
+  (load `dist-chrome/` unpacked), then `pnpm package:chrome` and follow
+  `docs/cws-submission.md`.
+
+### How to load the Chrome build for testing
+
+```bash
+pnpm build:chrome          # -> dist-chrome/
+# chrome://extensions → enable "Developer mode" → "Load unpacked"
+#   → select the dist-chrome/ directory
+```
 
 ---
 
@@ -36,14 +55,19 @@ phase.
 | D5 | Sequential release: Firefox 1.0.0 live + stable before Chrome submission | 2026-05-16 | Avoids dual-browser support burden during the period when bugs are most likely |
 | D6 | Plan + Chrome work happens on `chrome-port` branch only; not merged to `main` until both Chrome works and AMO is done | 2026-05-16 | Keeps `main` as AMO submission truth in case Mozilla requests source-matching changes |
 | D7 | Versioning: both browser builds publish under the same version number once paritised. Chrome MVP releases as a version that signals partial parity (TBD — see Q1). | 2026-05-16 | Single changelog, one mental model for users |
+| D8 | **In-house `browser` shim, NOT webextension-polyfill** (reverses D3) | 2026-06-01 | Research verified every API we await returns a native Promise on Chrome ≥114 (`storage`, `tabs`, `permissions`, `runtime`, `sidePanel`); the only non-promise calls (`contextMenus.create`, `runtime.getURL`) are never awaited. The polyfill is 10 kB, in maintenance mode, and doesn't even alias `browser.menus` (issue #242). The shim (`platform/globals.ts`, ~3 lines) preserves the zero-third-party-JS guarantee that CLAUDE.md/BUILD.md treat as a hard invariant. |
+| D9 | **Runtime feature detection, NOT build-time module aliasing** (refines D2) | 2026-06-01 | The only divergent surface is the sidebar adapter (~30 lines, 3 methods). Shipping both branches costs <1 KB and removes all tsc/Vite alias-resolution fragility (no `tsconfig paths`, no dual typecheck). The manifest is still switched at build time — that part genuinely can't be unified. |
+| D10 | **No menus adapter — use `browser.contextMenus` uniformly** | 2026-06-01 | Firefox exposes `contextMenus` as an alias of `menus` (works under the `menus` permission); Chrome only has `contextMenus`. One namespace, behaviorally identical on Firefox. A `lastError`-swallowing callback on `create` absorbs Chrome's duplicate-id-on-SW-restart. |
+| D11 | **Chrome auto-sync deferred (keeps D4); `tabs` dropped from Chrome manifest** | 2026-06-01 | The toggle is hidden on Chrome and `refreshAutoSyncEnabled` short-circuits, so the Chrome MVP ships a minimal permission set (no `optional_permissions`) for a clean first CWS review. Chrome's side-panel→`permissions.request` gesture path is plausible per docs but unverified live; not worth risking a visible-but-flaky control in v1. Re-enable in Phase 6 after live verification. Auto-sync code stays in the tree (Firefox uses it). |
+| D12 | **Strip sourcemaps + `icons/README.md` from packaged artifacts** | 2026-06-01 | The Firefox `.zip` shipped 174 KB of sourcemaps (66% of the artifact) because `web-ext-config.cjs`'s `ignoreFiles` was never loaded. Packaging now passes `--ignore-files` explicitly (263 KB → 43 KB). Behaviour-neutral (no executed JS changes); maps stay in `dist-*/` for local debugging and the full TS source ships in the AMO source zip. **Firefox-artifact note:** this diverges the future Firefox `.xpi` from the on-file AMO 1.0.0 package (which included maps); fold into a future Firefox update, not a silent resubmission. |
 
 ## Open questions
 
-| # | Question | Block phase | Default if unanswered |
-|---|----------|-------------|-----------------------|
-| Q1 | Chrome MVP version number — `1.0.0` (matches Firefox, but lacks auto-sync) or `0.9.0-chrome` / `1.0.0-mvp` (signals incomplete parity)? | Phase 5 | `1.0.0` with a clear "Chrome-specific limitations" section in the listing description |
-| Q2 | Do we want a single combined CHANGELOG, or separate per-browser sections? | Phase 5 | Single CHANGELOG with `[firefox]` / `[chrome]` prefixes on browser-specific entries |
-| Q3 | Side panel: Chrome allows the side panel to be tied to a specific tab vs. global. Which UX matches Firefox sidebar's behaviour best? | Phase 3 | Global side panel (one panel state across tabs, matches Firefox sidebar) — verify in Phase 4 |
+| # | Question | Status / resolution |
+|---|----------|---------------------|
+| Q1 | Chrome MVP version number | **Resolved: `1.0.0`** — matches Firefox. Auto-sync is the only missing feature; the CWS listing description should note "tab-switch auto-update lands in a follow-up". (Seb may override to `0.9.0` if he'd rather signal partial parity — change `version` in `package.json` + `public/manifest.chrome.json`.) |
+| Q2 | Single vs per-browser CHANGELOG | **Resolved: single CHANGELOG**, `[chrome]` / `[firefox]` prefixes on browser-specific lines. Not yet written — see Phase 5. |
+| Q3 | Side panel global vs tab-specific | **Resolved: global** — `setOptions`/`open` are called without a `tabId`, and `open({windowId})` opens the window-wide panel. Matches Firefox's single shared sidebar. Confirm visually in Phase 4. |
 
 ---
 
@@ -257,7 +281,28 @@ implemented yet.
 ## Phase 4 — Chrome smoke test + bug fixes
 
 **Goal:** Walk through every user-facing flow that MVP supports.
-Log issues, fix them, re-test.
+Log issues, fix them, re-test. Everything below typechecks, lints,
+unit-tests (170), builds, and packages clean — Phase 4 is purely the
+live-browser behaviours that can't be unit-tested.
+
+**Check these three Chrome-only risk points FIRST** (they're the only
+things genuinely unverified — the rest is shared, unit-tested logic):
+
+1. **Context-menu → side panel opens.** Right-click a page →
+   "Vis i brreg-snap sidebar". The panel must actually open.
+   `chrome.sidePanel.open()` needs a live user gesture and was added in
+   Chrome 116 (manifest sets `minimum_chrome_version: 116`). If it
+   throws a "user gesture" error, the synchronous order in
+   `background.ts` onClicked is wrong — but it's written to call
+   `open()` with no `await` before it, so this *should* pass.
+2. **Popup "Vis i sidepanel" link opens the panel.** Click the action
+   icon → popup → the details link. It calls `sidePanel.open({windowId})`
+   then `window.close()`. Watch for: panel doesn't open, or opens then
+   the popup-close cancels it. (Secondary path; context menu is primary.)
+3. **Side panel renders + repaints.** When opened it should show the
+   right company (it reads `?orgnr=` from the path *and* re-resolves the
+   active tab on load). Switching the popup to a new company while the
+   panel is open should repaint it (the `sync` `sendMessage` broadcast).
 
 Test matrix (run each, mark pass/fail/notes):
 
@@ -268,8 +313,12 @@ Test matrix (run each, mark pass/fail/notes):
 - [ ] Lookup by active tab: navigate to a Norwegian company site,
   click action icon, popup or side panel shows correct orgnr
 - [ ] Side panel close + reopen: state behaves consistently
-- [ ] Tab switch (without `tabs` permission): side panel does NOT
-  auto-update (this is correct for MVP — auto-sync deferred)
+- [ ] Auto-sync toggle is **absent** from the side-panel toolbar on
+  Chrome (it's hidden — auto-sync deferred for the MVP, D11). The
+  refresh button stays.
+- [ ] Tab switch: side panel does NOT auto-update (correct for MVP —
+  auto-sync deferred). The `tabs` permission is not in the Chrome
+  manifest, so it can't be granted.
 - [ ] Storage: recents list persists across popup close/reopen
 - [ ] CSP: no console errors related to CSP
 - [ ] Brreg API errors (e.g. orgnr that returns 500): graceful
