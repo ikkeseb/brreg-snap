@@ -3,6 +3,110 @@
 Decisions and deferred work that doesn't fit in CLAUDE.md (which
 documents shipped state) or commit messages.
 
+## Audit findings — adversarial review 2026-06-02
+
+A 28-agent adversarial audit of the Chrome port (6 lenses × find +
+independent verify) produced 26 findings; 9 confirmed real after
+verification. **Key result: every confirmed finding is PRE-EXISTING
+and engine-independent — none were introduced by the Chrome port** (all
+verified absent from `git diff chrome-port...HEAD`). They affect the
+AMO-approved Firefox v1.0.0 identically. So they are product backlog,
+not port blockers, and **fixing the resolution-logic ones changes the
+approved product's behavior → needs Seb's sign-off + embargo sequencing
+(don't land on the chrome-port branch, which must stay FF-behavior-
+equivalent).** Several scary-sounding candidates were dismissed on
+verification and three were additionally confirmed-safe LIVE on real
+Chrome (Playwright + `dist-chrome`): the refresh button works
+(`permissions.contains({tabs})` returns `false`, does not reject, for
+the undeclared perm), the shim ordering holds, and the full lookup +
+all four detail tabs render real brreg data with no console errors.
+
+### Confirmed — worth fixing (in priority order)
+
+- **[MEDIUM] orgnr extraction: first mod11-valid 9-digit run wins**
+  (`src/lib/orgnr.ts:8-17`). `extractOrgnrFromText` returns the FIRST
+  9-digit run that passes mod11. ~9% of arbitrary 9-digit numbers pass
+  mod11 (measured 9.11%/100k), and the whole raw tab URL/title is
+  scanned positionally — so a chance-valid affiliate ID / timestamp /
+  SKU appearing BEFORE the page's real `?orgnr=` silently resolves the
+  wrong company with no ambiguity signal. Verified:
+  `extract('…?aff=923609016&orgnr=982463718')` → 923609016 (wrong).
+  Real-world trigger is narrow (page needs both a chance-valid 9-digit
+  AND the real orgnr, former positionally first) but the failure is
+  silent + confident. **Fix is a product judgment — pick one:**
+  (A) key-aware: in `resolveOrgnr`, check query keys matching
+  `/^orgn(r)?$|organisasjonsnummer/i` + last path segment first, fall
+  back to positional; (B) ambiguity-refuse: collect ALL distinct
+  mod11-valid candidates, return undefined when >1 so the
+  hostname-search/picker decides; or a hybrid (A then B). Add a
+  regression test (`?aff=<valid>&orgnr=<valid>`). Candidate for a
+  Firefox v1.0.1 once Seb chooses the approach.
+
+### Confirmed — low severity (resolution heuristics, pre-existing)
+
+- **[LOW] `hostnameLabel` returns the public-suffix segment** for
+  multi-part TLDs / trailing-dot FQDNs (`hostname-score.ts:47-54`).
+  e.g. `telenor.no.` → `"telenor"` only after a trailing-dot strip; a
+  `foo.co.uk` style host mislabels. Fix: strip trailing dot + lowercase
+  before splitting; consider a public-suffix-aware split.
+- **[LOW] hjemmeside substring match (+12) cross-brand contamination**
+  (`hostname-score.ts:137-139`). `hjem.includes(bareHost)` lets
+  `bloggvg.no` match host `vg.no`. Fix: require a label boundary.
+- **[LOW] a single unrelated company self-reporting the host as its
+  homepage can auto-resolve with zero name relation**
+  (`hostname-score.ts:127-148`, `:235-252`). Fix: expose `nameMatched`
+  from `scoreCandidate`; force `band='picker'` (never `auto`) when the
+  top candidate has no name relation.
+- **[LOW] `findDagligLeder` silently drops a corporate (enhet) daglig
+  leder** (`src/lib/roller.ts:3-18`) — only handles person-name roles.
+  The sidebar's `render/roles.ts:60-83` already handles the enhet case;
+  mirror that fallback so the popup's quick-glance daglig leder matches.
+
+### Confirmed — accessibility (pre-existing)
+
+- **[LOW] manual-search & recent rows are non-semantic `<li tabindex=0>`**
+  (`details.ts:309-342`, `popup.ts:602-632`, `popup.ts:513-535`): no
+  role, no Space activation. Fix: wrap each row in a real
+  `<button type="button">` like the picker already does
+  (`popup.ts:410-411`, `details.ts:180`).
+- **[LOW] side-panel result is never announced to screen readers**
+  (`details.ts setState`/`loadOrgnr`): the loading announcement is set
+  then hidden on the result transition. Fix: populate the polite live
+  region with e.g. `"${enhet.navn} lastet"` on result.
+
+### Confirmed — Chrome-only, behavior defensible (port-specific)
+
+- **[LOW] popup `syncSidebarIfOpen` writes the global side-panel path on
+  every auto-resolve** because Chrome's `isOpen()` stub returns `true`
+  (`popup.ts:220-254` + `sidebar.ts:96-98`). Consequence: opening the
+  panel via Chrome's native side-panel dropdown shows the last-resolved
+  company. `setOptions(enabled:true)` does NOT auto-open the panel, and
+  the explicit open paths always `setPanel` right before `open()`, so
+  this is benign (arguably good UX — "last company you looked at").
+  Optional refinement: only write the global path from explicit open
+  intents. Left as-is for the MVP.
+
+### Confirmed — robustness (pre-existing, optional)
+
+- **[LOW] `details.ts init()` is unguarded** (`details.ts:775-818`):
+  unlike `popup.ts init()` (try/catch → showError), a `storage.session`
+  rejection during the no-match/active-tab path would leave the panel
+  on the initial HTML (no terminal state). Fix: wrap the body in
+  try/catch → `showError`. Near-impossible in practice (storage rarely
+  rejects), but cheap insurance.
+
+### Dismissed on verification (notable false alarms)
+
+Verified NOT bugs: "side panel can never resolve the active tab on
+Chrome" (it does, via `?orgnr=` + activeTab on context-menu open);
+"shim ordering relies on chunk-merge luck" (verified deterministic);
+"refresh button no-op / `permissions.contains` rejects" (live-verified
+returns false); mod11 accepts `000000000`/repdigits (real but inert —
+brreg 404s them); concurrent `cacheGet`/`cacheSet` double-fetch
+(converges, not wrong data); gesture races on the popup/context-menu
+open paths (no `await` before `open()` — covered by the live Phase-4
+checks). Full per-finding reasoning was in the audit run output.
+
 ## details.ts render slice extracted — shipped 2026-05-15
 
 The 1227-line `src/details/details.ts` had ~15 render functions inline
