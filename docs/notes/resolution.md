@@ -8,8 +8,10 @@ Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`,
 
 `resolveOrgnr` (sync) in `src/lib/orgnr.ts` tries:
 
-1. URL regex
-2. Title regex
+1. An orgnr named EXPLICITLY in a query param (`?orgnr=`,
+   `?organisasjonsnummer=` …) — author intent, wins outright.
+2. A single distinct mod-11-valid 9-digit run in the URL.
+3. A single distinct mod-11-valid 9-digit run in the title.
 
 `resolveOrgnrAsync` runs the same sync cascade then falls back to a
 hostname-based brreg search (`searchByHostname` in
@@ -19,9 +21,19 @@ data can't disambiguate (e.g. `finn.no`, whose legal name "FINN.no"
 loses its period in the search index) simply don't resolve, and the
 sidebar falls back to inline manual search.
 
-The regex iterates every 9-digit run via `matchAll` and accepts the
-first mod-11 valid candidate — needed because an upstream phone
-number or article id can shadow a real orgnr in the same string.
+**Ambiguity → abstain (anti-shadowing).** `extractOrgnrFromText`
+trusts a 9-digit run ONLY when it is the *single* distinct mod-11-valid
+candidate in the text; with two or more distinct valid candidates it
+returns `undefined`. ~9% of arbitrary 9-digit numbers pass mod-11, so a
+chance-valid tracking id / product id / timestamp positionally before
+the real orgnr used to win and silently resolve the WRONG company
+(the pre-2026-06 "first valid run wins" behaviour). A bare 9-digit
+*path* segment is deliberately NOT authoritative — it is as likely a
+product id — so it rides the same single-candidate rule; only a *named*
+param wins amid other digits (abstaining if two named values disagree).
+Abstaining drops through to the hostname pipeline / picker: better no
+answer than a confidently wrong one. The named-param + ambiguity cases
+are pinned in `tests/orgnr.test.ts`.
 
 <!-- SECTION: mod11-module -->
 ## Why `mod11.ts` is its own module

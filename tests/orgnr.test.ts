@@ -92,11 +92,22 @@ describe('extractOrgnrFromText', () => {
     expect(extractOrgnrFromText('123456789')).toBeUndefined();
   });
 
-  it('skips earlier invalid 9-digit runs and returns the first valid one', () => {
-    // 123456789 fails mod-11; 982463718 is Telenor and passes.
+  it('ignores earlier mod-11-INVALID runs and resolves the single valid one', () => {
+    // 123456789 fails mod-11; 982463718 (Telenor) passes — only one valid.
     expect(extractOrgnrFromText('foo 123456789 bar 982463718 baz')).toBe(
       '982463718',
     );
+  });
+
+  it('abstains when two or more distinct VALID candidates are present', () => {
+    // Both pass mod-11 (Equinor + Telenor). Positional first-match would
+    // silently pick the earlier one — which could be the wrong company —
+    // so we return undefined and let the caller fall through instead.
+    expect(
+      extractOrgnrFromText('aff 923609016 then 982463718'),
+    ).toBeUndefined();
+    // A repeated single valid candidate is NOT ambiguous.
+    expect(extractOrgnrFromText('982463718 / 982463718')).toBe('982463718');
   });
 });
 
@@ -128,6 +139,77 @@ describe('resolveOrgnr', () => {
   it('gracefully handles malformed URLs', () => {
     const result = resolveOrgnr({ url: 'about:newtab', title: '' });
     expect(result).toBeUndefined();
+  });
+});
+
+describe('resolveOrgnr — key-awareness and ambiguity (anti-shadowing)', () => {
+  it('a named ?orgnr= param wins over an unnamed valid tracking id', () => {
+    expect(
+      resolveOrgnr({
+        url: 'https://shop.example/?aff=923609016&orgnr=982463718',
+        title: '',
+      }),
+    ).toBe('982463718');
+  });
+
+  it('resolves a single valid orgnr in the path (e.g. brreg /enheter/<orgnr>)', () => {
+    expect(
+      resolveOrgnr({ url: 'https://x.example/enheter/982463718', title: '' }),
+    ).toBe('982463718');
+  });
+
+  it('still resolves a single valid orgnr in a query value', () => {
+    expect(
+      resolveOrgnr({ url: 'https://x.example/p?id=982463718', title: '' }),
+    ).toBe('982463718');
+  });
+
+  it('abstains when two unnamed valid candidates collide — never a silent wrong company', () => {
+    expect(
+      resolveOrgnr({
+        url: 'https://x.example/?aff=923609016&ref=982463718',
+        title: '',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('does NOT let a chance-valid path-segment id shadow the real orgnr', () => {
+    // 100000008 passes mod-11 but is a product id in the path; 982463718
+    // is the real orgnr in the query. A path-segment heuristic would
+    // confidently return the junk — we abstain (the hostname pipeline /
+    // picker takes over) rather than show the wrong company.
+    expect(
+      resolveOrgnr({
+        url: 'https://shop.no/p/100000008/detail?id=982463718',
+        title: '',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('abstains when two differently-named orgnr params disagree', () => {
+    expect(
+      resolveOrgnr({
+        url: 'https://x.example/?orgnr=982463718&organisasjonsnummer=923609016',
+        title: '',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('a mod-11-INVALID named param falls through to the single valid candidate', () => {
+    // 123456789 fails mod-11, so the named param yields nothing; the only
+    // valid 9-digit (982463718, in the path) is then resolved.
+    expect(
+      resolveOrgnr({
+        url: 'https://x.example/enheter/982463718?orgnr=123456789',
+        title: '',
+      }),
+    ).toBe('982463718');
+  });
+
+  it('falls through to the title when the URL is malformed (never throws)', () => {
+    expect(
+      resolveOrgnr({ url: 'ht!tp://[bad', title: 'Telenor 982463718' }),
+    ).toBe('982463718');
   });
 });
 
