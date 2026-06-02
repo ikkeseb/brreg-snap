@@ -2,18 +2,33 @@ import { searchByHostname } from './hostname-search.js';
 import { isValidOrgnr } from './mod11.js';
 
 const ORGNR_RE = /\b(\d{9})\b/g;
+// Query keys that explicitly name an organisasjonsnummer.
+const ORGNR_PARAM_RE =
+  /^(orgnr|orgnummer|organisasjonsnummer|organizationnumber|organizationid)$/i;
 
 export { isValidOrgnr };
 
-export function extractOrgnrFromText(text: string): string | undefined {
-  // Iterate every 9-digit run in text. The first mod-11 valid candidate
-  // wins. A URL like /?ref=123456789&orgnr=982463718 would otherwise be
-  // disqualified by an upstream phone number or article id.
+// Distinct mod-11-valid 9-digit runs found in `text`, in first-seen order.
+function validOrgnrsIn(text: string): string[] {
+  const seen = new Set<string>();
   for (const match of text.matchAll(ORGNR_RE)) {
     const candidate = match[1]!;
-    if (isValidOrgnr(candidate)) return candidate;
+    if (isValidOrgnr(candidate)) seen.add(candidate);
   }
-  return undefined;
+  return [...seen];
+}
+
+export function extractOrgnrFromText(text: string): string | undefined {
+  // Trust a 9-digit run ONLY when it is the single mod-11-valid candidate
+  // in the text. Roughly ~9% of arbitrary 9-digit numbers pass mod-11, so
+  // a tracking id / timestamp / SKU sitting before the real number used to
+  // win by position and silently resolve the WRONG company. When two or
+  // more distinct valid candidates appear we abstain (return undefined)
+  // and let the caller fall through to the hostname pipeline / picker —
+  // better no answer than a confidently wrong one. A single valid run
+  // (even with earlier mod-11-INVALID runs around it) still resolves.
+  const found = validOrgnrsIn(text);
+  return found.length === 1 ? found[0] : undefined;
 }
 
 export interface ResolveContext {
@@ -29,7 +44,43 @@ function hostnameFrom(url: string): string | undefined {
   }
 }
 
+// Strong signal: a query param whose KEY explicitly names the orgnr
+// (?orgnr=…, ?organisasjonsnummer=…). The page author labelled it, so it
+// wins over any other 9-digit run in the URL — even a chance-valid
+// tracking id. Abstains (undefined) when two differently-named orgnr
+// values disagree, which is maximal ambiguity. A bare 9-digit path
+// segment is deliberately NOT treated as authoritative: it is just as
+// likely to be a product/article id, and trusting it would re-open the
+// shadowing bug this fix exists to close — an unnamed path/query orgnr
+// is instead handled by the single-candidate rule in resolveOrgnr.
+function orgnrFromNamedParam(url: string): string | undefined {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return undefined;
+  }
+  const named = new Set<string>();
+  for (const [key, value] of parsed.searchParams) {
+    if (ORGNR_PARAM_RE.test(key)) {
+      for (const orgnr of validOrgnrsIn(value)) named.add(orgnr);
+    }
+  }
+  return named.size === 1 ? [...named][0] : undefined;
+}
+
 export function resolveOrgnr(ctx: ResolveContext): string | undefined {
+  // (a) An explicitly-named ?orgnr= param wins outright (author intent),
+  //     even amid other 9-digit runs.
+  const named = orgnrFromNamedParam(ctx.url);
+  if (named) return named;
+
+  // (b)/(c) Otherwise trust only an unambiguous single mod-11 candidate —
+  //     URL first, then title. Two or more distinct valid candidates
+  //     anywhere in the text (a chance-valid tracking id alongside the
+  //     real orgnr, in the path or query) → abstain and let the hostname
+  //     pipeline / picker decide. Better no answer than a confidently
+  //     wrong one.
   const fromUrl = extractOrgnrFromText(ctx.url);
   if (fromUrl) return fromUrl;
 
