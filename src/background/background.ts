@@ -145,15 +145,10 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 let autoSyncEnabled = false;
 
 async function refreshAutoSyncEnabled(): Promise<void> {
-  if (!isFirefox) {
-    // Auto-sync (the `tabs` opt-in) ships Firefox-only for now. On
-    // Chrome `tabs` isn't declared, so skip the permission probe and
-    // keep it disabled — the tab listeners stay registered but bail on
-    // this flag. Chrome auto-sync is deferred (docs/chrome-port.md
-    // Phase 6).
-    autoSyncEnabled = false;
-    return;
-  }
+  // Reconcile the in-memory flag from the runtime `tabs` grant + the
+  // stored toggle. Same on both engines: `tabs` is an optional
+  // (runtime opt-in) permission in each manifest, so it stays false
+  // until the user flips the auto-sync toggle and grants it.
   const [hasTabs, toggleOn] = await Promise.all([
     browser.permissions.contains({ permissions: ['tabs'] }),
     getAutoSync(),
@@ -206,20 +201,34 @@ browser.tabs.onActivated.addListener((info) => {
   })();
 });
 
-// Firefox-specific filter so the listener fires only on url changes.
-// handleUpdated() already bails on !changeInfo.url, so the filter is
-// pure overhead reduction — no behavior change. Skips noise from
-// favicon, title, status, mutedInfo and audible updates.
-browser.tabs.onUpdated.addListener(
-  (tabId, changeInfo, tab) => {
-    void (async () => {
-      if (!autoSyncEnabled) await refreshAutoSyncEnabled();
-      if (!autoSyncEnabled) return;
-      await handleUpdated(tabId, changeInfo, tab);
-    })();
-  },
-  { properties: ['url'] },
-);
+function onUpdatedDispatch(
+  tabId: number,
+  changeInfo: browser.tabs._OnUpdatedChangeInfo,
+  tab: browser.tabs.Tab,
+): void {
+  void (async () => {
+    if (!autoSyncEnabled) await refreshAutoSyncEnabled();
+    if (!autoSyncEnabled) return;
+    await handleUpdated(tabId, changeInfo, tab);
+  })();
+}
+
+// Firefox supports an onUpdated filter ({properties:['url']}) so the
+// listener fires only on URL changes — pure overhead reduction, since
+// handleUpdated() already bails on !changeInfo.url. Chrome's onUpdated
+// rejects ANY filter argument ("This event does not support filters")
+// and throws at registration, which would abort the rest of this module
+// (the permission/storage reconciliation listeners and the seed below).
+// So pass the filter only where it's supported; on Chrome the handler's
+// own !changeInfo.url guard does the same job at the cost of a few extra
+// (cheap, autoSync-gated) wakeups.
+if (isFirefox) {
+  browser.tabs.onUpdated.addListener(onUpdatedDispatch, {
+    properties: ['url'],
+  });
+} else {
+  browser.tabs.onUpdated.addListener(onUpdatedDispatch);
+}
 
 // Keep the cache in sync with permission and toggle changes so the
 // hot path stays a synchronous boolean. The events below are top-level

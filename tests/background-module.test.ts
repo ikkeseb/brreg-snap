@@ -26,10 +26,16 @@ interface BrowserMockOptions {
   hasTabs?: boolean;
   autoSyncOn?: boolean;
   activeTab?: { url?: string; title?: string; active?: boolean };
+  // Which engine the mock presents as. Firefox exposes `sidebarAction`
+  // (so isFirefox === true); Chrome exposes `sidePanel` instead. Drives
+  // the engine-specific branches in background.ts (notably the
+  // tabs.onUpdated filter, which Chrome rejects).
+  engine?: 'firefox' | 'chrome';
 }
 
 function installBrowserMock(opts: BrowserMockOptions = {}) {
-  const { hasTabs = false, autoSyncOn = false, activeTab } = opts;
+  const { hasTabs = false, autoSyncOn = false, activeTab, engine = 'firefox' } =
+    opts;
   const localStore: Record<string, unknown> = {};
   if (autoSyncOn) localStore[AUTO_SYNC_STORAGE_KEY] = true;
   const sessionStore: Record<string, unknown> = {};
@@ -82,10 +88,11 @@ function installBrowserMock(opts: BrowserMockOptions = {}) {
       },
       onChanged: makeListenerSpy(),
     },
-    sidebarAction: {
-      setPanel: vi.fn(),
-      open: vi.fn(),
-    },
+    // Engine marker: Firefox exposes sidebarAction, Chrome exposes
+    // sidePanel. engine.ts feature-detects on 'sidebarAction' in browser.
+    ...(engine === 'firefox'
+      ? { sidebarAction: { setPanel: vi.fn(), open: vi.fn() } }
+      : { sidePanel: { setOptions: vi.fn(), open: vi.fn() } }),
   };
   (globalThis as { browser?: unknown }).browser = mock;
   return mock;
@@ -123,6 +130,26 @@ describe('background module load — top-level listener registration', () => {
     expect(mock.tabs.onUpdated.addListener).toHaveBeenCalledTimes(1);
     const call = mock.tabs.onUpdated.addListener.mock.calls[0];
     expect(call?.[1]).toEqual({ properties: ['url'] });
+  });
+
+  it('registers tabs.onUpdated WITHOUT a filter on Chrome (filters throw there)', async () => {
+    // chrome.tabs.onUpdated.addListener(cb, {properties}) throws
+    // "This event does not support filters" and would abort the rest of
+    // module evaluation — taking the permission/storage reconciliation
+    // listeners and the seed with it. Chrome must register filter-free.
+    const mock = installBrowserMock({ engine: 'chrome' });
+    await loadBackground();
+    expect(mock.tabs.onUpdated.addListener).toHaveBeenCalledTimes(1);
+    const call = mock.tabs.onUpdated.addListener.mock.calls[0];
+    expect(call?.[1]).toBeUndefined();
+  });
+
+  it('still registers the tail listeners on Chrome (proves onUpdated did not throw)', async () => {
+    const mock = installBrowserMock({ engine: 'chrome' });
+    await loadBackground();
+    expect(mock.permissions.onAdded.addListener).toHaveBeenCalledTimes(1);
+    expect(mock.permissions.onRemoved.addListener).toHaveBeenCalledTimes(1);
+    expect(mock.storage.onChanged.addListener).toHaveBeenCalledTimes(1);
   });
 
   it('registers permission change listeners at top level', async () => {
@@ -179,6 +206,33 @@ describe('background tab event dispatch — gated on auto-sync state', () => {
       autoSyncOn: true,
       // URL carries a valid orgnr (DNB Bank ASA) so resolveOrgnrAsync
       // resolves synchronously without touching the mocked brreg client.
+      activeTab: {
+        url: 'https://example.com/foo/984851006',
+        title: 'DNB',
+        active: true,
+      },
+    });
+    await loadBackground();
+    const handler = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
+    expect(handler).toBeDefined();
+    await handler({ tabId: 7, windowId: 1 });
+    await flushMicrotasks();
+    expect(mock.tabs.get).toHaveBeenCalledWith(7);
+    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'sync',
+      orgnr: '984851006',
+      host: 'example.com',
+    });
+  });
+
+  it('dispatches on Chrome too when permission and toggle are on (no isFirefox gate)', async () => {
+    // Auto-sync is no longer Firefox-only: removing the !isFirefox
+    // short-circuit in refreshAutoSyncEnabled lets Chrome reconcile from
+    // permission + toggle like Firefox does.
+    const mock = installBrowserMock({
+      engine: 'chrome',
+      hasTabs: true,
+      autoSyncOn: true,
       activeTab: {
         url: 'https://example.com/foo/984851006',
         title: 'DNB',

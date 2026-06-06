@@ -23,6 +23,7 @@
     "128": "icons/icon-128.png"
   },
   "permissions": ["activeTab", "storage", "contextMenus", "sidePanel"],
+  "optional_permissions": ["tabs"],
   "host_permissions": ["https://data.brreg.no/*"],
   "background": {
     "service_worker": "background/background.js",
