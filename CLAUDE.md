@@ -4,30 +4,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Active long-running branches
 
-### `chrome-port`
+### Chrome port → eventual Firefox `v1.1.0`
 
-Chrome / Chromium support port in progress. Full WIP plan at
-`docs/chrome-port.md` on the `chrome-port` branch — read with
-`git show chrome-port:docs/chrome-port.md` (no checkout needed).
+Chrome support is built and shipped. **Status (2026-06-06):**
 
-**Do NOT merge `chrome-port` into `main`** until all three hold:
+- **Firefox `v1.0.1`** is live on AMO — the orgnr-resolution
+  reliability fix. `main` is at `v1.0.1`, tagged `v1.0.1` +
+  `amo-submission-1.0.1`.
+- **Chrome `1.0.0`** is submitted to the Chrome Web Store (awaiting
+  review). It ships from `feat/chrome-auto-sync` (off `chrome-port-mvp`
+  off `chrome-port`) and carries: Chrome support, auto-sync brought to
+  Firefox parity, the refresh button removed, and the orgnr fix
+  cherry-picked in.
 
-1. Mozilla AMO has approved Firefox `v1.0.0`.
-2. Firefox `v1.0.0` has been live on AMO for at least 7 days
-   without unaddressed bug reports.
-3. Chrome MVP has passed the Phase 4 smoke-test matrix in the
-   plan doc.
+Full plan + decision log (D1–D15): `docs/chrome-port.md` on the chrome
+branch — `git show feat/chrome-auto-sync:docs/chrome-port.md` (no
+checkout needed).
 
-Reason: `main` mirrors the AMO submission (tag
-`amo-submission-1.0.0` at `d98dc69`). Mozilla may request source
-clarifications during review; `main` should match submitted source
-until that channel is closed. The tag is the canonical reference
-regardless of where `main` HEAD moves.
+**The one pending merge: `feat/chrome-auto-sync` → `main`, which ships
+as a deliberate Firefox `v1.1.0`.** Not yet done, and no rush — CWS
+review doesn't need it. The merge carries a Firefox *behaviour* change
+(the refresh button is removed; `details.html` is shared between
+engines), so it must go out as a real FF version bump, not a silent
+change. `main` still has the refresh button + a single `manifest.json`;
+the chrome branch has dual manifests + the removal. Do the merge when
+ready to release FF `v1.1.0`.
 
-While AMO review is open, the only changes that may land on `main`
-are: (a) Mozilla-requested fixes (tagged `v1.0.1` etc), (b) docs
-that don't affect the `.xpi` (like this section). All Chrome-port
-work stays on `chrome-port`.
+`main` mirrors the live AMO submission — the `amo-submission-X.Y.Z` tag
+is the canonical reference for what was submitted, regardless of where
+`main` HEAD moves. Docs-only changes that don't affect the `.xpi` (like
+this section) may land on `main` directly.
 
 ## Commands
 
