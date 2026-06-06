@@ -163,6 +163,16 @@ main > header {
   color: var(--warn);
 }
 
+/* Transient confirmation after a manual refresh — re-fetching the same
+   company yields identical data, so without an explicit "Oppdatert" the
+   click looks like a no-op. Accent (not warn) — this is a success, not a
+   warning. Auto-cleared from details.ts. */
+.refresh-status {
+  margin: 0;
+  font-size: 12px;
+  color: var(--accent);
+}
+
 #back-link {
   color: var(--accent);
   text-decoration: none;

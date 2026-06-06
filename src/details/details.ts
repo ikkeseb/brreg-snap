@@ -46,6 +46,7 @@ const updatedTime = $('updated-time') as HTMLTimeElement;
 const refreshBtn = $('refresh-btn') as HTMLButtonElement;
 const autoSyncToggle = $('auto-sync-toggle') as HTMLInputElement;
 const autoSyncStatus = $('auto-sync-status');
+const refreshStatus = $('refresh-status');
 const footerSource = $('footer-source');
 const sourceHostEl = $('source-host');
 const pickerEl = $('picker');
@@ -512,55 +513,53 @@ async function stopRefreshSpin(): Promise<void> {
 }
 
 async function doRefresh(currentOrgnrArg: string): Promise<void> {
+  // Refresh has one job on both engines: reload the displayed company's
+  // data, bypassing the 24h cache. It deliberately does NOT re-resolve
+  // the active tab — auto-sync follows tab switches, and the popup /
+  // context-menu gesture re-syncs on demand. Folding active-tab
+  // resolution in here gave the button confusing dual semantics (silent
+  // re-fetch without `tabs`, active-tab re-resolve with it) and could
+  // wipe the panel to the empty / picker state when the active tab no
+  // longer resolved cleanly. With nothing on screen there's nothing to
+  // refresh — bail before spinning so the button doesn't look busy.
+  if (!currentOrgnrArg) return;
   refreshBtn.disabled = true;
   refreshBtn.setAttribute('aria-busy', 'true');
   void startRefreshSpin();
-  // Snapshot loadRunId so any path that bumps it during one of our
-  // awaits (sync broadcast from popup, no-match broadcast, picker
-  // path) wins over the refresh. Without this guard, refresh's
-  // terminal loadOrgnr/showPicker/showEmptyState would overwrite a
-  // newer state that landed concurrently.
+  // Snapshot loadRunId so a concurrent state change (sync broadcast from
+  // the popup, no-match broadcast, picker path) wins over the refresh —
+  // we must not announce "Oppdatert" or re-render over newer state.
   const startRunId = loadRunId;
+  let refreshed = false;
   try {
-    const hasTabs = await browser.permissions.contains({
-      permissions: ['tabs'],
-    });
-    if (loadRunId !== startRunId) return;
-    if (hasTabs) {
-      const fromTab = await resolveFromActiveTab();
-      if (loadRunId !== startRunId) return;
-      if (fromTab.orgnr) {
-        setSourceHost(fromTab.host);
-        const url = new URL(window.location.href);
-        url.searchParams.set('orgnr', fromTab.orgnr);
-        window.history.replaceState(null, '', url.toString());
-        await invalidateCache(fromTab.orgnr);
-        if (loadRunId !== startRunId) return;
-        await loadOrgnr(fromTab.orgnr, fromTab.method);
-        return;
-      }
-      if (fromTab.pickerCandidates && fromTab.host) {
-        showPicker(fromTab.host, fromTab.pickerCandidates);
-        return;
-      }
-      if (fromTab.host) {
-        showEmptyState(fromTab.host);
-        return;
-      }
-    }
-    if (!currentOrgnrArg) return;
     await invalidateCache(currentOrgnrArg);
     if (loadRunId !== startRunId) return;
-    // Refresh of an existing orgnr — keep its current resolution
-    // method so the override button remains visible/hidden as before.
+    // Keep the current resolution method so the override button's
+    // visibility is unchanged across a refresh.
     await loadOrgnr(currentOrgnrArg, currentResolutionMethod);
+    refreshed = true;
   } finally {
     // Outro phase (~380ms) gives the spin a visible wind-down even
     // on cache hits — no separate min-hold needed.
     await stopRefreshSpin();
     refreshBtn.disabled = false;
     refreshBtn.removeAttribute('aria-busy');
+    // Explicit confirmation: re-fetching the same company is visually
+    // identical, so without this the click reads as a no-op.
+    if (refreshed) confirmRefresh();
   }
+}
+
+let refreshStatusTimer: number | undefined;
+
+function confirmRefresh(): void {
+  refreshStatus.hidden = false;
+  refreshStatus.textContent = 'Oppdatert';
+  if (refreshStatusTimer !== undefined) clearTimeout(refreshStatusTimer);
+  refreshStatusTimer = window.setTimeout(() => {
+    refreshStatus.hidden = true;
+    refreshStatus.textContent = '';
+  }, 2200);
 }
 
 // Cached effective state of the toggle. Kept in sync with
