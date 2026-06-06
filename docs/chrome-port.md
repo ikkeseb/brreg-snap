@@ -28,8 +28,9 @@ phase.
 - **What deviates from the original plan (decided during build):**
   D3 (webextension-polyfill) → **in-house shim** (see D8); build-time
   module aliasing → **runtime feature detection** (see D9); D4
-  (auto-sync deferred on Chrome) **kept** — toggle hidden, `tabs`
-  dropped from the Chrome manifest.
+  (auto-sync deferred on Chrome) **reversed** — auto-sync brought
+  forward into the MVP (see D13); `tabs` is a runtime opt-in in the
+  Chrome manifest, same as Firefox.
 - **Next action:** run the Phase 4 manual smoke matrix below in Chrome
   (load `dist-chrome/` unpacked), then `pnpm package:chrome` and follow
   `docs/cws-submission.md`.
@@ -60,12 +61,13 @@ pnpm build:chrome          # -> dist-chrome/
 | D10 | **No menus adapter — use `browser.contextMenus` uniformly** | 2026-06-01 | Firefox exposes `contextMenus` as an alias of `menus` (works under the `menus` permission); Chrome only has `contextMenus`. One namespace, behaviorally identical on Firefox. A `lastError`-swallowing callback on `create` absorbs Chrome's duplicate-id-on-SW-restart. |
 | D11 | **Chrome auto-sync deferred (keeps D4); `tabs` dropped from Chrome manifest** | 2026-06-01 | The toggle is hidden on Chrome and `refreshAutoSyncEnabled` short-circuits, so the Chrome MVP ships a minimal permission set (no `optional_permissions`) for a clean first CWS review. Chrome's side-panel→`permissions.request` gesture path is plausible per docs but unverified live; not worth risking a visible-but-flaky control in v1. Re-enable in Phase 6 after live verification. Auto-sync code stays in the tree (Firefox uses it). |
 | D12 | **Strip sourcemaps + `icons/README.md` from packaged artifacts** | 2026-06-01 | The Firefox `.zip` shipped 174 KB of sourcemaps (66% of the artifact) because `web-ext-config.cjs`'s `ignoreFiles` was never loaded. Packaging now passes `--ignore-files` explicitly (263 KB → 43 KB). Behaviour-neutral (no executed JS changes); maps stay in `dist-*/` for local debugging and the full TS source ships in the AMO source zip. **Firefox-artifact note:** this diverges the future Firefox `.xpi` from the on-file AMO 1.0.0 package (which included maps); fold into a future Firefox update, not a silent resubmission. |
+| D13 | **Chrome auto-sync brought forward into the MVP (reverses D11/D4)** | 2026-06-06 | Live smoke surfaced the gap D11 created: with auto-sync deferred AND the refresh button gated on `tabs` (absent on Chrome), there is no way to make the panel follow the active tab — switch tab → stale, refresh → reloads the *displayed* company only. Felt broken on first use. Fix mirrors the Firefox `tabs` runtime opt-in onto Chrome: `optional_permissions:["tabs"]` in the Chrome manifest, drop the two `isFirefox` short-circuits (`refreshAutoSyncEnabled`, `setupAutoSyncToggle`). Also fixes a latent MVP bug found en route: `tabs.onUpdated.addListener(cb, {properties:['url']})` **throws** on Chrome ("This event does not support filters") and aborted the rest of background.ts module eval — harmless while auto-sync was dormant, fatal once enabled. Now filter-only-on-Firefox. Security model unchanged: `tabs` stays a runtime opt-in (not install-time), gated behind the toggle. Lives on `feat/chrome-auto-sync` off `chrome-port-mvp`. |
 
 ## Open questions
 
 | # | Question | Status / resolution |
 |---|----------|---------------------|
-| Q1 | Chrome MVP version number | **Resolved: `1.0.0`** — matches Firefox. Auto-sync is the only missing feature; the CWS listing description should note "tab-switch auto-update lands in a follow-up". (Seb may override to `0.9.0` if he'd rather signal partial parity — change `version` in `package.json` + `public/manifest.chrome.json`.) |
+| Q1 | Chrome MVP version number | **Resolved: `1.0.0`** — matches Firefox. With auto-sync brought forward (D13) the Chrome build is now at feature parity, so no "missing feature" caveat is needed in the listing. |
 | Q2 | Single vs per-browser CHANGELOG | **Resolved: single CHANGELOG**, `[chrome]` / `[firefox]` prefixes on browser-specific lines. Not yet written — see Phase 5. |
 | Q3 | Side panel global vs tab-specific | **Resolved: global** — `setOptions`/`open` are called without a `tabId`, and `open({windowId})` opens the window-wide panel. Matches Firefox's single shared sidebar. Confirm visually in Phase 4. |
 
@@ -233,8 +235,8 @@ remains byte-for-byte identical in behaviour to Phase 1's output.
 ## Phase 3 — Chrome adapter implementations
 
 **Goal:** Chrome build actually runs as an unpacked extension.
-Popup + side panel + lookup work. Auto-sync deliberately not
-implemented yet.
+Popup + side panel + lookup work. (Auto-sync was deferred at this
+phase; later pulled forward into the MVP — see Phase 6 / D13.)
 
 - [ ] Install `webextension-polyfill` and `@types/webextension-polyfill`
 - [ ] Add polyfill import to top-level entry points (`background.ts`,
@@ -313,12 +315,20 @@ Test matrix (run each, mark pass/fail/notes):
 - [ ] Lookup by active tab: navigate to a Norwegian company site,
   click action icon, popup or side panel shows correct orgnr
 - [ ] Side panel close + reopen: state behaves consistently
-- [ ] Auto-sync toggle is **absent** from the side-panel toolbar on
-  Chrome (it's hidden — auto-sync deferred for the MVP, D11). The
-  refresh button stays.
-- [ ] Tab switch: side panel does NOT auto-update (correct for MVP —
-  auto-sync deferred). The `tabs` permission is not in the Chrome
-  manifest, so it can't be granted.
+- [ ] Auto-sync toggle is **present** in the side-panel toolbar on
+  Chrome (auto-sync brought forward, D13), default off. The refresh
+  button stays.
+- [ ] Auto-sync grant: flip the toggle → Chrome prompts for `tabs`
+  ("Read your browsing history") → grant → toggle stays on. Deny →
+  toggle reverts to off. (This is the gesture path D11 worried about
+  — the key thing to confirm live.)
+- [ ] Tab switch with auto-sync ON: side panel auto-updates to the
+  new tab's company (or clears on an unresolvable page).
+- [ ] Tab switch with auto-sync OFF: side panel does NOT auto-update
+  (re-run the gesture or flip auto-sync on).
+- [ ] Auto-sync toggle off → `permissions.remove(['tabs'])`; tab
+  switches stop following. Revoke from `chrome://extensions` →
+  toggle reflects off on next panel open.
 - [ ] Storage: recents list persists across popup close/reopen
 - [ ] CSP: no console errors related to CSP
 - [ ] Brreg API errors (e.g. orgnr that returns 500): graceful
@@ -363,25 +373,38 @@ _(empty — populate as found)_
 
 ---
 
-## Phase 6 (post-launch) — Auto-sync for Chrome
+## Phase 6 — Auto-sync for Chrome (pulled forward into the MVP, D13)
 
-**Goal:** Bring auto-sync feature to parity with Firefox. Released
-as a follow-up Chrome update once user feedback on the MVP is in.
+**Goal:** Auto-sync at parity with Firefox. Done on
+`feat/chrome-auto-sync` off `chrome-port-mvp`; pending Seb's live
+permission-prompt smoke.
 
-- [ ] Audit `src/lib/auto-sync-*.ts` for Chrome compatibility
-- [ ] Verify `chrome.permissions.request({ permissions: ['tabs'] })`
-  works when triggered from a side panel UI gesture (Chrome's
-  gesture rules are stricter than Firefox's — this may need a brief
-  popup-mediated grant flow)
-- [ ] Verify tab event listeners (`tabs.onActivated`,
-  `tabs.onUpdated`) survive service worker restarts. SW will be
-  woken up by the event, but module-level state will be fresh.
-- [ ] Side panel auto-update on tab switch: Chrome's side panel has
-  its own visibility / global-vs-tab-specific semantics that differ
-  from Firefox sidebar. Test thoroughly.
-- [ ] Update Chrome listing to reflect parity
-- [ ] Release Chrome 1.1.0 (or whatever matches Firefox's then-current
-  version)
+Code + static verification (done):
+
+- [x] `optional_permissions:["tabs"]` added to `manifest.chrome.json`
+- [x] Drop the two `isFirefox` short-circuits (`refreshAutoSyncEnabled`
+  in background.ts, `setupAutoSyncToggle` in details.ts) so Chrome
+  reconciles from permission + toggle like Firefox
+- [x] Fix `tabs.onUpdated` filter throw on Chrome — register filter-only
+  on Firefox (`onUpdatedDispatch` shared handler)
+- [x] Unit coverage: Chrome-mode tests in `background-module.test.ts`
+  (filter-free registration, tail listeners survive, dispatch proceeds)
+- [x] Live: toggle now visible in Chrome side panel; background SW
+  loads with zero console errors (no more filter throw) — verified via
+  Playwright on real Chromium
+
+Pending (Seb's live smoke — needs the interactive permission prompt):
+
+- [ ] Flip toggle → Chrome `tabs` prompt appears → grant → toggle
+  sticks; deny → reverts. (The gesture-from-side-panel path D11
+  flagged as unverified — confirm it actually prompts.)
+- [ ] Tab switch with auto-sync on → panel follows the active tab
+- [ ] Toggle off → `permissions.remove`; external revoke reflected
+- [ ] Verify behaviour survives a service-worker restart (idle the SW,
+  then switch tabs)
+- [ ] Update CWS listing: `tabs` opt-in justification; drop the
+  "tab-switch auto-update lands in a follow-up" caveat
+- [ ] Decide release version (parity now — no longer a missing feature)
 
 ---
 

@@ -80,12 +80,12 @@ dashboard after submission — get it right in the zip.
    | `contextMenus` | Adds a single right-click item ("Vis i brreg-snap sidebar") to trigger a lookup for the current page without opening the popup. |
    | `sidePanel` | Shows the detailed company view (roles, parent/subsidiaries, key figures) in Chrome's side panel alongside the page. |
    | host `https://data.brreg.no/*` | The extension's sole network endpoint — all company data is fetched read-only from the official Brønnøysund open-data API. No other hosts are contacted; there are no content scripts. |
+   | `tabs` *(optional)* | Requested **at runtime only** when the user turns on "Auto-oppdater ved fane-bytte" in the side panel, so the panel can follow the active tab and show the company behind whatever page is in front. Granted via `permissions.request` on the toggle click; removed via `permissions.remove` when toggled off. Not requested at install time — the install dialog shows only `activeTab` + storage + the Brreg host. |
 
-   > The Chrome MVP declares **no `optional_permissions`** — the `tabs`
-   > opt-in (auto-sync) is deferred (see `docs/chrome-port.md` D11/Phase
-   > 6). When auto-sync ships, add `tabs` back and justify: "Requested
-   > at runtime only when the user enables 'Auto-oppdater ved
-   > fane-bytte'; removed via `permissions.remove` when toggled off."
+   > `tabs` is the only `optional_permissions` entry. It backs the
+   > auto-sync opt-in (D13) and is never held unless the user explicitly
+   > enables the toggle. Reviewers: this is a runtime, revocable grant,
+   > not an install-time permission.
 
 ## 4. Common rejection pitfalls (pre-checked here)
 
