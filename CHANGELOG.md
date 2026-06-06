@@ -3,6 +3,18 @@
 All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 
+## [1.0.1] — 2026-06-06
+
+### Fixed
+
+- More reliable org-number resolution: a chance-valid 9-digit number in
+  a URL or page title no longer shadows the real company. An explicit
+  named `?orgnr=` parameter wins; otherwise a bare 9-digit is trusted
+  only when it is the single mod-11-valid candidate, else the extension
+  abstains to the hostname search / picker rather than showing a
+  confidently-wrong hit. Reconciled the hostname benchmark to import the
+  shipped scoring (confirms 0 auto-wrong resolutions).
+
 ## [1.0.0] — 2026-05-16
 
 First public release. Renamed from the internal `brreg-now` working
