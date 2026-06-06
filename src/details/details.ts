@@ -8,7 +8,6 @@ import {
   fetchRegnskap,
   fetchRoller,
   fetchUnderenheter,
-  invalidateCache,
   searchEnheter,
 } from '../lib/brreg.js';
 import { formatRelativeTime } from '../lib/format.js';
@@ -43,10 +42,8 @@ const resultEl = $('result');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
 const footerUpdated = $('footer-updated');
 const updatedTime = $('updated-time') as HTMLTimeElement;
-const refreshBtn = $('refresh-btn') as HTMLButtonElement;
 const autoSyncToggle = $('auto-sync-toggle') as HTMLInputElement;
 const autoSyncStatus = $('auto-sync-status');
-const refreshStatus = $('refresh-status');
 const footerSource = $('footer-source');
 const sourceHostEl = $('source-host');
 const pickerEl = $('picker');
@@ -79,7 +76,6 @@ let lastUpdatedAt: number | undefined;
 let updatedTimerId: number | undefined;
 
 setupTabs();
-setupRefresh();
 setupManualSearch();
 setupRejectChoice();
 void setupAutoSyncToggle();
@@ -407,161 +403,6 @@ function paintUpdatedLabel(): void {
   updatedTime.textContent = formatRelativeTime(lastUpdatedAt);
 }
 
-function setupRefresh(): void {
-  refreshBtn.addEventListener('click', () => {
-    if (refreshBtn.disabled) return;
-    // currentOrgnr may be empty if the sidebar opened on an
-    // unrecognised page. doRefresh will try the active tab if
-    // tabs is granted; otherwise it's a no-op when there's nothing
-    // to re-fetch.
-    void doRefresh(currentOrgnr ?? '');
-  });
-}
-
-// Refresh spin: three-phase rotation via Web Animations API.
-// CSS-only `animation: spin linear infinite` couldn't ease in or out
-// without a visible seam at the loop boundary. With WAAPI we run an
-// ease-out intro (one rotation, slow start), a perfect linear loop
-// while data is in flight, and an ease-in outro that settles at the
-// next 360°-multiple — so the icon always lands neutral.
-let spinState: 'idle' | 'intro' | 'loop' | 'outro' = 'idle';
-let spinAnim: Animation | undefined;
-
-function refreshSvgEl(): SVGElement | null {
-  return refreshBtn.querySelector('svg');
-}
-
-function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-}
-
-function readRotation(svg: SVGElement): number {
-  // getComputedStyle returns "matrix(a, b, ...)" while a WAAPI rotate
-  // animation is active. atan2(b, a) recovers the angle in radians.
-  try {
-    const tr = window.getComputedStyle(svg).transform;
-    if (!tr || tr === 'none') return 0;
-    const m = new DOMMatrixReadOnly(tr);
-    const deg = (Math.atan2(m.b, m.a) * 180) / Math.PI;
-    return ((deg % 360) + 360) % 360;
-  } catch {
-    return 0;
-  }
-}
-
-async function startRefreshSpin(): Promise<void> {
-  if (spinState !== 'idle') return;
-  if (prefersReducedMotion()) return;
-  const svg = refreshSvgEl();
-  if (!svg) return;
-  spinState = 'intro';
-  const intro = svg.animate(
-    [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
-    {
-      duration: 320,
-      iterations: 1,
-      easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-    },
-  );
-  spinAnim = intro;
-  try {
-    await intro.finished;
-  } catch {
-    return;
-  }
-  if (spinState !== 'intro') return;
-  spinState = 'loop';
-  spinAnim = svg.animate(
-    [{ transform: 'rotate(0deg)' }, { transform: 'rotate(360deg)' }],
-    { duration: 800, iterations: Infinity, easing: 'linear' },
-  );
-}
-
-async function stopRefreshSpin(): Promise<void> {
-  if (spinState === 'idle') return;
-  const svg = refreshSvgEl();
-  if (!svg) {
-    spinState = 'idle';
-    spinAnim = undefined;
-    return;
-  }
-  const startAngle = readRotation(svg);
-  spinState = 'outro';
-  if (spinAnim) {
-    spinAnim.cancel();
-    spinAnim = undefined;
-  }
-  const outro = svg.animate(
-    [
-      { transform: `rotate(${startAngle}deg)` },
-      { transform: `rotate(${startAngle + (360 - startAngle)}deg)` },
-    ],
-    {
-      duration: 380,
-      iterations: 1,
-      easing: 'cubic-bezier(0.33, 1, 0.68, 1)',
-    },
-  );
-  spinAnim = outro;
-  try {
-    await outro.finished;
-  } catch {
-    // ignored
-  }
-  spinAnim = undefined;
-  spinState = 'idle';
-}
-
-async function doRefresh(currentOrgnrArg: string): Promise<void> {
-  // Refresh has one job on both engines: reload the displayed company's
-  // data, bypassing the 24h cache. It deliberately does NOT re-resolve
-  // the active tab — auto-sync follows tab switches, and the popup /
-  // context-menu gesture re-syncs on demand. Folding active-tab
-  // resolution in here gave the button confusing dual semantics (silent
-  // re-fetch without `tabs`, active-tab re-resolve with it) and could
-  // wipe the panel to the empty / picker state when the active tab no
-  // longer resolved cleanly. With nothing on screen there's nothing to
-  // refresh — bail before spinning so the button doesn't look busy.
-  if (!currentOrgnrArg) return;
-  refreshBtn.disabled = true;
-  refreshBtn.setAttribute('aria-busy', 'true');
-  void startRefreshSpin();
-  // Snapshot loadRunId so a concurrent state change (sync broadcast from
-  // the popup, no-match broadcast, picker path) wins over the refresh —
-  // we must not announce "Oppdatert" or re-render over newer state.
-  const startRunId = loadRunId;
-  let refreshed = false;
-  try {
-    await invalidateCache(currentOrgnrArg);
-    if (loadRunId !== startRunId) return;
-    // Keep the current resolution method so the override button's
-    // visibility is unchanged across a refresh.
-    await loadOrgnr(currentOrgnrArg, currentResolutionMethod);
-    refreshed = true;
-  } finally {
-    // Outro phase (~380ms) gives the spin a visible wind-down even
-    // on cache hits — no separate min-hold needed.
-    await stopRefreshSpin();
-    refreshBtn.disabled = false;
-    refreshBtn.removeAttribute('aria-busy');
-    // Explicit confirmation: re-fetching the same company is visually
-    // identical, so without this the click reads as a no-op.
-    if (refreshed) confirmRefresh();
-  }
-}
-
-let refreshStatusTimer: number | undefined;
-
-function confirmRefresh(): void {
-  refreshStatus.hidden = false;
-  refreshStatus.textContent = 'Oppdatert';
-  if (refreshStatusTimer !== undefined) clearTimeout(refreshStatusTimer);
-  refreshStatusTimer = window.setTimeout(() => {
-    refreshStatus.hidden = true;
-    refreshStatus.textContent = '';
-  }, 2200);
-}
-
 // Cached effective state of the toggle. Kept in sync with
 // storage + permission grant so handleToggleChange can call
 // browser.permissions.request *without* an await between the
@@ -619,8 +460,7 @@ async function handleToggleChange(desired: boolean): Promise<void> {
   // Guard against rapid double-clicks racing the permissions.request
   // prompt. Without this, a second click while the first await is
   // pending interleaves the two decisions and the final visible state
-  // can contradict what the user last clicked. Same shape as the
-  // refresh button's disabled-flip in doRefresh.
+  // can contradict what the user last clicked.
   if (toggleInFlight) return;
   toggleInFlight = true;
   autoSyncToggle.disabled = true;
