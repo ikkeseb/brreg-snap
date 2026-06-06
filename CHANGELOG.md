@@ -14,20 +14,35 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   picker, recents and click-to-copy all work. Engine differences are
   isolated in `src/lib/platform/` with no third-party polyfill (a
   ~3-line `browser`→`chrome` shim), preserving the zero-runtime-
-  dependency guarantee. Tab-switch auto-update stays Firefox-only for
-  now (a follow-up). Pending Chrome Web Store review.
+  dependency guarantee. Pending Chrome Web Store review.
+- `[chrome]` Auto-update on tab switch ("Auto-oppdater ved fane-bytte")
+  is now at parity with Firefox — `tabs` is a runtime opt-in in the
+  Chrome manifest, requested only when the user enables the toggle.
 
 ### Changed
 
+- Removed the manual refresh button from the side panel (both engines).
+  It couldn't follow the active tab without `tabs`, and with auto-sync
+  on the panel already follows live, so the refresh icon promised a sync
+  it couldn't deliver; the footer "Oppdatert" freshness stamp stays.
 - `[firefox]` Packaged `.xpi` no longer ships sourcemaps or
   `icons/README.md` (~263 KB → 43 KB). No change to executed code —
   maps remain in the build dir for local debugging and the full
   TypeScript source ships in the source zip used for AMO review.
 
+### Fixed
+
+- More reliable org-number resolution: a chance-valid 9-digit number in
+  a URL or title no longer shadows the real company. An explicit named
+  `?orgnr=` wins; otherwise a bare 9-digit is trusted only when it's the
+  single mod-11-valid candidate, else the extension abstains to the
+  hostname search / picker rather than showing a confidently-wrong hit.
+
 ### Internal
 
 - Characterization tests for `format` and `recent`, plus tests for the
-  platform layer (engine detection + sidebar adapter). 105 → 170 tests.
+  platform layer (engine detection + sidebar adapter) and Chrome-mode
+  background dispatch. 105 → 182 tests.
 - Removed an inert `web-ext-config.cjs` (was never loaded; packaging
   options are now explicit CLI flags).
 
