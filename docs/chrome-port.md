@@ -1,39 +1,43 @@
 # Chrome port plan
 
-Working doc for porting brreg-snap to Chrome / Chromium. Lives on
-the `chrome-port` branch and stays there until the port lands —
-keeps `main` aligned with the Firefox AMO submission until that
-review is done.
-
-This is a session-resumable plan: when picking up after a break,
-read **Status** and **Next action**, then jump to the relevant
-phase.
+Working doc for the brreg-snap Chrome / Chromium port. The port has
+**landed on `main`** (merged 2026-06-07, commit `79da925`). This doc
+is now a historical record: the decision log (D1–D15) and the
+phase-by-phase trail are kept for rationale, not as live TODOs.
 
 ---
 
 ## Status
 
-- **Current phase:** Phases 1–3 **done** (2026-06-01). Chrome MVP
-  builds, type-checks, lints, and passes the full unit suite (170
-  tests). Phase 4 (live Chrome smoke test) is the only thing between
-  here and a CWS submission — and it needs a human at a Chrome window.
-- **Branch:** `chrome-port-mvp`, off `chrome-port` (which is off
-  `d98dc69` == `v1.0.0` == AMO submission snapshot). All Chrome work
-  lives here; merge `chrome-port-mvp` → `chrome-port` once Phase 4 is
-  green, then follow the CLAUDE.md embargo before `chrome-port` → `main`.
-- **AMO review:** approved 2026-05-19; the 7-day-stable window passed
-  2026-05-26. Embargo conditions 1 & 2 are met; condition 3 (this
-  Chrome MVP passing Phase 4) is the last gate before a `main` merge.
-  Merging is **Seb's call** — not done autonomously.
-- **What deviates from the original plan (decided during build):**
-  D3 (webextension-polyfill) → **in-house shim** (see D8); build-time
-  module aliasing → **runtime feature detection** (see D9); D4
-  (auto-sync deferred on Chrome) **reversed** — auto-sync brought
-  forward into the MVP (see D13); `tabs` is a runtime opt-in in the
-  Chrome manifest, same as Firefox.
-- **Next action:** run the Phase 4 manual smoke matrix below in Chrome
-  (load `dist-chrome/` unpacked), then `pnpm package:chrome` and follow
-  `docs/cws-submission.md`.
+- **DONE — port merged to `main` 2026-06-07** (commit `79da925`,
+  merging `feat/chrome-auto-sync`). Both stores are live:
+  - **Chrome `1.0.0`** — submitted to CWS 2026-06-06, approved + live
+    2026-06-07.
+  - **Firefox `1.0.1`** — live on AMO (orgnr-resolution reliability fix).
+- **Embargo lifted:** all three CLAUDE.md merge conditions met — AMO
+  approved (FF v1.0.0 on 2026-05-19, v1.0.1 after), the 7-day-stable
+  window passed (2026-05-26), and the Chrome MVP is store-approved
+  (beyond the Phase 4 smoke). Merge was verified at source: only
+  `CLAUDE.md` conflicted (docs, resolved); the orgnr fix converged
+  cleanly with the cherry-pick already on `main`; the Firefox manifest
+  stays **byte-identical to `amo-submission-1.0.1`** (permissions/CSP
+  untouched); 182 unit tests + both builds + web-ext lint green.
+- **Version state on `main`:** package.json + FF manifest `1.0.1`,
+  Chrome manifest `1.0.0`. The merge is a **pure integration — no bump.**
+- **What deviated from the original plan:** D3 (webextension-polyfill)
+  → **in-house shim** (D8); build-time module aliasing → **runtime
+  feature detection** (D9); D4/D11 (auto-sync deferred on Chrome)
+  **reversed** — auto-sync brought forward (D13); the refresh button was
+  **removed entirely** on both engines (D14→D15); `tabs` is a runtime
+  opt-in in both manifests.
+- **Next (not started, not urgent):** a Firefox **`v1.1.0`** release to
+  carry the Chrome-parity UX (refresh button gone, auto-sync follows the
+  active tab) to Firefox users. Steps: bump all three version fields to
+  `1.1.0`, dedup the CHANGELOG (the orgnr fix is duplicated in
+  `[Unreleased]` + `[1.0.1]`), tag `v1.1.0` + `amo-submission-1.1.0`,
+  `pnpm package:firefox`, submit to AMO. Chrome stays `1.0.0` on CWS
+  (it already ships these features) and converges to `1.1.0` at its
+  next real change — no cosmetic re-submission.
 
 ### How to load the Chrome build for testing
 
@@ -284,6 +288,12 @@ phase; later pulled forward into the MVP — see Phase 6 / D13.)
 
 ## Phase 4 — Chrome smoke test + bug fixes
 
+**DONE.** Smoke matrix run live by Seb; the auto-sync gesture path
+(D11's open question) is confirmed — the `tabs` permission prompt fires
+from the side-panel toggle. Chrome 1.0.0 then passed CWS review, which
+validates the user-facing flows end to end. No outstanding Phase 4 bugs.
+The matrix below is kept as a record.
+
 **Goal:** Walk through every user-facing flow that MVP supports.
 Log issues, fix them, re-test. Everything below typechecks, lints,
 unit-tests (170), builds, and packages clean — Phase 4 is purely the
@@ -356,6 +366,11 @@ _(empty — populate as found)_
 
 ## Phase 5 — Chrome Web Store submission
 
+**DONE.** Chrome `1.0.0` submitted to CWS 2026-06-06 (category
+"Verktøy"/Tools), approved + live 2026-06-07. Listing: Norwegian
+summary + description; screenshots at `docs/screenshots/cws-ctx-01..03.png`
+(1280×800). Full submission steps in `docs/cws-submission.md`.
+
 **Goal:** Chrome MVP published to CWS.
 
 - [ ] Confirm Firefox 1.0.0 has been live and stable on AMO for at
@@ -380,9 +395,13 @@ _(empty — populate as found)_
 
 ## Phase 6 — Auto-sync for Chrome (pulled forward into the MVP, D13)
 
+**DONE.** Auto-sync at parity with Firefox; live-confirmed by Seb — the
+`tabs` permission prompt fires from the Chrome side-panel gesture
+(D11's unverified path resolved). Shipped in Chrome 1.0.0 and merged to
+`main`. The pending checkboxes below all passed.
+
 **Goal:** Auto-sync at parity with Firefox. Done on
-`feat/chrome-auto-sync` off `chrome-port-mvp`; pending Seb's live
-permission-prompt smoke.
+`feat/chrome-auto-sync` off `chrome-port-mvp`.
 
 Code + static verification (done):
 
