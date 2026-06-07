@@ -1,5 +1,7 @@
 node_modules/
 dist/
+dist-firefox/
+dist-chrome/
 web-ext-artifacts/
 .web-ext/
 

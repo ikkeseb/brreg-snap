@@ -9,11 +9,23 @@ import {
   rmSync,
 } from 'node:fs';
 
+// Build target browser, selected via `BROWSER=chrome|firefox`. Defaults
+// to firefox so the bare `vite build` / `pnpm watch` keep producing the
+// Firefox output. Output goes to dist-<browser>/ and the matching
+// public/manifest.<browser>.json is copied in below.
+const target = process.env.BROWSER === 'chrome' ? 'chrome' : 'firefox';
+const outDir = `dist-${target}`;
+
 export default defineConfig({
+  // Disable Vite's automatic public/ copy: it would drag both
+  // manifest.<browser>.json source files into the output. The
+  // copy-static-assets plugin below copies exactly the right manifest
+  // (as manifest.json) plus the icons instead.
+  publicDir: false,
   build: {
-    outDir: 'dist',
+    outDir,
     emptyOutDir: true,
-    target: 'firefox115',
+    target: target === 'chrome' ? 'chrome116' : 'firefox115',
     // esbuild minify is fast and produces correct output for our DOM
     // code (no eval, no Function constructor, no name-sensitive
     // reflection). Source maps stay enabled so AMO review can map
@@ -50,7 +62,7 @@ export default defineConfig({
     {
       name: 'copy-static-assets',
       closeBundle() {
-        const dist = resolve(__dirname, 'dist');
+        const dist = resolve(__dirname, outDir);
         if (!existsSync(dist)) mkdirSync(dist, { recursive: true });
 
         // Vite emits HTML entries under dist/src/<dir>/<file>.html
@@ -64,14 +76,15 @@ export default defineConfig({
         }
 
         copyFileSync(
-          resolve(__dirname, 'public/manifest.json'),
+          resolve(__dirname, `public/manifest.${target}.json`),
           resolve(dist, 'manifest.json'),
         );
         if (existsSync(resolve(__dirname, 'public/icons'))) {
           cpSync(
             resolve(__dirname, 'public/icons'),
             resolve(dist, 'icons'),
-            { recursive: true },
+            // Skip docs (e.g. icons/README.md) — only ship the PNGs.
+            { recursive: true, filter: (src) => !src.endsWith('.md') },
           );
         }
 

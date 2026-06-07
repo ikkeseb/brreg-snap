@@ -4,31 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Active long-running branches
 
-### Chrome port → eventual Firefox `v1.1.0`
+### Chrome port → Firefox `v1.1.0` (merged)
 
-Chrome support is built and shipped. **Status (2026-06-06):**
+Chrome support is built and shipped, and the chrome-port line is now
+merged into `main`. **Status (2026-06-07):**
 
 - **Firefox `v1.0.1`** is live on AMO — the orgnr-resolution
-  reliability fix. `main` is at `v1.0.1`, tagged `v1.0.1` +
-  `amo-submission-1.0.1`.
-- **Chrome `1.0.0`** is submitted to the Chrome Web Store (awaiting
-  review). It ships from `feat/chrome-auto-sync` (off `chrome-port-mvp`
-  off `chrome-port`) and carries: Chrome support, auto-sync brought to
+  reliability fix. Tagged `v1.0.1` + `amo-submission-1.0.1`.
+- **Chrome `1.0.0`** is approved and live on the Chrome Web Store. It
+  shipped from `feat/chrome-auto-sync` (off `chrome-port-mvp` off
+  `chrome-port`) and carries: Chrome support, auto-sync brought to
   Firefox parity, the refresh button removed, and the orgnr fix
   cherry-picked in.
+- **`feat/chrome-auto-sync` is now merged into `main`** (dual-build,
+  split manifests, refresh button removed, auto-sync parity). This is a
+  Firefox *behaviour* change (the refresh button is gone; `details.html`
+  is shared between engines), so it must go out as a real FF version
+  bump — release it as **`v1.1.0`**, not a silent `v1.0.1` change.
 
-Full plan + decision log (D1–D15): `docs/chrome-port.md` on the chrome
-branch — `git show feat/chrome-auto-sync:docs/chrome-port.md` (no
-checkout needed).
-
-**The one pending merge: `feat/chrome-auto-sync` → `main`, which ships
-as a deliberate Firefox `v1.1.0`.** Not yet done, and no rush — CWS
-review doesn't need it. The merge carries a Firefox *behaviour* change
-(the refresh button is removed; `details.html` is shared between
-engines), so it must go out as a real FF version bump, not a silent
-change. `main` still has the refresh button + a single `manifest.json`;
-the chrome branch has dual manifests + the removal. Do the merge when
-ready to release FF `v1.1.0`.
+Full plan + decision log (D1–D15): `docs/chrome-port.md`.
 
 `main` mirrors the live AMO submission — the `amo-submission-X.Y.Z` tag
 is the canonical reference for what was submitted, regardless of where
@@ -44,19 +38,36 @@ This project uses **pnpm** (pinned via `packageManager` in
 ```bash
 pnpm typecheck                             # tsc --noEmit
 pnpm lint:ts                               # ESLint on src/**/*.ts
-pnpm lint:ext                              # web-ext lint on dist/ (run build first)
+pnpm lint:ext                              # web-ext lint on dist-firefox/ (run build first)
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
 pnpm exec vitest run tests/orgnr.test.ts   # single file
 pnpm exec vitest run -t "rejects cd=10"    # single test by name
-pnpm build                                 # production build to dist/
-pnpm watch                                 # vite build --watch
-pnpm dev                                   # build + web-ext run (Firefox dev profile)
-pnpm package                               # build + .xpi to web-ext-artifacts/
+pnpm build                                 # = build:firefox (default target)
+pnpm build:firefox                         # BROWSER=firefox -> dist-firefox/
+pnpm build:chrome                          # BROWSER=chrome   -> dist-chrome/
+pnpm watch                                 # vite build --watch (firefox target)
+pnpm dev                                   # = dev:firefox (build + web-ext run, FF profile)
+pnpm dev:chrome                            # build:chrome + web-ext run -t chromium
+pnpm package                               # = package:firefox (.xpi/.zip, maps stripped)
+pnpm package:chrome                        # dist-chrome/ -> CWS-ready .zip (manifest at root)
 ```
 
 `pnpm dev` is the only way to exercise the popup — there is no Vite
-dev server for popup-only extensions.
+dev server for popup-only extensions. Chrome has no `web-ext run`
+parity for the side panel; load `dist-chrome/` unpacked via
+`chrome://extensions` → Developer mode → "Load unpacked" instead.
+
+### Dual-browser build (chrome-port)
+
+One source tree, two targets via `BROWSER=firefox|chrome`. Outputs go
+to `dist-firefox/` and `dist-chrome/`; the matching
+`public/manifest.<browser>.json` is copied to `manifest.json` by the
+`copy-static-assets` plugin in `vite.config.ts` (`publicDir` is
+disabled so the source manifests don't leak). The Firefox
+`manifest.json` stays byte-identical to the AMO submission. Engine
+differences are isolated in `src/lib/platform/` — see
+`docs/chrome-port.md`.
 
 ## Architecture — routing table
 
