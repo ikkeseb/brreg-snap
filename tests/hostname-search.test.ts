@@ -220,6 +220,94 @@ describe('searchByHostnameDetailed', () => {
   });
 });
 
+describe('pipeline failure handling (network errors)', () => {
+  let store: StorageMap;
+
+  beforeEach(() => {
+    store = installStorageMock();
+    searchMock.mockReset();
+  });
+
+  const bandKeys = () =>
+    Object.keys(store).filter((k) => k.startsWith('hostname:'));
+
+  it('returns band=none WITHOUT caching when every query fails', async () => {
+    searchMock.mockRejectedValue(new Error('brreg search returned 503.'));
+
+    const result = await searchByHostnameDetailed('orkla.com');
+    expect(result).toEqual({ band: 'none', candidates: [] });
+    expect(bandKeys()).toEqual([]);
+
+    // Next visit retries the network instead of serving a 24h miss.
+    const callsAfterFirst = searchMock.mock.calls.length;
+    await searchByHostnameDetailed('orkla.com');
+    expect(searchMock.mock.calls.length).toBeGreaterThan(callsAfterFirst);
+  });
+
+  it('returns a best-effort result WITHOUT caching on partial failure', async () => {
+    // hjemmeside queries throttled; navn queries succeed with a clear
+    // winner. The result is served, but built on partial data — it
+    // must not enter the band cache.
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) {
+        throw new Error('brreg search returned 429.');
+      }
+      return [
+        hit('ORKLA ASA', '910747711', {
+          organisasjonsform: { kode: 'ASA' },
+          antallAnsatte: 50,
+        }),
+        hit('ORKLA FOODS NORGE AS', '999999998', {
+          organisasjonsform: { kode: 'AS' },
+          overordnetEnhet: '910747711',
+        }),
+      ];
+    });
+
+    const result = await searchByHostnameDetailed('orkla.com');
+    expect(result?.band).toBe('auto');
+    expect(result?.choice).toBe('910747711');
+    expect(bandKeys()).toEqual([]);
+  });
+
+  it('caches the result when all queries succeed (regression)', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) return [];
+      return [
+        hit('ORKLA ASA', '910747711', {
+          organisasjonsform: { kode: 'ASA' },
+          antallAnsatte: 50,
+        }),
+      ];
+    });
+
+    const result = await searchByHostnameDetailed('orkla.com');
+    expect(result?.band).toBe('auto');
+    expect(bandKeys()).toEqual(['hostname:orkla.com']);
+  });
+
+  it('a failed Q3 fallback also blocks caching', async () => {
+    // Q1+Q2 succeed with zero hits, which triggers the Q3 fallback
+    // (no org-form filter) — and Q3 fails. The run is incomplete.
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) return [];
+      if (params.has('organisasjonsform')) return [];
+      throw new Error('brreg search returned 503.');
+    });
+
+    const result = await searchByHostnameDetailed('eksfin.no');
+    expect(result?.band).toBe('none');
+    expect(bandKeys()).toEqual([]);
+  });
+
+  it('picker-choice cache still wins regardless of network state', async () => {
+    searchMock.mockRejectedValue(new Error('offline'));
+    await setPickerChoice('orkla.com', '910747711');
+    expect(await searchByHostname('orkla.com')).toBe('910747711');
+    expect(searchMock).not.toHaveBeenCalled();
+  });
+});
+
 describe('getPickerChoice / setPickerChoice', () => {
   beforeEach(() => {
     installStorageMock();

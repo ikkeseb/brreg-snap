@@ -10,6 +10,12 @@ import type {
 const API = 'https://data.brreg.no/enhetsregisteret/api';
 const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+// Hard cap per request so a hung connection fails fast instead of
+// leaving the UI in a spinner. AbortSignal.timeout() is supported in
+// Firefox 100+ / Chrome 103+ — well below our minimum targets. An
+// abort rejects the fetch, which counts as a failure like any other
+// network error (no retry logic — callers decide what failure means).
+const FETCH_TIMEOUT_MS = 8000;
 
 // Cache-key prefixes used by all fetchers. invalidateCache() walks
 // these to clear everything related to a single orgnr.
@@ -62,6 +68,7 @@ export async function fetchEnhet(orgnr: string): Promise<Enhet> {
 
   const res = await fetch(`${API}/enheter/${orgnr}`, {
     headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (res.status === 404) {
     throw new Error(`No entity found for orgnr ${orgnr}.`);
@@ -84,7 +91,10 @@ export async function searchEnheter(
   const url = new URL(`${API}/enheter`);
   url.searchParams.set('navn', query);
   url.searchParams.set('size', String(size));
-  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
   if (!res.ok) throw new Error(`brreg search returned ${res.status}.`);
   const data = (await res.json()) as {
     _embedded?: { enheter?: SearchHit[] };
@@ -95,24 +105,25 @@ export async function searchEnheter(
 // Multi-parameter search for the hostname-resolution pipeline. Callers
 // pass a fully constructed URLSearchParams so they can mix
 // `hjemmeside`, `navn`, `navnMetodeForSoek`, `organisasjonsform`,
-// `sort`, `size`, etc. without an option-soup signature. Failures and
-// non-2xx responses return [] — the pipeline aggregates across several
-// calls and a single hiccup shouldn't poison the whole result.
+// `sort`, `size`, etc. without an option-soup signature. Network
+// failures (incl. timeouts) and non-2xx responses THROW — the pipeline
+// must be able to tell "no hits" from "couldn't ask", or an offline /
+// throttled moment would get cached as a 24h "no match". [] means a
+// genuine 2xx response with zero hits, nothing else.
 export async function searchEnheterWithParams(
   params: URLSearchParams,
 ): Promise<SearchHit[]> {
   const url = new URL(`${API}/enheter`);
   for (const [k, v] of params) url.searchParams.set(k, v);
-  try {
-    const res = await fetch(url, { headers: { Accept: 'application/json' } });
-    if (!res.ok) return [];
-    const data = (await res.json()) as {
-      _embedded?: { enheter?: SearchHit[] };
-    };
-    return data._embedded?.enheter ?? [];
-  } catch {
-    return [];
-  }
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!res.ok) throw new Error(`brreg search returned ${res.status}.`);
+  const data = (await res.json()) as {
+    _embedded?: { enheter?: SearchHit[] };
+  };
+  return data._embedded?.enheter ?? [];
 }
 
 function isRollerResponse(value: unknown): value is RollerResponse {
@@ -128,6 +139,7 @@ export async function fetchRoller(orgnr: string): Promise<RollerResponse> {
 
   const res = await fetch(`${API}/enheter/${orgnr}/roller`, {
     headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (res.status === 404) {
     // No roles registered — treat as empty rather than a hard error.
@@ -164,7 +176,10 @@ export async function fetchUnderenheter(orgnr: string): Promise<Underenhet[]> {
   const url = new URL(`${API}/underenheter`);
   url.searchParams.set('overordnetEnhet', orgnr);
   url.searchParams.set('size', '100');
-  const res = await fetch(url, { headers: { Accept: 'application/json' } });
+  const res = await fetch(url, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
   if (!res.ok) {
     throw new Error(`brreg underenheter API returned ${res.status}.`);
   }
@@ -205,6 +220,7 @@ export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
 
   const res = await fetch(`${REGNSKAP_API}/${orgnr}`, {
     headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   if (res.status === 404) {
     // Many small entities have no submitted regnskap. Cache the empty

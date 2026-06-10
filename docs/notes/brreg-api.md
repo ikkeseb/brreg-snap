@@ -32,6 +32,26 @@ offentlig API." line instead of pretending the company didn't file.
 Both empty results and unsupported-plan results are cached so refresh
 doesn't re-hit.
 
+<!-- SECTION: error-contract -->
+## Error contract: search throws, [] means a real empty result
+
+`searchEnheter` and `searchEnheterWithParams` throw on network
+failure, timeout, and every non-2xx response (429/503 included).
+They return `[]` only for a genuine 2xx response with zero hits.
+Don't reintroduce a swallow-and-return-`[]` catch: the resolution
+pipeline caches its outcome for 24h, and an offline moment disguised
+as "no hits" gets pinned as a day-long "no match" (see
+`docs/notes/cache.md` § failure-no-cache for the caching rule).
+
+The detail fetchers (`fetchEnhet`, `fetchRoller`, `fetchUnderenheter`,
+`fetchRegnskap`) keep their documented special cases — roller 404 →
+empty, regnskap 404 → empty, regnskap 500 → unsupported plan (above) —
+and throw on everything else.
+
+Every fetch in `brreg.ts` carries `AbortSignal.timeout(8000)`
+(Firefox 100+ / Chrome 103+). A timeout aborts the fetch with a
+rejection, which counts as a failure like any other. No retry logic.
+
 <!-- SECTION: no-signatur -->
 ## No `fetchSignatur` — endpoint doesn't exist publicly
 

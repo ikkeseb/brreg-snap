@@ -11,8 +11,11 @@
 //   - 'none'   → no plausible match, surface manual-search UX
 //
 // Cached per hostname in storage.session (24h) so re-visits don't
-// churn the API. User picker choices cache separately under
-// `picker-choice:<host>` and win over any cached band.
+// churn the API — but only when every constituent query succeeded.
+// Partial/failed runs return a best-effort result uncached so the
+// next visit retries instead of serving a 24h "no match". User picker
+// choices cache separately under `picker-choice:<host>` and win over
+// any cached band.
 
 import { searchEnheterWithParams } from './brreg.js';
 import {
@@ -132,10 +135,31 @@ export function queryFromHostname(hostname: string): string | undefined {
   return hostnameLabel(hostname);
 }
 
-async function queryByHjemmeside(host: string): Promise<SearchHit[]> {
+// Outcome of one query group. `ok` is true only when every constituent
+// fetch succeeded — a partially failed group can still contribute hits
+// (best effort), but the run must not be treated as authoritative.
+interface QueryOutcome {
+  hits: SearchHit[];
+  ok: boolean;
+}
+
+// searchEnheterWithParams throws on network failure / non-2xx; settle
+// each fetch so one hiccup doesn't sink the parallel siblings, while
+// still recording that the group is incomplete.
+async function settleSearches(
+  searches: Promise<SearchHit[]>[],
+): Promise<QueryOutcome> {
+  const settled = await Promise.allSettled(searches);
+  return {
+    hits: settled.flatMap((s) => (s.status === 'fulfilled' ? s.value : [])),
+    ok: settled.every((s) => s.status === 'fulfilled'),
+  };
+}
+
+async function queryByHjemmeside(host: string): Promise<QueryOutcome> {
   const bare = host.replace(/^www\./i, '').toLowerCase();
   const variants = [bare, `www.${bare}`];
-  const results = await Promise.all(
+  return settleSearches(
     variants.map((v) => {
       const params = new URLSearchParams();
       params.set('hjemmeside', v);
@@ -143,15 +167,14 @@ async function queryByHjemmeside(host: string): Promise<SearchHit[]> {
       return searchEnheterWithParams(params);
     }),
   );
-  return results.flat();
 }
 
 async function queryByNavn(
   label: string,
   withFilter: boolean,
-): Promise<SearchHit[]> {
+): Promise<QueryOutcome> {
   const variants = generateNordicVariants(label);
-  const results = await Promise.all(
+  return settleSearches(
     variants.map((v) => {
       const params = new URLSearchParams();
       params.set('navn', v);
@@ -164,7 +187,6 @@ async function queryByNavn(
       return searchEnheterWithParams(params);
     }),
   );
-  return results.flat();
 }
 
 function dedupeByOrgnr(hits: SearchHit[]): SearchHit[] {
@@ -175,23 +197,37 @@ function dedupeByOrgnr(hits: SearchHit[]): SearchHit[] {
   return [...seen.values()];
 }
 
+interface PipelineOutcome {
+  result: HostnameResult;
+  // True only when every constituent brreg query succeeded. Only
+  // complete runs may enter the band cache — caching a result built on
+  // partial data (offline, 429, 503, timeout) would pin a wrong "no
+  // match" for 24h. Incomplete runs still return their best-effort
+  // result; the all-failed case falls out naturally as band 'none'
+  // with complete=false.
+  complete: boolean;
+}
+
 async function runPipeline(
   host: string,
   label: string,
   rejected: string[] = [],
-): Promise<HostnameResult> {
+): Promise<PipelineOutcome> {
   const [byHj, byNavn] = await Promise.all([
     queryByHjemmeside(host),
     queryByNavn(label, true),
   ]);
+  let complete = byHj.ok && byNavn.ok;
 
-  let candidates = dedupeByOrgnr([...byHj, ...byNavn]);
+  let candidates = dedupeByOrgnr([...byHj.hits, ...byNavn.hits]);
 
   // Q3 fallback — drop the org-form filter only if Q1+Q2 yielded zero.
   // Catches ORGL/SF entities like EKSPORTFINANSIERING NORGE without
   // re-adding the FLI/ENK noise we filtered out otherwise.
   if (candidates.length === 0) {
-    candidates = dedupeByOrgnr(await queryByNavn(label, false));
+    const fallback = await queryByNavn(label, false);
+    complete = complete && fallback.ok;
+    candidates = dedupeByOrgnr(fallback.hits);
   }
 
   if (rejected.length > 0) {
@@ -202,7 +238,7 @@ async function runPipeline(
   }
 
   if (candidates.length === 0) {
-    return { band: 'none', candidates: [] };
+    return { result: { band: 'none', candidates: [] }, complete };
   }
 
   const scored = candidates
@@ -216,18 +252,24 @@ async function runPipeline(
 
   if (band === 'auto' && top) {
     return {
-      band: 'auto',
-      orgnr: top.cand.organisasjonsnummer,
-      candidates: scored.slice(0, MAX_PICKER_CANDIDATES).map((s) => s.cand),
+      result: {
+        band: 'auto',
+        orgnr: top.cand.organisasjonsnummer,
+        candidates: scored.slice(0, MAX_PICKER_CANDIDATES).map((s) => s.cand),
+      },
+      complete,
     };
   }
   if (band === 'picker') {
     return {
-      band: 'picker',
-      candidates: scored.slice(0, MAX_PICKER_CANDIDATES).map((s) => s.cand),
+      result: {
+        band: 'picker',
+        candidates: scored.slice(0, MAX_PICKER_CANDIDATES).map((s) => s.cand),
+      },
+      complete,
     };
   }
-  return { band: 'none', candidates: [] };
+  return { result: { band: 'none', candidates: [] }, complete };
 }
 
 function bandCacheKey(host: string, rejected: string[]): string {
@@ -243,9 +285,11 @@ function bandCacheKey(host: string, rejected: string[]): string {
 async function resolveInternal(
   hostname: string,
   rejected: string[] = [],
-): Promise<HostnameResult | undefined> {
+): Promise<HostnameResult> {
   const label = queryFromHostname(hostname);
   if (!label) {
+    // No usable label is a deterministic property of the hostname, not
+    // a network outcome — safe to cache.
     const empty: HostnameResult = { band: 'none', candidates: [] };
     await cacheSet(bandCacheKey(hostname, rejected), empty);
     return empty;
@@ -255,16 +299,14 @@ async function resolveInternal(
   const cached = await cacheGet<HostnameResult>(cacheKey);
   if (cached) return cached;
 
-  let result: HostnameResult;
-  try {
-    result = await runPipeline(hostname, label, rejected);
-  } catch {
-    // Network glitch — don't cache, next visit retries. The popup /
-    // sidebar already handle undefined gracefully.
-    return undefined;
-  }
+  const { result, complete } = await runPipeline(hostname, label, rejected);
 
-  await cacheSet(cacheKey, result);
+  // Only cache runs where every query succeeded. A partial or failed
+  // run still returns its best-effort result, but skipping the write
+  // means the next visit retries instead of serving a 24h miss.
+  if (complete) {
+    await cacheSet(cacheKey, result);
+  }
   return result;
 }
 
@@ -282,7 +324,6 @@ export async function searchByHostname(
   }
   const rejected = await getRejectedChoices(hostname);
   const result = await resolveInternal(hostname, rejected);
-  if (!result) return undefined;
   return result.band === 'auto' ? result.orgnr : undefined;
 }
 
@@ -300,7 +341,6 @@ export async function searchByHostnameDetailed(
   }
   const rejected = await getRejectedChoices(hostname);
   const result = await resolveInternal(hostname, rejected);
-  if (!result) return undefined;
   if (result.band === 'auto') {
     return {
       band: 'auto',
