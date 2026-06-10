@@ -22,6 +22,21 @@ function makeListenerSpy() {
   return { addListener: vi.fn(), removeListener: vi.fn() };
 }
 
+type MenusMock = {
+  create: ReturnType<typeof vi.fn>;
+  onClicked: ReturnType<typeof makeListenerSpy>;
+};
+
+// The context-menu API lives under a different namespace per engine
+// (browser.menus on Firefox, browser.contextMenus on Chromium). Reach
+// for whichever the mock exposes.
+function menusSpy(mock: unknown): MenusMock {
+  const m = mock as { menus?: MenusMock; contextMenus?: MenusMock };
+  const api = m.menus ?? m.contextMenus;
+  if (!api) throw new Error('mock exposes neither menus nor contextMenus');
+  return api;
+}
+
 interface MockTab {
   url?: string;
   title?: string;
@@ -70,10 +85,6 @@ function installBrowserMock(opts: BrowserMockOptions = {}) {
       getURL: vi.fn((p: string) => `moz-extension://test/${p}`),
       lastError: undefined,
     },
-    contextMenus: {
-      create: vi.fn(),
-      onClicked: makeListenerSpy(),
-    },
     permissions: {
       contains: vi.fn(async () => hasTabs),
       onAdded: makeListenerSpy(),
@@ -105,11 +116,22 @@ function installBrowserMock(opts: BrowserMockOptions = {}) {
       },
       onChanged: makeListenerSpy(),
     },
-    // Engine marker: Firefox exposes sidebarAction, Chrome exposes
-    // sidePanel. engine.ts feature-detects on 'sidebarAction' in browser.
+    // Engine marker + context-menu namespace, both engine-realistic.
+    // Firefox exposes sidebarAction and, under the `menus` permission,
+    // `browser.menus` — `browser.contextMenus` is UNDEFINED there.
+    // Chromium exposes sidePanel and only `chrome.contextMenus` (no
+    // `menus`). Mirroring this is what makes a hardcoded
+    // `browser.contextMenus` access fail on the FF mock the way it does
+    // in real Firefox. engine.ts feature-detects on 'sidebarAction'.
     ...(engine === 'firefox'
-      ? { sidebarAction: { setPanel: vi.fn(), open: vi.fn() } }
-      : { sidePanel: { setOptions: vi.fn(), open: vi.fn() } }),
+      ? {
+          sidebarAction: { setPanel: vi.fn(), open: vi.fn() },
+          menus: { create: vi.fn(), onClicked: makeListenerSpy() },
+        }
+      : {
+          sidePanel: { setOptions: vi.fn(), open: vi.fn() },
+          contextMenus: { create: vi.fn(), onClicked: makeListenerSpy() },
+        }),
   };
   (globalThis as { browser?: unknown }).browser = mock;
   return mock;
@@ -182,12 +204,27 @@ describe('background module load — top-level listener registration', () => {
     expect(mock.storage.onChanged.addListener).toHaveBeenCalledTimes(1);
   });
 
-  it('registers runtime.onInstalled, onStartup, and contextMenus.onClicked at top level', async () => {
+  it('registers runtime.onInstalled, onStartup, and the menu onClicked at top level', async () => {
     const mock = installBrowserMock();
     await loadBackground();
     expect(mock.runtime.onInstalled.addListener).toHaveBeenCalled();
     expect(mock.runtime.onStartup.addListener).toHaveBeenCalled();
-    expect(mock.contextMenus.onClicked.addListener).toHaveBeenCalledTimes(1);
+    expect(menusSpy(mock).onClicked.addListener).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses browser.menus on Firefox (browser.contextMenus is undefined there) — and still registers the tail listeners', async () => {
+    // Real Firefox under the `menus` permission exposes `browser.menus`,
+    // not `browser.contextMenus`. A hardcoded `browser.contextMenus`
+    // access throws a TypeError at module top level and aborts the whole
+    // background script BEFORE the auto-sync tab listeners register — so
+    // auto-sync silently dies on Firefox while Chrome (which has
+    // contextMenus) works. This pins the engine-correct namespace.
+    const mock = installBrowserMock({ engine: 'firefox' });
+    await loadBackground();
+    expect(menusSpy(mock).onClicked.addListener).toHaveBeenCalledTimes(1);
+    expect(mock.tabs.onActivated.addListener).toHaveBeenCalledTimes(1);
+    expect(mock.tabs.onUpdated.addListener).toHaveBeenCalledTimes(1);
+    expect(mock.permissions.onAdded.addListener).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -12,6 +12,7 @@
 // before any `browser.*` access. Must stay the first import.
 import '../lib/platform/globals.js';
 import { sidebar } from '../lib/platform/sidebar.js';
+import { menus } from '../lib/platform/menus.js';
 import { isFirefox } from '../lib/platform/engine.js';
 import { getAutoSync } from '../lib/auto-sync-settings.js';
 import { deriveSync, deriveSyncAsync } from '../lib/tab-sync.js';
@@ -19,9 +20,10 @@ import { deriveSync, deriveSyncAsync } from '../lib/tab-sync.js';
 const MENU_ID = 'show-in-brreg-sidebar';
 
 function registerMenu(): void {
-  // Use `contextMenus` (not Firefox's `menus` alias) so the same call
-  // works on Chromium, where `browser.menus` is undefined; Firefox
-  // exposes `contextMenus` too under the `menus` permission.
+  // `menus` resolves to browser.menus on Firefox and chrome.contextMenus
+  // on Chromium (see platform/menus.ts) — the two engines expose the
+  // same API under different namespaces, and browser.contextMenus is
+  // undefined on Firefox under the `menus` permission.
   //
   // The trailing callback reads runtime.lastError to swallow Chrome's
   // async "Cannot create item with duplicate id" — context menus
@@ -29,7 +31,7 @@ function registerMenu(): void {
   // onStartup can each re-run this. On Firefox the callback is a no-op
   // (create is idempotent across restarts; only one of onInstalled /
   // onStartup fires per session). Result: one menu item either way.
-  browser.contextMenus.create(
+  menus.create(
     {
       id: MENU_ID,
       title: 'Vis i brreg-snap sidebar',
@@ -76,7 +78,7 @@ function hostFromUrl(url: string | undefined): string | undefined {
   }
 }
 
-browser.contextMenus.onClicked.addListener((info, tab) => {
+menus.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== MENU_ID) return;
   // SYNC resolve only — setPanel + open must fire inside the user-
   // gesture stack and the first await would consume the activation
