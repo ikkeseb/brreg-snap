@@ -3,6 +3,7 @@
 // from brreg's /enheter endpoint. See docs/notes/resolution.md for the
 // pipeline overview.
 
+import { decodePunycode } from './punycode.js';
 import type { SearchHit } from '../types/brreg.js';
 
 // Fold Nordic letters to ASCII: Ø→O, Å→A, Æ→AE (and lowercase). Brreg
@@ -39,16 +40,52 @@ export function generateNordicVariants(label: string): string[] {
   return [...out];
 }
 
+// Common multi-part public suffixes. Intentionally NON-exhaustive —
+// this is generic TLD knowledge (NOT curated company data, which the
+// project bans) covering registries a Norwegian-focused user plausibly
+// hits; the full public-suffix list would be ~10k entries of dead
+// weight. When the host ends in one of these, the registrable label
+// sits one part further left (company.co.uk → "company",
+// oslo.kommune.no → "oslo" — not "co" / "kommune").
+const MULTI_PART_SUFFIXES = new Set([
+  'co.uk', 'org.uk', 'ac.uk', 'gov.uk',
+  'com.au', 'net.au', 'org.au',
+  'co.nz', 'co.za', 'co.jp', 'co.kr',
+  'com.br', 'com.mx', 'com.cn', 'com.tr', 'com.pl', 'com.sg',
+  'kommune.no', 'fylkeskommune.no',
+]);
+
 // Pull the brandable part out of a hostname for use as a search label.
 // `www.yara.com` → `yara`, `shop.mestergruppen.no` → `mestergruppen`,
-// `nrk.no` → `nrk`. Strips `www.` and the TLD segment, then takes the
-// rightmost remaining label. Returns undefined if the result is empty
-// or shorter than 2 chars (would match too much).
+// `nrk.no` → `nrk`. Strips `www.` and the public suffix (single- or
+// multi-part), then takes the rightmost remaining label. IDN labels
+// arrive punycoded from `new URL().hostname` and are decoded back to
+// human text (xn--blbr-roah.no → "blåbær") so name search can match
+// æ/ø/å brands. Returns undefined — the pipeline's abstain signal,
+// `resolveInternal` short-circuits to band 'none' / manual search —
+// when nothing brandable remains: single-label hosts, bare public
+// suffixes, labels shorter than 2 chars, or xn-- labels that fail to
+// decode (better manual search than querying a raw ACE string that
+// can never match a registered name).
 export function hostnameLabel(hostname: string): string | undefined {
   const stripped = hostname.replace(/^www\./i, '').toLowerCase();
   const parts = stripped.split('.');
   if (parts.length < 2) return undefined;
-  const base = parts[parts.length - 2];
+
+  let idx = parts.length - 2;
+  if (MULTI_PART_SUFFIXES.has(parts.slice(-2).join('.'))) {
+    if (parts.length < 3) return undefined; // host IS a public suffix
+    idx = parts.length - 3;
+  }
+
+  let base = parts[idx];
+  if (base?.startsWith('xn--')) {
+    const decoded = decodePunycode(base.slice(4));
+    // Bogus decodes (control chars, punctuation) would just be junk
+    // queries — only letters/digits/hyphen pass, like real IDN labels.
+    if (!decoded || !/^[\p{L}\p{N}-]+$/u.test(decoded)) return undefined;
+    base = decoded.toLowerCase();
+  }
   if (!base || base.length < 2) return undefined;
   return base;
 }
@@ -82,6 +119,22 @@ const ORG_FORM_WEIGHTS: Record<string, number> = {
 export interface ScoreResult {
   score: number;
   reasons: string[];
+}
+
+// Brreg's hjemmeside field is free text — "http://www.equinor.com",
+// "https://orkla.com/", "tine.no/om", trailing dots, mixed case.
+// Reduce it to a bare lowercase host so it compares against the
+// visited host like-for-like. Without this, an exact-host hjemmeside
+// wrapped in scheme/path scored as substring (+12) instead of exact
+// (+35) and confident matches landed in the picker.
+export function normalizeHjemmeside(raw: string): string {
+  return raw
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/^www\./, '')
+    .replace(/[/:?#].*$/, '') // drop path, port, query, fragment
+    .replace(/\.+$/, ''); // drop trailing dot(s)
 }
 
 export function scoreCandidate(
@@ -121,17 +174,19 @@ export function scoreCandidate(
   // Hjemmeside-felt match. Weighted lower than name match — small
   // associations populate this field more often than parent companies
   // (SHELL VETERANENE for shell.no, drift companies for lieoverflate).
-  const hjem = (cand.hjemmeside ?? '').toLowerCase();
+  // The field is normalized to a bare host first (see
+  // normalizeHjemmeside) so "http://www.equinor.com" scores exact
+  // against equinor.com, not substring. Bands/weights unchanged:
+  // exact > prefix (host plus trailing junk) > substring (visited
+  // host buried in a deeper hjemmeside host, e.g. shop.elkjop.no).
+  const hjem = normalizeHjemmeside(cand.hjemmeside ?? '');
   const bareHost = host.replace(/^www\./, '').toLowerCase();
   let hjemScore = 0;
   if (hjem) {
-    if (hjem === bareHost || hjem === `www.${bareHost}`) {
+    if (hjem === bareHost) {
       hjemScore = 35;
       reasons.push('hjemmeside=exact(+35)');
-    } else if (
-      hjem.startsWith(bareHost) ||
-      hjem.startsWith(`www.${bareHost}`)
-    ) {
+    } else if (hjem.startsWith(bareHost)) {
       hjemScore = 22;
       reasons.push('hjemmeside=prefix(+22)');
     } else if (hjem.includes(bareHost)) {

@@ -19,12 +19,32 @@
 // expected orgnr (or null = should refuse). The line that matters is
 // `auto-WRONG` — it must stay 0.
 
-import {
-  decideBand,
-  generateNordicVariants,
-  hostnameLabel,
-  scoreCandidate,
-} from '../src/lib/hostname-score.ts';
+import { registerHooks } from 'node:module';
+
+// hostname-score.ts imports './punycode.js' (repo convention — tsc and
+// Vite map .js specifiers to .ts sources), but Node's type stripping
+// does NOT rewrite extensions. Retry relative .js specifiers as .ts so
+// the shipped modules load unmodified. Hooks only affect imports made
+// AFTER registration, hence the dynamic import below.
+registerHooks({
+  resolve(specifier, context, next) {
+    try {
+      return next(specifier, context);
+    } catch (err) {
+      if (
+        err?.code === 'ERR_MODULE_NOT_FOUND' &&
+        specifier.startsWith('.') &&
+        specifier.endsWith('.js')
+      ) {
+        return next(`${specifier.slice(0, -3)}.ts`, context);
+      }
+      throw err;
+    }
+  },
+});
+
+const { decideBand, generateNordicVariants, hostnameLabel, scoreCandidate } =
+  await import('../src/lib/hostname-score.ts');
 
 const API = 'https://data.brreg.no/enhetsregisteret/api/enheter';
 const MAX_PICKER_CANDIDATES = 4;

@@ -10,8 +10,16 @@ Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`,
 
 1. An orgnr named EXPLICITLY in a query param (`?orgnr=`,
    `?organisasjonsnummer=` …) — author intent, wins outright.
-2. A single distinct mod-11-valid 9-digit run in the URL.
-3. A single distinct mod-11-valid 9-digit run in the title.
+2. A single distinct valid candidate in the URL.
+3. A single distinct valid candidate in the title.
+
+A candidate is either a contiguous 9-digit run or the canonical
+display format — three groups of three digits with ONE consistent
+separator from {space, dot, U+00A0} ("982 463 718", "982.463.718").
+Mixed separators and groups embedded in longer digit sequences
+("1982 463 718") are rejected; spaced matches normalize to 9 digits
+and share the same candidate set as contiguous runs, so the same
+orgnr in both formats counts once.
 
 `resolveOrgnrAsync` runs the same sync cascade then falls back to a
 hostname-based brreg search (`searchByHostname` in
@@ -43,6 +51,20 @@ are pinned in `tests/orgnr.test.ts`.
 Keeping it in a zero-dependency module means new callers can pull
 it in without dragging the rest of `orgnr.ts` along and without
 risking an import cycle.
+
+<!-- SECTION: first-digit-89 -->
+## First digit must be 8 or 9
+
+`isValidOrgnr` requires the first digit to be 8 or 9 on top of the
+mod-11 check. Empirical, not documented: the lowest registered orgnr
+is 810034882 (lowest underenhet 811545082, verified against the live
+API 2026-06-10 across all 1,164,034 enheter) — an artifact of the
+1995 conversion from 7-digit numbers. Brreg only documents "9 digits
++ mod-11", so if a new series ever opens the check must be relaxed
+in `mod11.ts`; the failure mode is graceful (extraction misses →
+hostname/name-search fallback). Until then it rejects most
+chance-valid junk ids that mod-11 alone lets through (~9% of
+arbitrary 9-digit runs).
 
 <!-- SECTION: sync-vs-async -->
 ## Sync vs async — when to call which
@@ -89,6 +111,37 @@ keyboard shortcuts (1-4 select the corresponding row, 0/Esc triggers
 "Ingen av disse") both popup and sidebar register at module load.
 Bumping the constant requires extending the digit-key handler in
 `popup.ts` and `details.ts`.
+
+<!-- SECTION: label-extraction -->
+## Label extraction (multi-part TLDs, punycode)
+
+`hostnameLabel` in `hostname-score.ts` picks the registrable label
+that seeds the name search. Two traps it handles:
+
+- **Multi-part public suffixes.** A small static list (`co.uk`,
+  `com.au`, `kommune.no`, … — intentionally non-exhaustive, generic
+  TLD knowledge, NOT curated company data) shifts the label one part
+  left so `company.co.uk` → "company" and `oslo.kommune.no` → "oslo"
+  instead of "co"/"kommune".
+- **Punycode.** `new URL().hostname` returns IDN labels in ACE form
+  (`blåbær.no` → `xn--blbr-roah.no`). A minimal RFC 3492 decoder
+  (`src/lib/punycode.ts`, decode only) restores the human label so
+  the Nordic-variant machinery can actually match æ/ø/å brands. A
+  label that fails to decode returns `undefined` — the abstain
+  signal: `resolveInternal` treats a falsy label as band `none`, so
+  the sidebar falls to manual search instead of querying a raw
+  `xn--` string that can never match.
+
+<!-- SECTION: hjemmeside-normalization -->
+## Hjemmeside normalization
+
+Brreg's `hjemmeside` field is free text ("http://www.equinor.com",
+"https://orkla.com/", "tine.no/om"). `normalizeHjemmeside` in
+`hostname-score.ts` reduces it to a bare lowercase host (strip
+scheme, `www.`, path/port/query/fragment, trailing dots) before the
+exact/prefix/substring comparison, so an exact-host field earns the
+full +35 instead of leaking down to substring (+12). Scoring bands
+and thresholds are unchanged by normalization.
 
 <!-- SECTION: picker-choice -->
 ## Picker choice cache

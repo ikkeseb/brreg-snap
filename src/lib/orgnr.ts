@@ -2,17 +2,35 @@ import { searchByHostname } from './hostname-search.js';
 import { isValidOrgnr } from './mod11.js';
 
 const ORGNR_RE = /\b(\d{9})\b/g;
+// Canonical Norwegian display format: three groups of three digits
+// with ONE consistent separator — "982 463 718", "982.463.718", or
+// the same with non-breaking spaces (U+00A0, common in rendered
+// footers). The \2 backreference rejects mixed separators
+// ("982 463.718" is a coincidence of unrelated numbers, not the
+// display format). The lookarounds reject groups embedded in longer
+// spaced/dotted digit sequences ("1982 463 718", "982 463 718 4")
+// where the 3-3-3 alignment is more likely a phone or account number.
+const SPACED_ORGNR_RE =
+  /(?<!\d[ .\u00a0]?)(\d{3})([ .\u00a0])(\d{3})\2(\d{3})(?![ .\u00a0]?\d)/g;
 // Query keys that explicitly name an organisasjonsnummer.
 const ORGNR_PARAM_RE =
   /^(orgnr|orgnummer|organisasjonsnummer|organizationnumber|organizationid)$/i;
 
 export { isValidOrgnr };
 
-// Distinct mod-11-valid 9-digit runs found in `text`, in first-seen order.
+// Distinct mod-11-valid orgnr candidates found in `text` — contiguous
+// 9-digit runs plus spaced/dotted display-format groups, the latter
+// normalized to 9 digits. Both formats land in one set, so the same
+// orgnr written "982463718" and "982 463 718" is a single candidate
+// and the single-valid-candidate abstain rule applies across formats.
 function validOrgnrsIn(text: string): string[] {
   const seen = new Set<string>();
   for (const match of text.matchAll(ORGNR_RE)) {
     const candidate = match[1]!;
+    if (isValidOrgnr(candidate)) seen.add(candidate);
+  }
+  for (const match of text.matchAll(SPACED_ORGNR_RE)) {
+    const candidate = match[1]! + match[3]! + match[4]!;
     if (isValidOrgnr(candidate)) seen.add(candidate);
   }
   return [...seen];
