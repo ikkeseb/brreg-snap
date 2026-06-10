@@ -43,3 +43,56 @@ listener bumps `loadRunId` (so an in-flight `loadOrgnr` from the
 previous page can't land late) and shows the empty state. Without
 this, the sidebar would keep showing the previous company after a
 tab switch to an unrelated site.
+
+<!-- SECTION: broadcast-ordering -->
+## Background broadcasts are sequenced — stale resolutions drop
+
+`deriveSyncAsync` in the tab listeners can hit the network (hostname
+pipeline), so rapid tab switches A→B can resolve out of order: slow-A
+lands after fast-B and the sidebar shows the wrong company.
+`background.ts` keeps a module-level `tabEventSeq`; `onActivated` /
+`onUpdated` claim a slot *synchronously* at event entry (shared
+counter — both feed the same sidebar) and re-check after their awaits.
+A superseded event drops its broadcast. `onUpdated` only claims a slot
+after its `changeInfo.url` / `tab.active` guards, so title-only churn
+and background-tab navigations can't invalidate an in-flight
+resolution. Covered by ordering tests in
+`tests/background-module.test.ts`.
+
+<!-- SECTION: load-race-guards -->
+## Both surfaces guard their loaders with a monotonic run id
+
+The sidebar's `loadOrgnr` has always used `loadRunId`; the popup's
+`loadAndRender` now uses the same pattern (clicking a manual result
+then a recent entry in quick succession must paint the second one,
+not whichever fetch chain resolves last). Stale runs return silently
+after every await — including the error path, so a stale failure
+can't flip the panel to the error state either.
+
+<!-- SECTION: background-repaint-etiquette -->
+## Background repaints must not steal focus or lie in the footer
+
+With auto-sync on, the sidebar repaints on tab switches while the
+user is working in the page. Two rules in `details.ts`:
+
+- `showEmptyState` focuses the manual-search input only when
+  `document.hasFocus()` — an unconditional `focus()` yanked the
+  keyboard out of the page on every switch to an unresolvable site.
+- `setState` hides the "Synket fra `<host>` · Oppdatert …" footer and
+  clears its 30s repaint interval for every non-result state; it
+  described an entity no longer on screen. `markUpdated()` re-arms
+  both on the next successful load.
+
+<!-- SECTION: shared-ui-modules -->
+## Popup and sidebar share their resolution UX via `src/lib/ui/`
+
+The picker (incl. digit shortcuts + "Ingen av disse" +
+"Feil bedrift?" reject flow), the debounced manual search (incl.
+inline error + "Prøv igjen" retry — manual-search failures never flip
+the panel to the full error state), the active-tab resolution cascade
+(`resolveTabContext`, `TabContext`, `ResolutionMethod`) and the
+source-host footer label live in `src/lib/ui/{picker,manual-search,
+resolve-tab,source-label,hit-row,flags}.ts`. The surfaces keep only
+their side effects (URL params, `loadRunId` bumps, sidebar broadcasts,
+the popup's recents list) in callbacks. Fixes to that UX land there,
+once.

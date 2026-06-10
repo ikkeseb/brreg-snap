@@ -22,6 +22,23 @@ function makeListenerSpy() {
   return { addListener: vi.fn(), removeListener: vi.fn() };
 }
 
+interface MockTab {
+  url?: string;
+  title?: string;
+  active?: boolean;
+}
+
+// Manually-released promise so a test can hold one tabs.get in flight
+// while later events resolve — the ordering scenarios need a "slow
+// network" the mock can release on cue.
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+}
+
 interface BrowserMockOptions {
   hasTabs?: boolean;
   autoSyncOn?: boolean;
@@ -44,7 +61,7 @@ function installBrowserMock(opts: BrowserMockOptions = {}) {
     tabs: {
       onActivated: makeListenerSpy(),
       onUpdated: makeListenerSpy(),
-      get: vi.fn(async () => activeTab ?? {}),
+      get: vi.fn(async (_tabId: number): Promise<MockTab> => activeTab ?? {}),
     },
     runtime: {
       onInstalled: makeListenerSpy(),
@@ -270,6 +287,124 @@ describe('background tab event dispatch — gated on auto-sync state', () => {
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'no-match',
       host: 'random-unknown-blog.example',
+    });
+  });
+});
+
+describe('background tab event ordering — stale broadcasts drop', () => {
+  beforeEach(() => {
+    vi.resetModules();
+  });
+
+  it('suppresses a slow onActivated broadcast superseded by a faster one', async () => {
+    const mock = installBrowserMock({ hasTabs: true, autoSyncOn: true });
+    // Tab 1 (DNB) resolves slowly — its tabs.get hangs until we release
+    // it. Tab 2 (Equinor) resolves immediately. Both URLs carry a valid
+    // orgnr so deriveSyncAsync stays off the (mocked) brreg client.
+    const slowTab1 = deferred<MockTab>();
+    mock.tabs.get.mockImplementation((tabId: number) =>
+      tabId === 1
+        ? slowTab1.promise
+        : Promise.resolve({
+            url: 'https://equinor.com/x/923609016',
+            title: 'Equinor',
+            active: true,
+          }),
+    );
+    await loadBackground();
+    const handler = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
+    expect(handler).toBeDefined();
+
+    // Event A (slow), then event B (fast) before A resolves.
+    handler({ tabId: 1, windowId: 1 });
+    handler({ tabId: 2, windowId: 1 });
+    await flushMicrotasks();
+    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'sync',
+      orgnr: '923609016',
+      host: 'equinor.com',
+    });
+    mock.runtime.sendMessage.mockClear();
+
+    // A's tabs.get finally lands — its broadcast must be dropped, not
+    // overwrite B's in the sidebar.
+    slowTab1.resolve({
+      url: 'https://dnb.no/x/984851006',
+      title: 'DNB',
+      active: true,
+    });
+    await flushMicrotasks();
+    expect(mock.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('lets a newer onUpdated supersede an in-flight onActivated (shared sequence)', async () => {
+    const mock = installBrowserMock({ hasTabs: true, autoSyncOn: true });
+    const slowTab1 = deferred<MockTab>();
+    mock.tabs.get.mockImplementation(() => slowTab1.promise);
+    await loadBackground();
+    const activated = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
+    const updated = mock.tabs.onUpdated.addListener.mock.calls[0]?.[0];
+    expect(activated).toBeDefined();
+    expect(updated).toBeDefined();
+
+    // Slow activation on tab 1, then a same-tab URL navigation that
+    // resolves immediately (onUpdated hands us the tab inline).
+    activated({ tabId: 1, windowId: 1 });
+    updated(
+      1,
+      { url: 'https://equinor.com/x/923609016' },
+      {
+        url: 'https://equinor.com/x/923609016',
+        title: 'Equinor',
+        active: true,
+      },
+    );
+    await flushMicrotasks();
+    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'sync',
+      orgnr: '923609016',
+      host: 'equinor.com',
+    });
+    mock.runtime.sendMessage.mockClear();
+
+    slowTab1.resolve({
+      url: 'https://dnb.no/x/984851006',
+      title: 'DNB',
+      active: true,
+    });
+    await flushMicrotasks();
+    expect(mock.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('does NOT claim a sequence slot for title-only or background-tab updates', async () => {
+    const mock = installBrowserMock({ hasTabs: true, autoSyncOn: true });
+    const slowTab1 = deferred<MockTab>();
+    mock.tabs.get.mockImplementation(() => slowTab1.promise);
+    await loadBackground();
+    const activated = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
+    const updated = mock.tabs.onUpdated.addListener.mock.calls[0]?.[0];
+
+    activated({ tabId: 1, windowId: 1 });
+    // Title-only churn (media playback) and a background-tab URL change
+    // must not invalidate the in-flight resolution for the active tab.
+    updated(2, { title: 'now playing' }, { title: 'now playing', active: false });
+    updated(
+      3,
+      { url: 'https://example.org/' },
+      { url: 'https://example.org/', active: false },
+    );
+    await flushMicrotasks();
+
+    slowTab1.resolve({
+      url: 'https://dnb.no/x/984851006',
+      title: 'DNB',
+      active: true,
+    });
+    await flushMicrotasks();
+    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'sync',
+      orgnr: '984851006',
+      host: 'dnb.no',
     });
   });
 });

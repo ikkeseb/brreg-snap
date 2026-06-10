@@ -144,6 +144,15 @@ browser.contextMenus.onClicked.addListener((info, tab) => {
 
 let autoSyncEnabled = false;
 
+// Monotonic sequence over tab events (shared by onActivated and
+// onUpdated — both feed the same sidebar). deriveSyncAsync can hit the
+// network, so two rapid tab switches A→B can resolve out of order:
+// without sequencing, slow-A's broadcast lands after fast-B's and the
+// sidebar shows the wrong company. Handlers claim a slot synchronously
+// at event entry and re-check after their awaits — superseded events
+// drop their broadcast.
+let tabEventSeq = 0;
+
 async function refreshAutoSyncEnabled(): Promise<void> {
   // Reconcile the in-memory flag from the runtime `tabs` grant + the
   // stored toggle. Same on both engines: `tabs` is an optional
@@ -158,10 +167,14 @@ async function refreshAutoSyncEnabled(): Promise<void> {
 
 async function handleActivated(
   info: browser.tabs._OnActivatedActiveInfo,
+  seq: number,
 ): Promise<void> {
   try {
     const tab = await browser.tabs.get(info.tabId);
     const sync = await deriveSyncAsync(tab.url, tab.title);
+    // Superseded by a newer tab event while we resolved — its
+    // broadcast (already sent or about to be) is the truthful one.
+    if (seq !== tabEventSeq) return;
     if (sync) {
       await broadcastSync(sync.orgnr, sync.host);
       return;
@@ -172,21 +185,20 @@ async function handleActivated(
   }
 }
 
-async function handleUpdated(
-  _tabId: number,
-  changeInfo: browser.tabs._OnUpdatedChangeInfo,
-  tab: browser.tabs.Tab,
-): Promise<void> {
-  // Only fire on URL transitions; title-only updates from media
-  // playback or notification badges shouldn't churn the sidebar.
-  if (!changeInfo.url) return;
-  if (!tab.active) return;
-  const sync = await deriveSyncAsync(tab.url, tab.title);
-  if (sync) {
-    await broadcastSync(sync.orgnr, sync.host);
-    return;
+async function handleUpdated(tab: browser.tabs.Tab, seq: number): Promise<void> {
+  try {
+    const sync = await deriveSyncAsync(tab.url, tab.title);
+    // Superseded by a newer tab event while we resolved — drop.
+    if (seq !== tabEventSeq) return;
+    if (sync) {
+      await broadcastSync(sync.orgnr, sync.host);
+      return;
+    }
+    await broadcastNoMatch(hostFromUrl(tab.url));
+  } catch {
+    // Parity with handleActivated — resolution/broadcast failures
+    // (network glitch, sidebar gone) drop silently.
   }
-  await broadcastNoMatch(hostFromUrl(tab.url));
 }
 
 // Top-level synchronous registration. The handler gates on the
@@ -194,22 +206,34 @@ async function handleUpdated(
 // false, so the first event after wakeup awaits a refresh before
 // dispatching. Subsequent events hit the cached value synchronously.
 browser.tabs.onActivated.addListener((info) => {
+  // Claim the sequence slot synchronously at event entry — arrival
+  // order, not resolution-completion order, decides which broadcast
+  // wins (see tabEventSeq above).
+  const seq = ++tabEventSeq;
   void (async () => {
     if (!autoSyncEnabled) await refreshAutoSyncEnabled();
     if (!autoSyncEnabled) return;
-    await handleActivated(info);
+    await handleActivated(info, seq);
   })();
 });
 
 function onUpdatedDispatch(
-  tabId: number,
+  _tabId: number,
   changeInfo: browser.tabs._OnUpdatedChangeInfo,
   tab: browser.tabs.Tab,
 ): void {
+  // Only fire on URL transitions; title-only updates from media
+  // playback or notification badges shouldn't churn the sidebar.
+  // These guards run BEFORE claiming a sequence slot — background-tab
+  // churn must not invalidate an in-flight resolution for the tab the
+  // user is actually looking at.
+  if (!changeInfo.url) return;
+  if (!tab.active) return;
+  const seq = ++tabEventSeq;
   void (async () => {
     if (!autoSyncEnabled) await refreshAutoSyncEnabled();
     if (!autoSyncEnabled) return;
-    await handleUpdated(tabId, changeInfo, tab);
+    await handleUpdated(tab, seq);
   })();
 }
 

@@ -8,17 +8,18 @@ import {
   fetchRegnskap,
   fetchRoller,
   fetchUnderenheter,
-  searchEnheter,
 } from '../lib/brreg.js';
 import { formatRelativeTime } from '../lib/format.js';
-import {
-  addRejectedChoice,
-  MAX_PICKER_CANDIDATES,
-  searchByHostnameDetailed,
-  setPickerChoice,
-} from '../lib/hostname-search.js';
+import { searchByHostnameDetailed } from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
-import { resolveOrgnr } from '../lib/orgnr.js';
+import { attachManualSearch } from '../lib/ui/manual-search.js';
+import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
+import {
+  resolveTabContext,
+  type ResolutionMethod,
+  type TabContext,
+} from '../lib/ui/resolve-tab.js';
+import { createSourceLabel } from '../lib/ui/source-label.js';
 import type {
   RegnskapResponse,
   RollerResponse,
@@ -37,6 +38,8 @@ const app = $('app');
 const brandMark = $('brand-mark') as HTMLImageElement;
 brandMark.src = browser.runtime.getURL('icons/icon-48.png');
 const statusEl = $('status');
+const errorActionsEl = $('error-actions');
+const retryLoadBtn = $('retry-load') as HTMLButtonElement;
 const skeletonEl = $('skeleton');
 const resultEl = $('result');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
@@ -55,29 +58,55 @@ const manualQueryEl = $('manual-query') as HTMLInputElement;
 const manualResultsEl = $('manual-results') as HTMLUListElement;
 const resolutionActionsEl = $('resolution-actions');
 const rejectChoiceBtn = $('reject-choice') as HTMLButtonElement;
+
 let currentOrgnr: string | undefined;
-let currentSourceHost: string | undefined;
-// Picker state held at module scope so the document-level keydown
-// handler can look up which candidate maps to keys 1-4 without
-// re-reading the DOM.
-let currentPickerHost: string | undefined;
-let currentPickerCandidates: SearchHit[] = [];
-// Why the current orgnr is on screen. Only host-resolved orgnrs are
-// overridable via the "Feil bedrift?" button — URL-derived orgnrs
-// (regex hit in path or title) are authoritative for their domain.
-type ResolutionMethod =
-  | 'host-auto'
-  | 'host-pick'
-  | 'url'
-  | 'manual'
-  | 'sync-broadcast';
 let currentResolutionMethod: ResolutionMethod | undefined;
 let lastUpdatedAt: number | undefined;
 let updatedTimerId: number | undefined;
+let loadRunId = 0;
+// Re-trigger for the "Prøv igjen" button in the full error state.
+let lastLoad: (() => void) | undefined;
+
+const sourceLabel = createSourceLabel(footerSource, sourceHostEl);
+
+const picker = createPicker({
+  appEl: app,
+  listEl: pickerListEl,
+  noneBtn: pickerNoneBtn,
+  onChoose: (_host, orgnr) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('orgnr', orgnr);
+    window.history.replaceState(null, '', url.toString());
+    void loadOrgnr(orgnr, 'host-pick');
+  },
+  onNone: (host) => {
+    showEmptyState(host);
+  },
+});
+
+const manualSearch = attachManualSearch({
+  inputEl: manualQueryEl,
+  resultsEl: manualResultsEl,
+  onSelect: (hit) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('orgnr', hit.organisasjonsnummer);
+    window.history.replaceState(null, '', url.toString());
+    void loadOrgnr(hit.organisasjonsnummer, 'manual');
+  },
+});
+
+setupRejectChoice({
+  buttonEl: rejectChoiceBtn,
+  getContext: () => ({ host: sourceLabel.get(), orgnr: currentOrgnr }),
+  showPicker,
+  showEmptyState,
+});
+
+retryLoadBtn.addEventListener('click', () => {
+  lastLoad?.();
+});
 
 setupTabs();
-setupManualSearch();
-setupRejectChoice();
 void setupAutoSyncToggle();
 
 function getOrgnrFromUrl(): string | undefined {
@@ -93,15 +122,20 @@ function getNoMatchHostFromUrl(): string | undefined {
   return host ?? undefined;
 }
 
+function clearOrgnrFromUrl(): void {
+  // Clear any orgnr left in the URL so a panel reload doesn't re-fetch
+  // the stale company.
+  const url = new URL(window.location.href);
+  url.searchParams.delete('orgnr');
+  window.history.replaceState(null, '', url.toString());
+}
+
 function setState(
   state: 'loading' | 'result' | 'error' | 'picker' | 'empty',
 ): void {
   // Leaving the picker — clear candidate state so a stray keydown
-  // can't fire handlePickerChoice on a previous host's list.
-  if (state !== 'picker') {
-    currentPickerHost = undefined;
-    currentPickerCandidates = [];
-  }
+  // can't fire the picker's onChoose on a previous host's list.
+  if (state !== 'picker') picker.clear();
   app.dataset.state = state;
   skeletonEl.hidden = state !== 'loading';
   // statusEl carries the aria-live polite announcement during loading
@@ -117,232 +151,65 @@ function setState(
     statusEl.hidden = true;
     statusEl.classList.remove('visually-hidden');
   }
+  // showError unhides this when a retry target exists.
+  errorActionsEl.hidden = true;
   resultEl.hidden = state !== 'result';
   pickerEl.hidden = state !== 'picker';
   emptyStateEl.hidden = state !== 'empty';
+  if (state !== 'result') {
+    // The "Synket fra <host> · Oppdatert …" footer describes the
+    // company on screen — hide it (and stop the 30s repaint) when no
+    // company is on screen. markUpdated() re-arms both on the next
+    // successful load.
+    footerUpdated.hidden = true;
+    if (updatedTimerId !== undefined) {
+      clearInterval(updatedTimerId);
+      updatedTimerId = undefined;
+    }
+  }
 }
 
 function showError(err: unknown): void {
   setState('error');
   const message = err instanceof Error ? err.message : String(err);
   statusEl.textContent = `Feil: ${message}`;
+  // "Prøv igjen" only makes sense when there is a load to re-trigger.
+  errorActionsEl.hidden = lastLoad === undefined;
 }
 
 function showEmptyState(host?: string): void {
   setState('empty');
-  // Clear any orgnr left in the URL so a panel reload doesn't re-fetch
-  // the stale company.
-  const url = new URL(window.location.href);
-  url.searchParams.delete('orgnr');
-  window.history.replaceState(null, '', url.toString());
+  clearOrgnrFromUrl();
   currentOrgnr = undefined;
-  setSourceHost(host);
+  sourceLabel.set(host);
   emptyMessageEl.textContent = host
     ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
     : 'Sidepanelet ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
-  resetManualSearch();
-  // Focus only when the panel is actually visible — focusing a hidden
-  // input is a no-op and steals the cursor needlessly otherwise.
-  manualQueryEl.focus();
-}
-
-function resetManualSearch(): void {
-  manualQueryEl.value = '';
-  manualResultsEl.innerHTML = '';
-  manualSearchRunId += 1;
-  if (manualSearchTimer) {
-    clearTimeout(manualSearchTimer);
-    manualSearchTimer = undefined;
-  }
+  manualSearch.reset();
+  // Focus the search box only when the sidebar window itself has
+  // focus — with auto-sync on, a tab switch to an unresolvable site
+  // repaints this panel in the background, and an unconditional
+  // focus() would yank keyboard focus out of the page.
+  if (document.hasFocus()) manualQueryEl.focus();
 }
 
 function showPicker(host: string, candidates: SearchHit[]): void {
-  currentPickerHost = host;
-  currentPickerCandidates = candidates.slice(0, MAX_PICKER_CANDIDATES);
   setState('picker');
-  setSourceHost(host);
+  sourceLabel.set(host);
   // Bump loadRunId so any in-flight loadOrgnr from a previous tab
   // can't overwrite the picker when its fetches land.
   ++loadRunId;
   currentOrgnr = undefined;
-  // Clear any orgnr in the URL so a panel reload doesn't re-fetch.
-  const url = new URL(window.location.href);
-  url.searchParams.delete('orgnr');
-  window.history.replaceState(null, '', url.toString());
-
-  pickerListEl.replaceChildren();
-  for (const cand of currentPickerCandidates) {
-    const li = document.createElement('li');
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'picker-item';
-    btn.addEventListener('click', () => {
-      void handlePickerChoice(host, cand.organisasjonsnummer);
-    });
-
-    const name = document.createElement('span');
-    name.className = 'picker-item-name';
-    name.textContent = cand.navn;
-    btn.appendChild(name);
-
-    // Næring disambiguates rows that share a name root — "VG CONSULT",
-    // "VG BYGG", "VGTV" all start with VG but the industry tells the
-    // user which is the media house. Optional field, skip silently when
-    // brreg has no NACE on record.
-    const naering = cand.naeringskode1?.beskrivelse;
-    if (naering) {
-      const naeringEl = document.createElement('span');
-      naeringEl.className = 'picker-item-naering';
-      naeringEl.textContent = naering;
-      btn.appendChild(naeringEl);
-    }
-
-    const meta = document.createElement('span');
-    meta.className = 'picker-item-meta';
-    const ansatte = cand.antallAnsatte;
-    const ansatteLabel =
-      typeof ansatte === 'number' && ansatte > 0
-        ? `, ${ansatte} ansatte`
-        : '';
-    meta.textContent = `${cand.organisasjonsnummer}${ansatteLabel}`;
-    btn.appendChild(meta);
-
-    li.appendChild(btn);
-    pickerListEl.appendChild(li);
-  }
-}
-
-async function handlePickerChoice(
-  host: string,
-  orgnr: string,
-): Promise<void> {
-  await setPickerChoice(host, orgnr);
-  const url = new URL(window.location.href);
-  url.searchParams.set('orgnr', orgnr);
-  window.history.replaceState(null, '', url.toString());
-  await loadOrgnr(orgnr, 'host-pick');
-}
-
-async function handlePickerNone(host: string): Promise<void> {
-  await setPickerChoice(host, null);
-  showEmptyState(host);
-}
-
-pickerNoneBtn.addEventListener('click', () => {
-  if (!currentSourceHost) return;
-  void handlePickerNone(currentSourceHost);
-});
-
-function setupRejectChoice(): void {
-  rejectChoiceBtn.addEventListener('click', () => {
-    if (rejectChoiceBtn.disabled) return;
-    void handleRejectChoice();
-  });
-}
-
-async function handleRejectChoice(): Promise<void> {
-  const host = currentSourceHost;
-  const orgnr = currentOrgnr;
-  if (!host || !orgnr) return;
-  rejectChoiceBtn.disabled = true;
-  try {
-    await addRejectedChoice(host, orgnr);
-    const detailed = await searchByHostnameDetailed(host);
-    if (detailed && detailed.candidates.length > 0) {
-      // Always show picker (even if a single candidate now wins
-      // band='auto') — the user just expressed doubt; let them confirm.
-      showPicker(host, detailed.candidates);
-      return;
-    }
-    showEmptyState(host);
-  } finally {
-    rejectChoiceBtn.disabled = false;
-  }
+  clearOrgnrFromUrl();
+  picker.render(host, candidates);
 }
 
 function updateRejectButtonVisibility(): void {
   const overridable =
     currentResolutionMethod === 'host-auto' ||
     currentResolutionMethod === 'host-pick';
-  resolutionActionsEl.hidden = !(overridable && currentSourceHost);
+  resolutionActionsEl.hidden = !(overridable && sourceLabel.get());
 }
-
-// Manual search inside the empty state. Mirrors popup's runSearch:
-// 250ms debounce, monotonic runId so out-of-order responses drop, min
-// 2 chars, capped to 100 before reaching brreg.
-let manualSearchTimer: ReturnType<typeof setTimeout> | undefined;
-let manualSearchRunId = 0;
-
-function setupManualSearch(): void {
-  manualQueryEl.addEventListener('input', () => {
-    if (manualSearchTimer) clearTimeout(manualSearchTimer);
-    manualSearchRunId += 1;
-    const value = manualQueryEl.value.trim();
-    if (value.length < 2) {
-      manualResultsEl.innerHTML = '';
-      return;
-    }
-    const capped = value.slice(0, 100);
-    manualSearchTimer = setTimeout(() => {
-      void runManualSearch(capped);
-    }, 250);
-  });
-}
-
-async function runManualSearch(query: string): Promise<void> {
-  const myRunId = ++manualSearchRunId;
-  try {
-    const results = await searchEnheter(query, 10);
-    if (myRunId !== manualSearchRunId) return;
-    manualResultsEl.innerHTML = '';
-    if (results.length === 0) {
-      const li = document.createElement('li');
-      li.className = 'empty-result';
-      li.textContent = 'Ingen treff.';
-      manualResultsEl.appendChild(li);
-      return;
-    }
-    for (const item of results) {
-      const li = document.createElement('li');
-      li.tabIndex = 0;
-
-      const name = document.createElement('span');
-      name.className = 'picker-item-name';
-      name.textContent = item.navn;
-      li.appendChild(name);
-
-      const naering = item.naeringskode1?.beskrivelse;
-      if (naering) {
-        const naeringEl = document.createElement('span');
-        naeringEl.className = 'picker-item-naering';
-        naeringEl.textContent = naering;
-        li.appendChild(naeringEl);
-      }
-
-      const meta = document.createElement('span');
-      meta.className = 'picker-item-meta';
-      meta.textContent = item.organisasjonsnummer;
-      li.appendChild(meta);
-
-      const select = (): void => {
-        const url = new URL(window.location.href);
-        url.searchParams.set('orgnr', item.organisasjonsnummer);
-        window.history.replaceState(null, '', url.toString());
-        void loadOrgnr(item.organisasjonsnummer, 'manual');
-      };
-      li.addEventListener('click', select);
-      li.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter') select();
-      });
-      manualResultsEl.appendChild(li);
-    }
-  } catch (err) {
-    if (myRunId !== manualSearchRunId) return;
-    showError(err);
-  }
-}
-
-let loadRunId = 0;
 
 async function loadOrgnr(
   orgnr: string,
@@ -354,6 +221,9 @@ async function loadOrgnr(
   const myRunId = ++loadRunId;
   currentOrgnr = orgnr;
   if (method !== undefined) currentResolutionMethod = method;
+  lastLoad = () => {
+    void loadOrgnr(orgnr, method);
+  };
 
   brregLink.href = `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`;
 
@@ -525,31 +395,6 @@ function showAutoSyncStatus(message: string | null): void {
   autoSyncStatus.textContent = message;
 }
 
-function setSourceHost(host: string | undefined): void {
-  currentSourceHost = host;
-  paintSourceLabel();
-}
-
-function paintSourceLabel(): void {
-  if (!currentSourceHost) {
-    footerSource.hidden = true;
-    sourceHostEl.textContent = '';
-    return;
-  }
-  footerSource.hidden = false;
-  sourceHostEl.textContent = currentSourceHost;
-}
-
-interface TabContext {
-  orgnr?: string;
-  host?: string;
-  pickerCandidates?: SearchHit[];
-  // Why we landed on this orgnr — drives whether the "Feil bedrift?"
-  // override is offered. Sync (URL/title regex) is authoritative;
-  // host-auto is the only one the user can dispute via this code path.
-  method?: ResolutionMethod;
-}
-
 async function resolveFromActiveTab(): Promise<TabContext> {
   // tabs.query returns the active tab's url and title only when the
   // extension holds activeTab on it — which Firefox grants on the
@@ -557,7 +402,8 @@ async function resolveFromActiveTab(): Promise<TabContext> {
   // icon, our toolbar action, or a keyboard shortcut). When grant
   // is absent (e.g. tab switched after the sidebar was opened from
   // the Firefox View menu), url and title come back empty and we
-  // silently fall back to whatever was in the URL param.
+  // silently fall back to whatever was in the URL param. The cascade
+  // itself is shared with the popup — lib/ui/resolve-tab.ts.
   try {
     const tabs = await browser.tabs.query({
       active: true,
@@ -565,37 +411,7 @@ async function resolveFromActiveTab(): Promise<TabContext> {
     });
     const tab = tabs[0];
     if (!tab) return {};
-    const url = tab.url ?? '';
-    const title = tab.title ?? '';
-    if (!url && !title) return {};
-    let host: string | undefined;
-    if (url) {
-      try {
-        host = new URL(url).hostname;
-      } catch {
-        /* invalid url — leave host undefined */
-      }
-    }
-    // Sync cascade first — fast, no network. Covers URL and title
-    // regex only.
-    const sync = resolveOrgnr({ url, title });
-    if (sync) return { orgnr: sync, host, method: 'url' };
-    if (!host) return { host };
-    // Sync miss → hostname-based brreg search with band awareness.
-    const detailed = await searchByHostnameDetailed(host);
-    if (!detailed) return { host };
-    if (detailed.band === 'auto') {
-      // detailed.choice may have been written by an earlier picker
-      // pick (positive picker-choice short-circuit) — both deserve
-      // the override button, so distinguish via candidates.
-      const method: ResolutionMethod =
-        detailed.candidates.length === 0 ? 'host-pick' : 'host-auto';
-      return { orgnr: detailed.choice, host, method };
-    }
-    if (detailed.band === 'picker') {
-      return { host, pickerCandidates: detailed.candidates };
-    }
-    return { host };
+    return await resolveTabContext(tab.url ?? '', tab.title ?? '');
   } catch {
     return {};
   }
@@ -637,7 +453,7 @@ async function init(): Promise<void> {
     url.searchParams.set('orgnr', fromTab.orgnr);
     window.history.replaceState(null, '', url.toString());
   }
-  setSourceHost(fromTab.host);
+  sourceLabel.set(fromTab.host);
   // fromTab.orgnr was set by resolveFromActiveTab and carries a
   // method; an orgnr inherited only from ?orgnr= in the URL has no
   // tab-resolution context and is treated as 'url' so the override
@@ -694,7 +510,7 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
   }
   if (!isSyncMessage(msg)) return;
   if (!isValidOrgnr(msg.orgnr)) return;
-  setSourceHost(msg.host);
+  sourceLabel.set(msg.host);
   const url = new URL(window.location.href);
   url.searchParams.set('orgnr', msg.orgnr);
   window.history.replaceState(null, '', url.toString());
@@ -723,7 +539,7 @@ async function handleNoMatchBroadcast(
     return;
   }
   if (detailed?.band === 'auto' && detailed.choice) {
-    setSourceHost(host);
+    sourceLabel.set(host);
     const url = new URL(window.location.href);
     url.searchParams.set('orgnr', detailed.choice);
     window.history.replaceState(null, '', url.toString());
@@ -774,36 +590,5 @@ function setupTabs(): void {
     });
   }
 }
-
-// Keyboard shortcuts when the picker is active: digits 1-4 pick the
-// corresponding row, 0 or Escape triggers "Ingen av disse". Bail when
-// the picker isn't visible or when the user is typing into a form
-// control (manual-search input is in a different state, but defensive
-// against future additions). Modifier keys also bail so OS shortcuts
-// (cmd+w, ctrl+a) keep working.
-document.addEventListener('keydown', (ev) => {
-  if (app.dataset.state !== 'picker') return;
-  if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
-  const target = ev.target;
-  if (
-    target instanceof HTMLInputElement ||
-    target instanceof HTMLTextAreaElement
-  ) {
-    return;
-  }
-  const host = currentPickerHost;
-  if (!host) return;
-  if (ev.key === '0' || ev.key === 'Escape') {
-    ev.preventDefault();
-    void handlePickerNone(host);
-    return;
-  }
-  const idx = '1234'.indexOf(ev.key);
-  if (idx === -1) return;
-  const cand = currentPickerCandidates[idx];
-  if (!cand) return;
-  ev.preventDefault();
-  void handlePickerChoice(host, cand.organisasjonsnummer);
-});
 
 void init();

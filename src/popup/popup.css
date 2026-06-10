@@ -93,6 +93,47 @@ main[data-state='error'] #status {
   color: var(--danger);
 }
 
+/* --- retry affordances (error state + inline search error) ------ */
+
+.error-actions {
+  padding: 0 0 10px;
+}
+
+.retry-button {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg);
+  padding: 6px 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.retry-button:hover,
+.retry-button:focus-visible {
+  border-color: var(--accent);
+  color: var(--fg-strong);
+  outline: none;
+}
+
+.manual-results li.search-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--danger);
+  cursor: default;
+  border-style: dashed;
+}
+
+.manual-results li.search-error:hover {
+  border-color: var(--border);
+}
+
 #result h2 {
   font-size: 16px;
   font-weight: 600;
