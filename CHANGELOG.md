@@ -4,10 +4,54 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
-## [Unreleased]
+## [1.1.0] — 2026-06-10
+
+### Added
+
+- `[chrome]` Chrome / Chromium support from the same source tree
+  (`BROWSER=chrome` build). Chrome's side panel (`sidePanel`) replaces
+  the Firefox sidebar; popup lookup, context menu, manual search,
+  picker, recents and click-to-copy all work. Engine differences are
+  isolated in `src/lib/platform/` with no third-party polyfill (a
+  ~3-line `browser`→`chrome` shim), preserving the zero-runtime-
+  dependency guarantee. Live on the Chrome Web Store since 2026-06-07.
+- `[chrome]` Auto-update on tab switch ("Auto-oppdater ved fane-bytte")
+  is now at parity with Firefox — `tabs` is a runtime opt-in in the
+  Chrome manifest, requested only when the user enables the toggle.
+
+### Changed
+
+- Hostname→orgnr resolution improvements (no curated data, as
+  always): orgnr extraction now accepts the canonical spaced format
+  ("982 463 718"), requires the first digit to be 8/9 (matches the
+  entire live registry; cuts chance-valid junk), normalizes brreg's
+  free-text `hjemmeside` field before scoring, handles multi-part
+  TLDs (`company.co.uk` no longer searches for "co"), and decodes
+  punycode hostnames so æ/ø/å domains resolve.
+- Manual-search failures now show an inline error with "Prøv igjen"
+  instead of wiping the search UI; the full error state also gained a
+  retry button.
+- Removed the manual refresh button from the side panel (both engines).
+  It couldn't follow the active tab without `tabs`, and with auto-sync
+  on the panel already follows live, so the refresh icon promised a sync
+  it couldn't deliver; the footer "Oppdatert" freshness stamp stays.
+- `[firefox]` Packaged `.xpi` no longer ships sourcemaps or
+  `icons/README.md` (~263 KB → 43 KB). No change to executed code —
+  maps remain in the build dir for local debugging and the full
+  TypeScript source ships in the source zip used for AMO review.
 
 ### Fixed
 
+- `[firefox]` Auto-update on tab switch (and the context-menu item)
+  silently broke on Firefox during the Chrome port: the background
+  switched to `browser.contextMenus`, which is `undefined` on Firefox
+  under the `menus` permission, so the top-level access threw and
+  aborted background-module evaluation before the auto-sync tab
+  listeners registered. The context-menu API is now selected per engine
+  (`browser.menus` on Firefox, `chrome.contextMenus` on Chromium) via
+  `src/lib/platform/menus.ts`. Caught in pre-release testing — never
+  shipped; the background test mock now mirrors each engine's namespace
+  so a regression can't slip through again.
 - Network failures (offline, timeouts, 429/5xx) are no longer cached
   as "no match" for 24h — the brreg search client now distinguishes
   errors from genuinely-empty results, and the resolution pipeline
@@ -25,19 +69,6 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   auto-sync lands on an unresolvable site, and stale footer metadata
   ("Synket fra …") no longer survives into empty/picker states.
 
-### Changed
-
-- Hostname→orgnr resolution improvements (no curated data, as
-  always): orgnr extraction now accepts the canonical spaced format
-  ("982 463 718"), requires the first digit to be 8/9 (matches the
-  entire live registry; cuts chance-valid junk), normalizes brreg's
-  free-text `hjemmeside` field before scoring, handles multi-part
-  TLDs (`company.co.uk` no longer searches for "co"), and decodes
-  punycode hostnames so æ/ø/å domains resolve.
-- Manual-search failures now show an inline error with "Prøv igjen"
-  instead of wiping the search UI; the full error state also gained a
-  retry button.
-
 ### Internal
 
 - ~300 lines of duplicated popup/sidebar UI logic consolidated into
@@ -50,37 +81,9 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   (single source of truth; Firefox manifest stays byte-identical when
   versions match).
 - Builds work in a native Windows shell (`.npmrc` `shell-emulator`).
-- 182 → 232 tests, including a new `brreg.ts` error-contract suite.
-
-### Added
-
-- `[chrome]` Chrome / Chromium support from the same source tree
-  (`BROWSER=chrome` build). Chrome's side panel (`sidePanel`) replaces
-  the Firefox sidebar; popup lookup, context menu, manual search,
-  picker, recents and click-to-copy all work. Engine differences are
-  isolated in `src/lib/platform/` with no third-party polyfill (a
-  ~3-line `browser`→`chrome` shim), preserving the zero-runtime-
-  dependency guarantee. Live on the Chrome Web Store since 2026-06-07.
-- `[chrome]` Auto-update on tab switch ("Auto-oppdater ved fane-bytte")
-  is now at parity with Firefox — `tabs` is a runtime opt-in in the
-  Chrome manifest, requested only when the user enables the toggle.
-
-### Changed
-
-- Removed the manual refresh button from the side panel (both engines).
-  It couldn't follow the active tab without `tabs`, and with auto-sync
-  on the panel already follows live, so the refresh icon promised a sync
-  it couldn't deliver; the footer "Oppdatert" freshness stamp stays.
-- `[firefox]` Packaged `.xpi` no longer ships sourcemaps or
-  `icons/README.md` (~263 KB → 43 KB). No change to executed code —
-  maps remain in the build dir for local debugging and the full
-  TypeScript source ships in the source zip used for AMO review.
-
-### Internal
-
-- Characterization tests for `format` and `recent`, plus tests for the
-  platform layer (engine detection + sidebar adapter) and Chrome-mode
-  background dispatch. 105 → 182 tests.
+- Characterization tests for `format` and `recent`, platform-layer
+  tests (engine detection + sidebar adapter), Chrome-mode background
+  dispatch, and a new `brreg.ts` error-contract suite. 105 → 232 tests.
 - Removed an inert `web-ext-config.cjs` (was never loaded; packaging
   options are now explicit CLI flags).
 
