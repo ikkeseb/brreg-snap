@@ -1,43 +1,25 @@
 # Post-MVP roadmap
 
-Forward-looking work after the Chrome MVP (which is feature-complete bar
-auto-sync — see `docs/chrome-port.md`). Ordered by value/effort. None of
+Forward-looking work after the Chrome launch (live on CWS since
+2026-06-07 at feature parity, including auto-sync — see
+`docs/chrome-port.md`). Ordered by value/effort. None of
 these may violate the non-negotiables (no content scripts, only
 `data.brreg.no`, minimal install perms, strict CSP, zero third-party
 runtime JS, no curated host→orgnr table).
 
-## Do these next (3)
+## Do these next
 
-1. **Verify the Chrome side-panel → `permissions.request` gesture** (gates
-   all of auto-sync). The code is already written correctly:
-   `details.ts handleToggleChange` calls `permissions.request` as the
-   first async call inside the toggle's own `change` handler — the
-   documented-valid shape. The one unknown is whether Chrome treats a
-   *side-panel page's* input event as a valid activation (Chrome docs
-   don't explicitly enumerate side-panel pages as a gesture context).
-   This is a ~5-min manual test, not a redesign: throwaway unpacked
-   extension with a side-panel checkbox that calls
-   `chrome.permissions.request({permissions:['tabs']})` and logs the
-   result; load in Chrome 116+, flip it, watch for the prompt.
-   - Green (prompt shows) → ship auto-sync as-is.
-   - "must be called during a user gesture" → use the popup-mediated
-     grant fallback (move the grant to the action popup, an unambiguous
-     gesture context; the side-panel toggle then just reflects state).
+1. ~~**Verify the Chrome side-panel → `permissions.request` gesture**~~
+   **SHIPPED via D13, 2026-06-06.** Live-verified by Seb: the `tabs`
+   prompt fires from the side-panel toggle (Chrome treats the
+   side-panel input event as a valid activation), so no popup-mediated
+   fallback was needed. See `docs/chrome-port.md` D13 / Phase 6.
 
-2. **Ship Chrome auto-sync** (if #1 is green). The code already exists and
-   is engine-gated; re-enabling is three un-gates + a manifest delta:
-   - `public/manifest.chrome.json`: add `"optional_permissions": ["tabs"]`
-     (does NOT change the install dialog — optional perms don't prompt).
-   - `src/details/details.ts`: remove the `!isFirefox` early-return in
-     `setupAutoSyncToggle` (un-hide the toggle). Make the deny message in
-     `auto-sync-controller.ts` engine-aware ("Firefox blokkerte…").
-   - `src/background/background.ts`: drop the `!isFirefox` short-circuit
-     in `refreshAutoSyncEnabled`. The tab listeners are already
-     registered unconditionally at top level (correct for the SW wakeup
-     model), so no rewiring.
-   - Test matrix: toggle on → switch between a NO-company site and a
-     non-company site → the open panel repaints / clears; toggle off →
-     `permissions.remove` fires and tab switches stop updating.
+2. ~~**Ship Chrome auto-sync**~~ **SHIPPED via D13, 2026-06-06**, in
+   Chrome 1.0.0 (live on CWS 2026-06-07). `optional_permissions:["tabs"]`
+   landed in the Chrome manifest, the two `isFirefox` short-circuits were
+   dropped, and the `tabs.onUpdated` filter throw was fixed en route.
+   See `docs/chrome-port.md` D13 / Phase 6 for the full trail.
 
 3. **`setPanelBehavior({openPanelOnActionClick})` as an opt-in preference.**
    Native Chrome ergonomic (toolbar icon opens the panel). Caveat:

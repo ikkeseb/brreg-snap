@@ -6,6 +6,52 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Fixed
+
+- Network failures (offline, timeouts, 429/5xx) are no longer cached
+  as "no match" for 24h — the brreg search client now distinguishes
+  errors from genuinely-empty results, and the resolution pipeline
+  only caches a verdict when every constituent query succeeded. The
+  next visit retries.
+- All brreg fetches now carry an 8s timeout (`AbortSignal.timeout`),
+  so a hung connection can't leave the popup/sidebar spinner running
+  forever.
+- Out-of-order auto-sync broadcasts: a slow resolution for a previous
+  tab can no longer overwrite the sidebar after a fast tab switch
+  (monotonic event sequencing in the background script).
+- Popup gained the same load-race guard the sidebar has — rapid
+  clicks can't paint a stale company.
+- The sidebar no longer steals keyboard focus from the page when
+  auto-sync lands on an unresolvable site, and stale footer metadata
+  ("Synket fra …") no longer survives into empty/picker states.
+
+### Changed
+
+- Hostname→orgnr resolution improvements (no curated data, as
+  always): orgnr extraction now accepts the canonical spaced format
+  ("982 463 718"), requires the first digit to be 8/9 (matches the
+  entire live registry; cuts chance-valid junk), normalizes brreg's
+  free-text `hjemmeside` field before scoring, handles multi-part
+  TLDs (`company.co.uk` no longer searches for "co"), and decodes
+  punycode hostnames so æ/ø/å domains resolve.
+- Manual-search failures now show an inline error with "Prøv igjen"
+  instead of wiping the search UI; the full error state also gained a
+  retry button.
+
+### Internal
+
+- ~300 lines of duplicated popup/sidebar UI logic consolidated into
+  shared `src/lib/ui/` modules (picker, manual search, tab
+  resolution, source label).
+- GitHub Actions CI: typecheck, lint, tests, both builds, web-ext
+  lint, `pnpm audit --prod`, and a manifest-invariants step that
+  enforces the security non-negotiables on every push.
+- Manifest version is now stamped from `package.json` at build time
+  (single source of truth; Firefox manifest stays byte-identical when
+  versions match).
+- Builds work in a native Windows shell (`.npmrc` `shell-emulator`).
+- 182 → 232 tests, including a new `brreg.ts` error-contract suite.
+
 ### Added
 
 - `[chrome]` Chrome / Chromium support from the same source tree
@@ -14,7 +60,7 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   picker, recents and click-to-copy all work. Engine differences are
   isolated in `src/lib/platform/` with no third-party polyfill (a
   ~3-line `browser`→`chrome` shim), preserving the zero-runtime-
-  dependency guarantee. Pending Chrome Web Store review.
+  dependency guarantee. Live on the Chrome Web Store since 2026-06-07.
 - `[chrome]` Auto-update on tab switch ("Auto-oppdater ved fane-bytte")
   is now at parity with Firefox — `tabs` is a runtime opt-in in the
   Chrome manifest, requested only when the user enables the toggle.
@@ -29,14 +75,6 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   `icons/README.md` (~263 KB → 43 KB). No change to executed code —
   maps remain in the build dir for local debugging and the full
   TypeScript source ships in the source zip used for AMO review.
-
-### Fixed
-
-- More reliable org-number resolution: a chance-valid 9-digit number in
-  a URL or title no longer shadows the real company. An explicit named
-  `?orgnr=` wins; otherwise a bare 9-digit is trusted only when it's the
-  single mod-11-valid candidate, else the extension abstains to the
-  hostname search / picker rather than showing a confidently-wrong hit.
 
 ### Internal
 

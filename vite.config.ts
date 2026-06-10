@@ -1,12 +1,13 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 import {
-  copyFileSync,
   cpSync,
   mkdirSync,
   existsSync,
+  readFileSync,
   renameSync,
   rmSync,
+  writeFileSync,
 } from 'node:fs';
 
 // Build target browser, selected via `BROWSER=chrome|firefox`. Defaults
@@ -28,8 +29,9 @@ export default defineConfig({
     target: target === 'chrome' ? 'chrome116' : 'firefox115',
     // esbuild minify is fast and produces correct output for our DOM
     // code (no eval, no Function constructor, no name-sensitive
-    // reflection). Source maps stay enabled so AMO review can map
-    // minified output back to the original TS.
+    // reflection). Source maps are emitted into dist-*/ for local
+    // debugging only — packaging excludes them (D12); AMO review uses
+    // the full-TS source zip instead.
     minify: 'esbuild',
     sourcemap: true,
     rollupOptions: {
@@ -75,9 +77,33 @@ export default defineConfig({
           rmSync(resolve(dist, 'src'), { recursive: true, force: true });
         }
 
-        copyFileSync(
+        // Copy the manifest, stamping `"version"` from package.json —
+        // the single source of truth for the version. The replacement
+        // is string-level on purpose: JSON.parse/stringify would
+        // reformat the file, and the built Firefox manifest must stay
+        // byte-identical to the AMO submission when the versions match.
+        // Known consequence: public/manifest.chrome.json still says
+        // 1.0.0 (the live CWS version), so local Chrome builds stamp
+        // the package.json version (1.0.1) instead — intentional; the
+        // next release (v1.1.0) aligns both stores. See BUILD.md.
+        const manifestSrc = readFileSync(
           resolve(__dirname, `public/manifest.${target}.json`),
+          'utf8',
+        );
+        const pkg = JSON.parse(
+          readFileSync(resolve(__dirname, 'package.json'), 'utf8'),
+        ) as { version: string };
+        const versionField = /("version"\s*:\s*")[^"]*(")/g;
+        const matches = manifestSrc.match(versionField);
+        if (!matches || matches.length !== 1) {
+          throw new Error(
+            `manifest.${target}.json: expected exactly one "version" field, ` +
+              `found ${matches?.length ?? 0}`,
+          );
+        }
+        writeFileSync(
           resolve(dist, 'manifest.json'),
+          manifestSrc.replace(versionField, `$1${pkg.version}$2`),
         );
         if (existsSync(resolve(__dirname, 'public/icons'))) {
           cpSync(

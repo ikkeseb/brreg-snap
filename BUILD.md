@@ -6,8 +6,11 @@ tools, no remote-loaded code.
 
 ## Environment
 
-- **OS**: Built on macOS 26.4. Linux and Windows produce equivalent
-  output (the build is platform-independent — Vite + esbuild).
+- **OS**: Built on macOS 26.4; verified on Windows 11 as well. Linux
+  produces equivalent output (the build is platform-independent —
+  Vite + esbuild). On Windows, the repo's `.npmrc`
+  (`shell-emulator=true`) makes the POSIX-style `BROWSER=…` env
+  prefixes in the package scripts work under pnpm — no WSL needed.
 - **Node.js**: ≥ 18 (tested on v25.8.1; any 18 LTS / 20 LTS / 22 LTS
   release should work).
 - **pnpm**: 10.33.0 (pinned via the `packageManager` field in
@@ -40,6 +43,23 @@ same `src/` and differ only in `public/manifest.<browser>.json` and a
 3-line `browser` shim. The Firefox `manifest.json` in the package is
 byte-identical to the one submitted to AMO. See `docs/chrome-port.md`.
 
+## Versioning
+
+`package.json` is the single source of truth for the version. At
+build time, the copy-static-assets plugin in `vite.config.ts` stamps
+the `"version"` field of the copied manifest with the package.json
+version, via a string-level replacement that leaves every other byte
+of the manifest untouched — so the built Firefox manifest stays
+byte-identical to the AMO submission whenever the two versions agree
+(they do today: both say 1.0.1).
+
+Known intentional skew: `public/manifest.chrome.json` still says
+`1.0.0` (the version live on the Chrome Web Store), but local Chrome
+builds stamp the package.json version (`1.0.1`). The next release
+(v1.1.0) aligns both stores; until then a locally built
+`dist-chrome/manifest.json` will differ from the CWS package in the
+version field only.
+
 The final artifact lands at
 `web-ext-artifacts/brreg-snap-<version>.zip`. (web-ext writes the
 package as `.zip`; AMO accepts both extensions interchangeably.)
@@ -63,8 +83,9 @@ outer envelope.
 
 1. **`pnpm build:firefox`** (Vite) — compiles TypeScript sources
    under `src/` to JavaScript, copies the Firefox manifest
-   (`public/manifest.firefox.json` → `manifest.json`) and toolbar
-   icons, relocates the popup/details HTML entries to their
+   (`public/manifest.firefox.json` → `manifest.json`, stamping its
+   `version` field from `package.json` — see Versioning above) and
+   toolbar icons, relocates the popup/details HTML entries to their
    manifest-expected paths, and writes everything to `dist-firefox/`.
 2. **`web-ext build`** — packages the contents of `dist-firefox/`
    into a `.zip` file with the `.xpi` extension, excluding sourcemaps

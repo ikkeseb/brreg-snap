@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Reads the pnpm version from the `packageManager` pin in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint:ts
+      - run: pnpm test
+      - run: pnpm build:firefox
+      - run: pnpm build:chrome
+
+      # web-ext lint is addons-linter — a Firefox-only validator. It
+      # structurally rejects the Chrome manifest (background.service_worker
+      # "not supported", gecko extension ID required), so only the Firefox
+      # target is lintable with it. The Chrome manifest is covered by the
+      # invariants step below.
+      - run: pnpm lint:ext:firefox
+
+      # Zero runtime dependencies is a repo guarantee — audit must be clean.
+      - run: pnpm audit --prod
+
+      - name: Manifest security invariants (both targets)
+        run: |
+          node <<'EOF'
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          const expect = {
+            host_permissions: ['https://data.brreg.no/*'],
+            optional_permissions: ['tabs'],
+            csp: ["default-src 'self'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'none'"],
+          };
+          let failed = false;
+          const fail = (file, msg) => { console.error(`FAIL ${file}: ${msg}`); failed = true; };
+          for (const file of ['dist-firefox/manifest.json', 'dist-chrome/manifest.json']) {
+            const m = JSON.parse(fs.readFileSync(file, 'utf8'));
+            if ('content_scripts' in m) fail(file, 'content_scripts must not exist');
+            if (JSON.stringify(m.host_permissions) !== JSON.stringify(expect.host_permissions))
+              fail(file, `host_permissions must be exactly ${JSON.stringify(expect.host_permissions)}, got ${JSON.stringify(m.host_permissions)}`);
+            if (JSON.stringify(m.optional_permissions) !== JSON.stringify(expect.optional_permissions))
+              fail(file, `optional_permissions must be exactly ${JSON.stringify(expect.optional_permissions)}, got ${JSON.stringify(m.optional_permissions)}`);
+            const csp = m.content_security_policy?.extension_pages ?? '';
+            for (const directive of expect.csp)
+              if (!csp.includes(directive)) fail(file, `CSP missing "${directive}"`);
+            if (m.version !== pkg.version)
+              fail(file, `manifest version ${m.version} != package.json version ${pkg.version}`);
+            if (!failed) console.log(`OK ${file}`);
+          }
+          if (failed) {
+            console.error('\nManifest invariants violated. These are the security');
+            console.error('non-negotiables from CLAUDE.md: no content scripts, only');
+            console.error('data.brreg.no as host, tabs as runtime opt-in only, strict CSP.');
+            process.exit(1);
+          }
+          console.log('All manifest security invariants hold for both targets.');
+          EOF

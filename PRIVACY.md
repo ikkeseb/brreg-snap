@@ -1,8 +1,9 @@
 # Privacy Policy
 
-_Last updated: 2026-05-16_
+_Last updated: 2026-06-10_
 
-brreg-snap is a browser extension that shows information from the
+brreg-snap is a browser extension (Firefox and Chrome — this policy
+covers both) that shows information from the
 public Norwegian business registry
 ([Brønnøysundregistrene](https://data.brreg.no/)) about Norwegian
 companies. This document explains exactly what data leaves your
@@ -17,8 +18,8 @@ browser, where it goes, and how the extension uses local storage.
 - It does **not** read or transmit page content, send anything to
   third parties, run analytics, or track you across sites.
 - Data is sent only in response to your action (clicking the
-  toolbar icon, opening the sidebar, or — if you explicitly enable
-  it — switching tabs while the sidebar is open).
+  toolbar icon, opening the sidebar / side panel, or — if you
+  explicitly enable it — switching tabs while the panel is open).
 
 ## What data leaves your browser
 
@@ -47,15 +48,16 @@ synced, nothing transmitted:
 
 - **`storage.session`** — A 24-hour cache of brreg responses keyed
   by organisation number, so repeated lookups don't hammer the API.
-  Cleared automatically when you close all Firefox windows.
+  Cleared automatically when you close the browser.
 - **`storage.session`** — A short list of recently viewed
   organisations (up to 5), used by the popup's empty state to
   re-open a recent lookup quickly. Cleared when the session ends.
 - **`storage.local`** — A single boolean for the "Auto-oppdater
-  ved fane-bytte" toggle in the sidebar header.
+  ved fane-bytte" toggle in the sidebar / side-panel header.
 
-You can clear all of this at any time via `about:addons` → brreg-snap
-→ Remove, or via Firefox's site data clearing.
+You can clear all of this at any time by removing the extension
+(`about:addons` in Firefox, `chrome://extensions` in Chrome) or via
+the browser's data clearing.
 
 ## Permissions
 
@@ -63,9 +65,10 @@ You can clear all of this at any time via `about:addons` → brreg-snap
 |---|---|
 | `activeTab` | Read URL and title of the current tab, only when you click the toolbar icon, the sidebar icon, or a context-menu item. Cannot read or modify the page. |
 | `storage` | Cache responses and remember the auto-sync toggle as described above. |
-| `menus` | Add a "Vis i brreg-snap sidebar" item to the right-click menu. |
+| `menus` (Firefox) / `contextMenus` (Chrome) | Add a "Vis i brreg-snap sidebar" item to the right-click menu. |
+| `sidePanel` (Chrome only) | Show the detail view in Chrome's side panel. Grants no access to page or tab data. |
 | `host_permissions: https://data.brreg.no/*` | The only network destination the extension contacts. |
-| `optional_permissions: tabs` | **Off by default.** Required only if you enable "Auto-oppdater ved fane-bytte". Requested at runtime via Firefox's standard permission prompt. When granted, allows the extension to receive tab-switch events so the sidebar can re-resolve the organisation number automatically. Revocable from `about:addons` or by flipping the toggle off (which calls `permissions.remove`). |
+| `optional_permissions: tabs` | **Off by default.** Required only if you enable "Auto-oppdater ved fane-bytte". Requested at runtime via the browser's standard permission prompt. When granted, allows the extension to receive tab-switch events so the sidebar / side panel can re-resolve the organisation number automatically. Revocable from the browser's extension manager (`about:addons` / `chrome://extensions`) or by flipping the toggle off (which calls `permissions.remove`). |
 
 ## Third parties
 
@@ -87,8 +90,6 @@ information about Norwegian businesses.
 - No `eval`, `Function()` constructor, or remote-loaded code.
 - Strict CSP: `default-src 'self'`, no `unsafe-inline`, no remote
   script hosts.
-- Source maps are shipped so the minified code can be mapped back
-  to the original TypeScript.
 
 ## Contact
 

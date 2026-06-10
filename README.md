@@ -8,9 +8,10 @@ straight from the toolbar.
 Click the icon while on a company website, get the brreg snapshot in a
 popup. No content scripts, no page DOM access, no third-party calls.
 
-> One source tree, two targets. Firefox is live on AMO; the Chrome
-> build is feature-complete bar the tab-switch auto-update (a follow-up)
-> and pending Chrome Web Store submission — see
+> One source tree, two targets, both live: Firefox on
+> [AMO](https://addons.mozilla.org/firefox/addon/brreg-snap/), Chrome
+> on the Chrome Web Store (since 2026-06-07) — at full feature parity,
+> including the optional tab-switch auto-update — see
 > [docs/chrome-port.md](docs/chrome-port.md). The engine differences
 > (sidebar vs. side panel, `menus` vs. `contextMenus`, event page vs.
 > service worker) are isolated in `src/lib/platform/` behind a runtime
@@ -30,13 +31,13 @@ pages you browse and never reads their DOM.
 | `storage` | Cache brreg responses locally (`storage.session`, 24h TTL) and persist the "Auto-oppdater" toggle (`storage.local`) |
 | `menus` | Register the "Vis i brreg-snap sidebar" right-click item. On Mozilla's no-prompt list — silent at install, does not grant tab snooping (activeTab still required, granted per click). |
 | `host_permissions: https://data.brreg.no/*` | Fetch from the public brreg API. Only domain we contact. |
-| `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater ved fane-bytte" in the sidebar. Requested at runtime via a Firefox prompt; revocable from `about:addons` or by flipping the toggle off (which calls `permissions.remove`). Install dialog stays silent. |
+| `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater ved fane-bytte" in the sidebar. Requested at runtime via the browser's permission prompt; revocable from the extension manager (`about:addons` / `chrome://extensions`) or by flipping the toggle off (which calls `permissions.remove`). Install dialog stays silent. |
 
 On Chrome the equivalent install set is `activeTab` + `storage` +
 `contextMenus` + `sidePanel` + the same `data.brreg.no` host — all on
-Chrome's no-prompt list. The Chrome MVP omits `tabs`/auto-sync
-entirely (deferred to a follow-up), so its install footprint is even
-narrower than Firefox's.
+Chrome's no-prompt list. `tabs` is the same runtime opt-in on both
+engines: it sits in `optional_permissions` and is requested only when
+the user enables "Auto-oppdater ved fane-bytte" in the side panel.
 
 What this rules out:
 
@@ -52,7 +53,9 @@ an org-number, and only while the user-facing toggle is on. There is
 no `cookies`, `webRequest`, or `<all_urls>` access — the security
 posture stays "no DOM, no network beyond data.brreg.no".
 
-Total reviewable surface is intentionally small (~200 LOC core).
+Total reviewable surface is intentionally small: all of `src/` is
+~3,500 lines of TypeScript with zero runtime dependencies — no
+content scripts, no third-party JS, one API host.
 
 ## Install — development
 
@@ -143,7 +146,9 @@ tests/
 ## Distribution
 
 - **[addons.mozilla.org](https://addons.mozilla.org/firefox/addon/brreg-snap/)**
-  — primary distribution. Auto-updates via Firefox.
+  — primary Firefox distribution. Auto-updates via Firefox.
+- **Chrome Web Store** — live since 2026-06-07 (search "brreg-snap").
+  Auto-updates via Chrome.
 - **[GitHub releases](https://github.com/ikkeseb/brreg-snap/releases)**
   — signed `.xpi` available as a backup for users who prefer
   side-loading. Manual updates only.
