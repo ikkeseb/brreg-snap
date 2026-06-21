@@ -161,7 +161,12 @@ function renderTrendTable(figures: KeyFigures[]): HTMLElement {
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
-  return table;
+  // Scope horizontal overflow to the table: a wide large-cap filing's nowrap
+  // figures would otherwise force a scrollbar onto the entire side panel.
+  const scroll = document.createElement('div');
+  scroll.className = 'trend-scroll';
+  scroll.appendChild(table);
+  return scroll;
 }
 
 const YOY_ARROW: Record<YoyDirection, string> = {

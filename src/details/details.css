@@ -740,12 +740,19 @@ footer a:hover {
   margin: 0 0 8px;
 }
 
-/* Trend table: years down the rows, headline P&L lines across. */
+/* Trend table: years down the rows, headline P&L lines across. The nowrap
+   figure cells can exceed a narrow panel's width for large-cap filings, so
+   the table is wrapped in .trend-scroll: the overflow scroll stays scoped to
+   the table instead of pushing a horizontal scrollbar onto the whole panel. */
+.trend-scroll {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
 table.nokkeltall-trend {
   width: 100%;
   border-collapse: collapse;
   font-size: 12.5px;
-  margin-bottom: 16px;
 }
 
 table.nokkeltall-trend th,
