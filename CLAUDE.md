@@ -4,30 +4,33 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Active long-running branches
 
-### Chrome port → Firefox `v1.1.0` (merged)
+### Side-panel UX batch → `v1.2.0` (branch `feat/improvements`, in progress)
 
-Chrome support is built and shipped, and the chrome-port line is now
-merged into `main`. **Status (2026-06-07):**
+The chrome-port line shipped as **`v1.1.0`** (live on AMO + CWS, tagged
+`v1.1.0` / `amo-submission-1.1.0`, 2026-06-10); `main` carries it. The
+active work is a side-panel UX batch on **`feat/improvements`**,
+release-prepped as **`v1.2.0`** but **not tagged**.
 
-- **Firefox `v1.0.1`** is live on AMO — the orgnr-resolution
-  reliability fix. Tagged `v1.0.1` + `amo-submission-1.0.1`.
-- **Chrome `1.0.0`** is approved and live on the Chrome Web Store. It
-  shipped from `feat/chrome-auto-sync` (off `chrome-port-mvp` off
-  `chrome-port`) and carries: Chrome support, auto-sync brought to
-  Firefox parity, the refresh button removed, and the orgnr fix
-  cherry-picked in.
-- **`feat/chrome-auto-sync` is now merged into `main`** (dual-build,
-  split manifests, refresh button removed, auto-sync parity). This is a
-  Firefox *behaviour* change (the refresh button is gone; `details.html`
-  is shared between engines), so it must go out as a real FF version
-  bump — release it as **`v1.1.0`**, not a silent `v1.0.1` change.
+- Renders for real: role typography, egenkapital amber caution,
+  card-heading dedup, empty-state glyph, single-year
+  Gjeld/Egenkapitalandel rows.
+- **Dormant:** the multi-year Nøkkeltall trend table + YoY deltas.
+  brreg's open regnskap API returns only the latest year (verified
+  ~294 companies), so `renderNokkeltall`'s `figures.length >= 2` branch
+  never fires in production. The code is correct but unreachable — see
+  `docs/notes/brreg-api.md` § `regnskap-single-year-only`. Open
+  decision: keep as future-proofing vs remove; resolve before tagging.
+- Lesson: data-dependent rendering must be checked against the **live**
+  API — unit tests (synthetic fixtures) and the hand-authored
+  `/tmp/brreg-preview` harness both passed while the live data shape
+  (one year, not many) silently broke the feature.
 
-Full plan + decision log (D1–D15): `docs/chrome-port.md`.
+Older chrome-port plan + decision log (D1–D15): `docs/chrome-port.md`.
 
 `main` mirrors the live AMO submission — the `amo-submission-X.Y.Z` tag
 is the canonical reference for what was submitted, regardless of where
-`main` HEAD moves. Docs-only changes that don't affect the `.xpi` (like
-this section) may land on `main` directly.
+`main` HEAD moves. Docs-only changes that don't affect the `.xpi` may
+land on `main` directly.
 
 ## Commands
 
