@@ -67,7 +67,10 @@
       </section>
       <section id="result" hidden>
         <header id="result-head">
-          <h2 id="name"></h2>
+          <!-- tabindex=-1: not in the tab order, but focusable by script
+               so a drill-in / Back moves focus here and screen readers
+               announce the new company name. -->
+          <h2 id="name" tabindex="-1"></h2>
           <div id="orgnr" class="orgnr"></div>
           <div id="flags" class="flags"></div>
           <div id="resolution-actions" class="resolution-actions" hidden>

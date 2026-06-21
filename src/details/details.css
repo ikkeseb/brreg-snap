@@ -236,6 +236,13 @@ main[data-state='error'] #status {
   margin: 0 0 4px;
 }
 
+/* Focused only programmatically (tabindex=-1) to announce a drilled-in
+   company to screen readers — it is not a keyboard target, so suppress
+   the focus ring that would otherwise flash on the heading. */
+#result-head h2:focus {
+  outline: none;
+}
+
 .orgnr {
   font-family: var(--font-mono);
   color: var(--muted);

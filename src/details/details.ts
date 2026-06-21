@@ -42,6 +42,7 @@ const errorActionsEl = $('error-actions');
 const retryLoadBtn = $('retry-load') as HTMLButtonElement;
 const skeletonEl = $('skeleton');
 const resultEl = $('result');
+const nameEl = $('name');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
 const footerUpdated = $('footer-updated');
 const updatedTime = $('updated-time') as HTMLTimeElement;
@@ -66,6 +67,9 @@ let updatedTimerId: number | undefined;
 let loadRunId = 0;
 // Re-trigger for the "Prøv igjen" button in the full error state.
 let lastLoad: (() => void) | undefined;
+// Assigned by setupTabs; lets popstate re-activate the tab named by a
+// restored ?tab= entry without reaching into setupTabs' closure.
+let activateTabByKey: (key: string) => void = () => {};
 
 const sourceLabel = createSourceLabel(footerSource, sourceHostEl);
 
@@ -179,7 +183,7 @@ function navigateToRelated(orgnr: string): void {
   if (!isValidOrgnr(orgnr)) return;
   sourceLabel.set(undefined);
   setHistoryOrgnr(orgnr, 'drill-in', true);
-  void loadOrgnr(orgnr, 'drill-in');
+  void loadOrgnr(orgnr, 'drill-in', { focusResult: true });
 }
 
 function setState(
@@ -266,6 +270,7 @@ function updateRejectButtonVisibility(): void {
 async function loadOrgnr(
   orgnr: string,
   method?: ResolutionMethod,
+  opts: { focusResult?: boolean } = {},
 ): Promise<void> {
   // Monotonic guard — if the popup pushes a second sync while the
   // first is still in flight, the older fetches must not overwrite
@@ -297,12 +302,25 @@ async function loadOrgnr(
     renderOverview(enhet, roller);
     renderContact(enhet);
     renderRoles(roller, navigateToRelated);
-    void renderParent(enhet.overordnetEnhet, navigateToRelated);
+    void renderParent(
+      enhet.overordnetEnhet,
+      navigateToRelated,
+      () => myRunId !== loadRunId,
+    );
     renderUnderenheter(underenheter);
     renderNokkeltall(regnskap);
     setState('result');
     updateRejectButtonVisibility();
     markUpdated();
+    // After an in-panel drill-in or Back/Forward, the <a> the user
+    // activated was torn down by the re-render and focus fell to
+    // <body>. Move focus to the company heading so keyboard users
+    // continue from the new content and screen readers announce the
+    // resolved name. Gated to drill-in/popstate (never the background
+    // sync repaint) and to the sidebar window actually holding focus —
+    // same guard showEmptyState uses to avoid yanking focus off the
+    // active page during an auto-sync tab switch.
+    if (opts.focusResult && document.hasFocus()) nameEl.focus();
   } catch (err) {
     if (myRunId !== loadRunId) return;
     showError(err);
@@ -583,7 +601,14 @@ window.addEventListener('popstate', (ev) => {
   const orgnr = entry?.orgnr ?? getOrgnrFromUrl();
   if (orgnr && isValidOrgnr(orgnr)) {
     sourceLabel.set(entry?.host);
-    void loadOrgnr(orgnr, entry?.method ?? 'url');
+    void loadOrgnr(orgnr, entry?.method ?? 'url', { focusResult: true });
+    // Re-activate the tab the restored entry's URL records, so the
+    // selected tab matches the ?tab= it was left on instead of keeping
+    // whatever the user last clicked before navigating away. An entry
+    // with no ?tab= (e.g. the initial one) restores the default tab.
+    activateTabByKey(
+      new URLSearchParams(window.location.search).get('tab') ?? 'oversikt',
+    );
     return;
   }
   const host = getNoMatchHostFromUrl();
@@ -654,14 +679,18 @@ function setupTabs(): void {
     window.history.replaceState(window.history.state, '', url.toString());
   }
 
-  // Restore the deep-linked / previously-selected tab on load instead
-  // of always booting Oversikt. No-op (and no persist) when ?tab= is
-  // absent or unknown, leaving the HTML default selected.
-  const wanted = new URLSearchParams(window.location.search).get('tab');
-  if (wanted) {
-    const match = tabs.find((t) => tabKey(t.id) === wanted);
+  // persist:false — restoring a tab (on load or via popstate) must not
+  // rewrite the history entry's ?tab=, only reflect it in the UI.
+  activateTabByKey = (key: string): void => {
+    const match = tabs.find((t) => tabKey(t.id) === key);
     if (match) activate(match.id, { persist: false });
-  }
+  };
+
+  // Restore the deep-linked / previously-selected tab on load instead
+  // of always booting Oversikt. No-op when ?tab= is absent or unknown,
+  // leaving the HTML default selected.
+  const wanted = new URLSearchParams(window.location.search).get('tab');
+  if (wanted) activateTabByKey(wanted);
 
   for (const tab of tabs) {
     tab.addEventListener('click', () => {
