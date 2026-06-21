@@ -4,9 +4,10 @@ import '../lib/platform/globals.js';
 import { sidebar } from '../lib/platform/sidebar.js';
 import { fetchEnhet, fetchRoller } from '../lib/brreg.js';
 import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
-import { formatAddress } from '../lib/format.js';
-import { findDagligLeder } from '../lib/roller.js';
+import { formatAddress, formatNaering } from '../lib/format.js';
+import { findRoleHolder } from '../lib/roller.js';
 import { addLink, addRow } from '../details/render/dom.js';
+import { makeActivable } from '../lib/ui/activate.js';
 import { makeFlag } from '../lib/ui/flags.js';
 import { attachManualSearch } from '../lib/ui/manual-search.js';
 import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
@@ -23,6 +24,7 @@ const app = document.getElementById('app') as HTMLElement;
 const brandMark = document.getElementById('brand-mark') as HTMLImageElement;
 brandMark.src = browser.runtime.getURL('icons/icon-32.png');
 const statusEl = document.getElementById('status') as HTMLElement;
+const skeletonEl = document.getElementById('skeleton') as HTMLElement;
 const errorActionsEl = document.getElementById('error-actions') as HTMLElement;
 const retryLoadBtn = document.getElementById(
   'retry-load',
@@ -323,13 +325,17 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   const dl = document.createElement('dl');
   addRow(dl, 'Form', enhet.organisasjonsform?.beskrivelse);
   addRow(dl, 'Registrert', enhet.registreringsdatoEnhetsregisteret);
-  addRow(dl, 'Næring', enhet.naeringskode1?.beskrivelse);
+  addRow(dl, 'Næring', formatNaering(enhet.naeringskode1));
   addRow(dl, 'Ansatte', enhet.antallAnsatte?.toString());
   // Always render daglig leder, even when missing, so the user sees we
   // looked — empty fallback distinguishes "no role registered" from
   // "we forgot to check". Other rows can legitimately be missing on
   // certain forms (ENK has no Form-suffix, foreign entities lack næring).
-  addRow(dl, 'Daglig leder', findDagligLeder(roller) ?? '—');
+  addRow(dl, 'Daglig leder', findRoleHolder(roller, 'DAGL') ?? '—');
+  // Styreleder is the natural "who else runs it" companion; shown only
+  // when registered so the fast-glance popup stays tight (the sidebar
+  // overview carries the fuller revisor/regnskapsfører set).
+  addRow(dl, 'Styreleder', findRoleHolder(roller, 'LEDE'));
   addRow(dl, 'Adresse', formatAddress(enhet.forretningsadresse));
   if (enhet.hjemmeside) {
     const href = enhet.hjemmeside.startsWith('http')
@@ -353,6 +359,10 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   if (enhet.registrertIMvaregisteret) flags.appendChild(makeFlag('MVA-registrert'));
   if (enhet.registrertIForetaksregisteret)
     flags.appendChild(makeFlag('Foretaksregistret'));
+  if (enhet.registrertIStiftelsesregisteret)
+    flags.appendChild(makeFlag('Stiftelsesregistret'));
+  if (enhet.registrertIFrivillighetsregisteret)
+    flags.appendChild(makeFlag('Frivillighetsregistret'));
   if (flags.childNodes.length > 0) resultEl.appendChild(flags);
 
   updateRejectButtonVisibility();
@@ -390,7 +400,6 @@ async function renderRecentList(): Promise<void> {
   recentSectionEl.hidden = false;
   for (const entry of entries) {
     const li = document.createElement('li');
-    li.tabIndex = 0;
 
     const name = document.createElement('span');
     name.className = 'recent-name';
@@ -402,12 +411,8 @@ async function renderRecentList(): Promise<void> {
     orgnr.textContent = entry.orgnr;
     li.appendChild(orgnr);
 
-    const select = (): void => {
+    makeActivable(li, () => {
       void loadAndRender(entry.orgnr, 'manual');
-    };
-    li.addEventListener('click', select);
-    li.addEventListener('keydown', (ev) => {
-      if (ev.key === 'Enter') select();
     });
     recentListEl.appendChild(li);
   }
@@ -430,10 +435,22 @@ function setState(
   // can't fire the picker's onChoose on a previous host's list.
   if (state !== 'picker') picker.clear();
   app.dataset.state = state;
-  // statusEl is the loading and error surface. Hide it on the data
-  // states ('result', 'picker', 'empty') so the previous status text
-  // doesn't stack above the new content.
-  statusEl.hidden = state !== 'loading' && state !== 'error';
+  // statusEl carries the polite aria-live announcement during loading
+  // (kept off-screen, not display:none, so screen readers still read
+  // "Henter …" while the skeleton is what's shown), and becomes the
+  // visible error message during state='error'. Same pattern as the
+  // sidebar (src/details/details.ts).
+  if (state === 'loading') {
+    statusEl.hidden = false;
+    statusEl.classList.add('visually-hidden');
+  } else if (state === 'error') {
+    statusEl.hidden = false;
+    statusEl.classList.remove('visually-hidden');
+  } else {
+    statusEl.hidden = true;
+    statusEl.classList.remove('visually-hidden');
+  }
+  skeletonEl.hidden = state !== 'loading';
   // showError unhides this when a retry target exists.
   errorActionsEl.hidden = true;
   resultEl.hidden = state !== 'result';

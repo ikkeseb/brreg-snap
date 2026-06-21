@@ -4,6 +4,51 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
+## [Unreleased]
+
+These are visible behaviour changes on both engines, so they ship as a
+real version bump (not a silent patch).
+
+### Added
+
+- Side-panel Nøkkeltall now shows a multi-year (up to 3) regnskap trend
+  table built from the already-fetched filings (no extra request), plus
+  derived **Gjeld** and **Egenkapitalandel**. Losses and negative
+  equity are flagged in red.
+- **Styreleder**, **Revisor** and **Regnskapsfører** are surfaced in the
+  side-panel overview (and Styreleder in the popup) from the roller
+  response already fetched for daglig leder.
+- Næringskode now shows its code next to the description
+  ("… (62.020)").
+- The popup reached registry-flag parity with the side panel
+  (Stiftelsesregistret, Frivillighetsregistret).
+- A skeleton loader in the popup, matching the side panel.
+- **In-panel drill-in**: clicking a parent enhet or a company
+  role-holder (auditor / accountant / corporate board member) loads it
+  in place, with browser Back/Forward support. Dissolved entities stay
+  plain text (they would 404). The active tab is deep-linked via `?tab=`
+  and restored on load.
+- Role rows flag deceased persons (død) and dissolved entities
+  (slettet); the underenheter table flags wound-down sub-units
+  (Nedlagt).
+- Keyboard: manual-search and recents rows are now operable with Space
+  as well as Enter and expose a button role; Home/End jump to the
+  first/last side-panel tab.
+
+### Changed
+
+- The UI accent is now the amber brand colour across both surfaces; the
+  exploratory teal `data-accent` override is no longer shipped.
+
+### Internal
+
+- Consolidated the duplicated `storage.session` TTL cache into
+  `src/lib/session-cache.ts`, the two `makeFlag` copies into one shared
+  pill, and added `findRoleHolder` (generalising `findDagligLeder`) plus
+  a DOM-free `src/lib/regnskap.ts`. New unit tests cover the cache,
+  role-holder lookup, regnskap derivations, and the næring/percent
+  formatters.
+
 ## [1.1.0] — 2026-06-10
 
 ### Added

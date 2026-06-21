@@ -1,28 +1,30 @@
 import { fetchEnhet } from '../../lib/brreg.js';
-import { $ } from './dom.js';
+import { $, makeNavLink } from './dom.js';
 
 const parentSection = $('parent');
 const parentBody = $('parent-body');
 
-export async function renderParent(parentOrgnr: string | undefined): Promise<void> {
+export async function renderParent(
+  parentOrgnr: string | undefined,
+  onNavigate: (orgnr: string) => void,
+): Promise<void> {
   if (!parentOrgnr) {
     parentSection.hidden = true;
     return;
   }
   parentSection.hidden = false;
   parentBody.innerHTML = '';
-  const link = document.createElement('a');
-  link.href = `?orgnr=${parentOrgnr}`;
-  link.textContent = `Org.nr ${parentOrgnr}`;
-  parentBody.appendChild(link);
+  // Show the orgnr immediately; upgrade to the name once it resolves.
+  parentBody.appendChild(
+    makeNavLink(parentOrgnr, `Org.nr ${parentOrgnr}`, onNavigate),
+  );
 
   try {
     const parent = await fetchEnhet(parentOrgnr);
     parentBody.innerHTML = '';
-    const a = document.createElement('a');
-    a.href = `?orgnr=${parentOrgnr}`;
-    a.textContent = `${parent.navn} (${parentOrgnr})`;
-    parentBody.appendChild(a);
+    parentBody.appendChild(
+      makeNavLink(parentOrgnr, `${parent.navn} (${parentOrgnr})`, onNavigate),
+    );
   } catch {
     // Already rendered fallback link with just the orgnr.
   }

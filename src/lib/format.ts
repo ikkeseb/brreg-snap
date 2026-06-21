@@ -1,4 +1,29 @@
-import type { Adresse } from '../types/brreg.js';
+import type { Adresse, Kode } from '../types/brreg.js';
+
+// "Konsulentvirksomhet … (62.020)" — pairs the NACE description with its
+// code so the user can cross-reference the official register. Falls back
+// to whichever field exists (description-only, or bare code).
+export function formatNaering(kode: Kode | undefined): string | undefined {
+  if (!kode) return undefined;
+  const desc = kode.beskrivelse?.trim();
+  const digits = kode.kode?.trim();
+  if (desc && digits) return `${desc} (${digits})`;
+  return desc || digits || undefined;
+}
+
+// Whole-percent string in nb-NO with a non-breaking space before the
+// sign ("42 %", "-25 %"). Returns undefined for nullish/NaN so addRow
+// skips it. Builds the sign with an ASCII '-' (same convention as
+// formatNok) rather than letting Intl emit a U+2212 minus, so the kr
+// and % figures share the same minus glyph in the UI.
+export function formatPercent(value: number | undefined): string | undefined {
+  if (value === undefined || value === null || Number.isNaN(value)) {
+    return undefined;
+  }
+  const rounded = Math.round(value);
+  const sign = rounded < 0 ? '-' : '';
+  return `${sign}${Math.abs(rounded).toLocaleString('nb-NO')}\u00a0%`;
+}
 
 export function formatAddress(addr: Adresse | undefined): string | undefined {
   if (!addr) return undefined;

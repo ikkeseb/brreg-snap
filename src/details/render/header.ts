@@ -1,4 +1,5 @@
 import { renderOrgnrCopy } from '../../lib/copy-orgnr.js';
+import { makeFlag } from '../../lib/ui/flags.js';
 import type { Enhet } from '../../types/brreg.js';
 import { $ } from './dom.js';
 
@@ -28,15 +29,4 @@ export function renderHeader(enhet: Enhet): void {
     flagsEl.appendChild(makeFlag('Stiftelsesregistret'));
   if (enhet.registrertIFrivillighetsregisteret)
     flagsEl.appendChild(makeFlag('Frivillighetsregistret'));
-}
-
-function makeFlag(
-  label: string,
-  severity?: 'ok' | 'warn' | 'danger',
-): HTMLElement {
-  const el = document.createElement('span');
-  el.className = 'flag';
-  if (severity) el.dataset.severity = severity;
-  el.textContent = label;
-  return el;
 }

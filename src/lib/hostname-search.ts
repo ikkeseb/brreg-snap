@@ -25,9 +25,9 @@ import {
   scoreCandidate,
   type ResolutionBand,
 } from './hostname-score.js';
+import { cacheGet, cacheSet } from './session-cache.js';
 import type { SearchHit } from '../types/brreg.js';
 
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const KEY_PREFIX = 'hostname:';
 const CHOICE_KEY_PREFIX = 'picker-choice:';
 const REJECTED_KEY_PREFIX = 'rejected:';
@@ -49,34 +49,6 @@ export interface DetailedResult {
   // directly. A cached negative choice ("Ingen av disse") becomes
   // band='none' with `choice` undefined.
   choice?: string;
-}
-
-interface CacheEntry<T> {
-  value: T;
-  expiresAt: number;
-}
-
-async function cacheGet<T>(key: string): Promise<T | undefined> {
-  const store = await browser.storage.session.get(key);
-  const entry = store[key] as CacheEntry<T> | undefined;
-  if (!entry) return undefined;
-  if (entry.expiresAt < Date.now()) {
-    try {
-      await browser.storage.session.remove(key);
-    } catch {
-      /* best-effort */
-    }
-    return undefined;
-  }
-  return entry.value;
-}
-
-async function cacheSet<T>(key: string, value: T): Promise<void> {
-  const entry: CacheEntry<T> = {
-    value,
-    expiresAt: Date.now() + CACHE_TTL_MS,
-  };
-  await browser.storage.session.set({ [key]: entry });
 }
 
 // Public helpers for the sidebar to read/write the user's picker

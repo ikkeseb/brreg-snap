@@ -26,8 +26,9 @@
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Accent overrides mirror details.css so popup and sidebar stay in
-   visual sync. Set <main data-accent="teal|sky"> to swap. */
+/* Amber (--accent above) is the shipped default, matching the
+   brand-mark. These overrides mirror details.css for devtools-only
+   experiments — no element sets data-accent in production. */
 main[data-accent='teal'] {
   --accent: #5eead4;
   --accent-strong: #99f6e4;
@@ -84,6 +85,18 @@ header h1 img.brand-mark {
   flex-shrink: 0;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 #status {
   padding: 10px 0;
   color: var(--muted);
@@ -91,6 +104,88 @@ header h1 img.brand-mark {
 
 main[data-state='error'] #status {
   color: var(--danger);
+}
+
+/* --- skeleton (data-state='loading') ---------------------------- */
+
+#skeleton {
+  padding: 8px 0 4px;
+}
+
+.skel {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 0%,
+    var(--bg-elevated) 50%,
+    var(--bg-card) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skel-name {
+  height: 18px;
+  width: 60%;
+  border-radius: 5px;
+  margin: 6px 0 8px;
+}
+
+.skel-orgnr {
+  height: 11px;
+  width: 96px;
+  margin-bottom: 14px;
+}
+
+.skel-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.skel-row {
+  height: 11px;
+  width: 100%;
+}
+
+.skel-row:nth-child(2) {
+  width: 88%;
+}
+
+.skel-row:nth-child(3) {
+  width: 72%;
+}
+
+.skel-row:nth-child(4) {
+  width: 80%;
+}
+
+.skel-flags {
+  display: flex;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.skel-pill {
+  height: 18px;
+  width: 70px;
+  border-radius: var(--radius-pill);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+    background: var(--bg-card);
+  }
 }
 
 /* --- retry affordances (error state + inline search error) ------ */
@@ -386,7 +481,7 @@ main[data-state='empty'] #picker {
 
 #manual-query:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(94, 234, 212, 0.18);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
 .manual-results {

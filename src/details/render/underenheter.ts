@@ -33,6 +33,16 @@ export function renderUnderenheter(items: Underenhet[]): void {
 
     const nameCell = document.createElement('td');
     nameCell.textContent = u.navn;
+    // Most underenheter are live; flag only the dissolved ones inline so
+    // the table doesn't carry a near-empty Status column. A nedleggelses-
+    // dato is brreg's marker that the sub-unit has been wound down.
+    if (u.nedleggelsesdato) {
+      const badge = document.createElement('span');
+      badge.className = 'underenhet-status';
+      badge.textContent = 'Nedlagt';
+      badge.title = `Nedlagt ${u.nedleggelsesdato}`;
+      nameCell.append(' ', badge);
+    }
     tr.appendChild(nameCell);
 
     const orgnrCell = document.createElement('td');

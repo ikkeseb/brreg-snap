@@ -9,6 +9,7 @@
 
 import { searchEnheter } from '../brreg.js';
 import type { SearchHit } from '../../types/brreg.js';
+import { makeActivable } from './activate.js';
 import { appendHitSummary } from './hit-row.js';
 
 const DEBOUNCE_MS = 250;
@@ -71,15 +72,8 @@ export function attachManualSearch(
       }
       for (const hit of results) {
         const li = document.createElement('li');
-        li.tabIndex = 0;
         appendHitSummary(li, hit);
-        const select = (): void => {
-          opts.onSelect(hit);
-        };
-        li.addEventListener('click', select);
-        li.addEventListener('keydown', (ev) => {
-          if (ev.key === 'Enter') select();
-        });
+        makeActivable(li, () => opts.onSelect(hit));
         opts.resultsEl.appendChild(li);
       }
     } catch {

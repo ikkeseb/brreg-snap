@@ -74,9 +74,7 @@ const picker = createPicker({
   listEl: pickerListEl,
   noneBtn: pickerNoneBtn,
   onChoose: (_host, orgnr) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('orgnr', orgnr);
-    window.history.replaceState(null, '', url.toString());
+    setHistoryOrgnr(orgnr, 'host-pick', false);
     void loadOrgnr(orgnr, 'host-pick');
   },
   onNone: (host) => {
@@ -88,9 +86,7 @@ const manualSearch = attachManualSearch({
   inputEl: manualQueryEl,
   resultsEl: manualResultsEl,
   onSelect: (hit) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('orgnr', hit.organisasjonsnummer);
-    window.history.replaceState(null, '', url.toString());
+    setHistoryOrgnr(hit.organisasjonsnummer, 'manual', false);
     void loadOrgnr(hit.organisasjonsnummer, 'manual');
   },
 });
@@ -128,6 +124,62 @@ function clearOrgnrFromUrl(): void {
   const url = new URL(window.location.href);
   url.searchParams.delete('orgnr');
   window.history.replaceState(null, '', url.toString());
+}
+
+// Shape stored in history.state for an orgnr entry, so popstate can
+// restore the company, its override-button method, and the footer host
+// without re-resolving.
+interface HistoryEntry {
+  orgnr: string;
+  method: ResolutionMethod;
+  host?: string;
+}
+
+function isHistoryEntry(value: unknown): value is HistoryEntry {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { orgnr?: unknown }).orgnr === 'string'
+  );
+}
+
+// Single writer for the ?orgnr= history entry. `push: true` adds a new
+// entry (in-panel drill-in, so Back returns to where you came from);
+// `push: false` replaces it (resolving the active tab, sync, no-match,
+// init reconcile — these track the current tab, not a navigation the
+// user wants to reverse). The method is stamped into history.state so
+// popstate can restore the right override-button visibility on Back.
+function setHistoryOrgnr(
+  orgnr: string,
+  method: ResolutionMethod,
+  push: boolean,
+): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set('orgnr', orgnr);
+  url.searchParams.delete('nomatch');
+  // Snapshot the current source host into the entry so a Back/Forward
+  // restores the footer label too. Read at write time — callers set
+  // sourceLabel before calling this.
+  const state: HistoryEntry = { orgnr, method, host: sourceLabel.get() };
+  if (push) {
+    window.history.pushState(state, '', url.toString());
+  } else {
+    window.history.replaceState(state, '', url.toString());
+  }
+}
+
+// In-panel drill-in into a related entity (parent enhet or a company
+// role-holder). Pushes a history entry so the browser Back button
+// returns to the entity the user came from. Drilled-in entities aren't
+// host-resolved — clear the source label first so the footer doesn't
+// keep claiming "synket fra <host>" (and so the snapshot in the new
+// entry is host-less), and load with 'drill-in' so the "Feil bedrift?"
+// override stays hidden.
+function navigateToRelated(orgnr: string): void {
+  if (!isValidOrgnr(orgnr)) return;
+  sourceLabel.set(undefined);
+  setHistoryOrgnr(orgnr, 'drill-in', true);
+  void loadOrgnr(orgnr, 'drill-in');
 }
 
 function setState(
@@ -244,8 +296,8 @@ async function loadOrgnr(
     renderHeader(enhet);
     renderOverview(enhet, roller);
     renderContact(enhet);
-    renderRoles(roller);
-    void renderParent(enhet.overordnetEnhet);
+    renderRoles(roller, navigateToRelated);
+    void renderParent(enhet.overordnetEnhet, navigateToRelated);
     renderUnderenheter(underenheter);
     renderNokkeltall(regnskap);
     setState('result');
@@ -448,18 +500,19 @@ async function init(): Promise<void> {
     return;
   }
 
-  if (fromTab.orgnr && fromTab.orgnr !== fromUrl) {
-    const url = new URL(window.location.href);
-    url.searchParams.set('orgnr', fromTab.orgnr);
-    window.history.replaceState(null, '', url.toString());
-  }
   sourceLabel.set(fromTab.host);
   // fromTab.orgnr was set by resolveFromActiveTab and carries a
   // method; an orgnr inherited only from ?orgnr= in the URL has no
   // tab-resolution context and is treated as 'url' so the override
   // button stays hidden (we don't know if the param originated from
-  // a host-resolution).
-  await loadOrgnr(orgnr, fromTab.orgnr ? fromTab.method : 'url');
+  // a host-resolution). Stamp the method into the initial history
+  // entry (replace, not push) so a Back from a later drill-in restores
+  // it with the right override visibility.
+  const method: ResolutionMethod = fromTab.orgnr
+    ? fromTab.method ?? 'url'
+    : 'url';
+  setHistoryOrgnr(orgnr, method, false);
+  await loadOrgnr(orgnr, method);
 }
 
 interface SyncMessage {
@@ -511,14 +564,34 @@ browser.runtime.onMessage.addListener((msg: unknown) => {
   if (!isSyncMessage(msg)) return;
   if (!isValidOrgnr(msg.orgnr)) return;
   sourceLabel.set(msg.host);
-  const url = new URL(window.location.href);
-  url.searchParams.set('orgnr', msg.orgnr);
-  window.history.replaceState(null, '', url.toString());
-  // Sync messages from the popup don't carry the original
-  // resolution method. Hide the override button rather than risk
-  // exposing it on a URL-derived pick the user can't actually
-  // override.
+  // Sync messages from the popup don't carry the original resolution
+  // method. Hide the override button rather than risk exposing it on a
+  // URL-derived pick the user can't actually override. replaceState
+  // (not push) — this tracks the active tab, not a reversible nav.
+  setHistoryOrgnr(msg.orgnr, 'sync-broadcast', false);
   void loadOrgnr(msg.orgnr, 'sync-broadcast');
+});
+
+// Browser Back / Forward within the panel — only reachable after an
+// in-panel drill-in pushed an entry. Restore from history.state,
+// falling back to the URL params for the initial entry (which may
+// predate state stamping). Bump loadRunId first so a slower in-flight
+// load can't paint over the restored entry when it lands.
+window.addEventListener('popstate', (ev) => {
+  ++loadRunId;
+  const entry = isHistoryEntry(ev.state) ? ev.state : undefined;
+  const orgnr = entry?.orgnr ?? getOrgnrFromUrl();
+  if (orgnr && isValidOrgnr(orgnr)) {
+    sourceLabel.set(entry?.host);
+    void loadOrgnr(orgnr, entry?.method ?? 'url');
+    return;
+  }
+  const host = getNoMatchHostFromUrl();
+  if (host !== undefined) {
+    void handleNoMatchBroadcast(host);
+    return;
+  }
+  showEmptyState(undefined);
 });
 
 async function handleNoMatchBroadcast(
@@ -540,11 +613,9 @@ async function handleNoMatchBroadcast(
   }
   if (detailed?.band === 'auto' && detailed.choice) {
     sourceLabel.set(host);
-    const url = new URL(window.location.href);
-    url.searchParams.set('orgnr', detailed.choice);
-    window.history.replaceState(null, '', url.toString());
     const method: ResolutionMethod =
       detailed.candidates.length === 0 ? 'host-pick' : 'host-auto';
+    setHistoryOrgnr(detailed.choice, method, false);
     await loadOrgnr(detailed.choice, method);
     return;
   }
@@ -557,7 +628,11 @@ function setupTabs(): void {
   );
   if (tabs.length === 0) return;
 
-  function activate(id: string): void {
+  // ?tab=<key> where key is the tab id minus its "tab-" prefix
+  // ('oversikt' | 'personer' | 'nokkeltall' | 'enheter').
+  const tabKey = (id: string): string => id.replace(/^tab-/, '');
+
+  function activate(id: string, opts: { persist?: boolean } = {}): void {
     for (const tab of tabs) {
       const selected = tab.id === id;
       tab.setAttribute('aria-selected', String(selected));
@@ -568,6 +643,24 @@ function setupTabs(): void {
         if (panel) panel.hidden = !selected;
       }
     }
+    if (opts.persist !== false) persistTab(id);
+  }
+
+  function persistTab(id: string): void {
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', tabKey(id));
+    // Keep the current orgnr history entry — only the tab param moves,
+    // so a drill-in still records which tab the user was reading.
+    window.history.replaceState(window.history.state, '', url.toString());
+  }
+
+  // Restore the deep-linked / previously-selected tab on load instead
+  // of always booting Oversikt. No-op (and no persist) when ?tab= is
+  // absent or unknown, leaving the HTML default selected.
+  const wanted = new URLSearchParams(window.location.search).get('tab');
+  if (wanted) {
+    const match = tabs.find((t) => tabKey(t.id) === wanted);
+    if (match) activate(match.id, { persist: false });
   }
 
   for (const tab of tabs) {
@@ -576,13 +669,25 @@ function setupTabs(): void {
       tab.focus();
     });
     tab.addEventListener('keydown', (ev) => {
-      if (ev.key !== 'ArrowRight' && ev.key !== 'ArrowLeft') return;
-      ev.preventDefault();
       const idx = tabs.indexOf(tab);
-      const nextIdx =
-        ev.key === 'ArrowRight'
-          ? (idx + 1) % tabs.length
-          : (idx - 1 + tabs.length) % tabs.length;
+      let nextIdx: number;
+      switch (ev.key) {
+        case 'ArrowRight':
+          nextIdx = (idx + 1) % tabs.length;
+          break;
+        case 'ArrowLeft':
+          nextIdx = (idx - 1 + tabs.length) % tabs.length;
+          break;
+        case 'Home':
+          nextIdx = 0;
+          break;
+        case 'End':
+          nextIdx = tabs.length - 1;
+          break;
+        default:
+          return;
+      }
+      ev.preventDefault();
       const next = tabs[nextIdx];
       if (!next) return;
       activate(next.id);

@@ -1,9 +1,7 @@
-// Status-flag pill ("Aktiv", "Konkurs", "MVA-registrert", …) shared
-// by the popup result view. src/details/render/header.ts currently
-// carries its own private copy — it can't import this module-free
-// (header.ts runs top-level $() lookups against details.html ids), so
-// migrating it means exporting from here and deleting the local copy
-// in a render/-scoped change.
+// Status-flag pill ("Aktiv", "Konkurs", "MVA-registrert", …) shared by
+// the popup result view (src/popup/popup.ts) and the sidebar header
+// (src/details/render/header.ts) — one definition so the two surfaces
+// can't drift on flag markup.
 
 export function makeFlag(
   label: string,

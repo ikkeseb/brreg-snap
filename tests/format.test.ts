@@ -1,9 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { Adresse } from '../src/types/brreg.js';
+import type { Adresse, Kode } from '../src/types/brreg.js';
 import {
   formatAddress,
+  formatNaering,
   formatNok,
+  formatPercent,
   formatRelativeTime,
 } from '../src/lib/format.js';
 
@@ -249,5 +251,46 @@ describe('formatAddress', () => {
     expect(
       formatAddress(addr({ adresse: ['  '], postnummer: '  ', land: '   ' })),
     ).toBeUndefined();
+  });
+});
+
+describe('formatNaering', () => {
+  const kode = (k: string, b?: string): Kode => ({ kode: k, beskrivelse: b });
+
+  it('pairs description with code', () => {
+    expect(formatNaering(kode('62.020', 'Konsulentvirksomhet'))).toBe(
+      'Konsulentvirksomhet (62.020)',
+    );
+  });
+
+  it('falls back to description only when code is blank', () => {
+    expect(formatNaering(kode('', 'Konsulentvirksomhet'))).toBe(
+      'Konsulentvirksomhet',
+    );
+  });
+
+  it('falls back to bare code when no description', () => {
+    expect(formatNaering(kode('62.020'))).toBe('62.020');
+  });
+
+  it('returns undefined for undefined input', () => {
+    expect(formatNaering(undefined)).toBeUndefined();
+  });
+});
+
+describe('formatPercent', () => {
+  it('rounds to a whole percent with a non-breaking space', () => {
+    expect(formatPercent(42.4)).toBe(`42${NBSP}%`);
+    expect(formatPercent(42.6)).toBe(`43${NBSP}%`);
+  });
+
+  it('handles negative (insolvent) shares', () => {
+    expect(formatPercent(-25)).toBe(`-25${NBSP}%`);
+  });
+
+  it('returns undefined for nullish / NaN', () => {
+    expect(formatPercent(undefined)).toBeUndefined();
+    expect(formatPercent(null as unknown as number)).toBeUndefined();
+    expect(formatPercent(Number.NaN)).toBeUndefined();
   });
 });

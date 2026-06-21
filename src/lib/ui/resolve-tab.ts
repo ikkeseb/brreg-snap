@@ -13,13 +13,16 @@ import type { SearchHit } from '../../types/brreg.js';
 // (regex hit in path or title) are authoritative for their domain;
 // manual picks are the user's own explicit choice. 'sync-broadcast'
 // (sidebar only) hides the override because the popup's sync message
-// doesn't carry the original resolution method.
+// doesn't carry the original resolution method. 'drill-in' (sidebar
+// only) is an in-panel navigation into a related entity (parent /
+// role-holder); it's not host-resolved, so the override stays hidden.
 export type ResolutionMethod =
   | 'host-auto'
   | 'host-pick'
   | 'url'
   | 'manual'
-  | 'sync-broadcast';
+  | 'sync-broadcast'
+  | 'drill-in';
 
 export interface TabContext {
   orgnr?: string;

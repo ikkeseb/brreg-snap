@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { findDagligLeder } from '../src/lib/roller.js';
+import { findDagligLeder, findRoleHolder } from '../src/lib/roller.js';
 import type { RollerResponse } from '../src/types/brreg.js';
 
 // Fixture is a trimmed real response from
@@ -115,5 +115,66 @@ describe('findDagligLeder', () => {
       ],
     };
     expect(findDagligLeder(noMiddle)).toBe('Kari Nordmann');
+  });
+});
+
+describe('findRoleHolder', () => {
+  it('finds styreleder (LEDE) nested under the STYR group', () => {
+    expect(findRoleHolder(DNB_ROLLER, 'LEDE')).toBe('Eimund Nygaard');
+  });
+
+  it('finds daglig leder (DAGL) — same result as findDagligLeder', () => {
+    expect(findRoleHolder(DNB_ROLLER, 'DAGL')).toBe(
+      'Kjerstin Elisabeth Rasmussen Braathen',
+    );
+  });
+
+  it('returns an entity name when the role holder is a firm (e.g. revisor)', () => {
+    const withRevisor: RollerResponse = {
+      rollegrupper: [
+        {
+          type: { kode: 'REVISOR', beskrivelse: 'Revisor' },
+          roller: [
+            {
+              type: { kode: 'REVI', beskrivelse: 'Revisor' },
+              enhet: {
+                organisasjonsnummer: '976389387',
+                navn: ['ERNST & YOUNG AS'],
+              },
+              fratraadt: false,
+            },
+          ],
+        },
+      ],
+    };
+    expect(findRoleHolder(withRevisor, 'REVI')).toBe('ERNST & YOUNG AS');
+  });
+
+  it('skips a fratrådt holder and returns the next active one', () => {
+    const regn: RollerResponse = {
+      rollegrupper: [
+        {
+          type: { kode: 'REGNSKAP', beskrivelse: 'Regnskapsfører' },
+          roller: [
+            {
+              type: { kode: 'REGN', beskrivelse: 'Regnskapsfører' },
+              enhet: { organisasjonsnummer: '111111111', navn: ['GAMMEL AS'] },
+              fratraadt: true,
+            },
+            {
+              type: { kode: 'REGN', beskrivelse: 'Regnskapsfører' },
+              enhet: { organisasjonsnummer: '222222222', navn: ['NY AS'] },
+              fratraadt: false,
+            },
+          ],
+        },
+      ],
+    };
+    expect(findRoleHolder(regn, 'REGN')).toBe('NY AS');
+  });
+
+  it('returns undefined when the role code is absent', () => {
+    expect(findRoleHolder(DNB_ROLLER, 'REVI')).toBeUndefined();
+    expect(findRoleHolder({}, 'LEDE')).toBeUndefined();
   });
 });

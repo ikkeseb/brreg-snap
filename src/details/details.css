@@ -27,8 +27,9 @@
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
 }
 
-/* Accent swappable via <main data-accent="teal|sky"> in devtools.
-   Brand-mark PNG is amber; non-amber variants are exploratory. */
+/* Amber (--accent above) is the shipped default and matches the
+   brand-mark PNG. These data-accent overrides are devtools-only
+   experiments — no element sets data-accent in production. */
 main[data-accent='teal'] {
   --accent: #5eead4;
   --accent-strong: #99f6e4;
@@ -415,6 +416,27 @@ dd a:hover {
   text-decoration: line-through;
 }
 
+.role-list .role-status {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.role-list a.role-link {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.role-list a.role-link:hover {
+  color: var(--accent-strong);
+  text-decoration: underline;
+}
+
+.role-list a.role-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 table.underenheter {
   width: 100%;
   border-collapse: collapse;
@@ -455,6 +477,19 @@ table.underenheter td.orgnr-cell {
   font-size: 12.5px;
   color: var(--muted);
   letter-spacing: 0.02em;
+}
+
+.underenhet-status {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--danger-bg);
+  color: var(--danger);
+  border: 1px solid rgba(248, 113, 113, 0.28);
+  letter-spacing: 0.01em;
+  vertical-align: middle;
 }
 
 footer {
@@ -635,12 +670,65 @@ footer a:hover {
   font-variant-numeric: tabular-nums;
 }
 
+.nokkeltall-grid dd[data-sign='neg'] {
+  color: var(--danger);
+}
+
 .nokkeltall-year {
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
   margin: 0 0 8px;
+}
+
+/* Trend table: years down the rows, headline P&L lines across. */
+table.nokkeltall-trend {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  margin-bottom: 16px;
+}
+
+table.nokkeltall-trend th,
+table.nokkeltall-trend td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+table.nokkeltall-trend thead th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+table.nokkeltall-trend thead th:first-child,
+table.nokkeltall-trend tbody th {
+  text-align: left;
+}
+
+table.nokkeltall-trend tbody th {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--fg-strong);
+}
+
+table.nokkeltall-trend td {
+  font-family: var(--font-mono);
+  color: var(--fg);
+}
+
+table.nokkeltall-trend td[data-sign='neg'] {
+  color: var(--danger);
+}
+
+table.nokkeltall-trend tr:last-child th,
+table.nokkeltall-trend tr:last-child td {
+  border-bottom: 0;
 }
 
 /* --- picker (data-state='picker') ------------------------------- */

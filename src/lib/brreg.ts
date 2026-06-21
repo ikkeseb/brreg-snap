@@ -1,3 +1,4 @@
+import { cacheGet, cacheSet } from './session-cache.js';
 import type {
   Enhet,
   Regnskap,
@@ -9,7 +10,6 @@ import type {
 
 const API = 'https://data.brreg.no/enhetsregisteret/api';
 const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 // Hard cap per request so a hung connection fails fast instead of
 // leaving the UI in a spinner. AbortSignal.timeout() is supported in
 // Firefox 100+ / Chrome 103+ — well below our minimum targets. An
@@ -21,28 +21,6 @@ const FETCH_TIMEOUT_MS = 8000;
 // these to clear everything related to a single orgnr.
 const CACHE_PREFIXES = ['enhet', 'roller', 'underenheter', 'regnskap'] as const;
 
-interface CacheEntry<T> {
-  value: T;
-  expiresAt: number;
-}
-
-async function cacheGet<T>(key: string): Promise<T | undefined> {
-  const store = await browser.storage.session.get(key);
-  const entry = store[key] as CacheEntry<T> | undefined;
-  if (!entry) return undefined;
-  if (entry.expiresAt < Date.now()) {
-    // Best-effort eviction; swallow failure so a flaky remove doesn't
-    // turn into a hard read failure for the caller.
-    try {
-      await browser.storage.session.remove(key);
-    } catch {
-      /* ignore */
-    }
-    return undefined;
-  }
-  return entry.value;
-}
-
 function isEnhet(value: unknown): value is Enhet {
   return (
     typeof value === 'object' &&
@@ -51,14 +29,6 @@ function isEnhet(value: unknown): value is Enhet {
       'string' &&
     typeof (value as { navn?: unknown }).navn === 'string'
   );
-}
-
-async function cacheSet<T>(key: string, value: T): Promise<void> {
-  const entry: CacheEntry<T> = {
-    value,
-    expiresAt: Date.now() + CACHE_TTL_MS,
-  };
-  await browser.storage.session.set({ [key]: entry });
 }
 
 export async function fetchEnhet(orgnr: string): Promise<Enhet> {
