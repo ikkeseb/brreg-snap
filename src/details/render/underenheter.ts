@@ -1,6 +1,6 @@
 import { buildOrgnrCopyButton } from '../../lib/copy-orgnr.js';
 import type { Underenhet } from '../../types/brreg.js';
-import { $, emptyLine } from './dom.js';
+import { $, emptyState } from './dom.js';
 
 const underenheterSection = $('underenheter');
 const underenheterBody = $('underenheter-body');
@@ -10,7 +10,9 @@ export function renderUnderenheter(items: Underenhet[]): void {
   underenheterBody.innerHTML = '';
 
   if (items.length === 0) {
-    underenheterBody.appendChild(emptyLine('Ingen registrerte underenheter.'));
+    underenheterBody.appendChild(
+      emptyState('Ingen registrerte underenheter.'),
+    );
     return;
   }
 

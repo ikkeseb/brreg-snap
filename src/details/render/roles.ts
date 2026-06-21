@@ -5,7 +5,7 @@ import type {
   RolleGruppe,
   RollerResponse,
 } from '../../types/brreg.js';
-import { $, emptyLine, makeNavLink } from './dom.js';
+import { $, emptyState, makeNavLink } from './dom.js';
 
 const rolesBody = $('roles-body');
 
@@ -19,7 +19,7 @@ export function renderRoles(
   const groups = roller.rollegrupper ?? [];
   const nonEmpty = groups.filter((g) => (g.roller?.length ?? 0) > 0);
   if (nonEmpty.length === 0) {
-    rolesBody.appendChild(emptyLine('Ingen registrerte roller.'));
+    rolesBody.appendChild(emptyState('Ingen registrerte roller.'));
     return;
   }
   for (const group of nonEmpty) {
@@ -54,12 +54,15 @@ function renderRoleItem(role: Rolle, onNavigate: Navigate): HTMLLIElement {
       ? role.type.beskrivelse
       : role.type.kode;
 
+  // Split the row into a muted role label and a strong subject so the eye
+  // lands on the name, not the repeated "Styremedlem:" boilerplate. The
+  // subject is either a person (plain strong text) or an enhet (possibly a
+  // drill-in link). A role with neither keeps just the bare label.
   const person = personName(role.person);
   if (person) {
-    li.append(`${roleLabel}: ${person}`);
+    li.append(roleLabelEl(roleLabel), subjectEl(person));
   } else if (role.enhet) {
-    li.append(`${roleLabel}: `);
-    li.append(renderEnhetSubject(role.enhet, onNavigate));
+    li.append(roleLabelEl(roleLabel), renderEnhetSubject(role.enhet, onNavigate));
   } else {
     li.append(roleLabel);
   }
@@ -87,7 +90,24 @@ function renderEnhetSubject(
     a.className = 'role-link';
     return a;
   }
-  return document.createTextNode(text);
+  return subjectEl(text);
+}
+
+// The role label ("Styreleder: ") — muted, recedes behind the subject.
+function roleLabelEl(label: string): HTMLElement {
+  const span = document.createElement('span');
+  span.className = 'role-label';
+  span.textContent = `${label}: `;
+  return span;
+}
+
+// The subject (a person's name, or a non-linked enhet) — strong, the thing
+// the user scans for.
+function subjectEl(text: string): HTMLElement {
+  const span = document.createElement('span');
+  span.className = 'role-subject';
+  span.textContent = text;
+  return span;
 }
 
 function personName(person: Person | undefined): string | undefined {

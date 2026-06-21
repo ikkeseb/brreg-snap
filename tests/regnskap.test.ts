@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { keyFigures, sortRegnskapDesc } from '../src/lib/regnskap.js';
+import {
+  EGENKAPITALANDEL_WARN_BELOW,
+  egenkapitalandelTone,
+  isConsecutiveYear,
+  keyFigures,
+  sortRegnskapDesc,
+  yoyDelta,
+} from '../src/lib/regnskap.js';
 import type { Regnskap } from '../src/types/brreg.js';
 
 function filing(
@@ -110,5 +117,86 @@ describe('keyFigures', () => {
     const f = keyFigures(filing(undefined, { aarsresultat: 5 }));
     expect(f.year).toBe('');
     expect(f.tilDato).toBe('');
+  });
+});
+
+describe('yoyDelta', () => {
+  it('reports growth as a positive percent and an up direction', () => {
+    expect(yoyDelta(110, 100)).toEqual({ pct: 10, direction: 'up' });
+  });
+
+  it('reports a decline as a negative percent and a down direction', () => {
+    expect(yoyDelta(90, 100)).toEqual({ pct: -10, direction: 'down' });
+  });
+
+  it('reports no change as flat', () => {
+    expect(yoyDelta(100, 100)).toEqual({ pct: 0, direction: 'flat' });
+  });
+
+  it('still reports direction when the figure swings negative', () => {
+    // prior is positive so the % is honest, even though current is a loss.
+    expect(yoyDelta(-50, 100)).toEqual({ pct: -150, direction: 'down' });
+  });
+
+  it('declines a zero base (no div-by-zero)', () => {
+    expect(yoyDelta(50, 0)).toBeUndefined();
+  });
+
+  it('declines a negative base (a % off a loss would mislead)', () => {
+    expect(yoyDelta(-50, -100)).toBeUndefined();
+  });
+
+  it('declines when either figure is missing', () => {
+    expect(yoyDelta(undefined, 100)).toBeUndefined();
+    expect(yoyDelta(100, undefined)).toBeUndefined();
+  });
+
+  it('declines non-finite inputs', () => {
+    expect(yoyDelta(Number.NaN, 100)).toBeUndefined();
+    expect(yoyDelta(Number.POSITIVE_INFINITY, 100)).toBeUndefined();
+  });
+});
+
+describe('egenkapitalandelTone', () => {
+  it('flags thin-but-positive equity as warn', () => {
+    expect(egenkapitalandelTone(10)).toBe('warn');
+    expect(egenkapitalandelTone(0)).toBe('warn');
+    expect(egenkapitalandelTone(EGENKAPITALANDEL_WARN_BELOW - 0.1)).toBe('warn');
+  });
+
+  it('leaves healthy equity untoned (no full green/amber rubric)', () => {
+    expect(egenkapitalandelTone(EGENKAPITALANDEL_WARN_BELOW)).toBeUndefined();
+    expect(egenkapitalandelTone(40)).toBeUndefined();
+  });
+
+  it('leaves negative equity to the red sign path', () => {
+    expect(egenkapitalandelTone(-5)).toBeUndefined();
+  });
+
+  it('declines missing or non-finite input', () => {
+    expect(egenkapitalandelTone(undefined)).toBeUndefined();
+    expect(egenkapitalandelTone(Number.NaN)).toBeUndefined();
+  });
+});
+
+describe('isConsecutiveYear', () => {
+  const yr = (y: string | undefined) =>
+    keyFigures(filing(y ? `${y}-12-31` : undefined));
+
+  it('is true when the prior filing is exactly one year earlier', () => {
+    expect(isConsecutiveYear(yr('2024'), yr('2023'))).toBe(true);
+  });
+
+  it('is false across a multi-year gap', () => {
+    expect(isConsecutiveYear(yr('2024'), yr('2022'))).toBe(false);
+  });
+
+  it('is false for two filings ending in the same year', () => {
+    expect(isConsecutiveYear(yr('2024'), yr('2024'))).toBe(false);
+  });
+
+  it('is false when a year is missing (no tilDato)', () => {
+    expect(isConsecutiveYear(yr('2024'), yr(undefined))).toBe(false);
+    expect(isConsecutiveYear(yr(undefined), yr('2023'))).toBe(false);
   });
 });

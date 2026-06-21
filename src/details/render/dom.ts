@@ -12,6 +12,10 @@ export interface AddRowOptions {
   // data-sign='neg' so CSS can color losses / negative equity red.
   // Positives are left unstyled to avoid a noisy all-green column.
   sign?: number;
+  // Explicit caution tone (data-sign='warn', amber). Applied only when the
+  // sign path didn't already mark the cell red, so red always wins over
+  // amber (e.g. negative equity stays red, thin-but-positive goes amber).
+  tone?: 'warn';
 }
 
 export function addRow(
@@ -27,6 +31,8 @@ export function addRow(
   dd.textContent = value;
   if (typeof opts.sign === 'number' && opts.sign < 0) {
     dd.dataset.sign = 'neg';
+  } else if (opts.tone === 'warn') {
+    dd.dataset.sign = 'warn';
   }
   dl.append(dt, dd);
 }
@@ -57,6 +63,54 @@ export function emptyLine(text: string): HTMLElement {
   p.className = 'empty';
   p.textContent = text;
   return p;
+}
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function svgEl(name: string, attrs: Record<string, string>): SVGElement {
+  const el = document.createElementNS(SVG_NS, name);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+// A "nothing registered here" placeholder: a quiet inline-SVG inbox glyph
+// above the message. Built with createElementNS (no innerHTML / no remote
+// asset) so it stays within the strict default-src 'self' CSP. The icon is
+// aria-hidden; screen readers get the text only. Use for genuinely-empty
+// lists (no roles / no underenheter / no regnskap), not for explanatory
+// notes — those keep the plain emptyLine.
+export function emptyState(text: string): HTMLElement {
+  const wrap = document.createElement('div');
+  wrap.className = 'empty-state';
+
+  const svg = svgEl('svg', {
+    class: 'empty-icon',
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '1.5',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'aria-hidden': 'true',
+    focusable: 'false',
+  });
+  svg.appendChild(
+    svgEl('path', {
+      d: 'M22 12h-6l-2 3h-4l-2-3H2',
+    }),
+  );
+  svg.appendChild(
+    svgEl('path', {
+      d: 'M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z',
+    }),
+  );
+  wrap.appendChild(svg);
+
+  const p = document.createElement('p');
+  p.className = 'empty';
+  p.textContent = text;
+  wrap.appendChild(p);
+  return wrap;
 }
 
 // Same-document orgnr link for in-panel drill-in (parent enhet, a

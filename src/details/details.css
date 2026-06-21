@@ -424,6 +424,22 @@ dd a:hover {
   text-decoration: line-through;
 }
 
+/* Split the row: muted label, strong subject — the name is what the eye
+   scans for, not the repeated role boilerplate. */
+.role-list .role-label {
+  color: var(--muted);
+}
+
+.role-list .role-subject {
+  color: var(--fg-strong);
+}
+
+/* A resigned role dims as a whole, so pull its otherwise-strong subject
+   back to muted to match the strike-through. */
+.role-list .fratraadt .role-subject {
+  color: var(--muted);
+}
+
 .role-list .role-status {
   color: var(--muted);
   font-style: italic;
@@ -527,6 +543,29 @@ footer a:hover {
   color: var(--muted);
   font-style: italic;
   font-size: 13px;
+}
+
+/* "Nothing registered here" placeholder: a quiet inbox glyph centered
+   above the message. The icon is deliberately faint so it signals absence
+   without competing with real content. */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 0 14px;
+  text-align: center;
+}
+
+.empty-state .empty {
+  margin: 0;
+}
+
+.empty-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  color: color-mix(in srgb, var(--muted) 55%, transparent);
 }
 
 /* --- skeleton (data-state='loading') ---------------------------- */
@@ -687,6 +726,12 @@ footer a:hover {
   color: var(--danger);
 }
 
+/* Thin-but-positive equity (egenkapitalandel below the warn band) — amber
+   caution. Negative equity is already red via [data-sign='neg']. */
+.nokkeltall-grid dd[data-sign='warn'] {
+  color: var(--warn);
+}
+
 .nokkeltall-year {
   font-size: 11px;
   text-transform: uppercase;
@@ -708,6 +753,10 @@ table.nokkeltall-trend td {
   padding: 6px 8px;
   border-bottom: 1px solid var(--border);
   text-align: right;
+  /* Top-align so the latest row's figures and year label line up at the
+     top, with the YoY delta hanging beneath rather than centering the
+     shorter cells against the taller two-line one. */
+  vertical-align: top;
   font-variant-numeric: tabular-nums;
   /* Keep "63,4 mrd" on one line — the compact formatter drops "kr" so
      the cells fit a narrow side panel without wrapping mid-figure. */
@@ -750,6 +799,21 @@ table.nokkeltall-trend td {
 
 table.nokkeltall-trend td[data-sign='neg'] {
   color: var(--danger);
+}
+
+/* Year-over-year delta under the latest figure ("▲ 12 %"). Block so it
+   sits on its own line beneath the number; nowrap keeps the arrow glued
+   to the percent. Muted by design — the arrow carries the direction, so a
+   coloured delta would clash with the red loss-flagging. Declared after
+   the neg rule (equal specificity) so a loss row's delta stays muted
+   rather than inheriting red. */
+table.nokkeltall-trend td .yoy {
+  display: block;
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--muted);
 }
 
 table.nokkeltall-trend tr:last-child th,

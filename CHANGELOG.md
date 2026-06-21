@@ -34,6 +34,14 @@ real version bump (not a silent patch).
 - Keyboard: manual-search and recents rows are now operable with Space
   as well as Enter and expose a button role; Home/End jump to the
   first/last side-panel tab.
+- The Nøkkeltall trend table now shows a year-over-year change (▲/▼ with
+  a percent) on the latest year's figures vs the prior year, so the
+  "is it growing?" signal is readable without doing the subtraction. The
+  delta is muted (the arrow carries direction) and is omitted when the
+  prior base is zero or negative (where a percent would mislead).
+- Empty tabs (no roles / no underenheter / no regnskap) now show a quiet
+  inline placeholder icon above the message, built CSP-safely with no
+  external asset.
 
 ### Changed
 
@@ -45,6 +53,15 @@ real version bump (not a silent patch).
   block) and no longer wrap mid-number; and registry-membership flags
   (MVA / Foretaks- / Stiftelses- / Frivillighetsregistret) render as
   quiet outlines so the status pill (Aktiv / Konkurs / …) reads first.
+- Egenkapitalandel that is thin but non-negative (below 15 %) is now
+  flagged amber as a caution; negative equity stays red. This is a
+  two-band caution, not a full green/amber/red rubric.
+- Role rows now split the muted role label from the strong subject name
+  ("Styreleder: **Kari Nordmann**") so the eye lands on the name rather
+  than the repeated role boilerplate.
+- The redundant card heading on single-card tabs (Roller / Nøkkeltall /
+  Underenheter) is now hidden visually — the tab already labels the
+  panel — while staying in the accessibility tree for screen readers.
 
 ### Internal
 

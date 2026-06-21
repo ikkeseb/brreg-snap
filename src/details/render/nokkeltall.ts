@@ -1,8 +1,14 @@
 import { formatNok, formatNokCompact, formatPercent } from '../../lib/format.js';
-import { keyFigures, sortRegnskapDesc } from '../../lib/regnskap.js';
-import type { KeyFigures } from '../../lib/regnskap.js';
+import {
+  egenkapitalandelTone,
+  isConsecutiveYear,
+  keyFigures,
+  sortRegnskapDesc,
+  yoyDelta,
+} from '../../lib/regnskap.js';
+import type { KeyFigures, YoyDelta, YoyDirection } from '../../lib/regnskap.js';
 import type { RegnskapResponse } from '../../types/brreg.js';
-import { $, addRow, emptyLine } from './dom.js';
+import { $, addRow, emptyLine, emptyState } from './dom.js';
 
 const nokkeltallBody = $('nokkeltall-body');
 
@@ -26,7 +32,7 @@ export function renderNokkeltall(response: RegnskapResponse): void {
 
   const sorted = sortRegnskapDesc(response.items);
   if (sorted.length === 0) {
-    nokkeltallBody.appendChild(emptyLine('Ingen regnskap registrert.'));
+    nokkeltallBody.appendChild(emptyState('Ingen regnskap registrert.'));
     return;
   }
 
@@ -65,6 +71,7 @@ export function renderNokkeltall(response: RegnskapResponse): void {
     addRow(dl, 'Gjeld', formatNok(latest.gjeld));
     addRow(dl, 'Egenkapitalandel', formatPercent(latest.egenkapitalandel), {
       sign: latest.egenkapitalandel,
+      tone: egenkapitalandelTone(latest.egenkapitalandel),
     });
 
     if (dl.children.length === 0) {
@@ -94,6 +101,7 @@ function renderBalance(latest: KeyFigures): HTMLElement {
   addRow(dl, 'Gjeld', formatNok(latest.gjeld));
   addRow(dl, 'Egenkapitalandel', formatPercent(latest.egenkapitalandel), {
     sign: latest.egenkapitalandel,
+    tone: egenkapitalandelTone(latest.egenkapitalandel),
   });
   wrap.appendChild(dl);
   return wrap;
@@ -123,7 +131,8 @@ function renderTrendTable(figures: KeyFigures[]): HTMLElement {
   table.appendChild(thead);
 
   const tbody = document.createElement('tbody');
-  for (const f of figures) {
+  figures.forEach((f, idx) => {
+    const prior = figures[idx + 1];
     const tr = document.createElement('tr');
     const yearCell = document.createElement('th');
     yearCell.scope = 'row';
@@ -132,16 +141,71 @@ function renderTrendTable(figures: KeyFigures[]): HTMLElement {
     for (const col of TREND_COLS) {
       const value = col.pick(f);
       const td = document.createElement('td');
-      td.textContent = formatNokCompact(value) ?? '—';
+      const figure = document.createElement('span');
+      figure.className = 'trend-figure';
+      figure.textContent = formatNokCompact(value) ?? '—';
+      td.appendChild(figure);
       if (col.signed && typeof value === 'number' && value < 0) {
         td.dataset.sign = 'neg';
+      }
+      // Latest row only: a small YoY delta so the user reads "is it
+      // growing?" without doing the subtraction. Shown only when the prior
+      // filing is the immediately preceding year (else it'd mislabel a
+      // multi-year jump); yoyDelta further declines a zero/negative base.
+      if (idx === 0 && prior && isConsecutiveYear(f, prior)) {
+        const delta = yoyDelta(value, col.pick(prior));
+        if (delta) td.appendChild(renderYoy(delta));
       }
       tr.appendChild(td);
     }
     tbody.appendChild(tr);
-  }
+  });
   table.appendChild(tbody);
   return table;
+}
+
+const YOY_ARROW: Record<YoyDirection, string> = {
+  up: '▲', // ▲
+  down: '▼', // ▼
+  flat: '→', // →
+};
+
+// Compact "▲ 12 %" delta shown under the latest figure. Kept muted (not
+// green/red) on purpose: the arrow carries the direction, and a coloured
+// delta would fight the red loss-flagging already in the table. The % uses
+// the shared formatPercent so it matches the balance block's minus glyph.
+// The triangle is decorative (aria-hidden); the direction is worded for
+// screen readers, and a huge small-base swing is clamped to ">999 %" so a
+// nowrap cell can't overflow the panel.
+const YOY_LABEL: Record<YoyDirection, string> = {
+  up: 'opp',
+  down: 'ned',
+  flat: 'uendret',
+};
+
+const YOY_MAX_PCT = 999;
+
+function renderYoy(delta: YoyDelta): HTMLElement {
+  const span = document.createElement('span');
+  span.className = 'yoy';
+  const absPct = Math.abs(delta.pct);
+  // A change that rounds to 0 % reads as flat, so don't pair "0 %" with an
+  // up/down arrow.
+  const direction: YoyDirection =
+    Math.round(absPct) === 0 ? 'flat' : delta.direction;
+  span.dataset.dir = direction;
+  const magnitude =
+    absPct > YOY_MAX_PCT ? `>${YOY_MAX_PCT}\u00a0%` : formatPercent(absPct) ?? '';
+
+  // The triangle is decorative; the direction is worded for screen readers.
+  const sr = document.createElement('span');
+  sr.className = 'visually-hidden';
+  sr.textContent = `${YOY_LABEL[direction]} `;
+  const arrow = document.createElement('span');
+  arrow.setAttribute('aria-hidden', 'true');
+  arrow.textContent = YOY_ARROW[direction];
+  span.append(sr, arrow, `\u00a0${magnitude}`);
+  return span;
 }
 
 function th(text: string): HTMLTableCellElement {
