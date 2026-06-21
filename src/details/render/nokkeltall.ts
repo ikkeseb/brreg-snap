@@ -41,7 +41,11 @@ export function renderNokkeltall(response: RegnskapResponse): void {
 
   if (figures.length >= 2) {
     // Multi-year company: lead with a compact P&L trend, then a
-    // latest-year balance/ratio snapshot below it.
+    // latest-year balance/ratio snapshot below it. NOTE: brreg's open
+    // regnskap endpoint currently returns only the latest year per
+    // orgnr, so this branch is effectively unreachable in production —
+    // see docs/notes/brreg-api.md § regnskap-single-year-only. Kept
+    // as-is so it lights up if brreg restores multi-year responses.
     nokkeltallBody.appendChild(renderTrendTable(figures));
     nokkeltallBody.appendChild(renderBalance(latest));
   } else {

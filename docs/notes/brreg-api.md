@@ -8,10 +8,33 @@ Source: `src/lib/brreg.ts`.
 Enhetsregisteret lives at `data.brreg.no/enhetsregisteret/api`, but
 Regnskapsregisteret is on
 `data.brreg.no/regnskapsregisteret/regnskap/<orgnr>` (no `/api/`,
-different sub-host). Response is an array (one entry per filed
-year, order is *not* guaranteed — sort by `regnskapsperiode.tilDato`
-before picking "latest"). 404 is normal: many small AS-er don't file
+different sub-host). Response is an array; the code defensively sorts by
+`regnskapsperiode.tilDato` before picking "latest" and supports up to 3
+rows for the trend table. 404 is normal: many small AS-er don't file
 separately. Cache the empty array so refresh doesn't re-hit.
+
+<!-- SECTION: regnskap-single-year-only -->
+## The open endpoint returns ONLY the latest year (multi-year trend is dormant)
+
+Empirically (verified 2026-06 across ~294 live companies plus the
+`år` / `regnskapstype` / `size` params and the published OpenAPI spec)
+the public endpoint returns exactly **one** filing per orgnr — the
+latest accounting year, `regnskapstype: SELSKAP`. It never returns a
+second year: `?år=2023` still returns the 2024 filing (the param does
+not select history), and there is no structured-JSON path to prior
+years (only the per-year PDF `kopi/{aar}` document endpoint).
+
+Consequence: `renderNokkeltall`'s `figures.length >= 2` branch — the
+multi-year trend table and its year-over-year deltas — is effectively
+**unreachable in production**; every company falls through to the
+single-year detail view (which still renders the new Gjeld /
+Egenkapitalandel rows and red loss/negative-equity flagging). The
+trend/YoY code is correct — unit tests and the preview harness exercise
+it with synthetic multi-year data — but dormant against the live API.
+This is NOT a bug to "fix" by probing harder; the data is simply not
+exposed. Whether to keep the dormant code as future-proofing (the note
+above long assumed brreg returns one entry *per year*) or remove it is
+an open decision.
 
 <!-- SECTION: regnskap-500-unsupported-plan -->
 ## 500 from regnskap = unsupported oppstillingsplan, not a bug

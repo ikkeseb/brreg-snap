@@ -8,10 +8,13 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ### Added
 
-- Side-panel Nøkkeltall now shows a multi-year (up to 3) regnskap trend
-  table built from the already-fetched filings (no extra request), plus
-  derived **Gjeld** and **Egenkapitalandel**. Losses and negative
-  equity are flagged in red.
+- Side-panel Nøkkeltall now derives **Gjeld** and **Egenkapitalandel**
+  from the latest filing, with losses and negative equity flagged in
+  red. (A multi-year trend table with year-over-year deltas is also
+  built when brreg returns more than one filed year, but the open
+  Regnskapsregisteret API currently serves only the latest year, so the
+  single-year detail view is what renders in practice — see
+  `docs/notes/brreg-api.md`.)
 - **Styreleder**, **Revisor** and **Regnskapsfører** are surfaced in the
   side-panel overview (and Styreleder in the popup) from the roller
   response already fetched for daglig leder.
@@ -31,11 +34,6 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 - Keyboard: manual-search and recents rows are now operable with Space
   as well as Enter and expose a button role; Home/End jump to the
   first/last side-panel tab.
-- The Nøkkeltall trend table now shows a year-over-year change (▲/▼ with
-  a percent) on the latest year's figures vs the prior year, so the
-  "is it growing?" signal is readable without doing the subtraction. The
-  delta is muted (the arrow carries direction) and is omitted when the
-  prior base is zero or negative (where a percent would mislead).
 - Empty tabs (no roles / no underenheter / no regnskap) now show a quiet
   inline placeholder icon above the message, built CSP-safely with no
   external asset.
