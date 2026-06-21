@@ -25,6 +25,20 @@ release-prepped as **`v1.2.0`** but **not tagged**.
   API — unit tests (synthetic fixtures) and the hand-authored
   `/tmp/brreg-preview` harness both passed while the live data shape
   (one year, not many) silently broke the feature.
+- **Drill-in hardened (2026-06-22, commit `024beec`):** an adversarial
+  review of the v1.2.0 diff caught three regressions the in-panel
+  drill-in introduced (before it, related clicks forced a full reload,
+  so none were reachable): a stale `renderParent` fetch clobbering the
+  wrong Morselskap (it is the one render module that self-fetches and so
+  needs its own run-id guard), lost focus + no SR announcement on
+  drill-in/Back, and tab/`?tab=` desync on Back. All fixed.
+- **Backlog (pre-v1.2.0, NOT a tag blocker):** a slettet (dissolved)
+  entity is mislabelled with a green "Aktiv" flag — `renderHeader`
+  (`header.ts`) and `renderEnhet` (`popup.ts`) compute status from
+  konkurs/avvikling only and ignore `slettedato`. Live-verified on
+  orgnr `933004708` (slettedato 2024-05-31, 200 OK). Shipped this way
+  since v1.1.0; fix = treat `slettedato` as a terminal negative status
+  in both render paths.
 
 Older chrome-port plan + decision log (D1–D15): `docs/chrome-port.md`.
 
