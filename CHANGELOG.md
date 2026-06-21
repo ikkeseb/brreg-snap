@@ -4,7 +4,7 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
-## [1.2.0] — 2026-06-21
+## [1.2.0] — 2026-06-22
 
 ### Added
 

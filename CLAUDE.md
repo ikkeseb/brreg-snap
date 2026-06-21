@@ -18,8 +18,9 @@ release-prepped as **`v1.2.0`** but **not tagged**.
   brreg's open regnskap API returns only the latest year (verified
   ~294 companies), so `renderNokkeltall`'s `figures.length >= 2` branch
   never fires in production. The code is correct but unreachable — see
-  `docs/notes/brreg-api.md` § `regnskap-single-year-only`. Open
-  decision: keep as future-proofing vs remove; resolve before tagging.
+  `docs/notes/brreg-api.md` § `regnskap-single-year-only`. **Decided
+  (2026-06-22): keep** as future-proofing — correct and harmless, and
+  lights up automatically if brreg restores multi-year filings.
 - Lesson: data-dependent rendering must be checked against the **live**
   API — unit tests (synthetic fixtures) and the hand-authored
   `/tmp/brreg-preview` harness both passed while the live data shape
