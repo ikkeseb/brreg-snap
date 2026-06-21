@@ -4,10 +4,7 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
-## [Unreleased]
-
-These are visible behaviour changes on both engines, so they ship as a
-real version bump (not a silent patch).
+## [1.2.0] — 2026-06-21
 
 ### Added
 
