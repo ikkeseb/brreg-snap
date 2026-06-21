@@ -1,4 +1,4 @@
-import { formatNok, formatPercent } from '../../lib/format.js';
+import { formatNok, formatNokCompact, formatPercent } from '../../lib/format.js';
 import { keyFigures, sortRegnskapDesc } from '../../lib/regnskap.js';
 import type { KeyFigures } from '../../lib/regnskap.js';
 import type { RegnskapResponse } from '../../types/brreg.js';
@@ -132,7 +132,7 @@ function renderTrendTable(figures: KeyFigures[]): HTMLElement {
     for (const col of TREND_COLS) {
       const value = col.pick(f);
       const td = document.createElement('td');
-      td.textContent = formatNok(value) ?? '—';
+      td.textContent = formatNokCompact(value) ?? '—';
       if (col.signed && typeof value === 'number' && value < 0) {
         td.dataset.sign = 'neg';
       }

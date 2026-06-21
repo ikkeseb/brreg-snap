@@ -335,6 +335,13 @@ main[data-state='error'] #status {
   border-color: rgba(248, 113, 113, 0.28);
 }
 
+/* Registry-membership facts recede behind the status pill. */
+#result .flag[data-kind='registry'] {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border-strong);
+}
+
 /* --- picker (data-state='picker') ------------------------------- */
 
 main[data-state='picker'] #status,

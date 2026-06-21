@@ -331,6 +331,14 @@ main[data-state='error'] #status {
   border-color: rgba(248, 113, 113, 0.28);
 }
 
+/* Registry-membership facts recede behind the status pill: quiet
+   outline, no fill, muted text. */
+.flag[data-kind='registry'] {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border-strong);
+}
+
 .card {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -603,16 +611,21 @@ footer a:hover {
   background: transparent;
   color: var(--muted);
   border: none;
-  padding: 10px 14px;
+  /* Tight enough that all four tabs fit a ~360px side panel without the
+     last one ("Enheter") clipping; the overflow-x scroll stays as a
+     fallback for the very narrowest panels. */
+  flex: 1 1 auto;
+  padding: 10px 6px;
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   cursor: pointer;
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
   font-family: inherit;
   white-space: nowrap;
+  text-align: center;
   transition:
     color 120ms ease,
     border-color 120ms ease;
@@ -696,6 +709,19 @@ table.nokkeltall-trend td {
   border-bottom: 1px solid var(--border);
   text-align: right;
   font-variant-numeric: tabular-nums;
+  /* Keep "63,4 mrd" on one line — the compact formatter drops "kr" so
+     the cells fit a narrow side panel without wrapping mid-figure. */
+  white-space: nowrap;
+}
+
+table.nokkeltall-trend th:first-child,
+table.nokkeltall-trend td:first-child {
+  padding-left: 0;
+}
+
+table.nokkeltall-trend th:last-child,
+table.nokkeltall-trend td:last-child {
+  padding-right: 0;
 }
 
 table.nokkeltall-trend thead th {

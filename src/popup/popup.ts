@@ -356,13 +356,14 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   if (enhet.underAvvikling) flags.appendChild(makeFlag('Under avvikling', 'warn'));
   if (enhet.underTvangsavviklingEllerTvangsopplosning)
     flags.appendChild(makeFlag('Tvangsavvikling', 'danger'));
-  if (enhet.registrertIMvaregisteret) flags.appendChild(makeFlag('MVA-registrert'));
+  if (enhet.registrertIMvaregisteret)
+    flags.appendChild(makeFlag('MVA-registrert', undefined, 'registry'));
   if (enhet.registrertIForetaksregisteret)
-    flags.appendChild(makeFlag('Foretaksregistret'));
+    flags.appendChild(makeFlag('Foretaksregistret', undefined, 'registry'));
   if (enhet.registrertIStiftelsesregisteret)
-    flags.appendChild(makeFlag('Stiftelsesregistret'));
+    flags.appendChild(makeFlag('Stiftelsesregistret', undefined, 'registry'));
   if (enhet.registrertIFrivillighetsregisteret)
-    flags.appendChild(makeFlag('Frivillighetsregistret'));
+    flags.appendChild(makeFlag('Frivillighetsregistret', undefined, 'registry'));
   if (flags.childNodes.length > 0) resultEl.appendChild(flags);
 
   updateRejectButtonVisibility();

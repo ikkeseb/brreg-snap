@@ -39,6 +39,12 @@ real version bump (not a silent patch).
 
 - The UI accent is now the amber brand colour across both surfaces; the
   exploratory teal `data-accent` override is no longer shipped.
+- Visual polish from a side-panel-width design review: the side-panel
+  tablist now fits all four tabs without clipping "Enheter"; the
+  Nøkkeltall trend figures drop the repeated " kr" (kept in the balance
+  block) and no longer wrap mid-number; and registry-membership flags
+  (MVA / Foretaks- / Stiftelses- / Frivillighetsregistret) render as
+  quiet outlines so the status pill (Aktiv / Konkurs / …) reads first.
 
 ### Internal
 

@@ -5,6 +5,7 @@ import {
   formatAddress,
   formatNaering,
   formatNok,
+  formatNokCompact,
   formatPercent,
   formatRelativeTime,
 } from '../src/lib/format.js';
@@ -275,6 +276,23 @@ describe('formatNaering', () => {
 
   it('returns undefined for undefined input', () => {
     expect(formatNaering(undefined)).toBeUndefined();
+  });
+});
+
+describe('formatNokCompact', () => {
+  it('drops the " kr" suffix but keeps the magnitude word', () => {
+    expect(formatNokCompact(37_877_000_000)).toBe('37,9 mrd');
+    expect(formatNokCompact(5_200_000)).toBe('5,2 mill');
+    expect(formatNokCompact(850_000)).toBe('850 tusen');
+  });
+
+  it('keeps the sign on losses', () => {
+    expect(formatNokCompact(-1_200_000_000)).toBe('-1,2 mrd');
+  });
+
+  it('returns undefined for nullish / NaN (passthrough from formatNok)', () => {
+    expect(formatNokCompact(undefined)).toBeUndefined();
+    expect(formatNokCompact(Number.NaN)).toBeUndefined();
   });
 });
 

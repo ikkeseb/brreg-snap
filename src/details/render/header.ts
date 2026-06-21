@@ -22,11 +22,11 @@ export function renderHeader(enhet: Enhet): void {
   if (enhet.underTvangsavviklingEllerTvangsopplosning)
     flagsEl.appendChild(makeFlag('Tvangsavvikling', 'danger'));
   if (enhet.registrertIMvaregisteret)
-    flagsEl.appendChild(makeFlag('MVA-registrert'));
+    flagsEl.appendChild(makeFlag('MVA-registrert', undefined, 'registry'));
   if (enhet.registrertIForetaksregisteret)
-    flagsEl.appendChild(makeFlag('Foretaksregistret'));
+    flagsEl.appendChild(makeFlag('Foretaksregistret', undefined, 'registry'));
   if (enhet.registrertIStiftelsesregisteret)
-    flagsEl.appendChild(makeFlag('Stiftelsesregistret'));
+    flagsEl.appendChild(makeFlag('Stiftelsesregistret', undefined, 'registry'));
   if (enhet.registrertIFrivillighetsregisteret)
-    flagsEl.appendChild(makeFlag('Frivillighetsregistret'));
+    flagsEl.appendChild(makeFlag('Frivillighetsregistret', undefined, 'registry'));
 }

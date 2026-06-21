@@ -54,6 +54,16 @@ export function formatNok(value: number | undefined): string | undefined {
   return `${sign}${fmt(abs, 0)} kr`;
 }
 
+// Same magnitude formatting as formatNok but without the " kr" suffix.
+// Used in the dense multi-year trend table, where every cell is monetary
+// (and a "kr"-labelled balance block sits right below it): repeating
+// "kr" 9× both adds noise and makes "63,4 mrd kr" wrap to two lines in a
+// narrow side panel. The "mrd"/"mill"/"tusen" magnitude word stays, so
+// the figures remain unambiguous.
+export function formatNokCompact(value: number | undefined): string | undefined {
+  return formatNok(value)?.replace(/ kr$/, '');
+}
+
 // "akkurat nå" / "for 3 min siden" / "i dag kl 14:32" / "i går kl 14:32".
 // For anything older than yesterday: full date + time. Used by the
 // footer's "Oppdatert: ..." label.
