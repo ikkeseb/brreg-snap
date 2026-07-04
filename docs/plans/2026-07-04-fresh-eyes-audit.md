@@ -50,10 +50,15 @@ Work the phases top-down. Each phase is independently shippable.
   `DetailedResult.complete` → `TabContext.degraded`), «← Tilbake»
   ghost-link on drilled-in entities, empty Kontakt card hidden,
   registry pill spelling (-registeret). 340 tests.
-  **Remaining before v1.3.0:** real-extension smoke (`pnpm dev` +
-  Chrome unpacked — harness can't cover permissions/sidebar APIs;
-  Seb's manual step), then CHANGELOG + release prep per the standing
-  instruction below.
+- **v1.3.0 SHIPPED + SUBMITTED (2026-07-05):** Seb smoke-tested FF +
+  Chrome; `v1.3.0` tagged, release workflow green, GitHub Release has
+  all three zips. Submission kit generated at
+  `docs/submission-kit/1.3.0/`. **Both stores submitted 2026-07-05**
+  (AMO with source zip; CWS privacy tab unchanged) — awaiting review;
+  `amo-submission-1.3.0` tagged. Listing falsehood fixed on the way:
+  stores claimed «signaturrett», which the open API doesn't expose
+  (`docs/notes/brreg-api.md` § no-signatur) — removed from both
+  listings and the canonical docs.
 - **Phase 5 item 4: DECIDED** — the durable support email is
   `sebastian@nuez.no` (updated in both submission docs).
 - **Standing instruction for the release session:** when prepping the

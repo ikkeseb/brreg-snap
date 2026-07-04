@@ -372,6 +372,11 @@ _(empty — populate as found)_
 summary + description; screenshots at `docs/screenshots/cws-ctx-01..03.png`
 (1280×800). Full submission steps in `docs/cws-submission.md`.
 
+Submission log since then: `1.1.0` (live per CLAUDE.md), **`1.3.0`
+submitted 2026-07-05** (per `docs/submission-kit/1.3.0/cws.md`;
+privacy tab unchanged, zero data collection; awaiting review — 1.2.0
+was never store-submitted, its changes shipped in 1.3.0).
+
 **Goal:** Chrome MVP published to CWS.
 
 - [ ] Confirm Firefox 1.0.0 has been live and stable on AMO for at
