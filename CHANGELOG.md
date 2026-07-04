@@ -4,6 +4,67 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
+## [1.3.0] — 2026-07-05
+
+Frontend overhaul release — the first store release since 1.1.0
+(1.2.0 was tagged but deliberately not submitted; its changes ship
+here).
+
+### Added
+
+- **Verdict strip**: a row of status / age / employee-count / filing
+  cells under the company name on both surfaces, answering "can I
+  trust this company?" at a glance. Age under 1 year and a missing
+  filing for an accounting-obliged form (AS/ASA/SE, past the 2-year
+  grace) are flagged amber; konkurs/slettet red. A signal whose fetch
+  failed is omitted entirely — never rendered as "not filed". The
+  popup now also fetches regnskap (same 24h cache) to feed it.
+- **Light theme**: both surfaces follow the OS via
+  `prefers-color-scheme` (shared semantic token layer; amber accent
+  darkened in light mode for contrast).
+- The sidebar empty state now shows the same "Nylig sett" recents list
+  the popup has.
+- A "← Tilbake" link on drilled-in entities (parent / role-holder) —
+  the sidebar has no browser chrome, so Back was effectively
+  unreachable without it.
+- Picker candidates show their keyboard-shortcut digits (1–4, 0) as
+  visible badges.
+
+### Changed
+
+- All load errors now map to plain-Norwegian messages (timeout,
+  offline, unknown orgnr, rate-limit, brreg 5xx) instead of raw API
+  errors, in both surfaces.
+- When the hostname lookup itself fails (offline, brreg down), the
+  empty state now says the check could not be performed instead of
+  claiming "Ingen bedrift identifisert" — a failed search is not a
+  confirmed no-match. Same principle in the Nøkkeltall tab: a failed
+  regnskap fetch says so instead of "Ingen regnskap registrert".
+- Dates render as "12. sep. 2002" and counts with Norwegian
+  thousand-separators across both surfaces.
+- System font stack replaces the Inter declaration (Inter was never
+  bundled and the CSP blocks remote fonts — it rendered for nobody).
+- Manual-search and recents rows are real buttons with aria-live
+  result announcements; copy-to-clipboard failures now give visible
+  feedback.
+
+### Fixed
+
+- Registry pill spelling: "Foretaksregistret" → "Foretaksregisteret"
+  (likewise Stiftelses- and Frivillighetsregisteret).
+- Deleted entities no longer render an empty "Kontakt" card.
+
+### Internal
+
+- One shared CSS token layer (`src/styles/shared.css`) replaces the
+  copy-pasted component styles; surface CSS keeps layout/scale only.
+- Shared flag derivation (`primaryStatusFlag`, `deriveRegistryFlags`)
+  ends the popup/sidebar duplication of status-pill logic.
+- A browser preview harness (`scripts/preview/`) runs the real built
+  bundles against the live brreg API in a plain tab for visual work
+  and screenshot automation.
+- 232 → 340 tests.
+
 ## [1.2.0] — 2026-07-04
 
 ### Added

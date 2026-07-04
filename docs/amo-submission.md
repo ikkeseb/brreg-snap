@@ -45,9 +45,11 @@ into the AMO listing's privacy field.)
 
 ### Summary (kort beskrivelse, ≤ 250 tegn)
 
-> Slå opp norske bedrifter i Brønnøysundregistrene med ett klikk. Henter daglig leder, styremedlemmer, signaturrett, nøkkeltall og regnskap direkte fra data.brreg.no. Ingen content scripts, ingen tredjeparts-trackere.
+> Slå opp norske bedrifter i Brønnøysundregistrene med ett klikk. Henter status, daglig leder, styret, nøkkeltall og regnskap direkte fra data.brreg.no. Ingen content scripts, ingen tredjeparts-trackere.
 
-(238 tegn — under grensen.)
+(202 tegn — under grensen. NB: tidligere versjoner nevnte
+«signaturrett» — den finnes ikke i det åpne API-et og vises ikke i
+produktet; fjernet fra all listing-tekst 2026-07-05.)
 
 ### Description (lang beskrivelse, markdown OK)
 
@@ -58,7 +60,7 @@ into the AMO listing's privacy field.)
 > - Firmanavn, organisasjonsnummer og status
 > - Forretningsadresse og postadresse
 > - Næringskode og antall ansatte
-> - Daglig leder, styremedlemmer og signaturrett
+> - Daglig leder, styret, revisor og regnskapsfører
 > - Siste innleverte regnskap med nøkkeltall
 > - Eventuelle underenheter og morselskap
 >
@@ -93,9 +95,9 @@ into the AMO listing's privacy field.)
 
 ### Summary (≤ 250 chars)
 
-> Look up Norwegian companies in the public Brønnøysund Register with one click. Shows CEO, board members, signatory rights, key figures, and accounts straight from data.brreg.no. No content scripts, no third-party trackers.
+> Look up Norwegian companies in the public Brønnøysund Register with one click. Shows status, CEO, board, key figures, and accounts straight from data.brreg.no. No content scripts, no third-party trackers.
 
-(241 chars — under the limit.)
+(206 chars — under the limit.)
 
 ### Description
 
@@ -106,7 +108,7 @@ into the AMO listing's privacy field.)
 > - Company name, organisation number, and status flags
 > - Business and postal address
 > - Industry code and employee count
-> - CEO, board members, and signatory rights
+> - CEO, board members, auditor, and accountant
 > - Latest filed accounts with key figures
 > - Subsidiaries and parent entity, where applicable
 >
