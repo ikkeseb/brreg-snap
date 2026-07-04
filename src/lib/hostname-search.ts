@@ -49,6 +49,10 @@ export interface DetailedResult {
   // directly. A cached negative choice ("Ingen av disse") becomes
   // band='none' with `choice` undefined.
   choice?: string;
+  // False when one or more constituent brreg queries failed — the
+  // band is then a best-effort guess, and a 'none' must not be
+  // presented to the user as a confirmed "no match".
+  complete: boolean;
 }
 
 // Public helpers for the sidebar to read/write the user's picker
@@ -257,29 +261,29 @@ function bandCacheKey(host: string, rejected: string[]): string {
 async function resolveInternal(
   hostname: string,
   rejected: string[] = [],
-): Promise<HostnameResult> {
+): Promise<PipelineOutcome> {
   const label = queryFromHostname(hostname);
   if (!label) {
     // No usable label is a deterministic property of the hostname, not
     // a network outcome — safe to cache.
     const empty: HostnameResult = { band: 'none', candidates: [] };
     await cacheSet(bandCacheKey(hostname, rejected), empty);
-    return empty;
+    return { result: empty, complete: true };
   }
 
   const cacheKey = bandCacheKey(hostname, rejected);
   const cached = await cacheGet<HostnameResult>(cacheKey);
-  if (cached) return cached;
+  if (cached) return { result: cached, complete: true };
 
-  const { result, complete } = await runPipeline(hostname, label, rejected);
+  const outcome = await runPipeline(hostname, label, rejected);
 
   // Only cache runs where every query succeeded. A partial or failed
   // run still returns its best-effort result, but skipping the write
   // means the next visit retries instead of serving a 24h miss.
-  if (complete) {
-    await cacheSet(cacheKey, result);
+  if (outcome.complete) {
+    await cacheSet(cacheKey, outcome.result);
   }
-  return result;
+  return outcome;
 }
 
 // Backwards-compatible AUTO-only resolver. Used by the sync cascade
@@ -295,7 +299,7 @@ export async function searchByHostname(
     return choice ?? undefined;
   }
   const rejected = await getRejectedChoices(hostname);
-  const result = await resolveInternal(hostname, rejected);
+  const { result } = await resolveInternal(hostname, rejected);
   return result.band === 'auto' ? result.orgnr : undefined;
 }
 
@@ -307,21 +311,22 @@ export async function searchByHostnameDetailed(
   const choice = await getPickerChoice(hostname);
   if (choice !== undefined) {
     if (choice === null) {
-      return { band: 'none', candidates: [] };
+      return { band: 'none', candidates: [], complete: true };
     }
-    return { band: 'auto', candidates: [], choice };
+    return { band: 'auto', candidates: [], choice, complete: true };
   }
   const rejected = await getRejectedChoices(hostname);
-  const result = await resolveInternal(hostname, rejected);
+  const { result, complete } = await resolveInternal(hostname, rejected);
   if (result.band === 'auto') {
     return {
       band: 'auto',
       candidates: result.candidates,
       choice: result.orgnr,
+      complete,
     };
   }
   if (result.band === 'picker') {
-    return { band: 'picker', candidates: result.candidates };
+    return { band: 'picker', candidates: result.candidates, complete };
   }
-  return { band: 'none', candidates: [] };
+  return { band: 'none', candidates: [], complete };
 }

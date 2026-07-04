@@ -121,6 +121,12 @@ main[data-state='error'] #status {
   margin-bottom: 18px;
 }
 
+/* Drill-in escape hatch — sits above the company name. */
+.back-link {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
 #result-head h2 {
   font-size: 22px;
   font-weight: 600;

@@ -209,7 +209,7 @@ async function init(): Promise<void> {
       showPicker(ctx.host, ctx.pickerCandidates);
       return;
     }
-    showEmptyState(ctx.host);
+    showEmptyState(ctx.host, ctx.degraded);
   } catch (err) {
     showError(err);
   }
@@ -386,15 +386,19 @@ function showPicker(host: string, candidates: SearchHit[]): void {
   picker.render(host, candidates);
 }
 
-function showEmptyState(host: string | undefined): void {
+function showEmptyState(host: string | undefined, degraded = false): void {
   currentOrgnr = undefined;
   currentResolutionMethod = undefined;
   setState('empty');
   setBrregLink();
   setDetailsLink();
-  emptyMessageEl.textContent = host
-    ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
-    : 'Popup-en ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
+  // degraded = the hostname search itself failed (offline, brreg down)
+  // — "we couldn't check" must not read as a confirmed "no match".
+  emptyMessageEl.textContent = degraded
+    ? `Fikk ikke svar fra Brønnøysundregistrene, så ${host ?? 'siden'} kunne ikke sjekkes. Prøv igjen om litt.`
+    : host
+      ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
+      : 'Popup-en ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
   manualSearch.reset();
   void renderRecentList();
   manualQueryEl.focus();

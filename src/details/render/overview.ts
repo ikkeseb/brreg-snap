@@ -9,6 +9,7 @@ import type { Enhet, RollerResponse } from '../../types/brreg.js';
 import { $, addLink, addRow } from './dom.js';
 
 const overviewList = $('overview-list') as HTMLDListElement;
+const contactCard = $('contact');
 const contactList = $('contact-list') as HTMLDListElement;
 
 export function renderOverview(enhet: Enhet, roller: RollerResponse): void {
@@ -55,4 +56,7 @@ export function renderContact(enhet: Enhet): void {
       : `https://${enhet.hjemmeside}`;
     addLink(contactList, 'Hjemmeside', href, enhet.hjemmeside, true);
   }
+  // Deleted entities often carry no contact info at all — an empty
+  // "Kontakt" card reads as a rendering bug, so hide it entirely.
+  contactCard.hidden = contactList.childElementCount === 0;
 }

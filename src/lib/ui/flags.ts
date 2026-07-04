@@ -70,10 +70,11 @@ function pickPrimary(flags: FlagSpec[]): FlagSpec {
 export function deriveRegistryFlags(enhet: Enhet): string[] {
   const labels: string[] = [];
   if (enhet.registrertIMvaregisteret) labels.push('MVA-registrert');
-  if (enhet.registrertIForetaksregisteret) labels.push('Foretaksregistret');
-  if (enhet.registrertIStiftelsesregisteret) labels.push('Stiftelsesregistret');
+  if (enhet.registrertIForetaksregisteret) labels.push('Foretaksregisteret');
+  if (enhet.registrertIStiftelsesregisteret)
+    labels.push('Stiftelsesregisteret');
   if (enhet.registrertIFrivillighetsregisteret)
-    labels.push('Frivillighetsregistret');
+    labels.push('Frivillighetsregisteret');
   return labels;
 }
 

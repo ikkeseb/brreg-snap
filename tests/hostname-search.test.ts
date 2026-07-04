@@ -188,14 +188,19 @@ describe('searchByHostnameDetailed', () => {
   it('honors a positive picker-choice cache: band=auto, choice set', async () => {
     await setPickerChoice('shell.no', '914807077');
     const result = await searchByHostnameDetailed('shell.no');
-    expect(result).toEqual({ band: 'auto', candidates: [], choice: '914807077' });
+    expect(result).toEqual({
+      band: 'auto',
+      candidates: [],
+      choice: '914807077',
+      complete: true,
+    });
     expect(searchMock).not.toHaveBeenCalled();
   });
 
   it('honors a negative picker-choice cache: band=none', async () => {
     await setPickerChoice('shell.no', null);
     const result = await searchByHostnameDetailed('shell.no');
-    expect(result).toEqual({ band: 'none', candidates: [] });
+    expect(result).toEqual({ band: 'none', candidates: [], complete: true });
     expect(searchMock).not.toHaveBeenCalled();
   });
 
@@ -235,7 +240,7 @@ describe('pipeline failure handling (network errors)', () => {
     searchMock.mockRejectedValue(new Error('brreg search returned 503.'));
 
     const result = await searchByHostnameDetailed('orkla.com');
-    expect(result).toEqual({ band: 'none', candidates: [] });
+    expect(result).toEqual({ band: 'none', candidates: [], complete: false });
     expect(bandKeys()).toEqual([]);
 
     // Next visit retries the network instead of serving a 24h miss.
@@ -267,6 +272,7 @@ describe('pipeline failure handling (network errors)', () => {
     const result = await searchByHostnameDetailed('orkla.com');
     expect(result?.band).toBe('auto');
     expect(result?.choice).toBe('910747711');
+    expect(result?.complete).toBe(false);
     expect(bandKeys()).toEqual([]);
   });
 
@@ -297,6 +303,7 @@ describe('pipeline failure handling (network errors)', () => {
 
     const result = await searchByHostnameDetailed('eksfin.no');
     expect(result?.band).toBe('none');
+    expect(result?.complete).toBe(false);
     expect(bandKeys()).toEqual([]);
   });
 

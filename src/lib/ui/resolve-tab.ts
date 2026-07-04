@@ -32,6 +32,10 @@ export interface TabContext {
   // override is offered. Sync (URL/title regex) is authoritative;
   // host-auto is the only one the user can dispute via this code path.
   method?: ResolutionMethod;
+  // True when the hostname search came back empty-handed because one
+  // or more brreg queries FAILED — "we couldn't check", not "no
+  // match". The empty state must not claim the host is unknown.
+  degraded?: boolean;
 }
 
 // Band-aware cascade: sync regex first (URL/title), then a
@@ -66,5 +70,5 @@ export async function resolveTabContext(
   if (detailed.band === 'picker') {
     return { host, pickerCandidates: detailed.candidates };
   }
-  return { host };
+  return { host, degraded: !detailed.complete || undefined };
 }

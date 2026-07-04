@@ -63,6 +63,7 @@ const recentSectionEl = $('recent-section');
 const recentListEl = $('recent-list') as HTMLUListElement;
 const resolutionActionsEl = $('resolution-actions');
 const rejectChoiceBtn = $('reject-choice') as HTMLButtonElement;
+const backBtn = $('back-link') as HTMLButtonElement;
 
 let currentOrgnr: string | undefined;
 let currentResolutionMethod: ResolutionMethod | undefined;
@@ -108,6 +109,11 @@ setupRejectChoice({
 
 retryLoadBtn.addEventListener('click', () => {
   lastLoad?.();
+});
+
+// The popstate listener below does the actual restore.
+backBtn.addEventListener('click', () => {
+  window.history.back();
 });
 
 setupTabs();
@@ -214,6 +220,13 @@ function setState(
   // showError unhides this when a retry target exists.
   errorActionsEl.hidden = true;
   resultEl.hidden = state !== 'result';
+  // Only a drilled-in entity has an in-panel "back" to offer; the
+  // method is stamped in history.state, so this stays correct across
+  // Back/Forward restores and sync-broadcast replaceState overwrites.
+  backBtn.hidden =
+    state !== 'result' ||
+    !isHistoryEntry(window.history.state) ||
+    window.history.state.method !== 'drill-in';
   pickerEl.hidden = state !== 'picker';
   emptyStateEl.hidden = state !== 'empty';
   if (state !== 'result') {
@@ -236,14 +249,18 @@ function showError(err: unknown): void {
   errorActionsEl.hidden = lastLoad === undefined;
 }
 
-function showEmptyState(host?: string): void {
+function showEmptyState(host?: string, degraded = false): void {
   setState('empty');
   clearOrgnrFromUrl();
   currentOrgnr = undefined;
   sourceLabel.set(host);
-  emptyMessageEl.textContent = host
-    ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
-    : 'Sidepanelet ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
+  // degraded = the hostname search itself failed (offline, brreg down)
+  // — "we couldn't check" must not read as a confirmed "no match".
+  emptyMessageEl.textContent = degraded
+    ? `Fikk ikke svar fra Brønnøysundregistrene, så ${host ?? 'siden'} kunne ikke sjekkes. Prøv igjen om litt.`
+    : host
+      ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
+      : 'Sidepanelet ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
   manualSearch.reset();
   void renderRecentSection(recentSectionEl, recentListEl, (entry) => {
     setHistoryOrgnr(entry.orgnr, 'manual', false);
@@ -530,7 +547,7 @@ async function init(): Promise<void> {
     // Neither the active tab nor the URL has a company. The sidebar
     // was opened manually (Firefox View > Sidebars) on a page brreg-snap
     // does not recognise. Show a hint, not a hard error.
-    showEmptyState(fromTab.host);
+    showEmptyState(fromTab.host, fromTab.degraded);
     return;
   }
 
@@ -660,7 +677,7 @@ async function handleNoMatchBroadcast(
     await loadOrgnr(detailed.choice, method);
     return;
   }
-  showEmptyState(host);
+  showEmptyState(host, detailed !== undefined && !detailed.complete);
 }
 
 function setupTabs(): void {

@@ -106,9 +106,9 @@ describe('deriveRegistryFlags', () => {
       }),
     ).toEqual([
       'MVA-registrert',
-      'Foretaksregistret',
-      'Stiftelsesregistret',
-      'Frivillighetsregistret',
+      'Foretaksregisteret',
+      'Stiftelsesregisteret',
+      'Frivillighetsregisteret',
     ]);
   });
 });

@@ -79,6 +79,12 @@
       </section>
       <section id="result" hidden>
         <header id="result-head">
+          <!-- Shown only on drilled-in entities (history.state.method
+               === 'drill-in') — the sidebar has no browser chrome, so
+               without this the drill-in is a one-way trip. -->
+          <button type="button" id="back-link" class="ghost-link back-link" hidden>
+            ← Tilbake
+          </button>
           <!-- tabindex=-1: not in the tab order, but focusable by script
                so a drill-in / Back moves focus here and screen readers
                announce the new company name. -->
