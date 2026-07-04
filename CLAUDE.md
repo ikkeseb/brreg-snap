@@ -4,20 +4,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Release state + active work
 
-**`v1.2.0` is tagged on `main`** (side-panel UX batch + slettedato
-status fix, 2026-07-04) but **deliberately not store-submitted**: the
-frontend overhaul (audit-plan Phase 3) lands first and ships to
-AMO/CWS as **v1.3.0**. Until then **stores run `v1.1.0`** and
-`amo-submission-1.1.0` remains the canonical reference for what AMO
-reviewed. `main` is the only long-running branch. Docs-only changes
-that don't affect the `.xpi` may land on `main` directly.
+**`v1.3.0` is tagged on `main`** (frontend overhaul: verdict strip,
+light theme, honest degraded states — 2026-07-05) with a GitHub
+Release carrying all three artifacts. **Store uploads are Seb's
+manual step**: follow `docs/submission-kit/1.3.0/` (amo.md, cws.md —
+includes a listing-text fix removing the false «signaturrett» claim).
+Until review passes, **stores run `v1.1.0`**; `amo-submission-1.1.0`
+marks what AMO last reviewed (v1.2.0 was tagged but never submitted —
+its changes ship in 1.3.0). After submitting, tag
+`amo-submission-1.3.0`. `main` is the only long-running branch.
+Docs-only changes that don't affect the `.xpi` may land on `main`
+directly.
 
 Active work is driven by `docs/plans/2026-07-04-fresh-eyes-audit.md`
-(six phases; see its Progress block — Phases 1–2 done, Phase 3 next).
-Support email everywhere: `sebastian@nuez.no`. When prepping a store
-submission, generate a committed copy-paste kit in
-`docs/submission-kit/<version>/` (recipe in the plan's Progress
-block).
+(six phases; see its Progress block — Phases 1–3 done). Support email
+everywhere: `sebastian@nuez.no`. When prepping a store submission,
+generate a committed copy-paste kit in `docs/submission-kit/<version>/`
+(recipe in the plan's Progress block).
 Chrome-port history + decision log (D1–D15): `docs/chrome-port.md`
 (historical).
 
