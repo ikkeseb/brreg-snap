@@ -94,6 +94,15 @@ Sidebar render functions are pure DOM writers in `src/details/render/*.ts`
 nokkeltall, plus shared helpers in `dom.ts`). No gotchas worth a topic
 note — grep the source.
 
+Frontend system (since Phase 3, 2026-07-04): design tokens + all shared
+components live in `src/styles/shared.css` (dark base, light theme via
+`prefers-color-scheme`); the surface CSS files keep layout/scale only.
+The verdict strip (`src/lib/ui/verdict.ts`) synthesizes status / alder /
+ansatte / regnskap under the company name on both surfaces — a signal
+whose fetch failed is OMITTED, never rendered as "not filed". Visual
+dev loop: `scripts/preview/` runs the real bundles against the live API
+in a plain browser tab (see its README for limits).
+
 Targeted lookups:
 
 ```bash

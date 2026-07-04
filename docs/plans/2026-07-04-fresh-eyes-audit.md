@@ -25,6 +25,25 @@ Work the phases top-down. Each phase is independently shippable.
   CI invariants, actions bumped to current majors (checkout@v7,
   setup-node@v6, pnpm/action-setup@v6 — the "@v5" below was stale),
   tag-triggered release workflow, `package:source`, dependabot.
+- **Phase 3: CORE DONE** (2026-07-04, commit `331ec3b`): shared token
+  layer (`src/styles/shared.css`), light+dark theme
+  (prefers-color-scheme), system font stack (Inter dropped — was never
+  bundled), dead accent variants deleted, **verdict strip** (status /
+  alder / ansatte / regnskap — `src/lib/ui/verdict.ts`, popup now also
+  fetches regnskap), flag unification (`primaryStatusFlag`,
+  `deriveRegistryFlags`, `renderFlags`), Norwegian error mapping
+  (`src/lib/ui/error-message.ts`), recents in the sidebar empty state
+  (moved to `src/lib/ui/recent.ts`), real-button rows + aria-live in
+  manual search, picker digit badges, copy-failure feedback, stale
+  placeholder removed, dates/counts nb-NO-formatted. 336 tests.
+  Items found ALREADY DONE pre-phase (plan was stale): amber accent is
+  the shipped default, popup has a skeleton, both surfaces render the
+  same four registry flags.
+  **Verified via `scripts/preview/` harness** (real bundles, live API,
+  screenshots light+dark). **Remaining before v1.3.0:** real-extension
+  smoke (`pnpm dev` + Chrome unpacked — harness can't cover
+  permissions/sidebar APIs), visual pass on error/konkurs/nyregistrert
+  states, CHANGELOG + release prep per the standing instruction below.
 - **Phase 5 item 4: DECIDED** — the durable support email is
   `sebastian@nuez.no` (updated in both submission docs).
 - **Standing instruction for the release session:** when prepping the
