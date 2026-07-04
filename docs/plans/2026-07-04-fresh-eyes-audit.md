@@ -40,10 +40,20 @@ Work the phases top-down. Each phase is independently shippable.
   the shipped default, popup has a skeleton, both surfaces render the
   same four registry flags.
   **Verified via `scripts/preview/` harness** (real bundles, live API,
-  screenshots light+dark). **Remaining before v1.3.0:** real-extension
-  smoke (`pnpm dev` + Chrome unpacked — harness can't cover
-  permissions/sidebar APIs), visual pass on error/konkurs/nyregistrert
-  states, CHANGELOG + release prep per the standing instruction below.
+  screenshots light+dark).
+- **Phase 3 polish pass: DONE** (2026-07-04, commit `e748ad2`): the
+  previously unscreenshotted states verified live (error both
+  surfaces, konkurs+«Mangler» via 933724751, slettet via 933004708,
+  nyregistrert «Under 1 år», skeleton light, wide-panel 4-across,
+  drill-in/Back) and four fixes landed: degraded empty state (failed
+  hostname search no longer claims «Ingen bedrift identifisert» —
+  `DetailedResult.complete` → `TabContext.degraded`), «← Tilbake»
+  ghost-link on drilled-in entities, empty Kontakt card hidden,
+  registry pill spelling (-registeret). 340 tests.
+  **Remaining before v1.3.0:** real-extension smoke (`pnpm dev` +
+  Chrome unpacked — harness can't cover permissions/sidebar APIs;
+  Seb's manual step), then CHANGELOG + release prep per the standing
+  instruction below.
 - **Phase 5 item 4: DECIDED** — the durable support email is
   `sebastian@nuez.no` (updated in both submission docs).
 - **Standing instruction for the release session:** when prepping the
