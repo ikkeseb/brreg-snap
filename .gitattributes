@@ -1,0 +1,3 @@
+# Keep the AMO source-review zip (git archive) lean: screenshots are
+# listing assets, not build inputs — they were ~6 MB of an 8.5 MB zip.
+docs/screenshots/ export-ignore
