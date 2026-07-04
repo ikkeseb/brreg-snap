@@ -10,12 +10,12 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Reads the pnpm version from the `packageManager` pin in package.json.
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: 22
           cache: pnpm
@@ -37,28 +37,37 @@ jobs:
       # Zero runtime dependencies is a repo guarantee — audit must be clean.
       - run: pnpm audit --prod
 
-      - name: Manifest security invariants (both targets)
+      # The same invariants are pinned against the SOURCE manifests in
+      # tests/manifest.test.ts (runs in `pnpm test` above). This step
+      # re-checks the STAMPED dist manifests, so a build-plugin bug
+      # that mangled them would still fail CI.
+      - name: Manifest security invariants (both targets, dist)
         run: |
           node <<'EOF'
           const fs = require('fs');
           const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-          const expect = {
-            host_permissions: ['https://data.brreg.no/*'],
-            optional_permissions: ['tabs'],
-            csp: ["default-src 'self'", "base-uri 'none'", "form-action 'none'", "frame-ancestors 'none'"],
+          const CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'self'; connect-src https://data.brreg.no; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
+          const PERMISSIONS = {
+            'dist-firefox/manifest.json': ['activeTab', 'storage', 'menus'],
+            'dist-chrome/manifest.json': ['activeTab', 'storage', 'contextMenus', 'sidePanel'],
           };
           let failed = false;
           const fail = (file, msg) => { console.error(`FAIL ${file}: ${msg}`); failed = true; };
-          for (const file of ['dist-firefox/manifest.json', 'dist-chrome/manifest.json']) {
+          for (const [file, permissions] of Object.entries(PERMISSIONS)) {
             const m = JSON.parse(fs.readFileSync(file, 'utf8'));
+            const exact = (key, want) => {
+              if (JSON.stringify(m[key]) !== JSON.stringify(want))
+                fail(file, `${key} must be exactly ${JSON.stringify(want)}, got ${JSON.stringify(m[key])}`);
+            };
             if ('content_scripts' in m) fail(file, 'content_scripts must not exist');
-            if (JSON.stringify(m.host_permissions) !== JSON.stringify(expect.host_permissions))
-              fail(file, `host_permissions must be exactly ${JSON.stringify(expect.host_permissions)}, got ${JSON.stringify(m.host_permissions)}`);
-            if (JSON.stringify(m.optional_permissions) !== JSON.stringify(expect.optional_permissions))
-              fail(file, `optional_permissions must be exactly ${JSON.stringify(expect.optional_permissions)}, got ${JSON.stringify(m.optional_permissions)}`);
+            exact('permissions', permissions);
+            exact('optional_permissions', ['tabs']);
+            exact('host_permissions', ['https://data.brreg.no/*']);
             const csp = m.content_security_policy?.extension_pages ?? '';
-            for (const directive of expect.csp)
-              if (!csp.includes(directive)) fail(file, `CSP missing "${directive}"`);
+            if (csp !== CSP)
+              fail(file, `CSP must be the exact policy string, got "${csp}"`);
+            if (/unsafe-inline|unsafe-eval/.test(csp))
+              fail(file, 'CSP contains unsafe-inline/unsafe-eval');
             if (m.version !== pkg.version)
               fail(file, `manifest version ${m.version} != package.json version ${pkg.version}`);
             if (!failed) console.log(`OK ${file}`);
@@ -66,7 +75,8 @@ jobs:
           if (failed) {
             console.error('\nManifest invariants violated. These are the security');
             console.error('non-negotiables from CLAUDE.md: no content scripts, only');
-            console.error('data.brreg.no as host, tabs as runtime opt-in only, strict CSP.');
+            console.error('data.brreg.no as host, install-time permissions frozen,');
+            console.error('tabs as runtime opt-in only, exact strict CSP.');
             process.exit(1);
           }
           console.log('All manifest security invariants hold for both targets.');

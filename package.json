@@ -19,6 +19,7 @@
     "package": "pnpm run package:firefox",
     "package:firefox": "pnpm run build:firefox && web-ext build --source-dir dist-firefox --artifacts-dir web-ext-artifacts --overwrite-dest --ignore-files \"**/*.map\" \"icons/README.md\"",
     "package:chrome": "pnpm run build:chrome && web-ext build --source-dir dist-chrome --artifacts-dir web-ext-artifacts --filename \"brreg-snap-chrome-{version}.zip\" --overwrite-dest --ignore-files \"**/*.map\" \"icons/README.md\"",
+    "package:source": "node -e \"require('fs').mkdirSync('web-ext-artifacts',{recursive:true})\" && git archive --format=zip -o web-ext-artifacts/brreg-snap-source-$npm_package_version.zip HEAD",
     "lint:ext": "pnpm run lint:ext:firefox",
     "lint:ext:firefox": "web-ext lint --source-dir dist-firefox",
     "lint:ext:chrome": "web-ext lint --source-dir dist-chrome",

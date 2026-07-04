@@ -1,0 +1,54 @@
+name: Release
+
+# Tag-triggered release: build + package both browser targets and the
+# AMO source-review zip from the exact tagged tree, and attach them to
+# a GitHub Release. Kills the manual-release version-skew error class —
+# the artifacts can no longer be built from the wrong working tree.
+# Store uploads (AMO/CWS) stay manual; the `amo-submission-X.Y.Z` tag
+# still marks what was actually submitted.
+
+on:
+  push:
+    tags: ['v[0-9]*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+
+      - name: Verify tag matches package.json version
+        run: |
+          pkg="v$(node -p "require('./package.json').version")"
+          if [ "$pkg" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match package.json $pkg" >&2
+            exit 1
+          fi
+
+      - run: pnpm package:firefox
+      - run: pnpm package:chrome
+      - run: pnpm package:source
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            web-ext-artifacts/*.zip \
+            --verify-tag \
+            --title "brreg-snap $GITHUB_REF_NAME" \
+            --notes "See [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/CHANGELOG.md) for details."

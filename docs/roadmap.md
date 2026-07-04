@@ -27,13 +27,10 @@ runtime JS, no curated host→orgnr table).
    and the popup is brreg-snap's primary fast-glance surface — so make it
    a stored preference, NOT the default. ~10 lines, no new permissions.
 
-4. **Bump GitHub Actions off the Node 20 runtime before 2026-06-16.**
-   `actions/checkout@v4`, `actions/setup-node@v4`, and
-   `pnpm/action-setup@v4` in `.github/workflows/ci.yml` run on the Node
-   20 runtime, which GitHub force-migrates to Node 24 on **2026-06-16**.
-   Bump `checkout`/`setup-node` to their `@v5` releases (verify current
-   latest at bump time) so CI doesn't start emitting deprecation warnings
-   or break. One CI-only commit, no source impact.
+4. ~~**Bump GitHub Actions off the Node 20 runtime before 2026-06-16.**~~
+   **DONE 2026-07-04** (checkout@v7, setup-node@v6, pnpm/action-setup@v6
+   in both workflows), together with a Dependabot config that keeps the
+   actions current from here on.
 
 ## Also worth doing
 

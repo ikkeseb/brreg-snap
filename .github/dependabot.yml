@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Dev-only dependency tree (the shipped bundle has zero runtime
+  # deps — CLAUDE.md § Dependencies). Grouped so updates arrive as one
+  # reviewable PR per week instead of a trickle.
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+    groups:
+      dev-dependencies:
+        patterns: ['*']
+
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
