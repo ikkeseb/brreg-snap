@@ -12,6 +12,29 @@ submitted to AMO/CWS.**
 
 Work the phases top-down. Each phase is independently shippable.
 
+## Progress (updated 2026-07-04, same day)
+
+- **Phase 1: DONE**, with one deliberate deviation — v1.2.0 is tagged,
+  packaged (`web-ext-artifacts/`, incl. lean source zip) and pushed,
+  but **Seb decided to skip the 1.2.0 store submission**: Phase 3
+  (frontend overhaul) lands first and ships to AMO/CWS as **v1.3.0**.
+  Stores stay on 1.1.0 until then. No `amo-submission-1.2.0` tag will
+  exist. No GitHub Release for v1.2.0 either (optional, can be added
+  any time); v1.3.0 gets one automatically from the release workflow.
+- **Phase 2: DONE** (same day): `tests/manifest.test.ts`, exact-match
+  CI invariants, actions bumped to current majors (checkout@v7,
+  setup-node@v6, pnpm/action-setup@v6 — the "@v5" below was stale),
+  tag-triggered release workflow, `package:source`, dependabot.
+- **Phase 5 item 4: DECIDED** — the durable support email is
+  `sebastian@nuez.no` (updated in both submission docs).
+- **Standing instruction for the release session:** when prepping the
+  v1.3.0 store submission, generate a **submission kit** under
+  `docs/submission-kit/` (gitignored): one file per destination with
+  the EXACT copy-paste text for every AMO/CWS form field + release
+  notes, topped with a short numbered upload recipe. Source the
+  content from `docs/amo-submission.md` / `docs/cws-submission.md` /
+  `CHANGELOG.md`; keep those canonical.
+
 ---
 
 ## Phase 1 — Ship v1.2.0
@@ -162,9 +185,10 @@ Do in this order; each step builds on the previous.
 3. **"Fant vi ikke bedriften?"-link** in both empty states:
    pre-filled GitHub issue with the hostname, user presses send —
    quality feedback loop with zero telemetry.
-4. Pick ONE durable support email and use it consistently (currently:
-   gmail in docs/amo-submission.md:30, proton in git, GitHub issues in
-   README/PRIVACY). CWS contact cannot be changed later.
+4. ~~Pick ONE durable support email~~ **DECIDED 2026-07-04:
+   `sebastian@nuez.no`** (recorded in both submission docs). Remaining:
+   use it consistently wherever a contact surfaces (README/PRIVACY
+   currently point at GitHub issues, which is fine to keep).
 
 ## Phase 6 — Tests + housekeeping (fill in around the above)
 

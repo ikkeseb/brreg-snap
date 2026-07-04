@@ -14,6 +14,7 @@ Facts verified against developer.chrome.com (2026-06).
 - **One-time USD $5** registration fee (lifetime, not recurring).
 - Provide and **verify a developer contact email** (separate from the
   Google login; it can't be changed later — use a durable address).
+  Decided 2026-07-04: `sebastian@nuez.no`.
 - Enable two-step verification on the Google account (required to
   publish).
 

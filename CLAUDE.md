@@ -5,15 +5,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Release state + active work
 
 **`v1.2.0` is tagged on `main`** (side-panel UX batch + slettedato
-status fix, 2026-07-04). Store submission of 1.2.0 is Seb's manual
-step; until it happens, **stores run `v1.1.0`** and
+status fix, 2026-07-04) but **deliberately not store-submitted**: the
+frontend overhaul (audit-plan Phase 3) lands first and ships to
+AMO/CWS as **v1.3.0**. Until then **stores run `v1.1.0`** and
 `amo-submission-1.1.0` remains the canonical reference for what AMO
 reviewed. `main` is the only long-running branch. Docs-only changes
 that don't affect the `.xpi` may land on `main` directly.
 
 Active work is driven by `docs/plans/2026-07-04-fresh-eyes-audit.md`
-(six phases; Phase 1 = ship v1.2.0). Chrome-port history + decision
-log (D1–D15): `docs/chrome-port.md` (historical).
+(six phases; see its Progress block — Phases 1–2 done, Phase 3 next).
+Support email everywhere: `sebastian@nuez.no`. When prepping a store
+submission, generate a gitignored copy-paste kit in
+`docs/submission-kit/` (recipe in the plan's Progress block).
+Chrome-port history + decision log (D1–D15): `docs/chrome-port.md`
+(historical).
 
 Standing gotchas that survive releases:
 

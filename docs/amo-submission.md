@@ -27,7 +27,8 @@ MIT (matches `LICENSE` in the repo).
 
 ## Support contact
 
-- **Email**: `sebbe.nuez@gmail.com`
+- **Email**: `sebastian@nuez.no` (decided 2026-07-04 — the one durable
+  support address for AMO, CWS, and everything user-facing)
 - **Website**: `https://github.com/ikkeseb/brreg-snap`
 - **Support site**: `https://github.com/ikkeseb/brreg-snap/issues`
 
