@@ -29,11 +29,13 @@ Work the phases top-down. Each phase is independently shippable.
   `sebastian@nuez.no` (updated in both submission docs).
 - **Standing instruction for the release session:** when prepping the
   v1.3.0 store submission, generate a **submission kit** under
-  `docs/submission-kit/` (gitignored): one file per destination with
-  the EXACT copy-paste text for every AMO/CWS form field + release
-  notes, topped with a short numbered upload recipe. Source the
-  content from `docs/amo-submission.md` / `docs/cws-submission.md` /
-  `CHANGELOG.md`; keep those canonical.
+  `docs/submission-kit/<version>/` — **committed**, so it follows Seb
+  across machines and doubles as an audit trail of exactly what was
+  pasted into each store (same role as the `amo-submission` tags).
+  One file per destination with the EXACT copy-paste text for every
+  AMO/CWS form field + release notes, topped with a short numbered
+  upload recipe. Source the content from `docs/amo-submission.md` /
+  `docs/cws-submission.md` / `CHANGELOG.md`; keep those canonical.
 
 ---
 

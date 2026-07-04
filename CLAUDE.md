@@ -15,8 +15,9 @@ that don't affect the `.xpi` may land on `main` directly.
 Active work is driven by `docs/plans/2026-07-04-fresh-eyes-audit.md`
 (six phases; see its Progress block — Phases 1–2 done, Phase 3 next).
 Support email everywhere: `sebastian@nuez.no`. When prepping a store
-submission, generate a gitignored copy-paste kit in
-`docs/submission-kit/` (recipe in the plan's Progress block).
+submission, generate a committed copy-paste kit in
+`docs/submission-kit/<version>/` (recipe in the plan's Progress
+block).
 Chrome-port history + decision log (D1–D15): `docs/chrome-port.md`
 (historical).
 

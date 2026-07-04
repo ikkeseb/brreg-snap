@@ -26,8 +26,3 @@ coverage/
 docs/superpowers/
 docs/brand-b.png
 docs/concept.png
-
-# Store-submission copy-paste kits (exact AMO/CWS form-field text per
-# release) — operational scratch, regenerated per release from the
-# canonical docs/amo-submission.md + docs/cws-submission.md.
-docs/submission-kit/
