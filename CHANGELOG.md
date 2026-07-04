@@ -4,7 +4,7 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
-## [1.2.0] — 2026-06-22
+## [1.2.0] — 2026-07-04
 
 ### Added
 
@@ -57,6 +57,15 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 - The redundant card heading on single-card tabs (Roller / Nøkkeltall /
   Underenheter) is now hidden visually — the tab already labels the
   panel — while staying in the accessibility tree for screen readers.
+
+### Fixed
+
+- A dissolved (slettet) entity no longer shows a green "Aktiv" flag in
+  the popup or side panel. The registry returns a minimal body with a
+  `slettedato` for deleted entities — where the konkurs/avvikling
+  booleans the status pill used to check are absent — so both surfaces
+  now derive status through a shared helper that flags these
+  **Slettet** (red). Present since 1.1.0.
 
 ### Internal
 

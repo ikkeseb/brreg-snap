@@ -31,6 +31,11 @@ export interface Enhet {
   telefon?: string;
   mobil?: string;
   overordnetEnhet?: string;
+  // Set (ISO date) when the entity is deleted from Enhetsregisteret.
+  // The API then returns a minimal SlettetEnhet body where konkurs/
+  // avvikling fields are absent — status derivation must check this
+  // first or a dissolved entity renders as active.
+  slettedato?: string;
   konkurs?: boolean;
   underAvvikling?: boolean;
   underTvangsavviklingEllerTvangsopplosning?: boolean;

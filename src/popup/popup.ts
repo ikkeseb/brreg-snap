@@ -8,7 +8,7 @@ import { formatAddress, formatNaering } from '../lib/format.js';
 import { findRoleHolder } from '../lib/roller.js';
 import { addLink, addRow } from '../details/render/dom.js';
 import { makeActivable } from '../lib/ui/activate.js';
-import { makeFlag } from '../lib/ui/flags.js';
+import { deriveStatusFlags, makeFlag } from '../lib/ui/flags.js';
 import { attachManualSearch } from '../lib/ui/manual-search.js';
 import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
 import {
@@ -347,15 +347,8 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
 
   const flags = document.createElement('div');
   flags.className = 'flags';
-  const negativeStatus =
-    enhet.konkurs ||
-    enhet.underAvvikling ||
-    enhet.underTvangsavviklingEllerTvangsopplosning;
-  if (!negativeStatus) flags.appendChild(makeFlag('Aktiv', 'ok'));
-  if (enhet.konkurs) flags.appendChild(makeFlag('Konkurs', 'danger'));
-  if (enhet.underAvvikling) flags.appendChild(makeFlag('Under avvikling', 'warn'));
-  if (enhet.underTvangsavviklingEllerTvangsopplosning)
-    flags.appendChild(makeFlag('Tvangsavvikling', 'danger'));
+  for (const flag of deriveStatusFlags(enhet))
+    flags.appendChild(makeFlag(flag.label, flag.severity));
   if (enhet.registrertIMvaregisteret)
     flags.appendChild(makeFlag('MVA-registrert', undefined, 'registry'));
   if (enhet.registrertIForetaksregisteret)
