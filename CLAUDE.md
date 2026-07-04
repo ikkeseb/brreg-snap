@@ -2,50 +2,31 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Active long-running branches
+## Release state + active work
 
-### Side-panel UX batch → `v1.2.0` (branch `feat/improvements`, in progress)
+**`v1.2.0` is tagged on `main`** (side-panel UX batch + slettedato
+status fix, 2026-07-04). Store submission of 1.2.0 is Seb's manual
+step; until it happens, **stores run `v1.1.0`** and
+`amo-submission-1.1.0` remains the canonical reference for what AMO
+reviewed. `main` is the only long-running branch. Docs-only changes
+that don't affect the `.xpi` may land on `main` directly.
 
-The chrome-port line shipped as **`v1.1.0`** (live on AMO + CWS, tagged
-`v1.1.0` / `amo-submission-1.1.0`, 2026-06-10); `main` carries it. The
-active work is a side-panel UX batch on **`feat/improvements`**,
-release-prepped as **`v1.2.0`** but **not tagged**.
+Active work is driven by `docs/plans/2026-07-04-fresh-eyes-audit.md`
+(six phases; Phase 1 = ship v1.2.0). Chrome-port history + decision
+log (D1–D15): `docs/chrome-port.md` (historical).
 
-- Renders for real: role typography, egenkapital amber caution,
-  card-heading dedup, empty-state glyph, single-year
-  Gjeld/Egenkapitalandel rows.
-- **Dormant:** the multi-year Nøkkeltall trend table + YoY deltas.
-  brreg's open regnskap API returns only the latest year (verified
-  ~294 companies), so `renderNokkeltall`'s `figures.length >= 2` branch
-  never fires in production. The code is correct but unreachable — see
-  `docs/notes/brreg-api.md` § `regnskap-single-year-only`. **Decided
-  (2026-06-22): keep** as future-proofing — correct and harmless, and
-  lights up automatically if brreg restores multi-year filings.
-- Lesson: data-dependent rendering must be checked against the **live**
-  API — unit tests (synthetic fixtures) and the hand-authored
-  `/tmp/brreg-preview` harness both passed while the live data shape
-  (one year, not many) silently broke the feature.
-- **Drill-in hardened (2026-06-22, commit `024beec`):** an adversarial
-  review of the v1.2.0 diff caught three regressions the in-panel
-  drill-in introduced (before it, related clicks forced a full reload,
-  so none were reachable): a stale `renderParent` fetch clobbering the
-  wrong Morselskap (it is the one render module that self-fetches and so
-  needs its own run-id guard), lost focus + no SR announcement on
-  drill-in/Back, and tab/`?tab=` desync on Back. All fixed.
-- **Backlog (pre-v1.2.0, NOT a tag blocker):** a slettet (dissolved)
-  entity is mislabelled with a green "Aktiv" flag — `renderHeader`
-  (`header.ts`) and `renderEnhet` (`popup.ts`) compute status from
-  konkurs/avvikling only and ignore `slettedato`. Live-verified on
-  orgnr `933004708` (slettedato 2024-05-31, 200 OK). Shipped this way
-  since v1.1.0; fix = treat `slettedato` as a terminal negative status
-  in both render paths.
+Standing gotchas that survive releases:
 
-Older chrome-port plan + decision log (D1–D15): `docs/chrome-port.md`.
-
-`main` mirrors the live AMO submission — the `amo-submission-X.Y.Z` tag
-is the canonical reference for what was submitted, regardless of where
-`main` HEAD moves. Docs-only changes that don't affect the `.xpi` may
-land on `main` directly.
+- **Dormant by API shape:** the multi-year Nøkkeltall trend table
+  never renders — brreg's open regnskap API returns only the latest
+  year, so `renderNokkeltall`'s `figures.length >= 2` branch is
+  unreachable. Decided 2026-06-22: keep as future-proofing. See
+  `docs/notes/brreg-api.md` § `regnskap-single-year-only`.
+- Lesson from that feature: data-dependent rendering must be checked
+  against the **live** API — synthetic fixtures and a hand-built
+  preview harness both passed while the live data shape broke it.
+- `renderParent` is the one render module that self-fetches and so
+  needs its own run-id guard (kept since commit `024beec`).
 
 ## Commands
 

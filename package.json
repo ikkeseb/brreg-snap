@@ -1,7 +1,7 @@
 {
   "name": "brreg-snap",
   "version": "1.2.0",
-  "description": "Firefox-utvidelse som henter bedriftsinfo fra Brønnøysundregistrene med ett klikk.",
+  "description": "Nettleserutvidelse (Firefox og Chrome) som henter bedriftsinfo fra Brønnøysundregistrene med ett klikk.",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",

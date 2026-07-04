@@ -82,10 +82,6 @@ export default defineConfig({
         // is string-level on purpose: JSON.parse/stringify would
         // reformat the file, and the built Firefox manifest must stay
         // byte-identical to the AMO submission when the versions match.
-        // Known consequence: public/manifest.chrome.json still says
-        // 1.0.0 (the live CWS version), so local Chrome builds stamp
-        // the package.json version (1.0.1) instead — intentional; the
-        // next release (v1.1.0) aligns both stores. See BUILD.md.
         const manifestSrc = readFileSync(
           resolve(__dirname, `public/manifest.${target}.json`),
           'utf8',

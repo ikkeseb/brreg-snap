@@ -30,14 +30,9 @@ phase-by-phase trail are kept for rationale, not as live TODOs.
   **reversed** — auto-sync brought forward (D13); the refresh button was
   **removed entirely** on both engines (D14→D15); `tabs` is a runtime
   opt-in in both manifests.
-- **Next (not started, not urgent):** a Firefox **`v1.1.0`** release to
-  carry the Chrome-parity UX (refresh button gone, auto-sync follows the
-  active tab) to Firefox users. Steps: bump all three version fields to
-  `1.1.0`, dedup the CHANGELOG (the orgnr fix is duplicated in
-  `[Unreleased]` + `[1.0.1]`), tag `v1.1.0` + `amo-submission-1.1.0`,
-  `pnpm package:firefox`, submit to AMO. Chrome stays `1.0.0` on CWS
-  (it already ships these features) and converges to `1.1.0` at its
-  next real change — no cosmetic re-submission.
+- **DONE — `v1.1.0` shipped 2026-06-10** on both AMO and CWS (tags
+  `v1.1.0` / `amo-submission-1.1.0`), aligning all version fields.
+  Later releases are tracked in `CHANGELOG.md`, not here.
 
 ### How to load the Chrome build for testing
 
@@ -80,6 +75,12 @@ pnpm build:chrome          # -> dist-chrome/
 ---
 
 ## Architecture
+
+> **Superseded.** This section is the pre-implementation design; the
+> decision log reversed its two main mechanisms (D8: in-house 3-line
+> shim instead of `webextension-polyfill`; D9/D10: runtime feature
+> detection instead of build-time `resolve.alias`). See
+> `README.md` § Project layout for the layout that actually shipped.
 
 ### Platform adapter
 

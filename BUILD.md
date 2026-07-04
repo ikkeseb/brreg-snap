@@ -50,15 +50,10 @@ build time, the copy-static-assets plugin in `vite.config.ts` stamps
 the `"version"` field of the copied manifest with the package.json
 version, via a string-level replacement that leaves every other byte
 of the manifest untouched — so the built Firefox manifest stays
-byte-identical to the AMO submission whenever the two versions agree
-(they do today: both say 1.0.1).
-
-Known intentional skew: `public/manifest.chrome.json` still says
-`1.0.0` (the version live on the Chrome Web Store), but local Chrome
-builds stamp the package.json version (`1.0.1`). The next release
-(v1.1.0) aligns both stores; until then a locally built
-`dist-chrome/manifest.json` will differ from the CWS package in the
-version field only.
+byte-identical to the AMO submission whenever the two versions agree.
+Both source manifests carry the same version as `package.json`; a
+mismatch would only appear if a manifest bump were forgotten, and the
+stamp makes that harmless.
 
 The final artifact lands at
 `web-ext-artifacts/brreg-snap-<version>.zip`. (web-ext writes the
