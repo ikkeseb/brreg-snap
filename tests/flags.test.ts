@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 
-import { deriveStatusFlags } from '../src/lib/ui/flags.js';
+import {
+  deriveRegistryFlags,
+  deriveStatusFlags,
+  primaryStatusFlag,
+} from '../src/lib/ui/flags.js';
 import type { Enhet } from '../src/types/brreg.js';
 
 const base: Enhet = { organisasjonsnummer: '910000000', navn: 'Test AS' };
@@ -64,5 +68,47 @@ describe('deriveStatusFlags', () => {
 
   it('empty-string slettedato is not treated as deleted', () => {
     expect(labels({ ...base, slettedato: '' })).toEqual(['Aktiv']);
+  });
+});
+
+describe('primaryStatusFlag', () => {
+  it('is Aktiv for a healthy company', () => {
+    expect(primaryStatusFlag(base).label).toBe('Aktiv');
+  });
+
+  it('picks the most severe status (danger beats warn)', () => {
+    expect(
+      primaryStatusFlag({ ...base, underAvvikling: true, konkurs: true }),
+    ).toEqual({ label: 'Konkurs', severity: 'danger' });
+  });
+
+  it('keeps derivation order between equal severities', () => {
+    expect(
+      primaryStatusFlag({ ...base, slettedato: '2024-05-31', konkurs: true })
+        .label,
+    ).toBe('Slettet');
+  });
+});
+
+describe('deriveRegistryFlags', () => {
+  it('is empty when no registries are set', () => {
+    expect(deriveRegistryFlags(base)).toEqual([]);
+  });
+
+  it('lists all four memberships in fixed order', () => {
+    expect(
+      deriveRegistryFlags({
+        ...base,
+        registrertIMvaregisteret: true,
+        registrertIForetaksregisteret: true,
+        registrertIStiftelsesregisteret: true,
+        registrertIFrivillighetsregisteret: true,
+      }),
+    ).toEqual([
+      'MVA-registrert',
+      'Foretaksregistret',
+      'Stiftelsesregistret',
+      'Frivillighetsregistret',
+    ]);
   });
 });

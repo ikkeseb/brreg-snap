@@ -32,16 +32,19 @@ export function renderOrgnrCopy(
 }
 
 async function copyOrgnr(orgnr: string, btn: HTMLElement): Promise<void> {
+  // Both outcomes get visible feedback — a silent failure reads as
+  // "copied" to the user, who then pastes the wrong thing elsewhere.
+  let ok = true;
   try {
     await navigator.clipboard.writeText(orgnr);
   } catch {
-    return;
+    ok = false;
   }
-  btn.classList.add('copied');
+  btn.classList.add(ok ? 'copied' : 'copy-failed');
   const original = btn.textContent ?? orgnr;
-  btn.textContent = 'Kopiert!';
+  btn.textContent = ok ? 'Kopiert!' : 'Kunne ikke kopiere';
   window.setTimeout(() => {
     btn.textContent = original;
-    btn.classList.remove('copied');
+    btn.classList.remove('copied', 'copy-failed');
   }, 1500);
 }

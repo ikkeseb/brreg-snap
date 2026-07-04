@@ -1,55 +1,6 @@
-:root {
-  --bg: #0a0e1a;
-  --bg-card: #131922;
-  --bg-elevated: #1a2030;
-  --fg: #e8eaed;
-  --fg-strong: #ffffff;
-  --muted: #8a8e96;
-  --border: #1e2330;
-  --border-strong: #2a3142;
-  --accent: #d4a574;
-  --accent-strong: #e5b87f;
-  --success: #4ade80;
-  --success-bg: rgba(34, 197, 94, 0.12);
-  --success-border: rgba(34, 197, 94, 0.28);
-  --warn: #fbbf24;
-  --warn-bg: rgba(251, 191, 36, 0.12);
-  --danger: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.12);
-  --radius: 8px;
-  --radius-pill: 999px;
-  --font-sans:
-    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, monospace;
-  font-family: var(--font-sans);
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-}
-
-/* Amber (--accent above) is the shipped default, matching the
-   brand-mark. These overrides mirror details.css for devtools-only
-   experiments — no element sets data-accent in production. */
-main[data-accent='teal'] {
-  --accent: #5eead4;
-  --accent-strong: #99f6e4;
-}
-
-main[data-accent='sky'] {
-  --accent: #7dd3fc;
-  --accent-strong: #bae6fd;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--fg);
-}
+/* Popup surface — layout and scale only. Tokens and every shared
+ * component live in ../styles/shared.css. */
+@import '../styles/shared.css';
 
 main {
   width: 340px;
@@ -85,18 +36,6 @@ header h1 img.brand-mark {
   flex-shrink: 0;
 }
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 #status {
   padding: 10px 0;
   color: var(--muted);
@@ -106,31 +45,10 @@ main[data-state='error'] #status {
   color: var(--danger);
 }
 
-/* --- skeleton (data-state='loading') ---------------------------- */
+/* --- skeleton layout (base .skel styles are shared) -------------- */
 
 #skeleton {
   padding: 8px 0 4px;
-}
-
-.skel {
-  background: linear-gradient(
-    90deg,
-    var(--bg-card) 0%,
-    var(--bg-elevated) 50%,
-    var(--bg-card) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.6s linear infinite;
-  border-radius: 4px;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 .skel-name {
@@ -144,6 +62,18 @@ main[data-state='error'] #status {
   height: 11px;
   width: 96px;
   margin-bottom: 14px;
+}
+
+.skel-verdict {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.skel-cell {
+  height: 46px;
+  border-radius: var(--radius);
 }
 
 .skel-rows {
@@ -165,69 +95,7 @@ main[data-state='error'] #status {
   width: 72%;
 }
 
-.skel-row:nth-child(4) {
-  width: 80%;
-}
-
-.skel-flags {
-  display: flex;
-  gap: 6px;
-  margin-top: 14px;
-}
-
-.skel-pill {
-  height: 18px;
-  width: 70px;
-  border-radius: var(--radius-pill);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skel {
-    animation: none;
-    background: var(--bg-card);
-  }
-}
-
-/* --- retry affordances (error state + inline search error) ------ */
-
-.error-actions {
-  padding: 0 0 10px;
-}
-
-.retry-button {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  color: var(--fg);
-  padding: 6px 12px;
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  transition:
-    color 120ms ease,
-    border-color 120ms ease;
-}
-
-.retry-button:hover,
-.retry-button:focus-visible {
-  border-color: var(--accent);
-  color: var(--fg-strong);
-  outline: none;
-}
-
-.manual-results li.search-error {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--danger);
-  cursor: default;
-  border-style: dashed;
-}
-
-.manual-results li.search-error:hover {
-  border-color: var(--border);
-}
+/* --- result ------------------------------------------------------ */
 
 #result h2 {
   font-size: 16px;
@@ -235,41 +103,6 @@ main[data-state='error'] #status {
   letter-spacing: -0.02em;
   color: var(--fg-strong);
   margin: 10px 0 2px;
-}
-
-#result .orgnr {
-  font-family: var(--font-mono);
-  color: var(--muted);
-  font-size: 12px;
-  letter-spacing: 0.02em;
-}
-
-#result .orgnr-copy {
-  font: inherit;
-  background: none;
-  border: none;
-  color: inherit;
-  padding: 0 2px;
-  margin: 0;
-  cursor: pointer;
-  border-bottom: 1px dashed transparent;
-  transition: color 120ms ease, border-color 120ms ease;
-}
-
-#result .orgnr-copy:hover {
-  color: var(--accent);
-  border-bottom-color: currentColor;
-}
-
-#result .orgnr-copy:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-#result .orgnr-copy.copied {
-  color: var(--success);
-  border-bottom-color: transparent;
 }
 
 #result dl {
@@ -299,149 +132,12 @@ main[data-state='error'] #status {
   text-decoration: underline;
 }
 
-#result .flags {
-  margin-top: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-#result .flag {
-  font-size: 10.5px;
-  font-weight: 500;
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  color: var(--fg);
-  border: 1px solid var(--border-strong);
-  letter-spacing: 0.01em;
-}
-
-#result .flag[data-severity='ok'] {
-  background: var(--success-bg);
-  color: var(--success);
-  border-color: var(--success-border);
-}
-
-#result .flag[data-severity='warn'] {
-  background: var(--warn-bg);
-  color: var(--warn);
-  border-color: rgba(251, 191, 36, 0.28);
-}
-
-#result .flag[data-severity='danger'] {
-  background: var(--danger-bg);
-  color: var(--danger);
-  border-color: rgba(248, 113, 113, 0.28);
-}
-
-/* Registry-membership facts recede behind the status pill. */
-#result .flag[data-kind='registry'] {
-  background: transparent;
-  color: var(--muted);
-  border-color: var(--border-strong);
-}
-
-/* --- picker (data-state='picker') ------------------------------- */
+/* --- state gating ------------------------------------------------- */
 
 main[data-state='picker'] #status,
 main[data-state='picker'] #result {
   display: none;
 }
-
-#picker {
-  padding: 8px 0 4px;
-}
-
-.picker-intro {
-  margin: 0 0 10px;
-  color: var(--muted);
-  font-size: 12.5px;
-}
-
-.picker-list {
-  list-style: none;
-  margin: 0 0 10px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 260px;
-  overflow: auto;
-}
-
-.picker-item {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 9px 11px;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  color: var(--fg);
-  transition:
-    border-color 120ms ease,
-    background 120ms ease;
-  width: 100%;
-}
-
-.picker-item:hover,
-.picker-item:focus-visible {
-  border-color: var(--accent);
-  outline: none;
-}
-
-.picker-item-name {
-  display: block;
-  font-weight: 500;
-  color: var(--fg-strong);
-  font-size: 12.5px;
-}
-
-.picker-item-naering {
-  display: block;
-  margin-top: 2px;
-  font-size: 11.5px;
-  color: var(--fg);
-  /* Single-line ellipsis — næring descriptions can be 60+ chars
-     ("Konsulentvirksomhet innenfor informasjonsteknologi") and would
-     wrap two/three lines in a 320px popup, blowing up row height. */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.picker-item-meta {
-  display: block;
-  margin-top: 3px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--muted);
-}
-
-.picker-none {
-  background: none;
-  border: 1px dashed var(--border-strong);
-  color: var(--muted);
-  padding: 8px 12px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-  width: 100%;
-  transition:
-    color 120ms ease,
-    border-color 120ms ease;
-}
-
-.picker-none:hover,
-.picker-none:focus-visible {
-  color: var(--fg);
-  border-color: var(--border-strong);
-  outline: none;
-}
-
-/* --- empty state with manual search ---------------------------- */
 
 main[data-state='empty'] #status,
 main[data-state='empty'] #result,
@@ -449,174 +145,20 @@ main[data-state='empty'] #picker {
   display: none;
 }
 
+#picker {
+  padding: 8px 0 4px;
+}
+
+.picker-list {
+  max-height: 260px;
+  overflow: auto;
+}
+
 #empty-state {
   padding: 8px 0 4px;
 }
 
-.empty-message {
-  margin: 0 0 12px;
-  color: var(--muted);
-  font-size: 12.5px;
-}
-
-.manual-search {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.manual-search-label {
-  font-size: 12px;
-  color: var(--muted);
-}
-
-#manual-query {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  color: var(--fg);
-  padding: 8px 10px;
-  font: inherit;
-  font-size: 13px;
-  outline: none;
-  transition: border-color 120ms ease;
-}
-
-#manual-query::placeholder {
-  color: var(--muted);
-}
-
-#manual-query:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-.manual-results {
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-height: 200px;
-  overflow: auto;
-}
-
-.manual-results li {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 7px 10px;
-  cursor: pointer;
-  font-size: 12.5px;
-  color: var(--fg);
-  transition: border-color 120ms ease;
-}
-
-.manual-results li:hover,
-.manual-results li:focus-visible {
-  border-color: var(--accent);
-  outline: none;
-}
-
-.manual-results li.empty-result {
-  color: var(--muted);
-  font-style: italic;
-  cursor: default;
-  border-style: dashed;
-}
-
-.manual-results li.empty-result:hover {
-  border-color: var(--border);
-}
-
-.resolution-actions {
-  margin-top: 10px;
-}
-
-/* --- recent companies (inside empty state) --------------------- */
-
-.recent-section {
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px solid var(--border);
-}
-
-.recent-title {
-  font-size: 11px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--muted);
-  margin: 0 0 6px;
-}
-
-.recent-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  max-height: 160px;
-  overflow: auto;
-}
-
-.recent-list li {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--fg);
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  transition: border-color 120ms ease;
-}
-
-.recent-list li:hover,
-.recent-list li:focus-visible {
-  border-color: var(--accent);
-  outline: none;
-}
-
-.recent-list .recent-name {
-  flex: 1 1 auto;
-  font-weight: 500;
-  color: var(--fg-strong);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.recent-list .recent-orgnr {
-  flex: 0 0 auto;
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--muted);
-}
-
-.ghost-link {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  font-size: 12px;
-  color: var(--muted);
-  cursor: pointer;
-  border-bottom: 1px dashed transparent;
-  transition: color 120ms ease, border-color 120ms ease;
-}
-
-.ghost-link:hover,
-.ghost-link:focus-visible {
-  color: var(--accent);
-  border-bottom-color: currentColor;
-  outline: none;
-}
+/* --- footer -------------------------------------------------------- */
 
 footer {
   margin-top: 14px;

@@ -1,0 +1,632 @@
+/* Shared design system for both surfaces (popup + sidebar).
+ *
+ * Structure:
+ *   1. Semantic tokens — dark is the base theme, light overrides via
+ *      prefers-color-scheme. `color-scheme: light dark` lets the engine
+ *      pick matching form controls / scrollbars.
+ *   2. Base element styles shared by both documents.
+ *   3. Shared components — every block that used to be copy-pasted
+ *      between popup.css and details.css lives here exactly once.
+ *
+ * Surface stylesheets (@import this file first) keep only layout,
+ * scale and surface-specific sections. */
+
+/* --- 1. tokens --------------------------------------------------- */
+
+:root {
+  color-scheme: light dark;
+
+  /* Dark (base) — amber accent matches the brand-mark PNG. */
+  --bg: #0a0e17;
+  --bg-card: #121722;
+  --bg-elevated: #1a2130;
+  --fg: #e8eaed;
+  --fg-strong: #ffffff;
+  --muted: #8a8e96;
+  --border: #1e2432;
+  --border-strong: #2a3244;
+  --accent: #d4a574;
+  --accent-strong: #e5b87f;
+  --success: #4ade80;
+  --success-bg: rgba(34, 197, 94, 0.12);
+  --success-border: rgba(34, 197, 94, 0.28);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.12);
+  --warn-border: rgba(251, 191, 36, 0.28);
+  --danger: #f87171;
+  --danger-bg: rgba(248, 113, 113, 0.12);
+  --danger-border: rgba(248, 113, 113, 0.28);
+
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /* System stack — no bundled webfont: the strict CSP ('self') blocks
+   * remote fonts, and native UI chrome is the right register for an
+   * extension surface anyway. */
+  --font-sans:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, monospace;
+  font-family: var(--font-sans);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f6f7f9;
+    --bg-card: #ffffff;
+    --bg-elevated: #eceef2;
+    --fg: #23272f;
+    --fg-strong: #0b0e14;
+    --muted: #5f6672;
+    --border: #e3e6ec;
+    --border-strong: #c6ccd8;
+    /* Amber darkens in light mode to keep link/badge text readable
+     * against white cards. */
+    --accent: #8a5f1d;
+    --accent-strong: #6d4a15;
+    --success: #15803d;
+    --success-bg: rgba(22, 163, 74, 0.1);
+    --success-border: rgba(22, 163, 74, 0.35);
+    --warn: #9a6206;
+    --warn-bg: rgba(217, 119, 6, 0.12);
+    --warn-border: rgba(217, 119, 6, 0.35);
+    --danger: #b91c1c;
+    --danger-bg: rgba(220, 38, 38, 0.08);
+    --danger-border: rgba(220, 38, 38, 0.3);
+  }
+}
+
+/* --- 2. base ------------------------------------------------------ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- 3. shared components ---------------------------------------- */
+
+/* status / registry pills */
+
+.flags {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.flag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-elevated);
+  color: var(--fg);
+  border: 1px solid var(--border-strong);
+  letter-spacing: 0.01em;
+}
+
+.flag[data-severity='ok'] {
+  background: var(--success-bg);
+  color: var(--success);
+  border-color: var(--success-border);
+}
+
+.flag[data-severity='warn'] {
+  background: var(--warn-bg);
+  color: var(--warn);
+  border-color: var(--warn-border);
+}
+
+.flag[data-severity='danger'] {
+  background: var(--danger-bg);
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+
+/* Registry-membership facts recede behind status signals: quiet
+ * outline, no fill, muted text. */
+.flag[data-kind='registry'] {
+  background: transparent;
+  color: var(--muted);
+  border-color: var(--border-strong);
+}
+
+/* verdict strip — the synthesized trust signals under the name */
+
+.verdict {
+  margin-top: 12px;
+  display: grid;
+  /* 2×2 by default — auto-fit would strand the fourth cell alone on a
+   * second row at typical side-panel widths. Wide panels opt into a
+   * 4-across row via a media query in details.css. */
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.verdict-cell {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 9px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.verdict-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.verdict-value {
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verdict-cell[data-tone='ok'] .verdict-value {
+  color: var(--success);
+}
+
+.verdict-cell[data-tone='warn'] .verdict-value {
+  color: var(--warn);
+}
+
+.verdict-cell[data-tone='danger'] .verdict-value {
+  color: var(--danger);
+}
+
+.verdict-detail {
+  font-size: 10.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* orgnr + click-to-copy */
+
+.orgnr {
+  font-family: var(--font-mono);
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+
+.orgnr-copy {
+  font: inherit;
+  background: none;
+  border: none;
+  color: inherit;
+  padding: 0 2px;
+  margin: 0;
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.orgnr-copy:hover {
+  color: var(--accent);
+  border-bottom-color: currentColor;
+}
+
+.orgnr-copy:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.orgnr-copy.copied {
+  color: var(--success);
+  border-bottom-color: transparent;
+}
+
+.orgnr-copy.copy-failed {
+  color: var(--danger);
+  border-bottom-color: transparent;
+}
+
+/* quiet inline action ("Feil bedrift? Vis alternativer") */
+
+.resolution-actions {
+  margin-top: 10px;
+}
+
+.ghost-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 1px dashed transparent;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.ghost-link:hover,
+.ghost-link:focus-visible {
+  color: var(--accent);
+  border-bottom-color: currentColor;
+  outline: none;
+}
+
+/* retry affordances (error state + inline search error) */
+
+.error-actions {
+  padding: 0 0 12px;
+}
+
+.retry-button {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg);
+  padding: 6px 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.retry-button:hover,
+.retry-button:focus-visible {
+  border-color: var(--accent);
+  color: var(--fg-strong);
+  outline: none;
+}
+
+/* picker ("Vi fant flere mulige treff…") */
+
+.picker-intro {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.picker-list {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.picker-item {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 34px 9px 11px;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--fg);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease;
+  width: 100%;
+}
+
+.picker-item:hover,
+.picker-item:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.picker-item-name {
+  display: block;
+  font-weight: 500;
+  color: var(--fg-strong);
+  font-size: 13px;
+}
+
+.picker-item-naering {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--fg);
+  /* Single-line ellipsis — næring descriptions can be 60+ chars
+   * ("Konsulentvirksomhet innenfor informasjonsteknologi") and would
+   * wrap two/three lines in a narrow surface, blowing up row height. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-item-meta {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Digit-shortcut badge (1-4 on rows, 0 on "Ingen av disse") — makes
+ * the existing keyboard shortcuts discoverable. */
+.picker-key {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1;
+  color: var(--muted);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  padding: 3px 5px;
+}
+
+.picker-none {
+  position: relative;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--muted);
+  padding: 8px 34px 8px 12px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  width: 100%;
+  transition:
+    color 120ms ease,
+    border-color 120ms ease;
+}
+
+.picker-none:hover,
+.picker-none:focus-visible {
+  color: var(--fg);
+  border-color: var(--border-strong);
+  outline: none;
+}
+
+/* empty state + manual search */
+
+.empty-message {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.manual-search {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.manual-search-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#manual-query {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--fg);
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 120ms ease;
+}
+
+#manual-query::placeholder {
+  color: var(--muted);
+}
+
+#manual-query:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+.manual-results {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+/* Result rows are real buttons (keyboard-operable for free); the li is
+ * just the list slot. */
+.manual-results li {
+  display: block;
+}
+
+.manual-hit {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--fg);
+  transition: border-color 120ms ease;
+}
+
+.manual-hit:hover,
+.manual-hit:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.manual-results li.empty-result {
+  color: var(--muted);
+  font-style: italic;
+  cursor: default;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-size: 12.5px;
+}
+
+.manual-results li.search-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--danger);
+  cursor: default;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 7px 10px;
+  font-size: 12.5px;
+}
+
+/* recent companies (empty-state section, both surfaces) */
+
+.recent-section {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.recent-title {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.recent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.recent-list li {
+  display: block;
+}
+
+.recent-hit {
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 6px 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  color: var(--fg);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  transition: border-color 120ms ease;
+}
+
+.recent-hit:hover,
+.recent-hit:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.recent-name {
+  flex: 1 1 auto;
+  text-align: left;
+  font-weight: 500;
+  color: var(--fg-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.recent-orgnr {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+/* skeleton (data-state='loading') */
+
+.skel {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 0%,
+    var(--bg-elevated) 50%,
+    var(--bg-card) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.skel-flags {
+  display: flex;
+  gap: 6px;
+}
+
+.skel-pill {
+  height: 19px;
+  width: 74px;
+  border-radius: var(--radius-pill);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skel {
+    animation: none;
+    background: var(--bg-card);
+  }
+}

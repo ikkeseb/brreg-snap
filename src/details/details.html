@@ -35,9 +35,11 @@
       <section id="skeleton" aria-hidden="true">
         <div class="skel skel-name"></div>
         <div class="skel skel-orgnr"></div>
-        <div class="skel-flags">
-          <div class="skel skel-pill"></div>
-          <div class="skel skel-pill"></div>
+        <div class="skel-verdict">
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
         </div>
         <div class="skel skel-card"></div>
         <div class="skel skel-card"></div>
@@ -57,12 +59,22 @@
           />
           <ul id="manual-results" class="manual-results"></ul>
         </div>
+        <section id="recent-section" class="recent-section" hidden>
+          <h3 class="recent-title">Nylig sett</h3>
+          <ul id="recent-list" class="recent-list"></ul>
+        </section>
       </section>
       <section id="picker" hidden>
         <p class="picker-intro">Vi fant flere mulige treff på denne siden:</p>
         <ul id="picker-list" class="picker-list"></ul>
-        <button type="button" id="picker-none" class="picker-none">
+        <button
+          type="button"
+          id="picker-none"
+          class="picker-none"
+          aria-keyshortcuts="0 Escape"
+        >
           Ingen av disse
+          <kbd class="picker-key" aria-hidden="true">0</kbd>
         </button>
       </section>
       <section id="result" hidden>
@@ -72,6 +84,7 @@
                announce the new company name. -->
           <h2 id="name" tabindex="-1"></h2>
           <div id="orgnr" class="orgnr"></div>
+          <div id="verdict" class="verdict" role="group" aria-label="Vurdering"></div>
           <div id="flags" class="flags"></div>
           <div id="resolution-actions" class="resolution-actions" hidden>
             <button type="button" id="reject-choice" class="ghost-link">
@@ -164,9 +177,7 @@
         >
           <section id="nokkeltall" class="card">
             <h3 class="visually-hidden">Nøkkeltall</h3>
-            <div id="nokkeltall-body">
-              <p class="empty">Regnskapsdata kommer snart.</p>
-            </div>
+            <div id="nokkeltall-body"></div>
           </section>
         </section>
 

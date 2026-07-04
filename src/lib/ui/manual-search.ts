@@ -6,10 +6,13 @@
 // return []). Failures render INLINE in the results container with a
 // "Prøv igjen" retry — never a full panel error state, which would
 // rip the input away from under the user mid-typing.
+//
+// Result rows are real <button>s (keyboard-operable for free), and the
+// result count is announced through a visually-hidden aria-live region
+// so screen-reader users hear "5 treff" instead of silence.
 
 import { searchEnheter } from '../brreg.js';
 import type { SearchHit } from '../../types/brreg.js';
-import { makeActivable } from './activate.js';
 import { appendHitSummary } from './hit-row.js';
 
 const DEBOUNCE_MS = 250;
@@ -41,12 +44,24 @@ export function attachManualSearch(
   let timer: ReturnType<typeof setTimeout> | undefined;
   let runId = 0;
 
+  // aria-live region for result-count announcements. Created here
+  // (not in the HTML) so every surface using the component gets it.
+  const liveRegion = document.createElement('div');
+  liveRegion.className = 'visually-hidden';
+  liveRegion.setAttribute('aria-live', 'polite');
+  opts.resultsEl.insertAdjacentElement('afterend', liveRegion);
+
+  function announce(text: string): void {
+    liveRegion.textContent = text;
+  }
+
   opts.inputEl.addEventListener('input', () => {
     if (timer) clearTimeout(timer);
     runId += 1;
     const value = opts.inputEl.value.trim();
     if (value.length < MIN_QUERY_LENGTH) {
       opts.resultsEl.replaceChildren();
+      announce('');
       opts.onQueryCleared?.();
       return;
     }
@@ -68,14 +83,20 @@ export function attachManualSearch(
         li.className = 'empty-result';
         li.textContent = 'Ingen treff.';
         opts.resultsEl.appendChild(li);
+        announce('Ingen treff.');
         return;
       }
       for (const hit of results) {
         const li = document.createElement('li');
-        appendHitSummary(li, hit);
-        makeActivable(li, () => opts.onSelect(hit));
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'manual-hit';
+        appendHitSummary(btn, hit);
+        btn.addEventListener('click', () => opts.onSelect(hit));
+        li.appendChild(btn);
         opts.resultsEl.appendChild(li);
       }
+      announce(results.length === 1 ? '1 treff.' : `${results.length} treff.`);
     } catch {
       if (myRunId !== runId) return;
       renderSearchError(query);
@@ -98,12 +119,14 @@ export function attachManualSearch(
     });
     li.appendChild(retry);
     opts.resultsEl.appendChild(li);
+    announce('Søket feilet.');
   }
 
   return {
     reset(): void {
       opts.inputEl.value = '';
       opts.resultsEl.replaceChildren();
+      announce('');
       runId += 1;
       if (timer) {
         clearTimeout(timer);

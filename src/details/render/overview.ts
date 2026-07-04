@@ -1,4 +1,9 @@
-import { formatAddress, formatNaering } from '../../lib/format.js';
+import {
+  formatAddress,
+  formatCount,
+  formatDateNo,
+  formatNaering,
+} from '../../lib/format.js';
 import { findRoleHolder } from '../../lib/roller.js';
 import type { Enhet, RollerResponse } from '../../types/brreg.js';
 import { $, addLink, addRow } from './dom.js';
@@ -7,15 +12,15 @@ const overviewList = $('overview-list') as HTMLDListElement;
 const contactList = $('contact-list') as HTMLDListElement;
 
 export function renderOverview(enhet: Enhet, roller: RollerResponse): void {
-  overviewList.innerHTML = '';
+  overviewList.replaceChildren();
   addRow(overviewList, 'Organisasjonsform', enhet.organisasjonsform?.beskrivelse);
   addRow(
     overviewList,
     'Registrert',
-    enhet.registreringsdatoEnhetsregisteret,
+    formatDateNo(enhet.registreringsdatoEnhetsregisteret),
   );
   addRow(overviewList, 'Næring', formatNaering(enhet.naeringskode1));
-  addRow(overviewList, 'Antall ansatte', enhet.antallAnsatte?.toString());
+  addRow(overviewList, 'Antall ansatte', formatCount(enhet.antallAnsatte));
   // Who runs it / who vouches for the books — all from the same roller
   // response already fetched for daglig leder. addRow skips any that are
   // absent (a firm may have no registered styreleder, revisor, or
@@ -27,7 +32,7 @@ export function renderOverview(enhet: Enhet, roller: RollerResponse): void {
 }
 
 export function renderContact(enhet: Enhet): void {
-  contactList.innerHTML = '';
+  contactList.replaceChildren();
   const businessAddr = formatAddress(enhet.forretningsadresse);
   const postalAddr = formatAddress(enhet.postadresse);
   addRow(contactList, 'Forretningsadresse', businessAddr);

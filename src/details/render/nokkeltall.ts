@@ -15,8 +15,19 @@ const nokkeltallBody = $('nokkeltall-body');
 // How many years the trend table shows at most.
 const TREND_YEARS = 3;
 
-export function renderNokkeltall(response: RegnskapResponse): void {
-  nokkeltallBody.innerHTML = '';
+export function renderNokkeltall(
+  response: RegnskapResponse | undefined,
+): void {
+  nokkeltallBody.replaceChildren();
+  if (!response) {
+    // The regnskap fetch failed (network/5xx). Say so — an empty-state
+    // "Ingen regnskap registrert" here would be a false claim about
+    // the registry.
+    nokkeltallBody.appendChild(
+      emptyLine('Kunne ikke hente regnskapsdata. Prøv igjen senere.'),
+    );
+    return;
+  }
   if (response.unsupportedPlan) {
     // brreg's public regnskap-API only serialises the default
     // oppstillingsplan; BANK / FORS filings exist but come back as

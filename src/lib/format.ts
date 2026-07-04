@@ -64,6 +64,29 @@ export function formatNokCompact(value: number | undefined): string | undefined 
   return formatNok(value)?.replace(/ kr$/, '');
 }
 
+// ISO date ("2002-09-12") → "12. sep. 2002". brreg serialises dates as
+// ISO strings; raw ISO in the UI forces the reader to re-parse it.
+// Returns undefined for missing/unparsable input so addRow skips it.
+export function formatDateNo(iso: string | undefined): string | undefined {
+  if (!iso) return undefined;
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date.toLocaleDateString('nb-NO', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+// Integer with nb-NO thousands separators ("7 536"). Returns undefined
+// for nullish/NaN so addRow skips it.
+export function formatCount(value: number | undefined): string | undefined {
+  if (value === undefined || value === null || Number.isNaN(value)) {
+    return undefined;
+  }
+  return value.toLocaleString('nb-NO');
+}
+
 // "akkurat nå" / "for 3 min siden" / "i dag kl 14:32" / "i går kl 14:32".
 // For anything older than yesterday: full date + time. Used by the
 // footer's "Oppdatert: ..." label.

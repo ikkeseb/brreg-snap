@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { getRecent, pushRecent } from '../src/popup/recent.js';
+import { getRecent, pushRecent } from '../src/lib/ui/recent.js';
 
 // Characterization tests for the popup "recent companies" stack. Locks
 // in the current behavior (storage.session backing, MAX 5, dedupe-by-

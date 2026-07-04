@@ -2,23 +2,29 @@
 // before any `browser.*` access. Must stay the first import.
 import '../lib/platform/globals.js';
 import { sidebar } from '../lib/platform/sidebar.js';
-import { fetchEnhet, fetchRoller } from '../lib/brreg.js';
+import { fetchEnhet, fetchRegnskap, fetchRoller } from '../lib/brreg.js';
 import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress, formatNaering } from '../lib/format.js';
 import { findRoleHolder } from '../lib/roller.js';
 import { addLink, addRow } from '../details/render/dom.js';
-import { makeActivable } from '../lib/ui/activate.js';
-import { deriveStatusFlags, makeFlag } from '../lib/ui/flags.js';
+import { describeLoadError } from '../lib/ui/error-message.js';
+import { renderFlags } from '../lib/ui/flags.js';
 import { attachManualSearch } from '../lib/ui/manual-search.js';
 import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
+import { pushRecent, renderRecentSection } from '../lib/ui/recent.js';
 import {
   resolveTabContext,
   type ResolutionMethod,
   type TabContext,
 } from '../lib/ui/resolve-tab.js';
 import { createSourceLabel } from '../lib/ui/source-label.js';
-import type { Enhet, RollerResponse, SearchHit } from '../types/brreg.js';
-import { getRecent, pushRecent } from './recent.js';
+import { deriveVerdict, renderVerdict } from '../lib/ui/verdict.js';
+import type {
+  Enhet,
+  RegnskapResponse,
+  RollerResponse,
+  SearchHit,
+} from '../types/brreg.js';
 
 const app = document.getElementById('app') as HTMLElement;
 const brandMark = document.getElementById('brand-mark') as HTMLImageElement;
@@ -287,24 +293,33 @@ async function loadAndRender(
   setDetailsLink();
   void syncSidebarIfOpen(orgnr);
   try {
-    // Roller is a second API call but it lives behind the same 24h
-    // session cache, and we want daglig leder visible in the quick
-    // glance — not just in the sidebar details view.
-    const [enhet, roller] = await Promise.all([
+    // Roller and regnskap are extra API calls but live behind the same
+    // 24h session cache, and both feed the quick glance: daglig leder
+    // in the rows, "leverer regnskap?" in the verdict strip. They are
+    // soft dependencies — on failure the verdict omits the signal
+    // (undefined ≠ "not filed") and the roller rows render empty.
+    const [enhet, roller, regnskap] = await Promise.all([
       fetchEnhet(orgnr),
       fetchRoller(orgnr).catch(
         () => ({ rollegrupper: [] }) as RollerResponse,
       ),
+      fetchRegnskap(orgnr).catch(
+        (): RegnskapResponse | undefined => undefined,
+      ),
     ]);
     if (myRunId !== loadRunId) return;
-    renderEnhet(enhet, roller);
+    renderEnhet(enhet, roller, regnskap);
   } catch (err) {
     if (myRunId !== loadRunId) return;
     showError(err);
   }
 }
 
-function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
+function renderEnhet(
+  enhet: Enhet,
+  roller: RollerResponse,
+  regnskap: RegnskapResponse | undefined,
+): void {
   setState('result');
   resultEl.replaceChildren();
 
@@ -322,11 +337,19 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   renderOrgnrCopy(orgnrEl, enhet.organisasjonsnummer);
   resultEl.appendChild(orgnrEl);
 
+  // The verdict strip answers the user's actual question ("kan jeg
+  // stole på dette firmaet?") before the detail rows: status, age,
+  // size, filing record. Registrert/Ansatte therefore no longer get
+  // their own dl rows — the strip carries them.
+  const verdictEl = document.createElement('div');
+  verdictEl.setAttribute('role', 'group');
+  verdictEl.setAttribute('aria-label', 'Vurdering');
+  renderVerdict(verdictEl, deriveVerdict(enhet, regnskap));
+  resultEl.appendChild(verdictEl);
+
   const dl = document.createElement('dl');
   addRow(dl, 'Form', enhet.organisasjonsform?.beskrivelse);
-  addRow(dl, 'Registrert', enhet.registreringsdatoEnhetsregisteret);
   addRow(dl, 'Næring', formatNaering(enhet.naeringskode1));
-  addRow(dl, 'Ansatte', enhet.antallAnsatte?.toString());
   // Always render daglig leder, even when missing, so the user sees we
   // looked — empty fallback distinguishes "no role registered" from
   // "we forgot to check". Other rows can legitimately be missing on
@@ -345,19 +368,12 @@ function renderEnhet(enhet: Enhet, roller: RollerResponse): void {
   }
   resultEl.appendChild(dl);
 
+  // Secondary status pills (rare combos) + registry memberships. The
+  // primary status lives in the verdict strip.
   const flags = document.createElement('div');
   flags.className = 'flags';
-  for (const flag of deriveStatusFlags(enhet))
-    flags.appendChild(makeFlag(flag.label, flag.severity));
-  if (enhet.registrertIMvaregisteret)
-    flags.appendChild(makeFlag('MVA-registrert', undefined, 'registry'));
-  if (enhet.registrertIForetaksregisteret)
-    flags.appendChild(makeFlag('Foretaksregistret', undefined, 'registry'));
-  if (enhet.registrertIStiftelsesregisteret)
-    flags.appendChild(makeFlag('Stiftelsesregistret', undefined, 'registry'));
-  if (enhet.registrertIFrivillighetsregisteret)
-    flags.appendChild(makeFlag('Frivillighetsregistret', undefined, 'registry'));
-  if (flags.childNodes.length > 0) resultEl.appendChild(flags);
+  renderFlags(flags, enhet);
+  if (!flags.hidden) resultEl.appendChild(flags);
 
   updateRejectButtonVisibility();
 }
@@ -385,38 +401,15 @@ function showEmptyState(host: string | undefined): void {
 }
 
 async function renderRecentList(): Promise<void> {
-  const entries = await getRecent();
-  recentListEl.replaceChildren();
-  if (entries.length === 0) {
-    recentSectionEl.hidden = true;
-    return;
-  }
-  recentSectionEl.hidden = false;
-  for (const entry of entries) {
-    const li = document.createElement('li');
-
-    const name = document.createElement('span');
-    name.className = 'recent-name';
-    name.textContent = entry.navn;
-    li.appendChild(name);
-
-    const orgnr = document.createElement('span');
-    orgnr.className = 'recent-orgnr';
-    orgnr.textContent = entry.orgnr;
-    li.appendChild(orgnr);
-
-    makeActivable(li, () => {
-      void loadAndRender(entry.orgnr, 'manual');
-    });
-    recentListEl.appendChild(li);
-  }
+  await renderRecentSection(recentSectionEl, recentListEl, (entry) => {
+    void loadAndRender(entry.orgnr, 'manual');
+  });
 }
 
 function showError(err: unknown): void {
   setState('error');
   setDetailsLink();
-  const message = err instanceof Error ? err.message : String(err);
-  statusEl.textContent = `Feil: ${message}`;
+  statusEl.textContent = describeLoadError(err);
   // "Prøv igjen" only makes sense when there is a load to re-trigger —
   // an init-time resolution failure has nothing to retry.
   errorActionsEl.hidden = lastLoad === undefined;

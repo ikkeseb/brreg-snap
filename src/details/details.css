@@ -1,56 +1,6 @@
-:root {
-  --bg: #080b14;
-  --bg-card: #11151f;
-  --bg-elevated: #1a2030;
-  --fg: #e8eaed;
-  --fg-strong: #ffffff;
-  --muted: #8a8e96;
-  --border: #1e2330;
-  --border-strong: #2a3142;
-  --accent: #d4a574;
-  --accent-strong: #e5b87f;
-  --success: #4ade80;
-  --success-bg: rgba(34, 197, 94, 0.12);
-  --success-border: rgba(34, 197, 94, 0.28);
-  --warn: #fbbf24;
-  --warn-bg: rgba(251, 191, 36, 0.12);
-  --danger: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.12);
-  --radius: 8px;
-  --radius-lg: 12px;
-  --radius-pill: 999px;
-  --font-sans:
-    'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-    Ubuntu, Cantarell, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, monospace;
-  font-family: var(--font-sans);
-  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
-}
-
-/* Amber (--accent above) is the shipped default and matches the
-   brand-mark PNG. These data-accent overrides are devtools-only
-   experiments — no element sets data-accent in production. */
-main[data-accent='teal'] {
-  --accent: #5eead4;
-  --accent-strong: #99f6e4;
-}
-
-main[data-accent='sky'] {
-  --accent: #7dd3fc;
-  --accent-strong: #bae6fd;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-  background: var(--bg);
-  color: var(--fg);
-}
+/* Sidebar / side-panel surface — layout and scale only. Tokens and
+ * every shared component live in ../styles/shared.css. */
+@import '../styles/shared.css';
 
 main {
   max-width: 880px;
@@ -68,18 +18,6 @@ main > header {
   margin-bottom: 18px;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--border);
-}
-
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 .brand-row {
@@ -124,7 +62,9 @@ main > header {
   background: var(--bg-elevated);
   border: 1px solid var(--border-strong);
   position: relative;
-  transition: background 120ms ease, border-color 120ms ease;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
 }
 
 .toggle-track::after {
@@ -136,7 +76,9 @@ main > header {
   height: 12px;
   border-radius: 50%;
   background: var(--muted);
-  transition: transform 160ms ease, background 120ms ease;
+  transition:
+    transform 160ms ease,
+    background 120ms ease;
 }
 
 .toggle input:checked ~ .toggle-track {
@@ -164,16 +106,6 @@ main > header {
   color: var(--warn);
 }
 
-#back-link {
-  color: var(--accent);
-  text-decoration: none;
-  font-size: 13px;
-}
-
-#back-link:hover {
-  text-decoration: underline;
-}
-
 #status {
   padding: 16px 0;
   color: var(--muted);
@@ -183,46 +115,7 @@ main[data-state='error'] #status {
   color: var(--danger);
 }
 
-/* --- retry affordances (error state + inline search error) ------ */
-
-.error-actions {
-  padding: 0 0 12px;
-}
-
-.retry-button {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  color: var(--fg);
-  padding: 7px 14px;
-  cursor: pointer;
-  font: inherit;
-  font-size: 13px;
-  transition:
-    color 120ms ease,
-    border-color 120ms ease;
-}
-
-.retry-button:hover,
-.retry-button:focus-visible {
-  border-color: var(--accent);
-  color: var(--fg-strong);
-  outline: none;
-}
-
-.manual-results li.search-error {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--danger);
-  cursor: default;
-  border-style: dashed;
-}
-
-.manual-results li.search-error:hover {
-  border-color: var(--border);
-}
+/* --- result head --------------------------------------------------- */
 
 #result-head {
   margin-bottom: 18px;
@@ -237,114 +130,26 @@ main[data-state='error'] #status {
 }
 
 /* Focused only programmatically (tabindex=-1) to announce a drilled-in
-   company to screen readers — it is not a keyboard target, so suppress
-   the focus ring that would otherwise flash on the heading. */
+ * company to screen readers — it is not a keyboard target, so suppress
+ * the focus ring that would otherwise flash on the heading. */
 #result-head h2:focus {
   outline: none;
 }
 
 .orgnr {
-  font-family: var(--font-mono);
-  color: var(--muted);
   font-size: 12.5px;
-  letter-spacing: 0.02em;
 }
 
-.orgnr-copy {
-  font: inherit;
-  background: none;
-  border: none;
-  color: inherit;
-  padding: 0 2px;
-  margin: 0;
-  cursor: pointer;
-  border-bottom: 1px dashed transparent;
-  transition: color 120ms ease, border-color 120ms ease;
+/* Wide panels (detached window, wide sidebar): the four verdict cells
+ * fit one row. The viewport IS the panel here, so a media query is the
+ * container query. */
+@media (min-width: 560px) {
+  .verdict {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
-.orgnr-copy:hover {
-  color: var(--accent);
-  border-bottom-color: currentColor;
-}
-
-.orgnr-copy:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-.orgnr-copy.copied {
-  color: var(--success);
-  border-bottom-color: transparent;
-}
-
-.flags {
-  margin-top: 12px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.resolution-actions {
-  margin-top: 10px;
-}
-
-.ghost-link {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  font-size: 12px;
-  color: var(--muted);
-  cursor: pointer;
-  border-bottom: 1px dashed transparent;
-  transition: color 120ms ease, border-color 120ms ease;
-}
-
-.ghost-link:hover,
-.ghost-link:focus-visible {
-  color: var(--accent);
-  border-bottom-color: currentColor;
-  outline: none;
-}
-
-.flag {
-  font-size: 11px;
-  font-weight: 500;
-  padding: 3px 10px;
-  border-radius: var(--radius-pill);
-  background: var(--bg-elevated);
-  color: var(--fg);
-  border: 1px solid var(--border-strong);
-  letter-spacing: 0.01em;
-}
-
-.flag[data-severity='ok'] {
-  background: var(--success-bg);
-  color: var(--success);
-  border-color: var(--success-border);
-}
-
-.flag[data-severity='warn'] {
-  background: var(--warn-bg);
-  color: var(--warn);
-  border-color: rgba(251, 191, 36, 0.28);
-}
-
-.flag[data-severity='danger'] {
-  background: var(--danger-bg);
-  color: var(--danger);
-  border-color: rgba(248, 113, 113, 0.28);
-}
-
-/* Registry-membership facts recede behind the status pill: quiet
-   outline, no fill, muted text. */
-.flag[data-kind='registry'] {
-  background: transparent;
-  color: var(--muted);
-  border-color: var(--border-strong);
-}
+/* --- cards ---------------------------------------------------------- */
 
 .card {
   background: var(--bg-card);
@@ -400,6 +205,8 @@ dd a:hover {
   text-decoration: underline;
 }
 
+/* --- roles ----------------------------------------------------------- */
+
 .role-group {
   margin-bottom: 14px;
 }
@@ -432,7 +239,7 @@ dd a:hover {
 }
 
 /* Split the row: muted label, strong subject — the name is what the eye
-   scans for, not the repeated role boilerplate. */
+ * scans for, not the repeated role boilerplate. */
 .role-list .role-label {
   color: var(--muted);
 }
@@ -442,7 +249,7 @@ dd a:hover {
 }
 
 /* A resigned role dims as a whole, so pull its otherwise-strong subject
-   back to muted to match the strike-through. */
+ * back to muted to match the strike-through. */
 .role-list .fratraadt .role-subject {
   color: var(--muted);
 }
@@ -467,6 +274,8 @@ dd a:hover {
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* --- underenheter ----------------------------------------------------- */
 
 table.underenheter {
   width: 100%;
@@ -518,10 +327,12 @@ table.underenheter td.orgnr-cell {
   border-radius: var(--radius-pill);
   background: var(--danger-bg);
   color: var(--danger);
-  border: 1px solid rgba(248, 113, 113, 0.28);
+  border: 1px solid var(--danger-border);
   letter-spacing: 0.01em;
   vertical-align: middle;
 }
+
+/* --- footer ----------------------------------------------------------- */
 
 footer {
   margin-top: 24px;
@@ -553,8 +364,8 @@ footer a:hover {
 }
 
 /* "Nothing registered here" placeholder: a quiet inbox glyph centered
-   above the message. The icon is deliberately faint so it signals absence
-   without competing with real content. */
+ * above the message. The icon is deliberately faint so it signals absence
+ * without competing with real content. */
 .empty-state {
   display: flex;
   flex-direction: column;
@@ -575,31 +386,10 @@ footer a:hover {
   color: color-mix(in srgb, var(--muted) 55%, transparent);
 }
 
-/* --- skeleton (data-state='loading') ---------------------------- */
+/* --- skeleton layout (base .skel styles are shared) ------------------ */
 
 #skeleton {
   padding: 4px 0 0;
-}
-
-.skel {
-  background: linear-gradient(
-    90deg,
-    var(--bg-card) 0%,
-    var(--bg-elevated) 50%,
-    var(--bg-card) 100%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.6s linear infinite;
-  border-radius: 4px;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
 }
 
 .skel-name {
@@ -612,19 +402,19 @@ footer a:hover {
 .skel-orgnr {
   height: 12px;
   width: 110px;
+  margin-bottom: 14px;
+}
+
+.skel-verdict {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(86px, 1fr));
+  gap: 6px;
   margin-bottom: 18px;
 }
 
-.skel-flags {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 22px;
-}
-
-.skel-pill {
-  height: 20px;
-  width: 78px;
-  border-radius: var(--radius-pill);
+.skel-cell {
+  height: 50px;
+  border-radius: var(--radius);
 }
 
 .skel-card {
@@ -633,12 +423,7 @@ footer a:hover {
   border-radius: var(--radius-lg);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .skel {
-    animation: none;
-    background: var(--bg-card);
-  }
-}
+/* --- tabs -------------------------------------------------------------- */
 
 .tablist {
   display: flex;
@@ -658,8 +443,8 @@ footer a:hover {
   color: var(--muted);
   border: none;
   /* Tight enough that all four tabs fit a ~360px side panel without the
-     last one ("Enheter") clipping; the overflow-x scroll stays as a
-     fallback for the very narrowest panels. */
+   * last one ("Enheter") clipping; the overflow-x scroll stays as a
+   * fallback for the very narrowest panels. */
   flex: 1 1 auto;
   padding: 10px 6px;
   font-size: 11px;
@@ -710,6 +495,8 @@ footer a:hover {
   color: var(--fg);
 }
 
+/* --- nøkkeltall --------------------------------------------------------- */
+
 .nokkeltall-grid {
   display: grid;
   grid-template-columns: 1fr max-content;
@@ -734,7 +521,7 @@ footer a:hover {
 }
 
 /* Thin-but-positive equity (egenkapitalandel below the warn band) — amber
-   caution. Negative equity is already red via [data-sign='neg']. */
+ * caution. Negative equity is already red via [data-sign='neg']. */
 .nokkeltall-grid dd[data-sign='warn'] {
   color: var(--warn);
 }
@@ -748,9 +535,9 @@ footer a:hover {
 }
 
 /* Trend table: years down the rows, headline P&L lines across. The nowrap
-   figure cells can exceed a narrow panel's width for large-cap filings, so
-   the table is wrapped in .trend-scroll: the overflow scroll stays scoped to
-   the table instead of pushing a horizontal scrollbar onto the whole panel. */
+ * figure cells can exceed a narrow panel's width for large-cap filings, so
+ * the table is wrapped in .trend-scroll: the overflow scroll stays scoped to
+ * the table instead of pushing a horizontal scrollbar onto the whole panel. */
 .trend-scroll {
   overflow-x: auto;
   margin-bottom: 16px;
@@ -768,12 +555,12 @@ table.nokkeltall-trend td {
   border-bottom: 1px solid var(--border);
   text-align: right;
   /* Top-align so the latest row's figures and year label line up at the
-     top, with the YoY delta hanging beneath rather than centering the
-     shorter cells against the taller two-line one. */
+   * top, with the YoY delta hanging beneath rather than centering the
+   * shorter cells against the taller two-line one. */
   vertical-align: top;
   font-variant-numeric: tabular-nums;
   /* Keep "63,4 mrd" on one line — the compact formatter drops "kr" so
-     the cells fit a narrow side panel without wrapping mid-figure. */
+   * the cells fit a narrow side panel without wrapping mid-figure. */
   white-space: nowrap;
 }
 
@@ -816,11 +603,11 @@ table.nokkeltall-trend td[data-sign='neg'] {
 }
 
 /* Year-over-year delta under the latest figure ("▲ 12 %"). Block so it
-   sits on its own line beneath the number; nowrap keeps the arrow glued
-   to the percent. Muted by design — the arrow carries the direction, so a
-   coloured delta would clash with the red loss-flagging. Declared after
-   the neg rule (equal specificity) so a loss row's delta stays muted
-   rather than inheriting red. */
+ * sits on its own line beneath the number; nowrap keeps the arrow glued
+ * to the percent. Muted by design — the arrow carries the direction, so a
+ * coloured delta would clash with the red loss-flagging. Declared after
+ * the neg rule (equal specificity) so a loss row's delta stays muted
+ * rather than inheriting red. */
 table.nokkeltall-trend td .yoy {
   display: block;
   margin-top: 2px;
@@ -835,7 +622,7 @@ table.nokkeltall-trend tr:last-child td {
   border-bottom: 0;
 }
 
-/* --- picker (data-state='picker') ------------------------------- */
+/* --- state gating -------------------------------------------------------- */
 
 #picker {
   padding: 16px 0;
@@ -846,92 +633,6 @@ main[data-state='picker'] #result {
   display: none;
 }
 
-.picker-intro {
-  margin: 0 0 12px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.picker-list {
-  list-style: none;
-  margin: 0 0 12px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.picker-item {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 12px 14px;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  color: var(--fg);
-  transition:
-    border-color 120ms ease,
-    background 120ms ease;
-  width: 100%;
-}
-
-.picker-item:hover,
-.picker-item:focus-visible {
-  border-color: var(--accent);
-  outline: none;
-}
-
-.picker-item-name {
-  display: block;
-  font-weight: 500;
-  color: var(--fg-strong);
-}
-
-.picker-item-naering {
-  display: block;
-  margin-top: 3px;
-  font-size: 12.5px;
-  color: var(--fg);
-  /* Single-line ellipsis — næring descriptions can be 60+ chars
-     ("Konsulentvirksomhet innenfor informasjonsteknologi") and would
-     wrap multiple lines, blowing up row height. */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.picker-item-meta {
-  display: block;
-  margin-top: 4px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.picker-none {
-  background: none;
-  border: 1px dashed var(--border-strong);
-  color: var(--muted);
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  cursor: pointer;
-  font: inherit;
-  width: 100%;
-  transition:
-    color 120ms ease,
-    border-color 120ms ease;
-}
-
-.picker-none:hover,
-.picker-none:focus-visible {
-  color: var(--fg);
-  border-color: var(--border-strong);
-  outline: none;
-}
-
-/* --- empty state with manual search ---------------------------- */
-
 main[data-state='empty'] #status,
 main[data-state='empty'] #result,
 main[data-state='empty'] #picker {
@@ -940,79 +641,4 @@ main[data-state='empty'] #picker {
 
 #empty-state {
   padding: 16px 0 8px;
-}
-
-.empty-message {
-  margin: 0 0 14px;
-  color: var(--danger);
-  font-size: 13px;
-}
-
-.manual-search {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.manual-search-label {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: var(--muted);
-}
-
-#manual-query {
-  background: var(--bg-card);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius);
-  color: var(--fg);
-  padding: 10px 12px;
-  font: inherit;
-  outline: none;
-  transition: border-color 120ms ease;
-}
-
-#manual-query::placeholder {
-  color: var(--muted);
-}
-
-#manual-query:focus {
-  border-color: var(--accent);
-}
-
-.manual-results {
-  list-style: none;
-  margin: 4px 0 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.manual-results li {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 9px 12px;
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--fg);
-  transition: border-color 120ms ease;
-}
-
-.manual-results li:hover,
-.manual-results li:focus-visible {
-  border-color: var(--accent);
-  outline: none;
-}
-
-.manual-results li.empty-result {
-  color: var(--muted);
-  font-style: italic;
-  cursor: default;
-  border-style: dashed;
-}
-
-.manual-results li.empty-result:hover {
-  border-color: var(--border);
 }

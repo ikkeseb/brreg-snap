@@ -92,7 +92,7 @@ export function createPicker(opts: PickerOptions): PickerController {
       currentHost = host;
       currentCandidates = candidates.slice(0, MAX_PICKER_CANDIDATES);
       opts.listEl.replaceChildren();
-      for (const cand of currentCandidates) {
+      currentCandidates.forEach((cand, idx) => {
         const li = document.createElement('li');
         const btn = document.createElement('button');
         btn.type = 'button';
@@ -101,9 +101,21 @@ export function createPicker(opts: PickerOptions): PickerController {
           void choose(host, cand.organisasjonsnummer);
         });
         appendHitSummary(btn, cand, { includeAnsatte: true });
+        // Surface the existing 1-4 digit shortcuts: a small <kbd>
+        // badge on the row (decorative — the shortcut itself is
+        // exposed via aria-keyshortcuts).
+        if (idx < 4) {
+          const key = String(idx + 1);
+          btn.setAttribute('aria-keyshortcuts', key);
+          const badge = document.createElement('kbd');
+          badge.className = 'picker-key';
+          badge.setAttribute('aria-hidden', 'true');
+          badge.textContent = key;
+          btn.appendChild(badge);
+        }
         li.appendChild(btn);
         opts.listEl.appendChild(li);
-      }
+      });
     },
     clear(): void {
       currentHost = undefined;

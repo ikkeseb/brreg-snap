@@ -12,8 +12,10 @@ import {
 import { formatRelativeTime } from '../lib/format.js';
 import { searchByHostnameDetailed } from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
+import { describeLoadError } from '../lib/ui/error-message.js';
 import { attachManualSearch } from '../lib/ui/manual-search.js';
 import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
+import { pushRecent, renderRecentSection } from '../lib/ui/recent.js';
 import {
   resolveTabContext,
   type ResolutionMethod,
@@ -57,6 +59,8 @@ const emptyStateEl = $('empty-state');
 const emptyMessageEl = $('empty-message');
 const manualQueryEl = $('manual-query') as HTMLInputElement;
 const manualResultsEl = $('manual-results') as HTMLUListElement;
+const recentSectionEl = $('recent-section');
+const recentListEl = $('recent-list') as HTMLUListElement;
 const resolutionActionsEl = $('resolution-actions');
 const rejectChoiceBtn = $('reject-choice') as HTMLButtonElement;
 
@@ -227,8 +231,7 @@ function setState(
 
 function showError(err: unknown): void {
   setState('error');
-  const message = err instanceof Error ? err.message : String(err);
-  statusEl.textContent = `Feil: ${message}`;
+  statusEl.textContent = describeLoadError(err);
   // "Prøv igjen" only makes sense when there is a load to re-trigger.
   errorActionsEl.hidden = lastLoad === undefined;
 }
@@ -242,6 +245,10 @@ function showEmptyState(host?: string): void {
     ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
     : 'Sidepanelet ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
   manualSearch.reset();
+  void renderRecentSection(recentSectionEl, recentListEl, (entry) => {
+    setHistoryOrgnr(entry.orgnr, 'manual', false);
+    void loadOrgnr(entry.orgnr, 'manual');
+  });
   // Focus the search box only when the sidebar window itself has
   // focus — with auto-sync on, a tab switch to an unresolvable site
   // repaints this panel in the background, and an unconditional
@@ -294,11 +301,20 @@ async function loadOrgnr(
       fetchEnhet(orgnr),
       fetchRoller(orgnr).catch(() => ({ rollegrupper: [] }) as RollerResponse),
       fetchUnderenheter(orgnr).catch(() => [] as Underenhet[]),
-      fetchRegnskap(orgnr).catch(() => ({ items: [] }) as RegnskapResponse),
+      // undefined = "couldn't ask", distinct from "asked, nothing
+      // filed" — the verdict strip omits its regnskap signal and the
+      // Nøkkeltall tab explains, instead of claiming an empty registry.
+      fetchRegnskap(orgnr).catch(
+        (): RegnskapResponse | undefined => undefined,
+      ),
     ]);
     if (myRunId !== loadRunId) return;
 
-    renderHeader(enhet);
+    // Stamp the recent stack now that the Enhet is confirmed — same
+    // rule as the popup: never persist orgnrs that failed to fetch.
+    void pushRecent(enhet.organisasjonsnummer, enhet.navn);
+
+    renderHeader(enhet, regnskap);
     renderOverview(enhet, roller);
     renderContact(enhet);
     renderRoles(roller, navigateToRelated);

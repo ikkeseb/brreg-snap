@@ -20,15 +20,16 @@
       <section id="skeleton" aria-hidden="true" hidden>
         <div class="skel skel-name"></div>
         <div class="skel skel-orgnr"></div>
+        <div class="skel-verdict">
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
+          <div class="skel skel-cell"></div>
+        </div>
         <div class="skel-rows">
           <div class="skel skel-row"></div>
           <div class="skel skel-row"></div>
           <div class="skel skel-row"></div>
-          <div class="skel skel-row"></div>
-        </div>
-        <div class="skel-flags">
-          <div class="skel skel-pill"></div>
-          <div class="skel skel-pill"></div>
         </div>
       </section>
       <section id="result" hidden></section>
@@ -40,8 +41,14 @@
       <section id="picker" hidden>
         <p class="picker-intro">Vi fant flere mulige treff på denne siden:</p>
         <ul id="picker-list" class="picker-list"></ul>
-        <button type="button" id="picker-none" class="picker-none">
+        <button
+          type="button"
+          id="picker-none"
+          class="picker-none"
+          aria-keyshortcuts="0 Escape"
+        >
           Ingen av disse
+          <kbd class="picker-key" aria-hidden="true">0</kbd>
         </button>
       </section>
       <section id="empty-state" hidden>

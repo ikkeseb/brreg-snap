@@ -1,24 +1,23 @@
 import { renderOrgnrCopy } from '../../lib/copy-orgnr.js';
-import { deriveStatusFlags, makeFlag } from '../../lib/ui/flags.js';
-import type { Enhet } from '../../types/brreg.js';
+import { renderFlags } from '../../lib/ui/flags.js';
+import { deriveVerdict, renderVerdict } from '../../lib/ui/verdict.js';
+import type { Enhet, RegnskapResponse } from '../../types/brreg.js';
 import { $ } from './dom.js';
 
 const nameEl = $('name');
 const orgnrEl = $('orgnr');
+const verdictEl = $('verdict');
 const flagsEl = $('flags');
 
-export function renderHeader(enhet: Enhet): void {
+// Header = identity (name, orgnr) + judgment (verdict strip) +
+// memberships (quiet registry pills). The primary status lives in the
+// verdict strip; renderFlags shows only secondary statuses + registries.
+export function renderHeader(
+  enhet: Enhet,
+  regnskap: RegnskapResponse | undefined,
+): void {
   nameEl.textContent = enhet.navn;
   renderOrgnrCopy(orgnrEl, enhet.organisasjonsnummer);
-  flagsEl.innerHTML = '';
-  for (const flag of deriveStatusFlags(enhet))
-    flagsEl.appendChild(makeFlag(flag.label, flag.severity));
-  if (enhet.registrertIMvaregisteret)
-    flagsEl.appendChild(makeFlag('MVA-registrert', undefined, 'registry'));
-  if (enhet.registrertIForetaksregisteret)
-    flagsEl.appendChild(makeFlag('Foretaksregistret', undefined, 'registry'));
-  if (enhet.registrertIStiftelsesregisteret)
-    flagsEl.appendChild(makeFlag('Stiftelsesregistret', undefined, 'registry'));
-  if (enhet.registrertIFrivillighetsregisteret)
-    flagsEl.appendChild(makeFlag('Frivillighetsregistret', undefined, 'registry'));
+  renderVerdict(verdictEl, deriveVerdict(enhet, regnskap));
+  renderFlags(flagsEl, enhet);
 }
