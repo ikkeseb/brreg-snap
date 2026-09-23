@@ -28,13 +28,18 @@ Chrome throws on any filter, so `followsUpdate` is the gate there.
 <!-- SECTION: sendmessage-not-setpanel -->
 ## Messages repaint an open panel; each names its window
 
-`sidebarAction.setPanel({panel: url})` *should* repaint an open
-sidebar per MDN, but in Firefox 115+ it doesn't reliably — the panel
-URL is updated for the next open, the visible iframe stays put. So the
+A global `sidebarAction.setPanel({panel: url})` repaints an open
+sidebar in one window only. Firefox keeps one panel URL per extension
+(`this.panel` in `ext-sidebarAction.js`); `updateOnChange(null)` walks
+the windows oldest first, and only the first sees the URL change and
+reloads its open sidebar. That need not be the sender's window. So the
 popup (after resolving the tab, and on «Ingen av disse») and the
 context menu send a `runtime.sendMessage` the open panel applies in
 place. The shape lives in `panel-protocol.ts`: `{type:'sync', windowId,
-orgnr, host, method}` or `{type:'no-match', windowId, host}`.
+orgnr, host, method}` or `{type:'no-match', windowId, host}`. Don't
+switch to a per-window `setPanel({windowId})`: against the one shared
+`this.panel`, every tab switch in the other window would then count as
+a URL change and reload that window's open sidebar.
 
 `runtime.sendMessage` reaches every extension page, and each browser
 window has its own panel document, so every message carries the
@@ -52,8 +57,25 @@ for that (it only left a global panel URL behind for a later open).
 
 `sidebar.setPanel` sets the GLOBAL panel URL on both engines, and it
 outlives the open it was set for. Only gestures that also open the
-panel set it (popup link, context menu), via `panelPath(target, now)`:
-`details.html?orgnr=…&at=<ms>` or `?nomatch=<host>&at=<ms>`.
+panel set it (popup link, context menu), via
+`panelPath(target, now, windowId)`: `details.html?orgnr=…&at=<ms>&w=<id>`
+or `?nomatch=<host>&at=<ms>&w=<id>`.
+
+`w` is the window the open was for. The same global URL can load in
+another window: a later open there, or the Firefox reload above, which
+hits the oldest window's open sidebar. `readPanelHint` then returns no
+hint at all, fresh or leftover, so that panel shows its own tab (or
+the empty state), never the other window's company. A panel that
+couldn't learn its window takes no hint that names one. The popup's
+plain `href` (middle- or shift-click, maybe into a new window) names
+none.
+
+Known limit: every open stamps a new `at`, so on Firefox a context-menu
+or popup-link open also reloads the sidebar that is already open in
+the oldest window, losing its drill-in history, open tab and scroll.
+When that is the opener's own window, the reload lands on the requested
+company. Skipping `setPanel` when the panel is already open would need
+`isOpen`, which can't be awaited inside the gesture.
 
 On load (`chooseStart` in `panel-follow.ts`, tested there):
 

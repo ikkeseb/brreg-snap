@@ -196,8 +196,10 @@ describe('context menu click', () => {
     menuHandler(mock)({ menuItemId: 'show-in-brreg-sidebar' }, tab);
 
     // Synchronously, before any await: setPanel + open (gesture stack).
+    // The path names the click's window, so another window's panel
+    // that loads it ignores it.
     expect(mock.sidebarAction?.setPanel).toHaveBeenCalledWith({
-      panel: `moz-extension://test/details/details.html?orgnr=984851006&at=${NOW}`,
+      panel: `moz-extension://test/details/details.html?orgnr=984851006&at=${NOW}&w=3`,
     });
     expect(mock.sidebarAction?.open).toHaveBeenCalledTimes(1);
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
@@ -221,7 +223,7 @@ describe('context menu click', () => {
     await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
     expect(mock.sidePanel?.setOptions).toHaveBeenCalledWith({
-      path: `details/details.html?nomatch=www.yara.com&at=${NOW}`,
+      path: `details/details.html?nomatch=www.yara.com&at=${NOW}&w=3`,
       enabled: true,
     });
     expect(mock.sidePanel?.open).toHaveBeenCalledWith({ windowId: 3 });

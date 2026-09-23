@@ -68,12 +68,14 @@ describe('isForWindow', () => {
 
 describe('panelPath / readPanelHint — the stamped panel-URL hint', () => {
   const now = 1_790_000_000_000;
+  // The window of the panel reading the hint.
+  const WIN = 7;
 
   it('stamps an orgnr target with the open time and reads it back as fresh', () => {
     const path = panelPath({ orgnr: DNB }, now);
     expect(path).toBe(`details/details.html?orgnr=${DNB}&at=${now}`);
     const search = path.slice(path.indexOf('?'));
-    expect(readPanelHint(search, now + 400)).toEqual({
+    expect(readPanelHint(search, now + 400, WIN)).toEqual({
       orgnr: DNB,
       nomatch: undefined,
       fresh: true,
@@ -83,7 +85,7 @@ describe('panelPath / readPanelHint — the stamped panel-URL hint', () => {
   it('encodes a nomatch host', () => {
     const path = panelPath({ nomatch: 'bløtekake.no' }, now);
     const search = path.slice(path.indexOf('?'));
-    expect(readPanelHint(search, now)).toMatchObject({
+    expect(readPanelHint(search, now, WIN)).toMatchObject({
       nomatch: 'bløtekake.no',
       fresh: true,
     });
@@ -91,7 +93,7 @@ describe('panelPath / readPanelHint — the stamped panel-URL hint', () => {
 
   it('a bare panel path carries no hint', () => {
     expect(panelPath(undefined, now)).toBe('details/details.html');
-    expect(readPanelHint('', now)).toEqual({
+    expect(readPanelHint('', now, WIN)).toEqual({
       orgnr: undefined,
       nomatch: undefined,
       fresh: false,
@@ -100,27 +102,60 @@ describe('panelPath / readPanelHint — the stamped panel-URL hint', () => {
 
   it('a hint older than the open window is a leftover, not fresh', () => {
     const search = `?orgnr=${DNB}&at=${now}`;
-    expect(readPanelHint(search, now + PANEL_HINT_FRESH_MS).fresh).toBe(true);
-    expect(readPanelHint(search, now + PANEL_HINT_FRESH_MS + 1).fresh).toBe(
+    expect(readPanelHint(search, now + PANEL_HINT_FRESH_MS, WIN).fresh).toBe(true);
+    expect(readPanelHint(search, now + PANEL_HINT_FRESH_MS + 1, WIN).fresh).toBe(
       false,
     );
   });
 
   it('an unstamped, future-stamped or junk-stamped hint is never fresh', () => {
-    expect(readPanelHint(`?orgnr=${DNB}`, now).fresh).toBe(false);
-    expect(readPanelHint(`?orgnr=${DNB}&at=${now + 5000}`, now).fresh).toBe(
+    expect(readPanelHint(`?orgnr=${DNB}`, now, WIN).fresh).toBe(false);
+    expect(readPanelHint(`?orgnr=${DNB}&at=${now + 5000}`, now, WIN).fresh).toBe(
       false,
     );
-    expect(readPanelHint(`?orgnr=${DNB}&at=soon`, now).fresh).toBe(false);
+    expect(readPanelHint(`?orgnr=${DNB}&at=soon`, now, WIN).fresh).toBe(false);
+  });
+
+  it('names the window the open was for, and that window reads it as fresh', () => {
+    const path = panelPath({ orgnr: DNB }, now, WIN);
+    expect(path).toBe(`details/details.html?orgnr=${DNB}&at=${now}&w=${WIN}`);
+    const search = path.slice(path.indexOf('?'));
+    expect(readPanelHint(search, now + 400, WIN)).toEqual({
+      orgnr: DNB,
+      nomatch: undefined,
+      fresh: true,
+    });
+  });
+
+  it('a hint for another window is no hint at all, fresh or leftover', () => {
+    // Firefox: a global setPanel from window 3 reloads the open sidebar
+    // in window 7 with window 3's company.
+    const fresh = panelPath({ orgnr: DNB }, now, 3);
+    const nomatch = panelPath({ nomatch: 'x.no' }, now, 3);
+    for (const path of [fresh, nomatch]) {
+      const search = path.slice(path.indexOf('?'));
+      expect(readPanelHint(search, now + 400, WIN)).toEqual({ fresh: false });
+      expect(readPanelHint(search, now + 60_000, WIN)).toEqual({ fresh: false });
+    }
+  });
+
+  it('a panel that could not learn its window takes no hint that names one', () => {
+    const path = panelPath({ orgnr: DNB }, now, WIN);
+    const search = path.slice(path.indexOf('?'));
+    expect(readPanelHint(search, now, undefined)).toEqual({ fresh: false });
+    // An unaddressed hint (the popup's plain href) still applies.
+    expect(readPanelHint(`?orgnr=${DNB}&at=${now}`, now, undefined).fresh).toBe(
+      true,
+    );
   });
 
   it('drops an invalid orgnr and an empty nomatch', () => {
-    expect(readPanelHint(`?orgnr=123&at=${now}`, now)).toEqual({
+    expect(readPanelHint(`?orgnr=123&at=${now}`, now, WIN)).toEqual({
       orgnr: undefined,
       nomatch: undefined,
       fresh: false,
     });
-    expect(readPanelHint(`?nomatch=&at=${now}`, now).nomatch).toBeUndefined();
+    expect(readPanelHint(`?nomatch=&at=${now}`, now, WIN).nomatch).toBeUndefined();
   });
 });
 

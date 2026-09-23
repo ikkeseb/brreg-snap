@@ -749,12 +749,17 @@ const follower = createPanelFollower({
   keep: keepView,
 });
 
-function init(): Promise<void> {
+async function init(): Promise<void> {
   // ?orgnr= / ?nomatch= is a hint from whoever opened the panel (popup
-  // link, context menu), stamped with the open's time. Drop the stamp
-  // from this document's URL once read, so a later reload of the panel
-  // doesn't treat it as fresh.
-  const hint = readPanelHint(window.location.search, Date.now());
+  // link, context menu), stamped with the open's time and window; a
+  // hint for another window counts as none. Drop the stamp from this
+  // document's URL once read, so a later reload of the panel doesn't
+  // treat it as fresh. Messages wait on the same window promise, queued
+  // behind this await, so start still claims its load token first and
+  // a message that arrives during startup wins.
+  const search = window.location.search;
+  const now = Date.now();
+  const hint = readPanelHint(search, now, await panelWindowId);
   const url = new URL(window.location.href);
   if (url.searchParams.has('at')) {
     url.searchParams.delete('at');
@@ -764,11 +769,11 @@ function init(): Promise<void> {
 }
 
 // Messages from the popup (sync after it resolved the tab, no-match
-// after «Ingen av disse») and the context menu. sidebarAction.setPanel
-// alone does not reliably repaint an already-open sidebar in Firefox,
-// so the sender tells the panel directly. runtime messages reach every
-// extension page, so each names its window and the other windows'
-// panels ignore it.
+// after «Ingen av disse») and the context menu. Firefox's global
+// setPanel reloads an open sidebar in one window only, not necessarily
+// the sender's, so the sender tells the panel directly. runtime
+// messages reach every extension page, so each names its window and
+// the other windows' panels ignore it.
 browser.runtime.onMessage.addListener((raw: unknown) => {
   const msg = parsePanelMessage(raw);
   if (!msg) return;

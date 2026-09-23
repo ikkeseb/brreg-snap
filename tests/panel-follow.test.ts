@@ -18,7 +18,11 @@ import {
   type PanelView,
   type TabFields,
 } from '../src/lib/panel-follow.js';
-import type { PanelHint } from '../src/lib/panel-protocol.js';
+import {
+  panelPath,
+  readPanelHint,
+  type PanelHint,
+} from '../src/lib/panel-protocol.js';
 import type { TabContext } from '../src/lib/ui/resolve-tab.js';
 import type { SearchHit } from '../src/types/brreg.js';
 import dnb from './fixtures/brreg/enhet-984851006-dnb.json';
@@ -190,6 +194,15 @@ describe('chooseStart — panel-URL hint vs. the active tab', () => {
       kind: 'probe',
       host: 'other.no',
     });
+  });
+
+  it('a fresh hint written for another window never shows there', () => {
+    // Window 3's open reloaded window 7's sidebar with window 3's URL.
+    const now = 1_790_000_000_000;
+    const path = panelPath({ orgnr: EQUINOR }, now, 3);
+    const hint = readPanelHint(path.slice(path.indexOf('?')), now + 400, 7);
+    expect(chooseStart(hint, tabDnb)).toEqual(viewFromContext(tabDnb));
+    expect(chooseStart(hint, undefined)).toEqual({ kind: 'empty' });
   });
 
   it('an unreadable tab falls back to the hint, fresh or not', () => {

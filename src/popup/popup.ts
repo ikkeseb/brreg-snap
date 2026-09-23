@@ -161,7 +161,8 @@ function setDetailsLink(): void {
   // Keep href so middle-click and keyboard activation still open the
   // details page somewhere. The onclick docks it into the browser's
   // sidebar / side panel instead of stealing focus into a new tab or
-  // popup window.
+  // popup window. The href names no window: shift-click can open it in
+  // a new one.
   detailsLink.href = browser.runtime.getURL(panelPath(panelTarget, Date.now()));
   detailsLink.onclick = (ev) => {
     ev.preventDefault();
@@ -169,9 +170,10 @@ function setDetailsLink(): void {
     // No await before open() — both engines consume the activation
     // token on the first await, and Chrome's sidePanel.open hard-
     // requires a live gesture. open() picks up the panel path setPanel
-    // just queued. The path is stamped with the click's time so the
-    // panel treats it as this open's target, not a leftover.
-    sidebar.setPanel(panelPath(panelTarget, Date.now()));
+    // just queued. The path is stamped with the click's time and this
+    // window, so the panel treats it as this open's target, not a
+    // leftover, and a panel in another window ignores it.
+    sidebar.setPanel(panelPath(panelTarget, Date.now(), currentWindowId));
     sidebar.open({ windowId: currentWindowId, tabId: currentTabId });
     window.close();
   };

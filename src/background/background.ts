@@ -66,24 +66,26 @@ menus.onClicked.addListener((info, tab) => {
   const host = hostFromUrl(tab?.url);
 
   // Encode the target into the panel path, stamped with this click's
-  // time, so a panel opened by this click shows it even if the message
-  // below races the panel's listener registration — and so the same
-  // path, left behind as the global panel URL, can't override the
-  // active tab on some later open. The adapter resolves this relative
-  // path to an absolute URL on Firefox and feeds it to setOptions on
-  // Chrome.
+  // time and window, so a panel opened by this click shows it even if
+  // the message below races the panel's listener registration — while
+  // the same path, left behind as the global panel URL or loaded into
+  // another window's open panel, can't override that panel's own tab.
+  // The adapter resolves this relative path to an absolute URL on
+  // Firefox and feeds it to setOptions on Chrome.
   sidebar.setPanel(
     panelPath(
       sync ? { orgnr: sync.orgnr } : host ? { nomatch: host } : undefined,
       Date.now(),
+      tab?.windowId,
     ),
   );
   sidebar.open({ windowId: tab?.windowId, tabId: tab?.id });
 
-  // For the already-open case: setPanel doesn't reliably repaint a
-  // visible sidebar in Firefox 115+, so tell this window's panel
-  // directly. On a sync miss the panel runs the picker-aware host
-  // search itself — the one resolver, and it can show the picker.
+  // For the already-open case: Firefox's global setPanel reloads an
+  // open sidebar in only one window, not necessarily this one
+  // (panel-protocol.ts), so tell this window's panel directly. On a
+  // sync miss the panel runs the picker-aware host search itself — the
+  // one resolver, and it can show the picker.
   const windowId = tab?.windowId;
   if (windowId === undefined) return;
   void notifyPanel(

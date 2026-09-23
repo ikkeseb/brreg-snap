@@ -13,6 +13,11 @@
 //     timestamp: a hint written moments ago by a deliberate open wins,
 //     a leftover one is only a fallback for when the panel can't read
 //     the active tab (see panel-follow.ts § chooseStart).
+//   - The global URL also reaches other windows: Firefox keeps one
+//     panel URL per extension, and a global setPanel reloads an open
+//     sidebar in the first window it checks, which need not be the
+//     window the open was for. So the URL names its window too, and a
+//     panel in any other window reads it as no hint at all.
 
 import { isValidOrgnr } from './mod11.js';
 import type { ResolutionMethod } from './ui/resolve-tab.js';
@@ -110,12 +115,19 @@ const PANEL_PAGE = 'details/details.html';
 
 // Extension-root-relative path for sidebar.setPanel. Build it inside
 // the gesture that opens the panel so the stamp is the open's time.
-export function panelPath(target: PanelTarget, now: number): string {
+// `windowId` is the window being opened in; leave it out only for a
+// link that may open anywhere (the popup's plain href).
+export function panelPath(
+  target: PanelTarget,
+  now: number,
+  windowId?: number,
+): string {
   if (!target) return PANEL_PAGE;
   const params = new URLSearchParams();
   if ('orgnr' in target) params.set('orgnr', target.orgnr);
   else params.set('nomatch', target.nomatch);
   params.set('at', String(now));
+  if (windowId !== undefined) params.set('w', String(windowId));
   return `${PANEL_PAGE}?${params.toString()}`;
 }
 
@@ -126,8 +138,19 @@ export interface PanelHint {
   fresh: boolean;
 }
 
-export function readPanelHint(search: string, now: number): PanelHint {
+export function readPanelHint(
+  search: string,
+  now: number,
+  panelWindowId: number | undefined,
+): PanelHint {
   const params = new URLSearchParams(search);
+  // A hint for another window is none at all, fresh or not: it names
+  // that window's company. As with isForWindow, a panel that couldn't
+  // learn its own window takes no hint that names one.
+  const w = params.get('w');
+  if (w !== null && (panelWindowId === undefined || w !== String(panelWindowId))) {
+    return { fresh: false };
+  }
   const orgnrParam = params.get('orgnr');
   const orgnr =
     orgnrParam && isValidOrgnr(orgnrParam) ? orgnrParam : undefined;

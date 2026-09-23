@@ -24,8 +24,10 @@ export interface OpenTarget {
 }
 
 export interface SidebarAdapter {
-  /** Point the panel at `relativePath`. Updates the next-open target
-   *  and, on Firefox, the already-open panel's URL. Fire-and-forget. */
+  /** Point the panel at `relativePath`, for every window. Updates the
+   *  next-open target and, on Firefox, reloads an already-open panel
+   *  in one window, not necessarily the caller's (panel-protocol.ts).
+   *  Fire-and-forget. */
   setPanel(relativePath: string): void;
   /** Open the panel. MUST be called synchronously inside a user-gesture
    *  stack — both engines consume the activation token on the first
