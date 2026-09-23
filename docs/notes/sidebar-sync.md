@@ -106,7 +106,7 @@ runs return silently after every await — including the error path.
 
 `sameView` compares the incoming view with the settled one (company by
 orgnr, picker / empty state by host). A match keeps the rendered
-content — no skeleton, scroll, focus, open tab and «Oppdatert» stamp
+content — no skeleton, scroll, focus, open tab and «Data hentet» stamp
 stay put, a half-typed manual search survives — and only refreshes the
 footer host, method and history entry. Auto-sync fires on every URL
 change of the active tab, most of which stay on the same company.
@@ -120,10 +120,13 @@ is working in the page. Two rules in `details.ts`:
 - `showEmptyState` focuses the manual-search input only when
   `document.hasFocus()` — an unconditional `focus()` yanked the
   keyboard out of the page on every switch to an unresolvable site.
-- `setState` hides the "Synket fra `<host>` · Oppdatert …" footer and
-  clears its 30s repaint interval for every non-result state; it
-  described an entity no longer on screen. `markUpdated()` re-arms
-  both on the next successful load.
+- `setState` hides the "Synket fra `<host>` · Data hentet … ·
+  Oppdater" footer and clears its 30s repaint interval for every
+  non-result state; it described an entity no longer on screen.
+  `markFetched()` re-arms both on the next successful load.
+- The stamp is the data's age (`loadCompany`'s `fetchedAt`, the
+  oldest cached part), never the paint time: a cache hit can be a
+  day old. See `docs/notes/cache.md` § 24h-session.
 
 <!-- SECTION: shared-ui-modules -->
 ## Popup and sidebar share their resolution UX via `src/lib/ui/`

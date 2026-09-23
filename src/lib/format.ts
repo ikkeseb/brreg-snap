@@ -163,7 +163,7 @@ export function formatCount(value: number | undefined): string | undefined {
 
 // "akkurat nå" / "for 3 min siden" / "i dag kl 14:32" / "i går kl 14:32".
 // For anything older than yesterday: full date + time. Used by the
-// footer's "Oppdatert: ..." label.
+// panel footer's "Data hentet ..." label.
 export function formatRelativeTime(timestamp: number, now = Date.now()): string {
   const diffMs = now - timestamp;
   const diffSec = Math.round(diffMs / 1000);

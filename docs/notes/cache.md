@@ -27,7 +27,11 @@ The module is `src/lib/session-cache.ts`. Its rules:
 - **Data age.** `storedAt` is the fetch time. `cacheStoredAt(keys)`
   returns the oldest live one; `getFetchedAt(orgnr)` in `brreg.ts`
   wraps it for one company's keys, and `invalidateCache(orgnr)` drops
-  them for a refetch.
+  them for a refetch. `loadCompany` (`src/lib/company-load.ts`) turns
+  it into the view's `fetchedAt`, across the orgnr asked for and the
+  enhet shown (they differ for an underenhet). The panel footer shows
+  it as «Data hentet …», and its «Oppdater» button invalidates both
+  orgnrs and reloads.
 
 `fetchRegnskap` caches empty results (404, normal for small AS) for
 24h and "unavailable" results (500, banks/insurers) for 6h, so a

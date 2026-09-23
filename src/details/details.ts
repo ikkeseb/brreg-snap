@@ -7,6 +7,7 @@ import {
   getAutoSync,
   setAutoSync,
 } from '../lib/auto-sync-settings.js';
+import { invalidateCache } from '../lib/brreg.js';
 import { isPermanentLoadError, loadCompany } from '../lib/company-load.js';
 import { formatRelativeTime } from '../lib/format.js';
 import { searchByHostnameDetailed } from '../lib/hostname-search.js';
@@ -56,6 +57,7 @@ const avdelingNoteEl = $('avdeling-note');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
 const footerUpdated = $('footer-updated');
 const updatedTime = $('updated-time') as HTMLTimeElement;
+const refreshBtn = $('refresh-data') as HTMLButtonElement;
 const autoSyncToggle = $('auto-sync-toggle') as HTMLInputElement;
 const autoSyncStatus = $('auto-sync-status');
 const footerSource = $('footer-source');
@@ -76,10 +78,15 @@ const backBtn = $('back-link') as HTMLButtonElement;
 const BRREG_LINK_FALLBACK = 'https://virksomhet.brreg.no/nb/oppslag/enheter';
 
 // The orgnr asked for (URL, sync, search). For an underenhet that is
-// not the company on screen, which is its parent.
+// not the company on screen — see shownEnhetOrgnr.
 let currentOrgnr: string | undefined;
+// The enhet actually rendered: currentOrgnr, or its parent when
+// currentOrgnr is an underenhet. «Oppdater» drops both from the cache.
+let shownEnhetOrgnr: string | undefined;
 let currentResolutionMethod: ResolutionMethod | undefined;
-let lastUpdatedAt: number | undefined;
+// When the data on screen was fetched from brreg, not when it was
+// painted: a cache hit can be up to a day old.
+let fetchedAt: number | undefined;
 let updatedTimerId: number | undefined;
 // Every flow that ends in a paint claims a token from this one
 // sequence (the painters below claim their own; flows that await first
@@ -155,6 +162,15 @@ setupRejectChoice({
 
 retryLoadBtn.addEventListener('click', () => {
   lastLoad?.();
+});
+
+// «Oppdater» in the footer: refetch the company on screen instead of
+// serving the cached copy. Only shown with a result.
+refreshBtn.addEventListener('click', () => {
+  if (!currentOrgnr || app.dataset.state !== 'result') return;
+  void loadOrgnr(currentOrgnr, currentResolutionMethod, {
+    invalidate: [currentOrgnr, shownEnhetOrgnr],
+  });
 });
 
 // The popstate listener below does the actual restore.
@@ -285,9 +301,9 @@ function setState(
   pickerEl.hidden = state !== 'picker';
   emptyStateEl.hidden = state !== 'empty';
   if (state !== 'result') {
-    // The "Synket fra <host> · Oppdatert …" footer describes the
+    // The "Synket fra <host> · Data hentet …" footer describes the
     // company on screen — hide it (and stop the 30s repaint) when no
-    // company is on screen. markUpdated() re-arms both on the next
+    // company is on screen. markFetched() re-arms both on the next
     // successful load.
     footerUpdated.hidden = true;
     if (updatedTimerId !== undefined) {
@@ -370,7 +386,12 @@ function updateRejectButtonVisibility(): void {
 async function loadOrgnr(
   orgnr: string,
   method?: ResolutionMethod,
-  opts: { focusResult?: boolean } = {},
+  opts: {
+    focusResult?: boolean;
+    // «Oppdater»: orgnrs whose cached data is dropped first, so every
+    // part is refetched from brreg.
+    invalidate?: Array<string | undefined>;
+  } = {},
 ): Promise<void> {
   // If a second sync lands while this one is still in flight, the
   // older fetches must not overwrite the newer ones when they land out
@@ -388,6 +409,10 @@ async function loadOrgnr(
   statusEl.textContent = `Henter ${orgnr}…`;
 
   try {
+    if (opts.invalidate) {
+      const orgnrs = new Set(opts.invalidate.filter((n) => n !== undefined));
+      await Promise.all([...orgnrs].map((n) => invalidateCache(n)));
+    }
     // The fetch-and-failure policy is shared with the popup: roller,
     // underenheter and regnskap come back undefined when their fetch
     // failed ("couldn't ask"), and each renderer says so instead of
@@ -401,6 +426,7 @@ async function loadOrgnr(
     void pushRecent(enhet.organisasjonsnummer, enhet.navn);
     // For an underenhet that is the parent — the company on screen.
     setBrregLink(enhet.organisasjonsnummer);
+    shownEnhetOrgnr = enhet.organisasjonsnummer;
 
     renderHeader(enhet, regnskap);
     avdelingNoteEl.hidden = !avdeling;
@@ -424,7 +450,7 @@ async function loadOrgnr(
       host: sourceLabel.get(),
     };
     updateRejectButtonVisibility();
-    markUpdated();
+    markFetched(company.fetchedAt);
     // After an in-panel drill-in or Back/Forward, the <a> the user
     // activated was torn down by the re-render and focus fell to
     // <body>. Move focus to the company heading so keyboard users
@@ -434,26 +460,29 @@ async function loadOrgnr(
     // same guard showEmptyState uses to avoid yanking focus off the
     // active page during an auto-sync tab switch.
     if (opts.focusResult && document.hasFocus()) nameEl.focus();
+    // «Oppdater» was hidden with the footer while loading, so focus
+    // fell to <body>; hand it back to the button.
+    else if (opts.invalidate && document.hasFocus()) refreshBtn.focus();
   } catch (err) {
     if (run.isStale()) return;
     showError(err);
   }
 }
 
-function markUpdated(): void {
-  lastUpdatedAt = Date.now();
+function markFetched(at: number): void {
+  fetchedAt = at;
   footerUpdated.hidden = false;
-  paintUpdatedLabel();
-  // Refresh the relative label every 30s so "akkurat nå" → "for 1 min siden"
-  // transitions don't look stuck.
+  paintFetchedLabel();
+  // Repaint the relative label every 30s so "akkurat nå" → "for 1 min
+  // siden" transitions don't look stuck.
   if (updatedTimerId !== undefined) clearInterval(updatedTimerId);
-  updatedTimerId = window.setInterval(paintUpdatedLabel, 30_000);
+  updatedTimerId = window.setInterval(paintFetchedLabel, 30_000);
 }
 
-function paintUpdatedLabel(): void {
-  if (lastUpdatedAt === undefined) return;
-  updatedTime.dateTime = new Date(lastUpdatedAt).toISOString();
-  updatedTime.textContent = formatRelativeTime(lastUpdatedAt);
+function paintFetchedLabel(): void {
+  if (fetchedAt === undefined) return;
+  updatedTime.dateTime = new Date(fetchedAt).toISOString();
+  updatedTime.textContent = formatRelativeTime(fetchedAt);
 }
 
 // --- auto-sync ------------------------------------------------------
