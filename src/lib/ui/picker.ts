@@ -57,11 +57,16 @@ export function createPicker(opts: PickerOptions): PickerController {
   });
 
   // Keyboard shortcuts when the picker is active: digits 1-4 pick the
-  // corresponding row, 0 or Escape triggers "Ingen av disse". Bail when
-  // the picker isn't visible or when the user is typing into a form
-  // control (no inputs in picker state today, but defensive against
-  // future additions). Modifier keys also bail so OS shortcuts (cmd+w,
-  // ctrl+a) keep working.
+  // corresponding row, 0 triggers "Ingen av disse". Bail when the
+  // picker isn't visible or when the user is typing into a form control
+  // (no inputs in picker state today, but defensive against future
+  // additions). Modifier keys also bail so OS shortcuts (cmd+w, ctrl+a)
+  // keep working.
+  //
+  // Escape is deliberately NOT a shortcut. "Ingen av disse" is stored
+  // for the host (24h, no undo in the UI), and Escape is the reflex key
+  // for getting out of a popup, not a considered answer. It is left to
+  // the browser, and nothing is persisted.
   document.addEventListener('keydown', (ev) => {
     if (opts.appEl.dataset.state !== 'picker') return;
     if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
@@ -74,7 +79,7 @@ export function createPicker(opts: PickerOptions): PickerController {
     }
     const host = currentHost;
     if (!host) return;
-    if (ev.key === '0' || ev.key === 'Escape') {
+    if (ev.key === '0') {
       ev.preventDefault();
       void none(host);
       return;

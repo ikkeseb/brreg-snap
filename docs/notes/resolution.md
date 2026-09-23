@@ -153,6 +153,12 @@ candidates:[], choice}`. `setPickerChoice(host, null)` ("Ingen av
 disse") caches a negative choice that returns `{band:'none'}` on the
 next visit. Clears with the existing `storage.session` lifetime.
 
+Only a deliberate decline stores the negative choice: the «Ingen av
+disse» button or its `0` shortcut. Escape is not a shortcut. It is
+the reflex key for leaving a popup, the stored "no" has no undo in
+the UI, so the picker leaves Escape to the browser and persists
+nothing (`src/lib/ui/picker.ts`, pinned in `tests/picker.test.ts`).
+
 <!-- SECTION: reject-override -->
 ## Reject override (`Feil bedrift?` / `Feil treff?`)
 
