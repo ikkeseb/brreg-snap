@@ -1,0 +1,23 @@
+{
+  "organisasjonsnummer": "932324229",
+  "navn": "BBC AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap"
+  },
+  "registreringsdatoEnhetsregisteret": "2023-10-24",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "4460",
+    "poststed": "MOI",
+    "adresse": [
+      "Eksempelveien 1"
+    ],
+    "kommune": "LUND",
+    "kommunenummer": "1112"
+  }
+}
