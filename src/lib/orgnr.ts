@@ -78,11 +78,26 @@ function orgnrFromNamedParam(url: string): string | undefined {
   return named.size === 1 ? [...named][0] : undefined;
 }
 
-export function resolveOrgnr(ctx: ResolveContext): string | undefined {
+// Which tier of the sync cascade found the orgnr. All three are the
+// site's own claim (it controls its URL and title) — provenance the
+// «Kobling» signal (trust/kobling.ts) compares with the company's
+// registered hjemmeside.
+//   url-param — an explicitly named ?orgnr= / ?organisasjonsnummer=
+//   url-path  — the single valid candidate elsewhere in the URL (path
+//               or an unnamed query value)
+//   title     — the single valid candidate in the tab title
+export type SyncTier = 'url-param' | 'url-path' | 'title';
+
+export interface SyncMatch {
+  orgnr: string;
+  method: SyncTier;
+}
+
+export function resolveOrgnr(ctx: ResolveContext): SyncMatch | undefined {
   // (a) An explicitly-named ?orgnr= param wins outright (author intent),
   //     even amid other 9-digit runs.
   const named = orgnrFromNamedParam(ctx.url);
-  if (named) return named;
+  if (named) return { orgnr: named, method: 'url-param' };
 
   // (b)/(c) Otherwise trust only an unambiguous single mod-11 candidate —
   //     URL first, then title. Two or more distinct valid candidates
@@ -91,10 +106,10 @@ export function resolveOrgnr(ctx: ResolveContext): string | undefined {
   //     pipeline / picker decide. Better no answer than a confidently
   //     wrong one.
   const fromUrl = extractOrgnrFromText(ctx.url);
-  if (fromUrl) return fromUrl;
+  if (fromUrl) return { orgnr: fromUrl, method: 'url-path' };
 
   const fromTitle = extractOrgnrFromText(ctx.title);
-  if (fromTitle) return fromTitle;
+  if (fromTitle) return { orgnr: fromTitle, method: 'title' };
 
   return undefined;
 }

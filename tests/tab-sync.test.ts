@@ -13,7 +13,11 @@ describe('deriveSync', () => {
   it('resolves orgnr from url path even when title is empty', () => {
     // brreg's own canonical orgnr appears in path; resolver picks it up
     const result = deriveSync('https://example.com/foo/950588063', '');
-    expect(result).toEqual({ orgnr: '950588063', host: 'example.com' });
+    expect(result).toEqual({
+      orgnr: '950588063',
+      host: 'example.com',
+      method: 'url-path',
+    });
   });
 
   it('returns null when url is undefined', () => {
@@ -32,7 +36,11 @@ describe('deriveSync', () => {
   it('handles malformed url by leaving host undefined when orgnr is in title', () => {
     // Edge case: resolver finds orgnr in title even though URL is junk
     const result = deriveSync('not-a-url', 'DNB BANK ASA orgnr 984851006');
-    expect(result).toEqual({ orgnr: '984851006', host: undefined });
+    expect(result).toEqual({
+      orgnr: '984851006',
+      host: undefined,
+      method: 'title',
+    });
   });
 });
 

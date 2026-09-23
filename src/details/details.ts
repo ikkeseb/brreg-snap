@@ -10,7 +10,10 @@ import { createAutoSyncToggle } from '../lib/auto-sync-toggle.js';
 import { invalidateCache } from '../lib/brreg.js';
 import { isPermanentLoadError, loadCompany } from '../lib/company-load.js';
 import { formatRelativeTime } from '../lib/format.js';
-import { searchByHostnameDetailed } from '../lib/hostname-search.js';
+import {
+  searchByHostnameDetailed,
+  type Candidate,
+} from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
 import {
   createLoadSequence,
@@ -30,12 +33,14 @@ import { attachManualSearch } from '../lib/ui/manual-search.js';
 import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
 import { pushRecent, renderRecentSection } from '../lib/ui/recent.js';
 import {
+  isHostDerived,
+  RESOLUTION_METHODS,
   resolveTabContext,
+  UNKNOWN_URL_METHOD,
   type ResolutionMethod,
 } from '../lib/ui/resolve-tab.js';
 import { createSourceLabel } from '../lib/ui/source-label.js';
 import { avdelingNote } from '../lib/ui/summary-lines.js';
-import type { SearchHit } from '../types/brreg.js';
 import { $ } from './render/dom.js';
 import { renderHeader } from './render/header.js';
 import { renderNokkeltall } from './render/nokkeltall.js';
@@ -221,7 +226,8 @@ function isHistoryEntry(value: unknown): value is HistoryEntry {
   return (
     typeof value === 'object' &&
     value !== null &&
-    typeof (value as { orgnr?: unknown }).orgnr === 'string'
+    typeof (value as { orgnr?: unknown }).orgnr === 'string' &&
+    RESOLUTION_METHODS.includes((value as { method?: unknown }).method as ResolutionMethod)
   );
 }
 
@@ -369,7 +375,7 @@ function showEmptyState(host?: string, degraded = false): void {
   if (document.hasFocus()) manualQueryEl.focus();
 }
 
-function showPicker(host: string, candidates: SearchHit[]): void {
+function showPicker(host: string, candidates: Candidate[]): void {
   // Claim the token so an in-flight loadOrgnr from a previous tab
   // can't overwrite the picker when its fetches land.
   loads.begin();
@@ -383,9 +389,7 @@ function showPicker(host: string, candidates: SearchHit[]): void {
 }
 
 function updateRejectButtonVisibility(): void {
-  const overridable =
-    currentResolutionMethod === 'host-auto' ||
-    currentResolutionMethod === 'host-pick';
+  const overridable = isHostDerived(currentResolutionMethod);
   resolutionActionsEl.hidden = !(overridable && sourceLabel.get());
 }
 
@@ -452,7 +456,7 @@ async function loadOrgnr(
     onScreen = {
       kind: 'company',
       orgnr,
-      method: currentResolutionMethod ?? 'url',
+      method: currentResolutionMethod ?? UNKNOWN_URL_METHOD,
       host: sourceLabel.get(),
     };
     updateRejectButtonVisibility();
@@ -674,7 +678,9 @@ window.addEventListener('popstate', (ev) => {
   const orgnr = entry?.orgnr ?? getOrgnrFromUrl();
   if (orgnr && isValidOrgnr(orgnr)) {
     sourceLabel.set(entry?.host);
-    void loadOrgnr(orgnr, entry?.method ?? 'url', { focusResult: true });
+    void loadOrgnr(orgnr, entry?.method ?? UNKNOWN_URL_METHOD, {
+      focusResult: true,
+    });
     // Re-activate the tab the restored entry's URL records, so the
     // selected tab matches the ?tab= it was left on instead of keeping
     // whatever the user last clicked before navigating away. An entry

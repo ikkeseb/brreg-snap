@@ -9,8 +9,8 @@ import {
   MAX_PICKER_CANDIDATES,
   searchByHostnameDetailed,
   setPickerChoice,
+  type Candidate,
 } from '../hostname-search.js';
-import type { SearchHit } from '../../types/brreg.js';
 import { appendHitSummary } from './hit-row.js';
 
 export interface PickerOptions {
@@ -28,7 +28,7 @@ export interface PickerOptions {
 }
 
 export interface PickerController {
-  render(host: string, candidates: SearchHit[]): void;
+  render(host: string, candidates: Candidate[]): void;
   // Drop candidate state so a stray keydown can't fire onChoose on a
   // previous host's list. Call when leaving the picker state.
   clear(): void;
@@ -39,7 +39,7 @@ export function createPicker(opts: PickerOptions): PickerController {
   // keydown handler can look up which candidate maps to keys 1-4
   // without re-reading the DOM.
   let currentHost: string | undefined;
-  let currentCandidates: SearchHit[] = [];
+  let currentCandidates: Candidate[] = [];
 
   async function choose(host: string, orgnr: string): Promise<void> {
     await setPickerChoice(host, orgnr);
@@ -93,7 +93,7 @@ export function createPicker(opts: PickerOptions): PickerController {
   });
 
   return {
-    render(host: string, candidates: SearchHit[]): void {
+    render(host: string, candidates: Candidate[]): void {
       currentHost = host;
       currentCandidates = candidates.slice(0, MAX_PICKER_CANDIDATES);
       opts.listEl.replaceChildren();
@@ -138,7 +138,7 @@ export interface RejectChoiceOptions {
   // wins over this flow's late picker. The popup has nothing else that
   // paints meanwhile and passes none.
   claim?: () => { isStale(): boolean };
-  showPicker: (host: string, candidates: SearchHit[]) => void;
+  showPicker: (host: string, candidates: Candidate[]) => void;
   showEmptyState: (host: string) => void;
 }
 

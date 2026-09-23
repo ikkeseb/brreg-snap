@@ -4,32 +4,27 @@
 // wraps the query in its own error handling — only the band-aware
 // cascade over the already-read tab fields is shared here.
 
-import { searchByHostnameDetailed } from '../hostname-search.js';
+import {
+  getRejectedChoices,
+  searchByHostnameDetailed,
+  type Candidate,
+} from '../hostname-search.js';
+import { isNotFoundError, lookupOrgnr } from '../company-load.js';
 import { resolveOrgnr } from '../orgnr.js';
-import type { SearchHit } from '../../types/brreg.js';
+import type { ResolutionMethod } from '../resolution-method.js';
 
-// Why the current orgnr is on screen. Only host-resolved orgnrs are
-// overridable via the "Feil bedrift?" button — URL-derived orgnrs
-// (regex hit in path or title) are authoritative for their domain;
-// manual picks are the user's own explicit choice. 'drill-in' (sidebar
-// only) is an in-panel navigation into a related entity (parent /
-// role-holder); it's not host-resolved, so the override stays hidden.
-// A sync message carries the sender's method, so the panel needs no
-// method of its own for it.
-export type ResolutionMethod =
-  | 'host-auto'
-  | 'host-pick'
-  | 'url'
-  | 'manual'
-  | 'drill-in';
+export {
+  isHostDerived,
+  RESOLUTION_METHODS,
+  UNKNOWN_URL_METHOD,
+  type ResolutionMethod,
+} from '../resolution-method.js';
 
 export interface TabContext {
   orgnr?: string;
   host?: string;
-  pickerCandidates?: SearchHit[];
-  // Why we landed on this orgnr — drives whether the "Feil bedrift?"
-  // override is offered. Sync (URL/title regex) is authoritative;
-  // host-auto is the only one the user can dispute via this code path.
+  pickerCandidates?: Candidate[];
+  // How we landed on this orgnr (see ResolutionMethod).
   method?: ResolutionMethod;
   // True when the hostname search came back empty-handed because one
   // or more brreg queries FAILED — "we couldn't check", not "no
@@ -37,31 +32,56 @@ export interface TabContext {
   degraded?: boolean;
 }
 
+function hostOf(url: string): string | undefined {
+  if (!url) return undefined;
+  try {
+    return new URL(url).hostname || undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+// False only when brreg answered that the orgnr is neither an enhet
+// nor an underenhet.
+async function exists(orgnr: string): Promise<boolean> {
+  try {
+    await lookupOrgnr(orgnr);
+    return true;
+  } catch (err) {
+    return !isNotFoundError(err);
+  }
+}
+
 // Band-aware cascade: sync regex first (URL/title), then a
 // picker-aware hostname search that tells us whether to auto-resolve,
 // show the picker, or fall through to the empty/manual-search state.
+// An orgnr the user rejected for this site («Feil bedrift?») is not
+// taken from the URL/title again, and neither is one brreg doesn't
+// know (a chance-valid product id): the hostname search decides
+// instead. The existence check is the enhet fetch the view needs
+// anyway, cached for the load that follows; a network failure keeps
+// the orgnr so the load shows the real error.
+// The title rides along to the hostname search as a word-boundary hint
+// (hostname-search.ts § title segmentation).
 export async function resolveTabContext(
   url: string,
   title: string,
 ): Promise<TabContext> {
   if (!url && !title) return {};
-  let host: string | undefined;
-  if (url) {
-    try {
-      host = new URL(url).hostname;
-    } catch {
-      /* invalid url — leave host undefined */
+  const host = hostOf(url);
+  const sync = resolveOrgnr({ url, title });
+  if (sync && !(host && (await getRejectedChoices(host)).includes(sync.orgnr))) {
+    if (await exists(sync.orgnr)) {
+      return { orgnr: sync.orgnr, host, method: sync.method };
     }
   }
-  const sync = resolveOrgnr({ url, title });
-  if (sync) return { orgnr: sync, host, method: 'url' };
   if (!host) return {};
-  const detailed = await searchByHostnameDetailed(host);
+  const detailed = await searchByHostnameDetailed(host, title || undefined);
   if (!detailed) return { host };
   if (detailed.band === 'auto') {
     // detailed.choice may have been written by an earlier picker pick
-    // (positive picker-choice short-circuit) — both deserve the
-    // override button, so distinguish via candidates.
+    // (positive picker-choice short-circuit) — distinguish via
+    // candidates.
     const method: ResolutionMethod =
       detailed.candidates.length === 0 ? 'host-pick' : 'host-auto';
     return { orgnr: detailed.choice, host, method };

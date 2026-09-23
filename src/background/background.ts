@@ -90,7 +90,7 @@ menus.onClicked.addListener((info, tab) => {
   if (windowId === undefined) return;
   void notifyPanel(
     sync
-      ? { type: 'sync', windowId, orgnr: sync.orgnr, host: sync.host, method: 'url' }
+      ? { type: 'sync', windowId, orgnr: sync.orgnr, host: sync.host, method: sync.method }
       : { type: 'no-match', windowId, host },
   );
 });

@@ -9,6 +9,8 @@ import {
   fetchUnderenheter,
   getFetchedAt,
   invalidateCache,
+  MAX_RETRY_AFTER_MS,
+  parseRetryAfter,
   searchEnheter,
   searchEnheterWithParams,
 } from '../src/lib/brreg.js';
@@ -324,5 +326,94 @@ describe('cache robustness + data age', () => {
     fetchMock.mockResolvedValue(jsonResponse(ENHET));
     await fetchEnhet('923609016');
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('429 rate limit: honour Retry-After, retry once', () => {
+  const params = () => new URLSearchParams({ navn: 'orkla', size: '10' });
+  const hits = { _embedded: { enheter: [{ organisasjonsnummer: '910747711', navn: 'ORKLA ASA' }] } };
+
+  function tooMany(retryAfter?: string): Response {
+    return new Response('{}', {
+      status: 429,
+      headers: retryAfter === undefined ? {} : { 'Retry-After': retryAfter },
+    });
+  }
+
+  it('parses delay-seconds and HTTP-dates; junk and absence are undefined', () => {
+    const now = Date.parse('2026-09-24T10:00:00Z');
+    expect(parseRetryAfter('2', now)).toBe(2000);
+    expect(parseRetryAfter(' 0 ', now)).toBe(0);
+    expect(parseRetryAfter('Thu, 24 Sep 2026 10:00:03 GMT', now)).toBe(3000);
+    // A date already past means "now", not a negative wait.
+    expect(parseRetryAfter('Thu, 24 Sep 2026 09:59:00 GMT', now)).toBe(0);
+    expect(parseRetryAfter('soon', now)).toBeUndefined();
+    expect(parseRetryAfter('-1', now)).toBeUndefined();
+    expect(parseRetryAfter(null, now)).toBeUndefined();
+  });
+
+  it('waits Retry-After seconds, then retries once and succeeds', async () => {
+    vi.useFakeTimers();
+    try {
+      fetchMock
+        .mockResolvedValueOnce(tooMany('2'))
+        .mockResolvedValueOnce(jsonResponse(hits));
+      const pending = searchEnheterWithParams(params());
+      await vi.advanceTimersByTimeAsync(1999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      await expect(pending).resolves.toHaveLength(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('honours an HTTP-date Retry-After', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date('2026-09-24T10:00:00Z'));
+      fetchMock
+        .mockResolvedValueOnce(tooMany('Thu, 24 Sep 2026 10:00:04 GMT'))
+        .mockResolvedValueOnce(jsonResponse(hits));
+      const pending = searchEnheterWithParams(params());
+      await vi.advanceTimersByTimeAsync(4000);
+      await expect(pending).resolves.toHaveLength(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('a wait longer than the cap is not retried: transient 429 error', async () => {
+    fetchMock.mockResolvedValue(tooMany(String(MAX_RETRY_AFTER_MS / 1000 + 1)));
+    await expect(searchEnheterWithParams(params())).rejects.toThrow(
+      'brreg search returned 429.',
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('no Retry-After header is not retried', async () => {
+    fetchMock.mockResolvedValue(tooMany());
+    await expect(searchEnheterWithParams(params())).rejects.toThrow('429');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('retries only once: a second 429 fails as transient', async () => {
+    fetchMock.mockResolvedValue(tooMany('0'));
+    await expect(searchEnheterWithParams(params())).rejects.toThrow('429');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('applies to the detail fetchers too, and a 429 is never cached', async () => {
+    fetchMock
+      .mockResolvedValueOnce(tooMany('0'))
+      .mockResolvedValueOnce(tooMany('0'));
+    await expect(fetchEnhet('923609016')).rejects.toThrow('brreg API returned 429.');
+    fetchMock.mockResolvedValueOnce(tooMany('0')).mockResolvedValueOnce(
+      jsonResponse({ organisasjonsnummer: '923609016', navn: 'EQUINOR ASA' }),
+    );
+    await expect(fetchEnhet('923609016')).resolves.toMatchObject({ navn: 'EQUINOR ASA' });
+    expect(fetchMock).toHaveBeenCalledTimes(4);
   });
 });

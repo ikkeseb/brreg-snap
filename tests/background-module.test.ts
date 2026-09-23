@@ -168,7 +168,7 @@ describe('context menu click', () => {
       windowId: 3,
       orgnr: '984851006',
       host: 'example.com',
-      method: 'url',
+      method: 'url-path',
     });
   });
 

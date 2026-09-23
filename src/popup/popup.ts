@@ -24,13 +24,15 @@ import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
 import { pushRecent, renderRecentSection } from '../lib/ui/recent.js';
 import {
   resolveTabContext,
+  isHostDerived,
+  UNKNOWN_URL_METHOD,
   type ResolutionMethod,
   type TabContext,
 } from '../lib/ui/resolve-tab.js';
 import { createSourceLabel } from '../lib/ui/source-label.js';
 import { avdelingNote, revenueLine } from '../lib/ui/summary-lines.js';
 import { deriveVerdict, renderVerdict } from '../lib/ui/verdict.js';
-import type { SearchHit } from '../types/brreg.js';
+import type { Candidate } from '../lib/hostname-search.js';
 
 const app = document.getElementById('app') as HTMLElement;
 const brandMark = document.getElementById('brand-mark') as HTMLImageElement;
@@ -182,13 +184,12 @@ function setDetailsLink(): void {
 }
 
 function updateRejectButtonVisibility(): void {
-  // Only host-resolved orgnrs are disputable. URL-derived orgnrs are
-  // authoritative for their domain; manual picks are the user's own
-  // explicit choice and not subject to the "Feil bedrift?" reframe.
+  // Every result derived from the site (URL, title or hostname) is
+  // disputable — the site controls its own URL and title. Manual picks
+  // are the user's own explicit choice.
   const overridable =
     app.dataset.state === 'result' &&
-    (currentResolutionMethod === 'host-auto' ||
-      currentResolutionMethod === 'host-pick') &&
+    isHostDerived(currentResolutionMethod) &&
     sourceLabel.get() !== undefined &&
     currentOrgnr !== undefined;
   resolutionActionsEl.hidden = !overridable;
@@ -249,7 +250,7 @@ async function syncOpenPanel(msg: PanelMessage): Promise<void> {
 
 function syncSidebarIfOpen(orgnr: string): void {
   if (currentWindowId === undefined) return;
-  const method = currentResolutionMethod ?? 'url';
+  const method = currentResolutionMethod ?? UNKNOWN_URL_METHOD;
   void syncOpenPanel({
     type: 'sync',
     windowId: currentWindowId,
@@ -379,7 +380,7 @@ function renderEnhet({ enhet, avdeling, roller, regnskap }: CompanyData): void {
   updateRejectButtonVisibility();
 }
 
-function showPicker(host: string, candidates: SearchHit[]): void {
+function showPicker(host: string, candidates: Candidate[]): void {
   currentOrgnr = undefined;
   setState('picker');
   setBrregLink();

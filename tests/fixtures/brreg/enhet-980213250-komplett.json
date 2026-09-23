@@ -1,0 +1,25 @@
+{
+  "organisasjonsnummer": "980213250",
+  "navn": "KOMPLETT ASA",
+  "organisasjonsform": {
+    "kode": "ASA",
+    "beskrivelse": "Allmennaksjeselskap"
+  },
+  "hjemmeside": "www.komplettgroup.com",
+  "antallAnsatte": 47,
+  "registreringsdatoEnhetsregisteret": "1998-11-02",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "3241",
+    "poststed": "SANDEFJORD",
+    "adresse": [
+      "Østre Kullerød 4"
+    ],
+    "kommune": "SANDEFJORD",
+    "kommunenummer": "3907"
+  }
+}

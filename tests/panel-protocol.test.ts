@@ -23,6 +23,20 @@ describe('parsePanelMessage', () => {
     expect(parsePanelMessage(msg)).toEqual(msg);
   });
 
+  it.each(['url-param', 'url-path', 'title', 'host-auto', 'host-pick', 'manual', 'drill-in'])(
+    'carries the %s provenance through',
+    (method) => {
+      const msg = { type: 'sync', windowId: 3, orgnr: DNB, host: 'x.no', method };
+      expect(parsePanelMessage(msg)).toEqual(msg);
+    },
+  );
+
+  it('drops the pre-1.4 catch-all «url» method', () => {
+    expect(
+      parsePanelMessage({ type: 'sync', windowId: 3, orgnr: DNB, method: 'url' }),
+    ).toBeUndefined();
+  });
+
   it('accepts a no-match with or without a host', () => {
     expect(parsePanelMessage({ type: 'no-match', windowId: 3, host: 'x.no' }))
       .toEqual({ type: 'no-match', windowId: 3, host: 'x.no' });
@@ -35,13 +49,13 @@ describe('parsePanelMessage', () => {
 
   it('rejects messages without a window — they could be for any panel', () => {
     expect(
-      parsePanelMessage({ type: 'sync', orgnr: DNB, method: 'url' }),
+      parsePanelMessage({ type: 'sync', orgnr: DNB, method: 'url-path' }),
     ).toBeUndefined();
     expect(parsePanelMessage({ type: 'no-match', host: 'x.no' })).toBeUndefined();
   });
 
   it('rejects an invalid orgnr, an unknown method and junk', () => {
-    const base = { type: 'sync', windowId: 1, method: 'url' };
+    const base = { type: 'sync', windowId: 1, method: 'url-path' };
     expect(parsePanelMessage({ ...base, orgnr: '984851007' })).toBeUndefined();
     expect(
       parsePanelMessage({ ...base, orgnr: DNB, method: 'guess' }),
