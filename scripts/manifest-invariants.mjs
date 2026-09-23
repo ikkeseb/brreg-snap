@@ -24,6 +24,10 @@ export const TOP_LEVEL_KEYS = {
     'browser_specific_settings',
     'action',
     'sidebar_action',
+    // Keyboard shortcuts (1.4). A manifest key, not a permission: the
+    // install prompt is unchanged. The exact object is pinned in
+    // tests/manifest.test.ts § entry points.
+    'commands',
     'icons',
     'permissions',
     'optional_permissions',
@@ -39,6 +43,10 @@ export const TOP_LEVEL_KEYS = {
     'minimum_chrome_version',
     'action',
     'side_panel',
+    // Keyboard shortcuts (1.4). A manifest key, not a permission: the
+    // install prompt is unchanged. The exact object is pinned in
+    // tests/manifest.test.ts § entry points.
+    'commands',
     'icons',
     'permissions',
     'optional_permissions',

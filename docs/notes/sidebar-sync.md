@@ -36,7 +36,9 @@ reloads its open sidebar. That need not be the sender's window. So the
 popup (after resolving the tab, and on «Ingen av disse») and the
 context menu send a `runtime.sendMessage` the open panel applies in
 place. The shape lives in `panel-protocol.ts`: `{type:'sync', windowId,
-orgnr, host, method}` or `{type:'no-match', windowId, host}`. Don't
+orgnr, host, method}`, `{type:'no-match', windowId, host}`, or
+`{type:'search', windowId, query}` (the selection lookup's text, see
+permissions-model.md § commands-and-selection). Don't
 switch to a per-window `setPanel({windowId})`: against the one shared
 `this.panel`, every tab switch in the other window would then count as
 a URL change and reload that window's open sidebar.
@@ -57,9 +59,10 @@ for that (it only left a global panel URL behind for a later open).
 
 `sidebar.setPanel` sets the GLOBAL panel URL on both engines, and it
 outlives the open it was set for. Only gestures that also open the
-panel set it (popup link, context menu), via
-`panelPath(target, now, windowId)`: `details.html?orgnr=…&at=<ms>&w=<id>`
-or `?nomatch=<host>&at=<ms>&w=<id>`.
+panel set it (popup link, context menu, Chrome's open-panel command),
+via `panelPath(target, now, windowId)`:
+`details.html?orgnr=…&at=<ms>&w=<id>`, `?nomatch=<host>&at=…&w=…`, or
+from the selection lookup `?orgnr=…&m=manual&at=…&w=…` / `?q=<text>&at=…&w=…`.
 
 `w` is the window the open was for. The same global URL can load in
 another window: a later open there, or the Firefox reload above, which
@@ -88,6 +91,11 @@ On load (`chooseStart` in `panel-follow.ts`, tested there):
 3. Only when the tab can't be read (no `activeTab` grant, no `tabs`
    opt-in) does a leftover hint apply. A hint orgnr is shown without a
    host label: it didn't come from this tab.
+
+Selection-lookup hints bend two of these: a `?q=` query applies only
+while fresh (a leftover never re-sends the selected text, even with an
+unreadable tab), and an orgnr carrying `m=manual` is never "explained"
+by the tab — it stays the user's pick, with no host label.
 
 The tab is readable when `tabs.query` returns a URL — Firefox grants
 `activeTab` on the user action that toggles the sidebar (sidebar icon,
@@ -130,7 +138,9 @@ runs return silently after every await — including the error path.
 ## A sync or tab event for what's on screen keeps it
 
 `sameView` compares the incoming view with the settled one (company by
-orgnr, picker / empty state by host). A match keeps the rendered
+orgnr, picker / empty state by host; an empty state that carries a
+search query never matches, since the user asked for that search). A
+match keeps the rendered
 content — no skeleton, scroll, focus, open tab and «Data hentet» stamp
 stay put, a half-typed manual search survives — and only refreshes the
 footer host, method and history entry. Auto-sync fires on every URL

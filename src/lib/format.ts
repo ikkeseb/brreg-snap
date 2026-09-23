@@ -25,6 +25,15 @@ export function formatPercent(value: number | undefined): string | undefined {
   return `${sign}${Math.abs(rounded).toLocaleString('nb-NO')}\u00a0%`;
 }
 
+// "923609016" → "923 609 016", the way the orgnr is printed. Plain
+// spaces: this goes on the clipboard and into forms. Anything that
+// isn't nine digits is returned unchanged.
+export function formatOrgnr(orgnr: string): string {
+  return /^\d{9}$/.test(orgnr)
+    ? `${orgnr.slice(0, 3)} ${orgnr.slice(3, 6)} ${orgnr.slice(6)}`
+    : orgnr;
+}
+
 export function formatAddress(addr: Adresse | undefined): string | undefined {
   if (!addr) return undefined;
   const lines = [

@@ -191,6 +191,12 @@ export function fakeBrowser(opts: FakeBrowserOptions = {}) {
     onFocusChanged: fakeEvent(),
   };
 
+  // Both engines expose `commands` when the manifest declares the key
+  // (both do, for the keyboard shortcuts).
+  const commands = {
+    onCommand: fakeEvent(),
+  };
+
   const menusApi = () => ({
     create: vi.fn(),
     removeAll: vi.fn(async () => undefined),
@@ -225,6 +231,7 @@ export function fakeBrowser(opts: FakeBrowserOptions = {}) {
     runtime,
     tabs: pick('tabs', tabs),
     windows: pick('windows', windows),
+    commands,
     ...engineApis,
   };
 

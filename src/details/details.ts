@@ -348,11 +348,13 @@ function showError(err: unknown): void {
   errorActionsEl.hidden = lastLoad === undefined || isPermanentLoadError(err);
 }
 
-function showEmptyState(host?: string, degraded = false): void {
+// `query`: the selection lookup's text, searched at once in the
+// manual search below the message.
+function showEmptyState(host?: string, degraded = false, query?: string): void {
   // Claim the token: an in-flight load must not land on top of this.
   loads.begin();
   setState('empty');
-  onScreen = { kind: 'empty', host, degraded };
+  onScreen = { kind: 'empty', host, degraded, query };
   clearOrgnrFromUrl();
   currentOrgnr = undefined;
   setBrregLink();
@@ -361,10 +363,13 @@ function showEmptyState(host?: string, degraded = false): void {
   // — "we couldn't check" must not read as a confirmed "no match".
   emptyMessageEl.textContent = degraded
     ? `Fikk ikke svar fra Brønnøysundregistrene, så ${host ?? 'siden'} kunne ikke sjekkes. Prøv igjen om litt.`
-    : host
-      ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
-      : 'Sidepanelet ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
+    : query !== undefined
+      ? 'Søk i Brønnøysundregistrene etter teksten du markerte:'
+      : host
+        ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
+        : 'Sidepanelet ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
   manualSearch.reset();
+  if (query !== undefined) manualSearch.search(query);
   void renderRecentSection(recentSectionEl, recentListEl, (entry) => {
     loadManualPick(entry.orgnr);
   });
@@ -579,7 +584,7 @@ function showView(view: PanelView): void {
       showPicker(view.host, view.candidates);
       return;
     case 'empty':
-      showEmptyState(view.host, view.degraded);
+      showEmptyState(view.host, view.degraded, view.query);
       return;
   }
 }
@@ -661,6 +666,10 @@ browser.runtime.onMessage.addListener((raw: unknown) => {
         method: msg.method,
         host: msg.host,
       });
+      return;
+    }
+    if (msg.type === 'search') {
+      follower.follow({ kind: 'empty', query: msg.query });
       return;
     }
     void follower.probe(msg.host);

@@ -92,7 +92,7 @@ function setup() {
   const inputEl = new FakeElement('input');
   const resultsEl = new FakeElement('ul');
   const selected: SearchHit[] = [];
-  attachManualSearch({
+  const controller = attachManualSearch({
     inputEl: inputEl as unknown as HTMLInputElement,
     resultsEl: resultsEl as unknown as HTMLUListElement,
     onSelect: (hit) => selected.push(hit),
@@ -103,7 +103,7 @@ function setup() {
     inputEl.dispatch('input');
     await vi.advanceTimersByTimeAsync(250);
   };
-  return { resultsEl, selected, type };
+  return { inputEl, resultsEl, selected, type, controller };
 }
 
 beforeEach(() => {
@@ -205,5 +205,35 @@ describe('manual search', () => {
     await vi.waitFor(() => expect(resultsEl.findAll('search-error')).toHaveLength(1));
     expect(resultsEl.textContent).toContain('Søket feilet.');
     expect(resultsEl.findAll('retry-button')).toHaveLength(1);
+  });
+
+  it('search() prefills the input and searches at once (selection lookup)', async () => {
+    routeBrreg({
+      [`${API}/enheter?navn=Kiwi+Norge&size=10`]: () =>
+        json({ _embedded: { enheter: [enhetDnb] } }),
+    });
+    const { inputEl, resultsEl, controller } = setup();
+    controller.search('Kiwi Norge');
+    expect(inputEl.value).toBe('Kiwi Norge');
+    // No debounce: the request is already out.
+    expect(fetchedUrls()).toEqual([`${API}/enheter?navn=Kiwi+Norge&size=10`]);
+    await vi.waitFor(() => expect(resultsEl.findAll('manual-hit')).toHaveLength(1));
+  });
+
+  it('search() of selected orgnr text looks it up directly', async () => {
+    routeBrreg({ [`${API}/enheter/923609016`]: () => json(enhetEquinor) });
+    const { resultsEl, controller } = setup();
+    controller.search('Org.nr. 923 609 016');
+    await vi.waitFor(() => expect(resultsEl.findAll('manual-hit')).toHaveLength(1));
+    expect(fetchedUrls()).toEqual([`${API}/enheter/923609016`]);
+  });
+
+  it('search() below the minimum length prefills but asks brreg nothing', async () => {
+    routeBrreg({});
+    const { inputEl, controller } = setup();
+    controller.search('K');
+    expect(inputEl.value).toBe('K');
+    await vi.advanceTimersByTimeAsync(300);
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

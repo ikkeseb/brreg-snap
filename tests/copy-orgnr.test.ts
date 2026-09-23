@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { buildOrgnrCopyButton } from '../src/lib/copy-orgnr.js';
+import { buildOrgnrCopyButton, writeClipboard } from '../src/lib/copy-orgnr.js';
 
 // Minimal stand-in for the one <button> the module builds: no DOM
 // library in this repo's test setup, and the bug under test is pure
@@ -81,5 +81,25 @@ describe('orgnr copy button', () => {
     expect(classes.has('copy-failed')).toBe(true);
     await vi.advanceTimersByTimeAsync(1500);
     expect(btn.textContent).toBe(ORGNR);
+  });
+});
+
+describe('writeClipboard', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('writes the text and reports success', async () => {
+    const write = vi.fn(async (_text: string) => {});
+    vi.stubGlobal('navigator', { clipboard: { writeText: write } });
+    await expect(writeClipboard('EQUINOR ASA\nOrg.nr. 923 609 016')).resolves.toBe(true);
+    expect(write).toHaveBeenCalledWith('EQUINOR ASA\nOrg.nr. 923 609 016');
+  });
+
+  it('reports a refused write instead of throwing', async () => {
+    vi.stubGlobal('navigator', {
+      clipboard: { writeText: vi.fn(async () => Promise.reject(new Error('NotAllowedError'))) },
+    });
+    await expect(writeClipboard('x')).resolves.toBe(false);
   });
 });

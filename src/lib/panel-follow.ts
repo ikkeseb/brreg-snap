@@ -50,7 +50,14 @@ export type PanelView =
       host?: string;
     }
   | { kind: 'picker'; host: string; candidates: Candidate[] }
-  | { kind: 'empty'; host?: string; degraded?: boolean };
+  | {
+      kind: 'empty';
+      host?: string;
+      degraded?: boolean;
+      // Prefill the manual search with this and run it (selection
+      // lookup).
+      query?: string;
+    };
 
 export function viewFromContext(ctx: TabContext): PanelView {
   if (ctx.orgnr) {
@@ -105,6 +112,9 @@ export function sameView(
     case 'picker':
       return onScreen.kind === 'picker' && onScreen.host === next.host;
     case 'empty':
+      // A search request always repaints: the user asked for it, and
+      // what's on screen may be a search they have since edited.
+      if (next.query !== undefined) return false;
       return (
         onScreen.kind === 'empty' &&
         onScreen.host === next.host &&
@@ -138,19 +148,32 @@ export type StartPlan = PanelView | { kind: 'probe'; host: string };
 //   3. Only when the tab can't be read does a leftover hint apply. A
 //      hint orgnr is never paired with a host label: it didn't come
 //      from this tab.
+//
+// A search query (selection lookup) applies only while fresh: a
+// leftover must not re-send the selected text on a later open. An
+// orgnr that carries its method (a selection lookup: 'manual') is the
+// user's choice, not the tab's, so the tab can't "explain" it.
 export function chooseStart(
   hint: PanelHint,
   tab: TabContext | undefined,
 ): StartPlan {
+  if (hint.fresh && hint.query !== undefined) {
+    return { kind: 'empty', query: hint.query };
+  }
   if (tab && !hint.fresh) return viewFromContext(tab);
-  if (tab && hint.orgnr !== undefined && tab.orgnr === hint.orgnr) {
+  if (
+    tab &&
+    hint.orgnr !== undefined &&
+    hint.method === undefined &&
+    tab.orgnr === hint.orgnr
+  ) {
     return viewFromContext(tab);
   }
   if (tab && hint.nomatch !== undefined && tab.host === hint.nomatch) {
     return viewFromContext(tab);
   }
   if (hint.orgnr !== undefined) {
-    return { kind: 'company', orgnr: hint.orgnr, method: UNKNOWN_URL_METHOD };
+    return { kind: 'company', orgnr: hint.orgnr, method: hint.method ?? UNKNOWN_URL_METHOD };
   }
   if (hint.nomatch !== undefined) return { kind: 'probe', host: hint.nomatch };
   return tab ? viewFromContext(tab) : { kind: 'empty' };

@@ -134,6 +134,10 @@ describe('sameView', () => {
     const empty: PanelView = { kind: 'empty', host: 'a.no', degraded: false };
     expect(sameView(empty, { kind: 'empty', host: 'a.no' })).toBe(true);
     expect(sameView(empty, { ...empty, degraded: true })).toBe(false);
+    // A search request always repaints, even onto the same search.
+    const search: PanelView = { kind: 'empty', query: 'kiwi' };
+    expect(sameView(search, search)).toBe(false);
+    expect(sameView({ kind: 'empty' }, search)).toBe(false);
   });
 
   it('nothing settled (loading / error) is never the same', () => {
@@ -205,6 +209,33 @@ describe('chooseStart — panel-URL hint vs. the active tab', () => {
     const hint = readPanelHint(path.slice(path.indexOf('?')), now + 400, 7);
     expect(chooseStart(hint, tabDnb)).toEqual(viewFromContext(tabDnb));
     expect(chooseStart(hint, undefined)).toEqual({ kind: 'empty' });
+  });
+
+  it('a fresh ?q= (selection lookup) opens the search on it, whatever the tab shows', () => {
+    const hint = { query: 'Kiwi Norge', fresh: true };
+    expect(chooseStart(hint, tabDnb)).toEqual({ kind: 'empty', query: 'Kiwi Norge' });
+    expect(chooseStart(hint, undefined)).toEqual({ kind: 'empty', query: 'Kiwi Norge' });
+  });
+
+  it('a leftover ?q= is never searched again, even when the tab is unreadable', () => {
+    const hint = { query: 'Kiwi Norge', fresh: false };
+    expect(chooseStart(hint, tabDnb)).toEqual(viewFromContext(tabDnb));
+    expect(chooseStart(hint, undefined)).toEqual({ kind: 'empty' });
+  });
+
+  it('a fresh selection-lookup orgnr stays the user’s choice even when the tab shows the same company', () => {
+    // method: 'manual' — no host label, and «Feil bedrift?» is not
+    // offered for a company the user picked.
+    expect(chooseStart({ orgnr: DNB, method: 'manual', fresh: true }, tabDnb)).toEqual({
+      kind: 'company',
+      orgnr: DNB,
+      method: 'manual',
+    });
+    expect(chooseStart({ orgnr: DNB, method: 'manual', fresh: true }, undefined)).toEqual({
+      kind: 'company',
+      orgnr: DNB,
+      method: 'manual',
+    });
   });
 
   it('an unreadable tab falls back to the hint, fresh or not', () => {
