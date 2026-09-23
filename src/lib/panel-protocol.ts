@@ -45,7 +45,6 @@ const METHODS: readonly ResolutionMethod[] = [
   'host-pick',
   'url',
   'manual',
-  'sync-broadcast',
   'drill-in',
 ];
 

@@ -1,4 +1,3 @@
-import { searchByHostname } from './hostname-search.js';
 import { isValidOrgnr } from './mod11.js';
 
 const ORGNR_RE = /\b(\d{9})\b/g;
@@ -54,14 +53,6 @@ export interface ResolveContext {
   title: string;
 }
 
-function hostnameFrom(url: string): string | undefined {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return undefined;
-  }
-}
-
 // Strong signal: a query param whose KEY explicitly names the orgnr
 // (?orgnr=…, ?organisasjonsnummer=…). The page author labelled it, so it
 // wins over any other 9-digit run in the URL — even a chance-valid
@@ -106,22 +97,4 @@ export function resolveOrgnr(ctx: ResolveContext): string | undefined {
   if (fromTitle) return fromTitle;
 
   return undefined;
-}
-
-// Async variant that adds a hostname-based brreg search after the
-// sync cascade misses. Callers that run inside a user-gesture stack
-// (context menu → sidebarAction.open, click → permissions.request)
-// must NOT await on this — the first await consumes the activation
-// token and Firefox blocks the next browser API call. Those callers
-// sync-resolve first, then run this on a detached promise for the
-// broadcast.
-export async function resolveOrgnrAsync(
-  ctx: ResolveContext,
-): Promise<string | undefined> {
-  const sync = resolveOrgnr(ctx);
-  if (sync) return sync;
-
-  const hostname = hostnameFrom(ctx.url);
-  if (!hostname) return undefined;
-  return searchByHostname(hostname);
 }

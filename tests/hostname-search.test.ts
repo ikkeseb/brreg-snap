@@ -12,7 +12,6 @@ import {
   getPickerChoice,
   getRejectedChoices,
   queryFromHostname,
-  searchByHostname,
   searchByHostnameDetailed,
   setPickerChoice,
 } from '../src/lib/hostname-search.js';
@@ -72,80 +71,6 @@ describe('queryFromHostname', () => {
   });
 });
 
-describe('searchByHostname (AUTO-only legacy wrapper)', () => {
-  beforeEach(() => {
-    installStorageMock();
-    searchMock.mockReset();
-  });
-
-  it('returns the AUTO-band orgnr when scoring is confident', async () => {
-    // YARA INTERNATIONAL ASA → prefix(+35) + hjemmeside=exact(+35) +
-    // ASA(+28) + top-level(+12) + ansatte>=10(+8) = 118, clear winner.
-    // The hjemmeside tie (live value) is what allows AUTO at all.
-    searchMock.mockImplementation(async (params: URLSearchParams) => {
-      if (params.has('hjemmeside')) return [];
-      return [
-        hit('YARA INTERNATIONAL ASA', '986228608', {
-          organisasjonsform: { kode: 'ASA' },
-          hjemmeside: 'www.yara.com',
-          antallAnsatte: 50,
-        }),
-        hit('YARA FOODS NORGE AS', '999999998', {
-          organisasjonsform: { kode: 'AS' },
-          overordnetEnhet: '986228608',
-        }),
-      ];
-    });
-
-    expect(await searchByHostname('yara.com')).toBe('986228608');
-  });
-
-  it('returns undefined when band is picker (ambiguous)', async () => {
-    // Two near-identical kjedebutikker — picker band, no AUTO.
-    searchMock.mockImplementation(async (params: URLSearchParams) => {
-      if (params.has('hjemmeside')) {
-        return [
-          hit('ELKJØP LEKNES', '111111118', { hjemmeside: 'elkjop.no' }),
-          hit('ELKJØP SVOLVÆR', '222222226', { hjemmeside: 'elkjop.no' }),
-        ];
-      }
-      return [];
-    });
-
-    expect(await searchByHostname('elkjop.no')).toBeUndefined();
-  });
-
-  it('returns undefined when no candidates score above the gate', async () => {
-    searchMock.mockResolvedValue([]);
-    expect(await searchByHostname('mdn.mozilla.org')).toBeUndefined();
-  });
-
-  it('caches results and skips network on the second call', async () => {
-    searchMock.mockResolvedValue([
-      hit('YARA INTERNATIONAL ASA', '986228608', {
-        organisasjonsform: { kode: 'ASA' },
-        hjemmeside: 'www.yara.com',
-      }),
-    ]);
-    await searchByHostname('yara.com');
-    const callsAfterFirst = searchMock.mock.calls.length;
-    await searchByHostname('yara.com');
-    expect(searchMock.mock.calls.length).toBe(callsAfterFirst);
-  });
-
-  it('returns the cached picker choice when one exists', async () => {
-    await setPickerChoice('shell.no', '914807077');
-    expect(await searchByHostname('shell.no')).toBe('914807077');
-    expect(searchMock).not.toHaveBeenCalled();
-  });
-
-  it('returns undefined when the cached choice is "Ingen av disse"', async () => {
-    await setPickerChoice('shell.no', null);
-    expect(await searchByHostname('shell.no')).toBeUndefined();
-    expect(searchMock).not.toHaveBeenCalled();
-  });
-});
-
 describe('searchByHostnameDetailed', () => {
   beforeEach(() => {
     installStorageMock();
@@ -189,6 +114,19 @@ describe('searchByHostnameDetailed', () => {
     const result = await searchByHostnameDetailed('mdn.mozilla.org');
     expect(result?.band).toBe('none');
     expect(result?.candidates).toEqual([]);
+  });
+
+  it('caches results and skips network on the second call', async () => {
+    searchMock.mockResolvedValue([
+      hit('YARA INTERNATIONAL ASA', '986228608', {
+        organisasjonsform: { kode: 'ASA' },
+        hjemmeside: 'www.yara.com',
+      }),
+    ]);
+    await searchByHostnameDetailed('yara.com');
+    const callsAfterFirst = searchMock.mock.calls.length;
+    await searchByHostnameDetailed('yara.com');
+    expect(searchMock.mock.calls.length).toBe(callsAfterFirst);
   });
 
   it('honors a positive picker-choice cache: band=auto, choice set', async () => {
@@ -248,7 +186,6 @@ describe('searchByHostnameDetailed', () => {
     expect(result?.candidates.map((c) => c.organisasjonsnummer)).toEqual([
       '913491718',
     ]);
-    expect(await searchByHostname('medium.com')).toBeUndefined();
   });
 });
 
@@ -328,7 +265,6 @@ describe('hosts that never reach brreg', () => {
       candidates: [],
       complete: true,
     });
-    expect(await searchByHostname(host)).toBeUndefined();
     expect(searchMock).not.toHaveBeenCalled();
     expect(Object.keys(store)).toEqual([]);
   });
@@ -421,7 +357,10 @@ describe('pipeline failure handling (network errors)', () => {
   it('picker-choice cache still wins regardless of network state', async () => {
     searchMock.mockRejectedValue(new Error('offline'));
     await setPickerChoice('yara.com', '986228608');
-    expect(await searchByHostname('yara.com')).toBe('986228608');
+    expect(await searchByHostnameDetailed('yara.com')).toMatchObject({
+      band: 'auto',
+      choice: '986228608',
+    });
     expect(searchMock).not.toHaveBeenCalled();
   });
 });
@@ -519,11 +458,11 @@ describe('addRejectedChoice + pipeline filtering', () => {
       ];
     });
 
-    expect(await searchByHostname('yara.com')).toBe('986228608');
+    expect((await searchByHostnameDetailed('yara.com'))?.choice).toBe('986228608');
     const callsAfterFirst = searchMock.mock.calls.length;
 
     await addRejectedChoice('yara.com', '986228608');
-    await searchByHostname('yara.com');
+    await searchByHostnameDetailed('yara.com');
     expect(searchMock.mock.calls.length).toBeGreaterThan(callsAfterFirst);
   });
 });

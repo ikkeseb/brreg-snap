@@ -268,8 +268,8 @@ function bandCacheKey(host: string, rejected: string[]): string {
   return `${KEY_PREFIX}${host}:rej:${sorted}`;
 }
 
-// Internal: resolve via cache + pipeline. Returns the rich result; the
-// public wrappers below adapt it to their own return shapes.
+// Internal: resolve via cache + pipeline. Returns the rich result;
+// searchByHostnameDetailed below adds the picker-choice short-circuit.
 async function resolveInternal(
   hostname: string,
   rejected: string[] = [],
@@ -299,25 +299,9 @@ async function resolveInternal(
   return outcome;
 }
 
-// Backwards-compatible AUTO-only resolver. Used by the sync cascade
-// in src/lib/orgnr.ts and by the popup/background flows that only
-// want a confident orgnr or nothing.
-export async function searchByHostname(
-  hostname: string,
-): Promise<string | undefined> {
-  const choice = await getPickerChoice(hostname);
-  if (choice !== undefined) {
-    // User explicitly chose for this host. Positive choice → that
-    // orgnr; negative choice (null) → no match.
-    return choice ?? undefined;
-  }
-  const rejected = await getRejectedChoices(hostname);
-  const { result } = await resolveInternal(hostname, rejected);
-  return result.band === 'auto' ? result.orgnr : undefined;
-}
-
-// Picker-aware resolver. Returns the band + candidates so the sidebar
-// can render the picker UI directly.
+// The resolver every live path uses (resolveTabContext, the panel's
+// host probe, «Feil bedrift?»). Returns the band + candidates so the
+// surfaces can render the picker directly.
 export async function searchByHostnameDetailed(
   hostname: string,
 ): Promise<DetailedResult | undefined> {
