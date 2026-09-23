@@ -1,0 +1,116 @@
+{
+  "organisasjonsnummer": "982463718",
+  "navn": "TELENOR ASA",
+  "organisasjonsform": {
+    "kode": "ASA",
+    "beskrivelse": "Allmennaksjeselskap"
+  },
+  "children": [
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "TELENOR NETWORKS HOLDING AS",
+      "organisasjonsnummer": "983939724",
+      "parentNavn": "TELENOR ASA",
+      "parentOrganisasjonsnummer": "982463718",
+      "grunnlag": "100%",
+      "dato": "2022-08-09",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "TELENOR NORGE AS",
+          "organisasjonsnummer": "976967631",
+          "parentNavn": "TELENOR NETWORKS HOLDING AS",
+          "parentOrganisasjonsnummer": "983939724",
+          "grunnlag": "100%",
+          "dato": "2025-01-07",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "children": [
+            {
+              "nivaa": 1,
+              "knytningsform": {
+                "kode": "KGRL",
+                "beskrivelse": "Konsern grunnlag"
+              },
+              "navn": "BJØRVIKA IKT AS",
+              "organisasjonsnummer": "990440212",
+              "parentNavn": "TELENOR NORGE AS",
+              "parentOrganisasjonsnummer": "976967631",
+              "grunnlag": "33,33%",
+              "dato": "2016-01-09",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "TALKMORE AS",
+              "organisasjonsnummer": "876839342",
+              "parentNavn": "TELENOR NORGE AS",
+              "parentOrganisasjonsnummer": "976967631",
+              "grunnlag": "100%",
+              "dato": "2021-02-24",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "TELENOR FORSIKRING AS",
+      "organisasjonsnummer": "980003744",
+      "parentNavn": "TELENOR ASA",
+      "parentOrganisasjonsnummer": "982463718",
+      "grunnlag": "100%",
+      "dato": "2022-08-09",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KMOR",
+        "beskrivelse": "Konsern mor"
+      },
+      "navn": "BJØRVIKA IKT AS",
+      "organisasjonsnummer": "990440212",
+      "parentNavn": "TELENOR ASA",
+      "parentOrganisasjonsnummer": "982463718",
+      "grunnlag": "Indirekte mor",
+      "dato": "2007-05-29",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    }
+  ]
+}
