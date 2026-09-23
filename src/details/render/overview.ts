@@ -35,22 +35,25 @@ export function renderOverview(
   );
   addRow(overviewList, 'Næring', formatNaering(enhet.naeringskode1));
   addRow(overviewList, 'Antall ansatte', formatCount(enhet.antallAnsatte));
+  // A failed roller fetch needs its own row: the role rows below only
+  // appear when there's a holder, so silently dropping them would read
+  // as "none registered".
+  if (roller) addRoleRows(roller);
+  else addRow(overviewList, 'Roller', 'Kunne ikke hentes');
+}
+
+function addRoleRows(roller: RollerResponse): void {
   // Who runs it / who vouches for the books — all from the same roller
   // response already fetched for daglig leder. addRow skips any that are
   // absent (a firm may have no registered styreleder, revisor, or
-  // regnskapsfører), so these rows appear only when there's a holder —
-  // which is why a failed fetch needs its own row: silently dropping
-  // them would read as "none registered".
-  if (!roller) {
-    addRow(overviewList, 'Roller', 'Kunne ikke hentes');
-    return;
-  }
+  // regnskapsfører), so these rows appear only when there's a holder.
   addRow(overviewList, 'Daglig leder', findRoleHolder(roller, 'DAGL'));
   addRow(overviewList, 'Styreleder', findRoleHolder(roller, 'LEDE'));
   addRow(overviewList, 'Revisor', findRoleHolder(roller, 'REVI'));
   addRow(overviewList, 'Regnskapsfører', findRoleHolder(roller, 'REGN'));
-  // Only registered for a company in konkurs — the one contact a
-  // creditor needs, so it's worth a row, not just the Personer tab.
+  // Registered only once an estate is under administration (konkurs,
+  // forced dissolution) — then it's the one contact a creditor needs,
+  // so it's worth a row, not just the Personer tab.
   addRow(overviewList, 'Bostyrer', findRoleHolder(roller, 'BOBE'));
 }
 

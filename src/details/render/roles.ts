@@ -67,8 +67,8 @@ function renderRoleItem(role: Rolle, onNavigate: Navigate): HTMLLIElement {
   // Split the row into a muted role label and a strong subject so the eye
   // lands on the name, not the repeated "Styremedlem:" boilerplate. The
   // subject is a person (plain strong text), an enhet (possibly a
-  // drill-in link) or a bankruptcy trustee (name + postal address, the
-  // creditor's point of contact). A role with none keeps the bare label.
+  // drill-in link) or a bostyrer (name + postal address, the creditor's
+  // point of contact). A role with none keeps the bare label.
   const person = personName(role.person);
   const bostyrer = role.bostyrer?.navn?.trim();
   if (person) {

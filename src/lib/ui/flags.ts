@@ -23,8 +23,8 @@ export interface FlagSpec {
   reason?: string;
 }
 
-// Forced-dissolution reasons. brreg sets one date field per reason; the
-// first present one names the status. Order = most common first.
+// Forced-dissolution reasons. brreg sets one date field per reason, so
+// the field that is present says why; if several are, the first wins.
 const TVANG_REASONS: ReadonlyArray<[keyof Enhet, string]> = [
   ['tvangsopplostPgaManglendeRegnskapDato', 'mangler regnskap'],
   ['tvangsopplostPgaManglendeDagligLederDato', 'mangler daglig leder'],

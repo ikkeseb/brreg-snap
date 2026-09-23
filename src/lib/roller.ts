@@ -10,8 +10,8 @@ export function isResigned(role: Rolle): boolean {
 
 // Display name of a role subject: a person's joined name parts, a
 // registered entity's name (auditors/accountants are usually firms, so
-// a role holder can be an enhet, not a person), or a bankruptcy
-// trustee's name. Undefined when none carries a usable label.
+// a role holder can be an enhet, not a person), or a bostyrer's
+// flat name string. Undefined when none carries a usable label.
 export function roleSubjectName(role: Rolle): string | undefined {
   const navn = role.person?.navn;
   const parts = [navn?.fornavn, navn?.mellomnavn, navn?.etternavn].filter(
@@ -26,7 +26,7 @@ export function roleSubjectName(role: Rolle): string | undefined {
 // First current (not resigned) holder of a role, matched on the inner
 // role's `type.kode` so it works whether the code names a group (DAGL)
 // or a position inside a group (LEDE = styreleder lives under the STYR
-// group). Returns a person, entity or trustee name; undefined when the
+// group). Returns a person, entity or bostyrer name; undefined when the
 // role is absent or every holder has resigned.
 export function findRoleHolder(
   roller: RollerResponse,

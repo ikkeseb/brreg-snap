@@ -96,9 +96,9 @@ export interface RolleEnhet {
   erSlettet?: boolean;
 }
 
-// The bankruptcy trustee on a BOBE role. Unlike person/enhet it is a
-// flat name string (usually "Adv. <navn>") plus the trustee's postal
-// address — the contact a creditor of a bankrupt company needs.
+// The estate administrator on a BOBE role (konkurs, and forced
+// dissolution). Unlike person/enhet it is a flat name string (usually
+// "Adv. <navn>") plus a postal address — the contact a creditor needs.
 export interface Bostyrer {
   navn?: string;
   postadresse?: Adresse;
