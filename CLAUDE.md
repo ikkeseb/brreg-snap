@@ -70,10 +70,11 @@ One source tree, two targets via `BROWSER=firefox|chrome`. Outputs go
 to `dist-firefox/` and `dist-chrome/`; the matching
 `public/manifest.<browser>.json` is copied to `manifest.json` by the
 `copy-static-assets` plugin in `vite.config.ts` (`publicDir` is
-disabled so the source manifests don't leak). The Firefox
-`manifest.json` stays byte-identical to the AMO submission. Engine
-differences are isolated in `src/lib/platform/` — see
-`docs/chrome-port.md`.
+disabled so the source manifests don't leak). Engine differences are
+isolated in `src/lib/platform/` — see `docs/chrome-port.md`. Store
+uploads are the CI release artifacts only (`.gitattributes` forces LF
+so local and CI builds match; AMO re-serialises the manifest when it
+signs, so the shipped one is never byte-identical anyway).
 
 ## Architecture — routing table
 
@@ -83,11 +84,11 @@ note before reading the source file.
 
 | Concern                                       | Source                          | Note                              |
 | --------------------------------------------- | ------------------------------- | --------------------------------- |
-| Resolution cascade, sync↔async, scoring bands, picker-choice cache | `src/lib/orgnr.ts`, `mod11.ts`, `hostname-search.ts`, `hostname-score.ts` | `docs/notes/resolution.md`        |
-| 24h cache, race guards (`searchRunId`, `loadRunId`) | `src/lib/brreg.ts`, `popup.ts`, `details.ts` | `docs/notes/cache.md`             |
-| Sidebar sync (`sendMessage` vs `setPanel`, `no-match`) | `src/details/details.ts`, `popup/popup.ts`, `background/background.ts` | `docs/notes/sidebar-sync.md`      |
-| Permissions: `activeTab` limits, runtime `tabs` opt-in, gesture-stack rules | `manifest.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts` | `docs/notes/permissions-model.md` |
-| brreg API: regnskap base URL, 500 = unsupported plan, no signatur, search drops dots | `src/lib/brreg.ts`              | `docs/notes/brreg-api.md`         |
+| Resolution cascade, scoring bands + hjemmeside ties, registrable domain, picker-choice cache, orgnr → underenhet fallback | `src/lib/orgnr.ts`, `mod11.ts`, `hostname-search.ts`, `hostname-score.ts`, `company-load.ts` | `docs/notes/resolution.md`        |
+| Session cache (TTL, sweep, data age), race guards (`searchRunId`, the panel's load token) | `src/lib/session-cache.ts`, `brreg.ts`, `popup.ts`, `details.ts` | `docs/notes/cache.md`             |
+| Sidebar sync: panel-hosted auto-sync, window-scoped messages, same-view keep | `src/details/details.ts`, `src/lib/panel-protocol.ts`, `panel-follow.ts`, `tab-sync.ts`, `popup/popup.ts`, `background/background.ts` | `docs/notes/sidebar-sync.md`      |
+| Permissions: `activeTab` limits, runtime `tabs` opt-in + consent step, gesture-stack rules | `manifest.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts` | `docs/notes/permissions-model.md` |
+| brreg API: regnskap base URL, regnskap 500 = not in the open API, `avregistrert` roles, currency, no signatur, search drops dots | `src/lib/brreg.ts`              | `docs/notes/brreg-api.md`         |
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
 
 Sidebar render functions are pure DOM writers in `src/details/render/*.ts`
@@ -131,13 +132,19 @@ These are the product differentiator, not preferences. See
 - Only `data.brreg.no` in `host_permissions`. No new hosts.
 - Install-time permissions are `activeTab` + `storage` + `menus`.
   `tabs` lives in `optional_permissions` and is *runtime opt-in only*:
-  the user must flip "Auto-oppdater ved fane-bytte" in the sidebar,
-  which calls `permissions.request({permissions: ['tabs']})` on
-  click. Flipping off calls `permissions.remove`. No `<all_urls>`,
-  no `cookies`, no `webRequest`. `menus` is on Mozilla's no-prompt
-  list (silent at install). The install dialog therefore advertises
-  only `activeTab` + storage + brreg host — `tabs` does not appear
-  until the user explicitly grants it.
+  the user must flip "Auto-oppdater ved fane-bytte" in the sidebar and
+  confirm the inline disclosure, whose «Slå på» click calls
+  `permissions.request({permissions: ['tabs']})`. Flipping off calls
+  `permissions.remove`. No `<all_urls>`, no `cookies`, no
+  `webRequest`. `menus` is on Mozilla's no-prompt list (silent at
+  install). The install dialog therefore advertises only `activeTab` +
+  storage + brreg host (plus, on Firefox 140+, the declared
+  `browsingActivity` data collection) — `tabs` does not appear until
+  the user explicitly grants it.
+- Data declarations stay honest: the visited site's domain goes to
+  data.brreg.no, so Firefox declares `browsingActivity` as required
+  and the CWS privacy tab discloses web history. Pinned by
+  `tests/manifest.test.ts`.
 - CSP keeps `default-src 'self'` with `base-uri`, `form-action`, and
   `frame-ancestors` all `'none'`. Don't add `'unsafe-inline'`, remote
   script hosts, or relax these directives.
