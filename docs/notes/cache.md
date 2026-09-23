@@ -42,26 +42,32 @@ The module is `src/lib/session-cache.ts`. Its rules:
 refresh doesn't re-hit (see `docs/notes/brreg-api.md`
 § regnskap-500-unsupported-plan).
 
-`hostname-search.ts` caches under three keys:
+`hostname-search.ts` caches under three keys, all per SITE — the
+registrable domain (`siteKey`: `www.dnb.no`, `dnb.no` and
+`nettbank.dnb.no` are all `dnb.no`; `docs/notes/resolution.md`
+§ undo):
 
-- `hostname:<host>` → `HostnameResult` = `{band: 'auto' | 'picker' |
-  'none', candidates: SearchHit[]}` (orgnr is included on the auto
-  variant). Replaces the older `string | null` shape.
-- `picker-choice:<host>` → `string | null` (null = "Ingen av disse").
+- `hostname:<site>` → `HostnameResult` = `{band: 'auto' | 'picker' |
+  'none', candidates: Candidate[]}` (orgnr is included on the auto
+  variant; each candidate carries its `evidence`). A read that fails
+  the shape guard (an older build's entry) is a miss. The title
+  segmentation run caches under `hostname:<site>[:rej:…]:seg:<queries>`.
+- `picker-choice:<site>` → `string | null` (null = "Ingen av disse").
   Set by the picker (either surface) when the user resolves it. Wins
   over the band cache: if a choice is cached,
   `searchByHostnameDetailed` short-circuits before running the
   pipeline.
-- `rejected:<host>` → `string[]`. Orgnrs the user said "Feil bedrift?"
-  on for this host. The pipeline filters these out before scoring,
+- `rejected:<site>` → `string[]`. Orgnrs the user said "Feil bedrift?"
+  on for this site. The pipeline filters these out before scoring,
   and the band cache key folds the sorted set in
-  (`hostname:<host>:rej:<a>|<b>`) so a fresh rejection doesn't serve
+  (`hostname:<site>:rej:<a>|<b>`) so a fresh rejection doesn't serve
   the stale pre-rejection result. `addRejectedChoice` also clears the
-  positive `picker-choice:<host>` if it equals the rejected orgnr —
+  positive `picker-choice:<site>` if it equals the rejected orgnr —
   otherwise the choice would keep short-circuiting future
   resolutions back to the rejected entity.
 
-All three keys honor the same 24h TTL.
+All three keys honor the same 24h TTL; `forgetHost` removes all of
+them for one site.
 
 <!-- SECTION: failure-no-cache -->
 ## Failures never enter the band cache
