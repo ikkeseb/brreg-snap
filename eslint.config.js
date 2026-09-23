@@ -14,6 +14,7 @@ const nodeGlobals = {
   setTimeout: 'readonly',
   URLSearchParams: 'readonly',
   clearTimeout: 'readonly',
+  FormData: 'readonly',
 };
 
 // The src security rules, exported for tests/lint-security.test.ts.

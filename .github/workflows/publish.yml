@@ -1,0 +1,196 @@
+name: Publish to stores
+
+# Submits the assets of an existing GitHub Release vX.Y.Z to AMO and/or
+# the Chrome Web Store (runbook: docs/release.md). Never rebuilds: what
+# goes up are the Release assets, checked against the Release's sha256
+# digests, the build attestation from release.yml and the package
+# invariants. The package check (verify-package.mjs) runs in its own
+# `verify` job: its AST scan loads the dev dependencies, which never get
+# installed next to the store keys. The `publish` job runs no installed
+# code and sits in the `store-publish` environment: its
+# required reviewer approves every run, and the store keys live there.
+# A store without keys is skipped with a notice; a store already tagged
+# as submitted for this version is skipped too. After a real submission
+# the job tags `amo-submission-X.Y.Z` / `cws-submission-X.Y.Z` (annotated,
+# on the vX.Y.Z commit, with the digests).
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to publish (X.Y.Z); the GitHub Release vX.Y.Z must exist
+        required: true
+        type: string
+      stores:
+        description: Stores
+        required: true
+        type: choice
+        options: [both, amo, cws]
+        default: both
+      dry_run:
+        description: Dry run (print the request plan; no store call, no tags)
+        required: true
+        type: boolean
+        default: true
+
+permissions: {}
+
+concurrency:
+  group: publish-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # download the Release assets
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - name: Check the version input
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must be X.Y.Z, got '$VERSION'"
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Package invariants of the Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "v$VERSION" --repo "$GITHUB_REPOSITORY" --pattern '*.zip' --dir assets
+          node scripts/verify-package.mjs "$VERSION" assets
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: store-publish
+    permissions:
+      contents: write # create the submission tags (via the API)
+      attestations: read # gh attestation verify
+    env:
+      VERSION: ${{ inputs.version }}
+      STORES: ${{ inputs.stores }}
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - name: Check the version input
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::version must be X.Y.Z, got '$VERSION'"
+            exit 1
+          fi
+
+      # Scripts from this ref; the submission kit is read from the tag
+      # (git show vX.Y.Z:...), hence the full history with tags.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+
+      - name: Download and verify the Release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "v$VERSION" --repo "$GITHUB_REPOSITORY" --pattern '*.zip' --dir assets
+          gh release view "v$VERSION" --repo "$GITHUB_REPOSITORY" --json assets \
+            --jq '.assets[] | select(.name | endswith(".zip")) | "\(.digest // "none" | sub("^sha256:"; ""))  \(.name)"' \
+            > SHA256SUMS
+          cat SHA256SUMS
+          if grep -qvE '^[0-9a-f]{64}  ' SHA256SUMS; then
+            echo "::error::a Release asset has no sha256 digest"
+            exit 1
+          fi
+          (cd assets && sha256sum --check --strict ../SHA256SUMS)
+          for f in assets/*.zip; do
+            gh attestation verify "$f" --repo "$GITHUB_REPOSITORY" \
+              --signer-workflow "$GITHUB_REPOSITORY/.github/workflows/release.yml"
+          done
+
+      - name: Plan
+        id: plan
+        run: |
+          for store in amo cws; do
+            run=false
+            if [ "$STORES" = both ] || [ "$STORES" = "$store" ]; then
+              if git rev-parse --quiet --verify "refs/tags/$store-submission-$VERSION" > /dev/null; then
+                echo "::notice::$store-submission-$VERSION exists: $store already has $VERSION, skipped."
+              else
+                run=true
+              fi
+            fi
+            echo "$store=$run" >> "$GITHUB_OUTPUT"
+          done
+
+      - name: AMO
+        id: amo
+        if: steps.plan.outputs.amo == 'true'
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          args=("$VERSION" assets)
+          if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
+          node scripts/publish-amo.mjs "${args[@]}"
+
+      # Runs even when AMO failed: one store's trouble doesn't hold the other.
+      - name: CWS
+        id: cws
+        if: ${{ !cancelled() && steps.plan.outputs.cws == 'true' }}
+        env:
+          CWS_SERVICE_ACCOUNT_JSON: ${{ secrets.CWS_SERVICE_ACCOUNT_JSON }}
+          CWS_CLIENT_ID: ${{ secrets.CWS_CLIENT_ID }}
+          CWS_CLIENT_SECRET: ${{ secrets.CWS_CLIENT_SECRET }}
+          CWS_REFRESH_TOKEN: ${{ secrets.CWS_REFRESH_TOKEN }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_ITEM_ID: ${{ vars.CWS_ITEM_ID }}
+        run: |
+          args=("$VERSION" assets)
+          if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
+          node scripts/publish-cws.mjs "${args[@]}"
+
+      # Annotated tags through the API (tag object + ref), so the checkout
+      # keeps no credentials and nothing but these two refs is written.
+      - name: Tag what was submitted
+        if: ${{ !cancelled() && (steps.amo.outputs.submitted == 'true' || steps.cws.outputs.submitted == 'true') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AMO_SUBMITTED: ${{ steps.amo.outputs.submitted }}
+          CWS_SUBMITTED: ${{ steps.cws.outputs.submitted }}
+        run: |
+          commit="$(git rev-parse "v$VERSION^{commit}")"
+          sum() { awk -v f="$1" '$2 == f { print $1 }' SHA256SUMS; }
+          tag() {
+            obj="$(gh api "repos/$GITHUB_REPOSITORY/git/tags" \
+              -f tag="$1" -f message="$2" -f object="$commit" -f type=commit \
+              -f 'tagger[name]=github-actions[bot]' \
+              -f 'tagger[email]=41898282+github-actions[bot]@users.noreply.github.com' \
+              --jq .sha)"
+            gh api "repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/tags/$1" -f sha="$obj" > /dev/null
+            echo "Tagged \`$1\` on v$VERSION ($commit)" >> "$GITHUB_STEP_SUMMARY"
+          }
+          pkg="brreg-snap-$VERSION.zip"
+          src="brreg-snap-source-$VERSION.zip"
+          crx="brreg-snap-chrome-$VERSION.zip"
+          if [ "$AMO_SUBMITTED" = true ]; then
+            tag "amo-submission-$VERSION" "AMO $VERSION: $pkg sha256:$(sum "$pkg") source $src sha256:$(sum "$src")"
+          fi
+          if [ "$CWS_SUBMITTED" = true ]; then
+            tag "cws-submission-$VERSION" "CWS $VERSION: $crx sha256:$(sum "$crx")"
+          fi

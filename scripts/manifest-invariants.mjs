@@ -122,7 +122,8 @@ export const STRUCTURE = {
 
 /**
  * Every package file the manifest points at, deduplicated, in manifest
- * order. verify:dist checks each exists in dist-<target>/.
+ * order. verify:dist checks each exists in dist-<target>/, verify-package
+ * in the release zips.
  * @param {Record<string, any>} manifest
  * @returns {string[]}
  */
@@ -141,6 +142,13 @@ export function referencedFiles(manifest) {
   ];
   return [...new Set(files.filter((f) => typeof f === 'string'))];
 }
+
+/**
+ * What a package may contain at its root (scripts/verify-dist.mjs checks
+ * dist-*, scripts/verify-package.mjs the release zips). .map files sit
+ * inside these directories and are stripped at packaging.
+ */
+export const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'chunks', 'icons', 'assets'];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const show = (v) => (v === undefined ? 'undefined' : JSON.stringify(v));

@@ -2,7 +2,8 @@
 // constraints), found on the AST rather than the raw text: a mention
 // inside a string is fine, and the minifier's spelling (`(0,eval)`,
 // `Reflect.construct(Function,…)`, `x["eval"]`) doesn't matter. Used by
-// scripts/verify-dist.mjs on every dist-*/ .js file.
+// scripts/verify-dist.mjs on every dist-*/ .js file and by
+// scripts/verify-package.mjs on every .js file in the release zips.
 //
 // Parser: Vite's own `parseSync` (Oxc, via rolldown), so no new
 // dependency. Scope is not analysed: any reference to the names below

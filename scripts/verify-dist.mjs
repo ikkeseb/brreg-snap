@@ -6,11 +6,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { findCodegen } from './codegen-scan.mjs';
-import { check, referencedFiles } from './manifest-invariants.mjs';
-
-// What a package may contain at its root. .map files sit inside these
-// directories and are stripped at packaging (package:* --ignore-files).
-const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'chunks', 'icons', 'assets'];
+import { check, DIST_ROOT, referencedFiles } from './manifest-invariants.mjs';
 
 const failures = [];
 const fail = (where, msg) => failures.push(`${where}: ${msg}`);
