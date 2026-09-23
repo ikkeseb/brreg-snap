@@ -61,8 +61,9 @@ orgnr that is neither are permanent answers: the error state offers no
 The manual search box takes the same route for orgnr-shaped input:
 brreg's `navn=` search can't find a company by its number (0 hits for
 `923609016`, unrelated names for `923 609 016`). `parseOrgnrQuery`
-accepts the digits with spaces, dots, U+00A0 and the invoice form
-`NO 923 609 016 MVA`. A valid orgnr is looked up directly and shown as
+accepts the digits with spaces, dots, U+00A0, the invoice form
+`NO 923 609 016 MVA`, and the label a site footer prints in front
+(`Org.nr.`, `Org nr:`, `Orgnr`, any case). A valid orgnr is looked up directly and shown as
 the one hit. An underenhet row reads «<navn> — avdeling av <parent>»,
 and selecting it loads the branch orgnr through the fallback above.
 Nine digits that fail mod-11 get «… er ikke et gyldig

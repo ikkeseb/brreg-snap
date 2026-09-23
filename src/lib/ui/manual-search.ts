@@ -38,11 +38,14 @@ export type OrgnrQuery =
   | { kind: 'invalid'; digits: string };
 
 // An orgnr the way people paste it: "923609016", "923 609 016",
-// "923.609.016", with non-breaking spaces from a rendered footer, or
-// the MVA form "NO 923 609 016 MVA". Undefined for anything else, which
-// is searched as a name.
+// "923.609.016", with non-breaking spaces from a rendered footer, the
+// MVA form "NO 923 609 016 MVA", or behind the label a site footer
+// prints ("Org.nr. 923 609 016", "Org nr: …", "Orgnr …", any case).
+// Undefined for anything else, which is searched as a name.
 export function parseOrgnrQuery(query: string): OrgnrQuery | undefined {
-  const m = /^(?:NO)?([\d\s.]+?)(?:MVA)?$/i.exec(query.trim());
+  const m = /^(?:org\.?\s*nr\.?:?)?\s*(?:NO)?([\d\s.]+?)(?:MVA)?$/i.exec(
+    query.trim(),
+  );
   if (!m) return undefined;
   const digits = m[1]!.replace(/[\s.]/g, '');
   if (!/^\d{9}$/.test(digits)) return undefined;

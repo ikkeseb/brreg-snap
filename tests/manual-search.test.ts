@@ -23,6 +23,15 @@ describe('parseOrgnrQuery', () => {
     ['NO 923 609 016 MVA'],
     ['no923609016mva'],
     ['  923 609 016  '],
+    // The label a site footer prints before the number.
+    ['Org.nr. 923 609 016'],
+    ['Org nr: 923609016'],
+    ['Org.nr: 923 609 016'],
+    ['Orgnr 923609016'],
+    ['ORG.NR.923609016'],
+    ['org. nr. 923.609.016'],
+    ['Org.nr.: NO 923 609 016 MVA'],
+    [`Org.nr.${NBSP}${['923', '609', '016'].join(NBSP)}`],
   ])('reads %j as orgnr 923609016', (query) => {
     expect(parseOrgnrQuery(query)).toEqual({ kind: 'orgnr', orgnr: '923609016' });
   });
@@ -34,7 +43,23 @@ describe('parseOrgnrQuery', () => {
     });
   });
 
-  it.each([['Equinor'], ['dnb bank'], ['12345'], ['9236090161'], ['7-eleven']])(
+  it('flags a labelled number that fails the check digit', () => {
+    expect(parseOrgnrQuery('Org.nr. 923 609 017')).toEqual({
+      kind: 'invalid',
+      digits: '923609017',
+    });
+  });
+
+  it.each([
+    ['Equinor'],
+    ['dnb bank'],
+    ['12345'],
+    ['9236090161'],
+    ['7-eleven'],
+    ['Orgnr'],
+    ['Org.nr. 12345'],
+    ['Organic 923609016'],
+  ])(
     'leaves %j to the name search',
     (query) => {
       expect(parseOrgnrQuery(query)).toBeUndefined();
