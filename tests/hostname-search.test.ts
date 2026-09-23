@@ -79,23 +79,25 @@ describe('searchByHostname (AUTO-only legacy wrapper)', () => {
   });
 
   it('returns the AUTO-band orgnr when scoring is confident', async () => {
-    // ORKLA ASA → exact-prefix(+48) + ASA(+28) + top-level(+12) +
-    // short(2w)(+10) = 98, clear winner.
+    // YARA INTERNATIONAL ASA → prefix(+35) + hjemmeside=exact(+35) +
+    // ASA(+28) + top-level(+12) + ansatte>=10(+8) = 118, clear winner.
+    // The hjemmeside tie (live value) is what allows AUTO at all.
     searchMock.mockImplementation(async (params: URLSearchParams) => {
       if (params.has('hjemmeside')) return [];
       return [
-        hit('ORKLA ASA', '910747711', {
+        hit('YARA INTERNATIONAL ASA', '986228608', {
           organisasjonsform: { kode: 'ASA' },
+          hjemmeside: 'www.yara.com',
           antallAnsatte: 50,
         }),
-        hit('ORKLA FOODS NORGE AS', '999999998', {
+        hit('YARA FOODS NORGE AS', '999999998', {
           organisasjonsform: { kode: 'AS' },
-          overordnetEnhet: '910747711',
+          overordnetEnhet: '986228608',
         }),
       ];
     });
 
-    expect(await searchByHostname('orkla.com')).toBe('910747711');
+    expect(await searchByHostname('yara.com')).toBe('986228608');
   });
 
   it('returns undefined when band is picker (ambiguous)', async () => {
@@ -120,11 +122,14 @@ describe('searchByHostname (AUTO-only legacy wrapper)', () => {
 
   it('caches results and skips network on the second call', async () => {
     searchMock.mockResolvedValue([
-      hit('ORKLA ASA', '910747711', { organisasjonsform: { kode: 'ASA' } }),
+      hit('YARA INTERNATIONAL ASA', '986228608', {
+        organisasjonsform: { kode: 'ASA' },
+        hjemmeside: 'www.yara.com',
+      }),
     ]);
-    await searchByHostname('orkla.com');
+    await searchByHostname('yara.com');
     const callsAfterFirst = searchMock.mock.calls.length;
-    await searchByHostname('orkla.com');
+    await searchByHostname('yara.com');
     expect(searchMock.mock.calls.length).toBe(callsAfterFirst);
   });
 
@@ -151,15 +156,16 @@ describe('searchByHostnameDetailed', () => {
     searchMock.mockImplementation(async (params: URLSearchParams) => {
       if (params.has('hjemmeside')) return [];
       return [
-        hit('ORKLA ASA', '910747711', {
+        hit('YARA INTERNATIONAL ASA', '986228608', {
           organisasjonsform: { kode: 'ASA' },
+          hjemmeside: 'www.yara.com',
         }),
       ];
     });
 
-    const result = await searchByHostnameDetailed('orkla.com');
+    const result = await searchByHostnameDetailed('yara.com');
     expect(result?.band).toBe('auto');
-    expect(result?.choice).toBe('910747711');
+    expect(result?.choice).toBe('986228608');
   });
 
   it('returns band=picker with candidates when ambiguous', async () => {
@@ -207,7 +213,7 @@ describe('searchByHostnameDetailed', () => {
   it('falls back to Q3 (no org-form filter) when Q1+Q2 yields zero', async () => {
     searchMock.mockImplementation(async (params: URLSearchParams) => {
       if (params.has('hjemmeside')) return [];
-      if (params.get('organisasjonsform') === 'AS,ASA,SA,ORGL,SF') return [];
+      if (params.has('organisasjonsform')) return [];
       // Q3 has no organisasjonsform set.
       return [
         hit('EKSPORTFINANSIERING NORGE', '999000001', {
@@ -218,10 +224,109 @@ describe('searchByHostnameDetailed', () => {
 
     const result = await searchByHostnameDetailed('eksfin.no');
     const q3Call = searchMock.mock.calls.find(
-      (call) => !(call[0] as URLSearchParams).has('organisasjonsform'),
+      (call) =>
+        (call[0] as URLSearchParams).has('navn') &&
+        !(call[0] as URLSearchParams).has('organisasjonsform'),
     );
     expect(q3Call).toBeDefined();
     expect(result).toBeDefined();
+  });
+
+  it('caps a confident name-only match at the picker', async () => {
+    // Live shape (medium.com): MEDIUM AS scores 81 with a 13-point lead,
+    // but nothing in the registry ties it to the site.
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) return [];
+      return [
+        hit('MEDIUM AS', '913491718', { registrertIForetaksregisteret: true }),
+      ];
+    });
+
+    const result = await searchByHostnameDetailed('medium.com');
+    expect(result?.band).toBe('picker');
+    expect(result?.choice).toBeUndefined();
+    expect(result?.candidates.map((c) => c.organisasjonsnummer)).toEqual([
+      '913491718',
+    ]);
+    expect(await searchByHostname('medium.com')).toBeUndefined();
+  });
+});
+
+describe('brreg queries', () => {
+  beforeEach(() => {
+    installStorageMock();
+    searchMock.mockReset();
+    searchMock.mockResolvedValue([]);
+  });
+
+  const calls = () =>
+    searchMock.mock.calls.map((c) => Object.fromEntries(c[0] as URLSearchParams));
+
+  it('sends one hjemmeside query on the registrable domain, sorted by headcount', async () => {
+    // Brreg matches hjemmeside as a substring, so the www. variant was a
+    // redundant second request; unsorted, the first 10 rows of obos.no
+    // were borettslag and OBOS BBL never became a candidate.
+    await searchByHostnameDetailed('nettbank.dnb.no');
+    const q1 = calls().filter((p) => 'hjemmeside' in p);
+    expect(q1).toEqual([
+      { hjemmeside: 'dnb.no', sort: 'antallAnsatte,DESC', size: '20' },
+    ]);
+  });
+
+  it('keeps BBL in the name query\'s org-form filter', async () => {
+    await searchByHostnameDetailed('obos.no');
+    const q2 = calls().filter((p) => 'organisasjonsform' in p);
+    expect(q2.length).toBeGreaterThan(0);
+    for (const p of q2) {
+      expect(p.organisasjonsform?.split(',')).toContain('BBL');
+    }
+  });
+
+  it('queries the tenant on hosting-platform subdomains', async () => {
+    await searchByHostnameDetailed('firma.pages.dev');
+    const params = calls();
+    expect(params).toContainEqual(
+      expect.objectContaining({ hjemmeside: 'firma.pages.dev' }),
+    );
+    const navn = params.filter((p) => 'navn' in p).map((p) => p.navn);
+    expect(navn).toContain('firma');
+    expect(navn.some((n) => n?.includes('pages'))).toBe(false);
+  });
+});
+
+describe('hosts that never reach brreg', () => {
+  let store: StorageMap;
+
+  beforeEach(() => {
+    store = installStorageMock();
+    searchMock.mockReset();
+  });
+
+  // Intranet names and IP literals used to go out as hjemmeside=/navn=
+  // queries (192.168.10.20 → navn=10, jira.corp.internal → navn=corp).
+  const hosts = [
+    '192.168.10.20',
+    '10.0.0.12',
+    '[::1]',
+    '[fe80::1]',
+    'localhost',
+    'intranet',
+    'jira.corp.internal',
+    'printer.local',
+    'nas.lan',
+    'router.home.arpa',
+    'sites.google.com',
+  ];
+
+  it.each(hosts)('%s resolves to none locally, sends nothing, stores nothing', async (host) => {
+    expect(await searchByHostnameDetailed(host)).toEqual({
+      band: 'none',
+      candidates: [],
+      complete: true,
+    });
+    expect(await searchByHostname(host)).toBeUndefined();
+    expect(searchMock).not.toHaveBeenCalled();
+    expect(Object.keys(store)).toEqual([]);
   });
 });
 
@@ -239,13 +344,13 @@ describe('pipeline failure handling (network errors)', () => {
   it('returns band=none WITHOUT caching when every query fails', async () => {
     searchMock.mockRejectedValue(new Error('brreg search returned 503.'));
 
-    const result = await searchByHostnameDetailed('orkla.com');
+    const result = await searchByHostnameDetailed('yara.com');
     expect(result).toEqual({ band: 'none', candidates: [], complete: false });
     expect(bandKeys()).toEqual([]);
 
     // Next visit retries the network instead of serving a 24h miss.
     const callsAfterFirst = searchMock.mock.calls.length;
-    await searchByHostnameDetailed('orkla.com');
+    await searchByHostnameDetailed('yara.com');
     expect(searchMock.mock.calls.length).toBeGreaterThan(callsAfterFirst);
   });
 
@@ -258,20 +363,21 @@ describe('pipeline failure handling (network errors)', () => {
         throw new Error('brreg search returned 429.');
       }
       return [
-        hit('ORKLA ASA', '910747711', {
+        hit('YARA INTERNATIONAL ASA', '986228608', {
           organisasjonsform: { kode: 'ASA' },
+          hjemmeside: 'www.yara.com',
           antallAnsatte: 50,
         }),
-        hit('ORKLA FOODS NORGE AS', '999999998', {
+        hit('YARA FOODS NORGE AS', '999999998', {
           organisasjonsform: { kode: 'AS' },
-          overordnetEnhet: '910747711',
+          overordnetEnhet: '986228608',
         }),
       ];
     });
 
-    const result = await searchByHostnameDetailed('orkla.com');
+    const result = await searchByHostnameDetailed('yara.com');
     expect(result?.band).toBe('auto');
-    expect(result?.choice).toBe('910747711');
+    expect(result?.choice).toBe('986228608');
     expect(result?.complete).toBe(false);
     expect(bandKeys()).toEqual([]);
   });
@@ -280,16 +386,17 @@ describe('pipeline failure handling (network errors)', () => {
     searchMock.mockImplementation(async (params: URLSearchParams) => {
       if (params.has('hjemmeside')) return [];
       return [
-        hit('ORKLA ASA', '910747711', {
+        hit('YARA INTERNATIONAL ASA', '986228608', {
           organisasjonsform: { kode: 'ASA' },
+          hjemmeside: 'www.yara.com',
           antallAnsatte: 50,
         }),
       ];
     });
 
-    const result = await searchByHostnameDetailed('orkla.com');
+    const result = await searchByHostnameDetailed('yara.com');
     expect(result?.band).toBe('auto');
-    expect(bandKeys()).toEqual(['hostname:orkla.com']);
+    expect(bandKeys()).toEqual(['hostname:yara.com']);
   });
 
   it('a failed Q3 fallback also blocks caching', async () => {
@@ -309,8 +416,8 @@ describe('pipeline failure handling (network errors)', () => {
 
   it('picker-choice cache still wins regardless of network state', async () => {
     searchMock.mockRejectedValue(new Error('offline'));
-    await setPickerChoice('orkla.com', '910747711');
-    expect(await searchByHostname('orkla.com')).toBe('910747711');
+    await setPickerChoice('yara.com', '986228608');
+    expect(await searchByHostname('yara.com')).toBe('986228608');
     expect(searchMock).not.toHaveBeenCalled();
   });
 });
@@ -396,22 +503,23 @@ describe('addRejectedChoice + pipeline filtering', () => {
     searchMock.mockImplementation(async (params: URLSearchParams) => {
       if (params.has('hjemmeside')) return [];
       return [
-        hit('ORKLA ASA', '910747711', {
+        hit('YARA INTERNATIONAL ASA', '986228608', {
           organisasjonsform: { kode: 'ASA' },
+          hjemmeside: 'www.yara.com',
           antallAnsatte: 50,
         }),
-        hit('ORKLA FOODS NORGE AS', '999999998', {
+        hit('YARA FOODS NORGE AS', '999999998', {
           organisasjonsform: { kode: 'AS' },
-          overordnetEnhet: '910747711',
+          overordnetEnhet: '986228608',
         }),
       ];
     });
 
-    expect(await searchByHostname('orkla.com')).toBe('910747711');
+    expect(await searchByHostname('yara.com')).toBe('986228608');
     const callsAfterFirst = searchMock.mock.calls.length;
 
-    await addRejectedChoice('orkla.com', '910747711');
-    await searchByHostname('orkla.com');
+    await addRejectedChoice('yara.com', '986228608');
+    await searchByHostname('yara.com');
     expect(searchMock.mock.calls.length).toBeGreaterThan(callsAfterFirst);
   });
 });

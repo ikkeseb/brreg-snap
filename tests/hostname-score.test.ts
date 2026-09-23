@@ -6,6 +6,7 @@ import {
   generateNordicVariants,
   hostnameLabel,
   normalizeHjemmeside,
+  registrableDomain,
   scoreCandidate,
 } from '../src/lib/hostname-score.js';
 import type { SearchHit } from '../src/types/brreg.js';
@@ -130,6 +131,92 @@ describe('hostnameLabel', () => {
     expect(hostnameLabel('xn--.no')).toBeUndefined(); // empty payload
     expect(hostnameLabel('xn--a-b.no')).toBeUndefined(); // truncated
   });
+
+  it('uses the tenant, not the platform, on hosting-platform subdomains', () => {
+    // Before: 'pages' / 'github' / 'myshopify' — queries that could only
+    // surface unrelated companies (firma.pages.dev → PRISMATIC PAGES AS).
+    expect(hostnameLabel('firma.pages.dev')).toBe('firma');
+    expect(hostnameLabel('nrkbeta.github.io')).toBe('nrkbeta');
+    expect(hostnameLabel('butikk.myshopify.com')).toBe('butikk');
+    expect(hostnameLabel('www.firma.netlify.app')).toBe('firma');
+  });
+
+  it('abstains on IP literals and intranet hosts', () => {
+    // Before: 192.168.10.20 → '10', jira.corp.internal → 'corp' —
+    // both sent to brreg.
+    expect(hostnameLabel('192.168.10.20')).toBeUndefined();
+    expect(hostnameLabel('172.16.254.100')).toBeUndefined();
+    expect(hostnameLabel('jira.corp.internal')).toBeUndefined();
+    expect(hostnameLabel('intranet.company.local')).toBeUndefined();
+    expect(hostnameLabel('router.home.arpa')).toBeUndefined();
+    expect(hostnameLabel('sites.google.com')).toBeUndefined();
+  });
+});
+
+describe('registrableDomain', () => {
+  it('reduces subdomains to the registrable domain', () => {
+    expect(registrableDomain('nettbank.dnb.no')).toBe('dnb.no');
+    expect(registrableDomain('www.dnb.no')).toBe('dnb.no');
+    expect(registrableDomain('dnb.no')).toBe('dnb.no');
+    expect(registrableDomain('a.b.c.yara.com')).toBe('yara.com');
+  });
+
+  it('keeps one label left of a multi-part public suffix', () => {
+    expect(registrableDomain('www.bbc.co.uk')).toBe('bbc.co.uk');
+    expect(registrableDomain('shop.company.co.uk')).toBe('company.co.uk');
+    expect(registrableDomain('bydel.oslo.kommune.no')).toBe('oslo.kommune.no');
+  });
+
+  it('keeps the tenant on hosting platforms', () => {
+    expect(registrableDomain('firma.github.io')).toBe('firma.github.io');
+    expect(registrableDomain('blogg.firma.github.io')).toBe('firma.github.io');
+    expect(registrableDomain('firma.pages.dev')).toBe('firma.pages.dev');
+    expect(registrableDomain('firma.wixsite.com')).toBe('firma.wixsite.com');
+  });
+
+  it('normalizes case and a trailing dot', () => {
+    expect(registrableDomain('WWW.DNB.NO.')).toBe('dnb.no');
+  });
+
+  it('refuses IPv4 and IPv6 literals', () => {
+    // `new URL().hostname` shapes: IPv6 stays bracketed, and every IPv4
+    // spelling (0x7f.1, 3232235777) is normalized to dotted decimal.
+    expect(registrableDomain('192.168.10.20')).toBeUndefined();
+    expect(registrableDomain('10.0.0.12')).toBeUndefined();
+    expect(registrableDomain('127.0.0.1')).toBeUndefined();
+    expect(registrableDomain('[::1]')).toBeUndefined();
+    expect(registrableDomain('[2001:db8::1]')).toBeUndefined();
+    expect(registrableDomain(new URL('http://3232235777/').hostname)).toBeUndefined();
+  });
+
+  it('refuses single-label and intranet/special-use hosts', () => {
+    for (const host of [
+      'localhost',
+      'intranet',
+      'printer.local',
+      'jira.corp.internal',
+      'nas.lan',
+      'router.home.arpa',
+      'files.home',
+      'app.localhost',
+      'site.test',
+      'www.example',
+      'x.invalid',
+      'abc.onion',
+    ]) {
+      expect(registrableDomain(host), host).toBeUndefined();
+    }
+  });
+
+  it('refuses hosts that are themselves a public suffix', () => {
+    expect(registrableDomain('co.uk')).toBeUndefined();
+    expect(registrableDomain('kommune.no')).toBeUndefined();
+    expect(registrableDomain('github.io')).toBeUndefined();
+    expect(registrableDomain('www.github.io')).toBeUndefined();
+    // Path-tenant platform: the tenant is in the URL path, never in the
+    // host, so the host abstains instead of matching GOOGLE NORWAY AS.
+    expect(registrableDomain('sites.google.com')).toBeUndefined();
+  });
 });
 
 describe('normalizeHjemmeside', () => {
@@ -213,6 +300,37 @@ describe('scoreCandidate', () => {
     );
   });
 
+  it('does not penalise the site\'s own company when it is winding down', () => {
+    // Live shape (10thpbergen.com): the only hit for the host is its own
+    // DA, under avvikling. With the -30 it scored 18 and the site showed
+    // «Ingen bedrift identifisert» — hiding the one warning that matters.
+    const own = cand({
+      navn: '10TH PLANET BERGEN JIU JITSU - DA',
+      organisasjonsform: { kode: 'DA' },
+      hjemmeside: '10thpbergen.com',
+      registrertIForetaksregisteret: true,
+      underAvvikling: true,
+    });
+    const { score, reasons } = scoreCandidate(own, '10thpbergen', '10thpbergen.com');
+    expect(reasons).not.toContain('inactive(-30)');
+    expect(score).toBe(48); // 35 + DA 5 + top-level 12 + foretaksreg 6 - long 10
+  });
+
+  it('still penalises a winding-down company tied only by a page on the site', () => {
+    // Live shape (nrk.no, name fictitious): an Urørt artist registered
+    // a page on nrk.no. That is not the site's own company, so the
+    // penalty stays.
+    const artist = cand({
+      navn: 'EKSEMPELBAND DA',
+      organisasjonsform: { kode: 'DA' },
+      hjemmeside: 'nrk.no/urort/artist/eksempelband',
+      underAvvikling: true,
+    });
+    const { reasons } = scoreCandidate(artist, 'nrk', 'nrk.no');
+    expect(reasons).toContain('hjemmeside=page(+12)');
+    expect(reasons).toContain('inactive(-30)');
+  });
+
   it('rewards hjemmeside-exact match even without a name match', () => {
     const c = cand({
       navn: 'UNRELATED MEDIA AS',
@@ -225,15 +343,18 @@ describe('scoreCandidate', () => {
 
   it('scores messy-but-exact hjemmeside values as exact, not substring', () => {
     // Brreg's hjemmeside is free text. Every shape below names exactly
-    // the visited host, so each must earn the full +35 — before
-    // normalization they fell through to substr(+12) or prefix(+22)
-    // and confident matches landed in the picker.
+    // the visited site, so each must earn the full +35 — before
+    // normalization they fell through to a weaker band and confident
+    // matches landed in the picker.
     const shapes = [
       ['http://www.equinor.com', 'equinor.com'],
       ['https://orkla.com/', 'orkla.com'],
-      ['tine.no/om', 'tine.no'],
+      ['www.telenor.no/', 'telenor.no'],
       ['HTTPS://TINE.NO', 'tine.no'],
       ['tine.no.', 'tine.no'],
+      ['tine.no:8080', 'tine.no'],
+      ['tine.no?lang=no', 'tine.no'],
+      ['Askertannlegene.no', 'askertannlegene.no'],
     ] as const;
     for (const [hjemmeside, host] of shapes) {
       const c = cand({ navn: 'UNRELATED AS', hjemmeside });
@@ -250,10 +371,106 @@ describe('scoreCandidate', () => {
     expect(reasons).toContain('hjemmeside=exact(+35)');
   });
 
-  it('keeps the substring band for deeper hjemmeside hosts', () => {
+  it('keeps the +12 band for a hjemmeside on a subdomain of the site', () => {
     const c = cand({ navn: 'UNRELATED AS', hjemmeside: 'shop.elkjop.no' });
-    const { reasons } = scoreCandidate(c, 'unrelated', 'elkjop.no');
-    expect(reasons).toContain('hjemmeside=substr(+12)');
+    const { reasons, hjemmesideTie } = scoreCandidate(c, 'unrelated', 'elkjop.no');
+    expect(reasons).toContain('hjemmeside=subdomain(+12)');
+    expect(hjemmesideTie).toBe(true);
+  });
+
+  it('scores a hjemmeside pointing at a page on the site as a page tie', () => {
+    // Live shape (storebrand.no): property SPVs and funds register
+    // www.storebrand.no/eiendom or /fond. Scored exact, they outranked
+    // STOREBRAND ASA and pushed it out of the picker.
+    const spv = cand({
+      navn: 'STOREBRAND TILLERTORGET AS',
+      hjemmeside: 'www.storebrand.no/eiendom',
+    });
+    const { reasons, hjemmesideTie } = scoreCandidate(spv, 'storebrand', 'storebrand.no');
+    expect(reasons).toContain('hjemmeside=page(+12)');
+    expect(hjemmesideTie).toBe(true);
+    const tine = cand({ navn: 'UNRELATED AS', hjemmeside: 'tine.no/om' });
+    expect(scoreCandidate(tine, 'unrelated', 'tine.no').reasons).toContain(
+      'hjemmeside=page(+12)',
+    );
+  });
+
+  it('ties a subdomain visit to the registrable domain\'s hjemmeside', () => {
+    // Before, nettbank.dnb.no was compared as a whole host and lost
+    // the +35 that dnb.no gets (101 vs 136).
+    const dnb = cand({
+      navn: 'DNB BANK ASA',
+      organisasjonsform: { kode: 'ASA' },
+      hjemmeside: 'www.dnb.no',
+    });
+    const { reasons } = scoreCandidate(dnb, 'dnb', 'nettbank.dnb.no');
+    expect(reasons).toContain('hjemmeside=exact(+35)');
+  });
+
+  it('matches hjemmeside only on domain-label boundaries', () => {
+    // Live hjemmeside values that contain the visited host as a plain
+    // substring. None of them is the site: sbanken.no auto-resolved to
+    // TIDSBANKEN AS through 'tidsbanken.no'.includes('sbanken.no').
+    const cases = [
+      ['www.tidsbanken.no', 'sbanken.no'],
+      ['www.bovg.no', 'vg.no'],
+      ['vg.nordland.no', 'vg.no'],
+      ['aaulie.no', 'aulie.no'],
+      ['www.lorenskogif.no', 'if.no'],
+      ['olapsychicmedium.com', 'medium.com'], // ENK, name fictitious
+    ] as const;
+    for (const [hjemmeside, host] of cases) {
+      const c = cand({ navn: 'UNRELATED AS', hjemmeside });
+      const { score, reasons, hjemmesideTie } = scoreCandidate(c, 'nomatch', host);
+      expect(reasons, `${hjemmeside} vs ${host}`).toEqual(['no-relation']);
+      expect(score).toBe(0);
+      expect(hjemmesideTie).toBe(false);
+    }
+  });
+
+  it('gives TIDSBANKEN AS no hjemmeside credit for sbanken.no', () => {
+    // Live shape. The name still carries a substring hit, so it can
+    // sit in the picker — but with no tie it can never be AUTO.
+    const tidsbanken = cand({
+      navn: 'TIDSBANKEN AS',
+      organisasjonsnummer: '999582214',
+      hjemmeside: 'www.tidsbanken.no',
+      antallAnsatte: 54,
+      registrertIForetaksregisteret: true,
+    });
+    const { score, reasons, hjemmesideTie } = scoreCandidate(
+      tidsbanken,
+      'sbanken',
+      'sbanken.no',
+    );
+    expect(reasons.some((r) => r.startsWith('hjemmeside='))).toBe(false);
+    expect(hjemmesideTie).toBe(false);
+    expect(score).toBe(63); // was 75 with hjemmeside=substr(+12) → AUTO
+  });
+
+  it('reads every entry of a list-shaped hjemmeside', () => {
+    const c = cand({
+      navn: 'UNRELATED AS',
+      hjemmeside: 'www.firma-group.com, www.firma.no; firma.se',
+    });
+    expect(scoreCandidate(c, 'nomatch', 'firma.no').reasons).toContain(
+      'hjemmeside=exact(+35)',
+    );
+    expect(scoreCandidate(c, 'nomatch', 'firma.se').reasons).toContain(
+      'hjemmeside=exact(+35)',
+    );
+    expect(scoreCandidate(c, 'nomatch', 'firma.dk').score).toBe(0);
+  });
+
+  it('flags a name-only candidate as having no hjemmeside tie', () => {
+    // Live shape (medium.com): MEDIUM AS, no hjemmeside, no employees.
+    const medium = cand({
+      navn: 'MEDIUM AS',
+      registrertIForetaksregisteret: true,
+    });
+    const { score, hjemmesideTie } = scoreCandidate(medium, 'medium', 'medium.com');
+    expect(score).toBe(81);
+    expect(hjemmesideTie).toBe(false);
   });
 
   it('gives no hjemmeside credit to unrelated hosts', () => {
@@ -305,30 +522,38 @@ describe('scoreCandidate', () => {
 
 describe('decideBand', () => {
   it('returns auto when top score >= 75 and margin >= 10', () => {
-    expect(decideBand(80, 60)).toBe('auto');
-    expect(decideBand(75, 65)).toBe('auto');
+    expect(decideBand(80, 60, true)).toBe('auto');
+    expect(decideBand(75, 65, true)).toBe('auto');
   });
 
   it('returns picker when top score >= 75 but margin < 10', () => {
-    expect(decideBand(80, 75)).toBe('picker');
+    expect(decideBand(80, 75, true)).toBe('picker');
+  });
+
+  it('never returns auto without a hjemmeside tie on the top candidate', () => {
+    // medium.com / bbc.co.uk: 81 on the name alone, clear margin — a
+    // guess the user has to confirm, not a verified match.
+    expect(decideBand(81, 68, false)).toBe('picker');
+    expect(decideBand(150, undefined, false)).toBe('picker');
   });
 
   it('returns picker when top score is in [45, 75)', () => {
-    expect(decideBand(50, 30)).toBe('picker');
-    expect(decideBand(74, 0)).toBe('picker');
+    expect(decideBand(50, 30, true)).toBe('picker');
+    expect(decideBand(74, 0, true)).toBe('picker');
   });
 
   it('returns none when top score < 45', () => {
-    expect(decideBand(40, 0)).toBe('none');
+    expect(decideBand(40, 0, true)).toBe('none');
+    expect(decideBand(40, 0, false)).toBe('none');
   });
 
   it('returns none when top score is 0 or negative', () => {
-    expect(decideBand(0, 0)).toBe('none');
-    expect(decideBand(-5, -10)).toBe('none');
+    expect(decideBand(0, 0, true)).toBe('none');
+    expect(decideBand(-5, -10, true)).toBe('none');
   });
 
   it('treats missing runner-up as score 0 for the margin check', () => {
-    expect(decideBand(80, undefined)).toBe('auto');
-    expect(decideBand(70, undefined)).toBe('picker');
+    expect(decideBand(80, undefined, true)).toBe('auto');
+    expect(decideBand(70, undefined, true)).toBe('picker');
   });
 });

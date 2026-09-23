@@ -1,10 +1,10 @@
 // Hostname → brreg resolution. Last tier of the resolve cascade,
 // after URL regex and title regex both miss.
 //
-// Runs three parallel brreg queries (hjemmeside, navn FORTLOEPENDE
-// with org-form filter, fallback navn without filter), aggregates +
-// scores candidates via src/lib/hostname-score.ts, and picks one of
-// three outcomes:
+// Runs brreg queries in parallel (hjemmeside on the registrable
+// domain, navn FORTLOEPENDE with org-form filter per Nordic variant,
+// fallback navn without filter), aggregates + scores candidates via
+// src/lib/hostname-score.ts, and picks one of three outcomes:
 //
 //   - 'auto'   → confident match, resolves to a single orgnr
 //   - 'picker' → ambiguous, return top candidates for sidebar UI
@@ -22,6 +22,7 @@ import {
   decideBand,
   generateNordicVariants,
   hostnameLabel,
+  registrableDomain,
   scoreCandidate,
   type ResolutionBand,
 } from './hostname-score.js';
@@ -132,18 +133,24 @@ async function settleSearches(
   };
 }
 
-async function queryByHjemmeside(host: string): Promise<QueryOutcome> {
-  const bare = host.replace(/^www\./i, '').toLowerCase();
-  const variants = [bare, `www.${bare}`];
-  return settleSearches(
-    variants.map((v) => {
-      const params = new URLSearchParams();
-      params.set('hjemmeside', v);
-      params.set('size', '10');
-      return searchEnheterWithParams(params);
-    }),
-  );
+// Q1. Brreg matches hjemmeside as a substring, so one query on the
+// registrable domain already returns the www. and subdomain rows —
+// and a popular domain returns hundreds (obos.no: 600+ borettslag
+// registered on www.obos.no). Sorting by headcount puts the operating
+// company on the first page instead of an alphabetical slice of
+// satellites; scoreCandidate then keeps only label-boundary matches.
+async function queryByHjemmeside(domain: string): Promise<QueryOutcome> {
+  const params = new URLSearchParams();
+  params.set('hjemmeside', domain);
+  params.set('sort', 'antallAnsatte,DESC');
+  params.set('size', '20');
+  return settleSearches([searchEnheterWithParams(params)]);
 }
+
+// Q2's org-form filter keeps the thousands of ENK/FLI namesakes out.
+// BBL (boligbyggelag, a few dozen in the registry) is in because
+// cooperatives like OBOS BBL run the sites people visit.
+const NAVN_ORG_FORMS = 'AS,ASA,SA,BBL,ORGL,SF';
 
 async function queryByNavn(
   label: string,
@@ -157,7 +164,7 @@ async function queryByNavn(
       params.set('navnMetodeForSoek', 'FORTLOEPENDE');
       params.set('size', '20');
       if (withFilter) {
-        params.set('organisasjonsform', 'AS,ASA,SA,ORGL,SF');
+        params.set('organisasjonsform', NAVN_ORG_FORMS);
         params.set('sort', 'antallAnsatte,DESC');
       }
       return searchEnheterWithParams(params);
@@ -186,11 +193,12 @@ interface PipelineOutcome {
 
 async function runPipeline(
   host: string,
+  domain: string,
   label: string,
   rejected: string[] = [],
 ): Promise<PipelineOutcome> {
   const [byHj, byNavn] = await Promise.all([
-    queryByHjemmeside(host),
+    queryByHjemmeside(domain),
     queryByNavn(label, true),
   ]);
   let complete = byHj.ok && byNavn.ok;
@@ -224,7 +232,11 @@ async function runPipeline(
 
   const top = scored[0];
   const runnerUp = scored[1];
-  const band = decideBand(top?.score ?? 0, runnerUp?.score);
+  const band = decideBand(
+    top?.score ?? 0,
+    runnerUp?.score,
+    top?.hjemmesideTie ?? false,
+  );
 
   if (band === 'auto' && top) {
     return {
@@ -262,20 +274,21 @@ async function resolveInternal(
   hostname: string,
   rejected: string[] = [],
 ): Promise<PipelineOutcome> {
+  const domain = registrableDomain(hostname);
   const label = queryFromHostname(hostname);
-  if (!label) {
-    // No usable label is a deterministic property of the hostname, not
-    // a network outcome — safe to cache.
-    const empty: HostnameResult = { band: 'none', candidates: [] };
-    await cacheSet(bandCacheKey(hostname, rejected), empty);
-    return { result: empty, complete: true };
+  if (!domain || !label) {
+    // IP literals, intranet hosts and hosts with nothing brandable are
+    // decided locally and never sent to brreg. Not cached either: the
+    // check is cheap and deterministic, and internal host names have
+    // no business sitting in storage.
+    return { result: { band: 'none', candidates: [] }, complete: true };
   }
 
   const cacheKey = bandCacheKey(hostname, rejected);
   const cached = await cacheGet<HostnameResult>(cacheKey);
   if (cached) return { result: cached, complete: true };
 
-  const outcome = await runPipeline(hostname, label, rejected);
+  const outcome = await runPipeline(hostname, domain, label, rejected);
 
   // Only cache runs where every query succeeded. A partial or failed
   // run still returns its best-effort result, but skipping the write

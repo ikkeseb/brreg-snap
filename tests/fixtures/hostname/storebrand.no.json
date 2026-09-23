@@ -1,0 +1,3701 @@
+{
+ "hjemmeside=storebrand.no&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "965733086",
+     "navn": "ESSO PENSJONSKASSE",
+     "organisasjonsform": {
+      "kode": "PK",
+      "beskrivelse": "Pensjonskasse",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/PK"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "ESSO PENSJONSKASSE",
+       "fraDato": "1999-04-19 19:03:11",
+       "tilDato": "2013-04-13 15:11:50"
+      }
+     ],
+     "hjemmeside": "storebrand.no/go/esso",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1999-04-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "65.300",
+      "beskrivelse": "Pensjonskasser"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "telefon": "00 00 00 00",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1992-11-12",
+     "institusjonellSektorkode": {
+      "kode": "5500",
+      "beskrivelse": "Livsforsikringsselskaper og pensjonskasser"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2023-09-14",
+     "vedtektsfestetFormaal": [
+      "Å forvalte pensjonsordning for selskapets ansatte, tidligere ansatte",
+      "og pensjonister som beskrevet i avtaleverket inngått mellom",
+      "pensjonskassen og selskapet.",
+      " ",
+      "Regelverket for pensjonsordningene er fastsatt gjennom særskilt avtale",
+      "mellom EPK og selskapet.",
+      " ",
+      "For medlemmer som har fratrådt med rett til pensjon, og det ikke",
+      "foreligger noen utløsningsavtale med et livsforsikringsforetak, skal",
+      "rettighetene sikres i EPK.",
+      " ",
+      "Pensjonskassens forsikringsvirksomhet omfatter ytelser knyttet til:",
+      "fripoliser (alder, etterlatte, uføre), alderspensjon, uførepensjon,",
+      "etterlattepensjon til ektefelle og registrert partner i henhold til",
+      "partnerskapsloven og barnepensjon.",
+      " "
+     ],
+     "aktivitet": [
+      "Pensjonskasse."
+     ],
+     "registreringsdatoForetaksregisteret": "2013-04-13",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/965733086"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "963895410",
+     "navn": "STOREBRAND FILIPSTAD BRYGGE AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "UNI STOREBRAND NYBYGG AS",
+       "fraDato": "1995-02-20 01:20:00",
+       "tilDato": "1996-09-26 20:04:05"
+      },
+      {
+       "navn": "STOREBRAND NYBYGG AS",
+       "fraDato": "1996-09-26 20:04:05",
+       "tilDato": "2015-09-24 09:50:45"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-20",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1992-03-23",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-08-12",
+     "vedtektsfestetFormaal": [
+      "Eie og forvalte eiendommen Filipstad brygge 1 m fl, samt virksomhet",
+      "som står i forbindelse med dette."
+     ],
+     "aktivitet": [
+      "Eie, utbygge og forvalte fast eiendom samt",
+      "virksomhet som står i forbindelse med dette,",
+      "herunder eie aksjer i selskap med likeartet",
+      "formål."
+     ],
+     "registreringsdatoForetaksregisteret": "1992-05-08",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 132000000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-08-26"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/963895410"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "960058658",
+     "navn": "VERDIPAPIRFONDET DELPHI NORDIC",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "VERDIPAPIRFONDET DELPHI NORDEN",
+       "fraDato": "1997-11-24 18:53:33",
+       "tilDato": "2012-06-27 12:41:31"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/fond",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 484"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1997-11-24",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1991-03-14",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Aksjefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/960058658"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "938144435",
+     "navn": "VERDIPAPIRFONDET STOREBRAND FREMTID 100",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "STOREBRAND AMS VERDIPAPIRFOND",
+       "fraDato": "1998-06-27 15:23:47",
+       "tilDato": "1998-12-02 20:55:04"
+      },
+      {
+       "navn": "STOREBRAND AKSJESPAR VERDIPAPIRFOND",
+       "fraDato": "1998-12-02 20:55:04",
+       "tilDato": "2006-08-30 20:09:25"
+      },
+      {
+       "navn": "STOREBRAND FUTURA 3",
+       "fraDato": "2006-08-30 20:09:25",
+       "tilDato": "2009-09-21 20:28:41"
+      },
+      {
+       "navn": "VERDIPAPIRFONDET STOREBRAND AKSJESPAR",
+       "fraDato": "2009-09-21 20:28:41",
+       "tilDato": "2020-10-08 15:07:49"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/fond",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 484"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1998-06-27",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1981-07-01",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Aksjefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/938144435"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "913222679",
+     "navn": "VERDIPAPIRFONDET STOREBRAND INDEKS - NORGE",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.storebrand.no/fond",
+     "registreringsdatoEnhetsregisteret": "2014-02-12",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2014-02-03",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Verdipapirfond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/913222679"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "938651728",
+     "navn": "VERDIPAPIRFONDET STOREBRAND NORGE",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "STOREBRAND NORGE VERDIPAPIRFOND",
+       "fraDato": "1998-06-27 15:23:36",
+       "tilDato": "2009-09-24 20:42:31"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/fond",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 484"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1998-06-27",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1993-08-16",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Aksjefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/938651728"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "964847878",
+     "navn": "VERDIPAPIRFONDET STOREBRAND VEKST",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "STOREBRAND SMB VERDIPAPIRFOND",
+       "fraDato": "1998-06-27 15:23:38",
+       "tilDato": "2000-04-28 21:34:19"
+      },
+      {
+       "navn": "STOREBRAND VEKST VERDIPAPIRFOND",
+       "fraDato": "2000-04-28 21:34:19",
+       "tilDato": "2009-09-26 14:42:44"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/fond",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 484"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1998-06-27",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1992-09-10",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Aksjefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/964847878"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "916788223",
+     "navn": "STOREBRAND INTERNATIONAL PRIVATE EQUITY 16 LIMITED",
+     "organisasjonsform": {
+      "kode": "NUF",
+      "beskrivelse": "Norskregistrert utenlandsk foretak",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/NUF"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.storebrand.no",
+     "registreringsdatoEnhetsregisteret": "2016-03-05",
+     "registrertIMvaregisteret": false,
+     "harRegistrertAntallAnsatte": false,
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0160",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Aksjefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/916788223"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "920329152",
+     "navn": "STOREBRAND INTERNATIONAL PRIVATE EQUITY 18 LIMITED",
+     "organisasjonsform": {
+      "kode": "NUF",
+      "beskrivelse": "Norskregistrert utenlandsk foretak",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/NUF"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.storebrand.no",
+     "registreringsdatoEnhetsregisteret": "2018-02-06",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "00.000",
+      "beskrivelse": "Uoppgitt"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "telefon": "00 00 00 00",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0160",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Aksjefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/920329152"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "810412402",
+     "navn": "STOREBRAND TILLERTORGET AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "TRØNDELAG INVESTERINGSSELSKAP AS",
+       "fraDato": "1995-02-19 16:52:00",
+       "tilDato": "2021-12-08 16:08:09"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6650",
+      "poststed": "SURNADAL",
+      "adresse": [
+       "Svartvassvegen 2"
+      ],
+      "kommune": "SURNADAL",
+      "kommunenummer": "1566"
+     },
+     "stiftelsesdato": "1977-08-20",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-03-30",
+     "vedtektsfestetFormaal": [
+      "Eie og forvalte eiendommen, og hva hermed står i forbindelse."
+     ],
+     "aktivitet": [
+      "Kjøp, salg og forvaltning av eiendom, aksjer og",
+      "hva hermed står i forbindelse."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-02-15",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 1285659,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-06-08"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/810412402"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "888309942",
+     "navn": "STOREBRAND VOGELLUND 35 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "BILGRUPPEN EIENDOM AS",
+       "fraDato": "2005-06-16 20:27:51",
+       "tilDato": "2008-07-12 15:03:09"
+      },
+      {
+       "navn": "STOREBRAND HOLMEN UTVIKLING AS",
+       "fraDato": "2008-07-12 15:03:09",
+       "tilDato": "2022-07-01 08:26:45"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2005-06-16",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2005-04-29",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-12-16",
+     "vedtektsfestetFormaal": [
+      "Eie og forvalte eiendommen, og hva hermed står i forbindelse."
+     ],
+     "aktivitet": [
+      "Å eie aksjer og andeler i andre selskaper, samt investering i andre",
+      "finans- og realaktiva."
+     ],
+     "registreringsdatoForetaksregisteret": "2005-06-16",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 1700000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2023-01-17"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/888309942"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "912315444",
+     "navn": "VERDIPAPIRFONDET SEB NOK LIQUIDITY FUND",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.storebrand.no/fond",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 484"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2013-08-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2013-08-05",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Pengemarkedsfond som forvaltes av Storebrand Fondene AS."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/912315444"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "868980982",
+     "navn": "VERDIPAPIRFONDET STOREBRAND KORT KREDITT IG",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "STOREBRAND HØYRENTE VERDIPAPIRFOND",
+       "fraDato": "1998-06-27 15:23:41",
+       "tilDato": "2006-08-30 20:09:40"
+      },
+      {
+       "navn": "STOREBRAND FUTURA 1",
+       "fraDato": "2006-08-30 20:09:40",
+       "tilDato": "2009-09-21 20:28:35"
+      },
+      {
+       "navn": "VERDIPAPIRFONDET STOREBRAND HØYRENTE",
+       "fraDato": "2009-09-21 20:28:35",
+       "tilDato": "2020-09-21 11:59:35"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/fond",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 484"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1998-06-27",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1994-06-21",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Rentefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/868980982"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "982100615",
+     "navn": "GULLHAUG TORG 2B AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "IFN GULLHAUG TORG 2A AS",
+       "fraDato": "2000-06-14 18:00:51",
+       "tilDato": "2003-04-15 20:16:00"
+      },
+      {
+       "navn": "NI GULLHAUG TORG 2A AS",
+       "fraDato": "2003-04-15 20:16:00",
+       "tilDato": "2004-10-18 20:22:51"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2000-06-14",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-25",
+     "registreringsdatoMerverdiavgiftsregisteret": "2010-11-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2011-02-14",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2000-05-30",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2010-03-20",
+     "vedtektsfestetFormaal": [
+      "Være hjemmelshaver til eiendommen Gullhaug Torg 2B."
+     ],
+     "aktivitet": [
+      "Være hjemmelshaver til eiendommen Gullhaug Torg 2B."
+     ],
+     "registreringsdatoForetaksregisteret": "2000-06-14",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2011-11-29",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 100000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2000-06-14"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/982100615"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "987878258",
+     "navn": "KRIP AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2005-02-15",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.110",
+      "beskrivelse": "Kjøp og salg av egen fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-25",
+     "registreringsdatoMerverdiavgiftsregisteret": "2011-07-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2011-09-01",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2005-02-08",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2017-08-25",
+     "vedtektsfestetFormaal": [
+      "Å være komplementar for Brynsalléen 6 KS."
+     ],
+     "aktivitet": [
+      "Å være komplementar for Brynsalléen 6 KS."
+     ],
+     "registreringsdatoForetaksregisteret": "2005-02-15",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 1000000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2017-09-05"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/987878258"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "982100445",
+     "navn": "NYDALSVEIEN 36 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "IFN NYDALSVEIEN 36 AS",
+       "fraDato": "2000-06-14 17:32:48",
+       "tilDato": "2004-10-18 20:23:26"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2000-06-14",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-25",
+     "registreringsdatoMerverdiavgiftsregisteret": "2010-11-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2011-02-14",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2000-05-30",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2010-03-20",
+     "vedtektsfestetFormaal": [
+      "Være hjemmelshaver til eiendommen Nydalsveien 39."
+     ],
+     "aktivitet": [
+      "Være hjemmelshaver til eiendommen Nydalsveien 39."
+     ],
+     "registreringsdatoForetaksregisteret": "2000-06-14",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2011-11-29",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 100000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2000-06-14"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/982100445"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "982100488",
+     "navn": "NYDALSVEIEN 38 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "IFN NYDALSVEIEN 38 AS",
+       "fraDato": "2000-06-14 17:44:52",
+       "tilDato": "2004-10-18 20:23:49"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2000-06-14",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-25",
+     "registreringsdatoMerverdiavgiftsregisteret": "2010-11-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2011-02-14",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2000-05-30",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2010-03-20",
+     "vedtektsfestetFormaal": [
+      "Være hjemmelshaver til eiendommen Nydalsveien 38."
+     ],
+     "aktivitet": [
+      "Være hjemmelshaver til eiendommen Nydalsveien 38."
+     ],
+     "registreringsdatoForetaksregisteret": "2000-06-14",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2011-11-29",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 100000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2000-06-14"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/982100488"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "988148784",
+     "navn": "STOREBRAND LURAMYRVEIEN 11 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "STARTFASE 163 AS",
+       "fraDato": "2005-04-26 07:18:12",
+       "tilDato": "2005-07-09 14:41:03"
+      },
+      {
+       "navn": "STOREBRAND SANDNES AS",
+       "fraDato": "2005-07-09 14:41:03",
+       "tilDato": "2024-04-29 14:28:17"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "registreringsdatoEnhetsregisteret": "2005-04-26",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.120",
+      "beskrivelse": "Utvikling og salg av byggeprosjekter"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6650",
+      "poststed": "SURNADAL",
+      "adresse": [
+       "Svartvassvegen 2"
+      ],
+      "kommune": "SURNADAL",
+      "kommunenummer": "1566"
+     },
+     "stiftelsesdato": "2005-04-20",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-04-12",
+     "vedtektsfestetFormaal": [
+      "Eie og forvalte eiendommen, og hva hermed står i forbindelse."
+     ],
+     "aktivitet": [
+      "Å eie eiendom, samt å drive annen virksomhet som står i forbindelse",
+      "med dette."
+     ],
+     "registreringsdatoForetaksregisteret": "2005-04-26",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 300000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2014-11-11"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/988148784"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "976588010",
+     "navn": "VERDIPAPIRFONDET STOREBRAND AKSJE INNLAND",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "UNI STOREBRAND AKSJE INNLAND VERDIPAPIRFOND",
+       "fraDato": "1996-07-17 18:17:59",
+       "tilDato": "1997-05-28 18:21:33"
+      },
+      {
+       "navn": "STOREBRAND AKSJE INNLAND VERDIPAPIRFOND",
+       "fraDato": "1997-05-28 18:21:33",
+       "tilDato": "2009-09-24 20:41:48"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/fond",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 484"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1996-07-17",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1996-07-01",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Aksjefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/976588010"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "979364768",
+     "navn": "VERDIPAPIRFONDET STOREBRAND GLOBAL VALUE",
+     "organisasjonsform": {
+      "kode": "VPFO",
+      "beskrivelse": "Verdipapirfond",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/VPFO"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "STOREBRAND GLOBAL",
+       "fraDato": "1997-11-04 14:09:24",
+       "tilDato": "2001-08-27 21:01:18"
+      },
+      {
+       "navn": "STOREBRAND GLOBAL VERDIPAPIRFOND",
+       "fraDato": "2001-08-27 21:01:18",
+       "tilDato": "2009-09-24 20:42:10"
+      },
+      {
+       "navn": "VERDIPAPIRFONDET STOREBRAND GLOBAL",
+       "fraDato": "2009-09-24 20:42:10",
+       "tilDato": "2013-11-09 15:32:51"
+      },
+      {
+       "navn": "VERDIPAPIRFONDET STOREBRAND GLOBAL VERDI",
+       "fraDato": "2013-11-09 15:32:51",
+       "tilDato": "2017-12-05 17:21:44"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/fond",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 484"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1997-11-04",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.311",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1997-10-20",
+     "institusjonellSektorkode": {
+      "kode": "4300",
+      "beskrivelse": "Verdipapirfond"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Aksjefond."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/979364768"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "first": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=storebrand.no&page=0&size=20&sort=antallAnsatte,desc"
+   },
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=storebrand.no&sort=antallAnsatte,DESC&size=20"
+   },
+   "next": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=storebrand.no&page=1&size=20&sort=antallAnsatte,desc"
+   },
+   "last": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=storebrand.no&page=2&size=20&sort=antallAnsatte,desc"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 51,
+   "totalPages": 3,
+   "number": 0
+  }
+ },
+ "navn=st%C3%B8rebrand&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=st%C3%B8rebrand&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "navn=storebr%C3%A5nd&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=storebr%C3%A5nd&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "navn=storebrand&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "958995369",
+     "navn": "STOREBRAND LIVSFORSIKRING AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "UNI STOREBRAND LIVSFORSIKRING AS",
+       "fraDato": "1995-03-12 17:19:00",
+       "tilDato": "1996-09-26 20:03:57"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-03-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "65.110",
+      "beskrivelse": "Livsforsikring"
+     },
+     "antallAnsatte": 1152,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1990-10-30",
+     "institusjonellSektorkode": {
+      "kode": "5500",
+      "beskrivelse": "Livsforsikringsselskaper og pensjonskasser"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2016-05-04",
+     "vedtektsfestetFormaal": [
+      "Livsforsikringsvirksomhet, samt annen virksomhet",
+      "som lovlig kan drives av livsforsikringsselskaper."
+     ],
+     "aktivitet": [
+      "Livsforsikringsvirksomhet, samt annen virksomhet",
+      "som lovlig kan drives av livsforsikringsselskaper."
+     ],
+     "registreringsdatoForetaksregisteret": "1990-11-06",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 3540420000,
+      "antallAksjer": 35404200,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2012-09-08"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/958995369"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "930553506",
+     "navn": "STOREBRAND FORSIKRING AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "UNI STOREBRAND SKADEFORSIKRING AS",
+       "fraDato": "1995-02-19 19:08:00",
+       "tilDato": "1996-09-26 20:03:55"
+      },
+      {
+       "navn": "STOREBRAND SKADEFORSIKRING AS",
+       "fraDato": "1996-09-26 20:03:55",
+       "tilDato": "2011-05-10 20:13:04"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "65.120",
+      "beskrivelse": "Skadeforsikring"
+     },
+     "antallAnsatte": 377,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1923-02-23",
+     "institusjonellSektorkode": {
+      "kode": "5700",
+      "beskrivelse": "Skadeforsikringsselskaper"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-06-21",
+     "vedtektsfestetFormaal": [
+      "Drive direkte skadeforsikringsvirksomhet,",
+      "gjenforsikringsvirksomhet, samt virksomhet som",
+      "naturlig henger sammen med forsikringsvirksomhet."
+     ],
+     "aktivitet": [
+      "Drive direkte skadeforsikringsvirksomhet,",
+      "gjenforsikringsvirksomhet, samt virksomhet som",
+      "naturlig henger sammen med forsikringsvirksomhet."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-02-24",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 18566736,
+      "antallAksjer": 18566736,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2024-06-26"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/930553506"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "930208868",
+     "navn": "STOREBRAND ASSET MANAGEMENT AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "UNI STOREBRAND SPAR AS",
+       "fraDato": "1995-03-12 16:26:00",
+       "tilDato": "1996-12-11 20:49:34"
+      },
+      {
+       "navn": "STOREBRAND SPAR AS",
+       "fraDato": "1996-12-11 20:49:34",
+       "tilDato": "1999-01-22 18:16:38"
+      },
+      {
+       "navn": "STOREBRAND FONDENE AS",
+       "fraDato": "1999-01-22 18:16:38",
+       "tilDato": "2004-10-20 20:20:10"
+      },
+      {
+       "navn": "STOREBRAND KAPITALFORVALTNING AS",
+       "fraDato": "2004-10-20 20:20:10",
+       "tilDato": "2008-05-02 10:09:50"
+      },
+      {
+       "navn": "STOREBRAND FONDENE AS",
+       "fraDato": "2008-05-02 10:09:50",
+       "tilDato": "2013-12-04 20:56:40"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-03-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "66.300",
+      "beskrivelse": "Fondsforvaltningsvirksomhet"
+     },
+     "antallAnsatte": 283,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1981-07-01",
+     "institusjonellSektorkode": {
+      "kode": "4900",
+      "beskrivelse": "Øvrige finansielle foretak unntatt forsikring"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-12-19",
+     "vedtektsfestetFormaal": [
+      "Forvaltning av verdipapirfond og alternative investeringsfond, ytelse",
+      "av aktiv forvaltning og øvrige tilleggstjenester som definert i",
+      "verdipapirfondloven og lov om alternative investeringsfond som",
+      "selskapet har tillatelse til å utøve i forhold til selskapets til",
+      "enhver tid gjeldende konsesjon samt øvrig tilknyttet virksomhet."
+     ],
+     "aktivitet": [
+      "Forvaltningsselskapets formål er forvaltning av verdipapirfond og",
+      "alternative investeringsfond, ytelse av aktiv forvaltning og øvrige",
+      "tilleggstjenester som definert i verdipapirfondloven og lov om",
+      "alternative investeringsfond som selskapet har tillatelse til å utøve",
+      "i forhold til selskapets til enhver tid gjeldende konsesjon samt øvrig",
+      "tilknyttet virksomhet."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-04-14",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 2400000,
+      "antallAksjer": 1600,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-01-22"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/930208868"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "953299216",
+     "navn": "STOREBRAND BANK ASA",
+     "organisasjonsform": {
+      "kode": "ASA",
+      "beskrivelse": "Allmennaksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/ASA"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "INDUSTRI & SKIPSBANKEN ASA",
+       "fraDato": "1996-01-22 21:03:00",
+       "tilDato": "1997-01-05 00:15:32"
+      },
+      {
+       "navn": "FINANSBANKEN ASA",
+       "fraDato": "1997-01-05 00:15:32",
+       "tilDato": "2003-03-17 14:51:11"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 474"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-03-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "64.190",
+      "beskrivelse": "Banker og kredittforetak"
+     },
+     "naeringskode2": {
+      "kode": "66.120",
+      "beskrivelse": "Verdipapirmegling"
+     },
+     "antallAnsatte": 219,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1989-10-17",
+     "institusjonellSektorkode": {
+      "kode": "3200",
+      "beskrivelse": "Banker"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-10-01",
+     "vedtektsfestetFormaal": [
+      "Drive bankvirksomhet og utføre alle forretninger og tjenester som det",
+      "er vanlig eller naturlig at banker utfører, herunder",
+      "investeringstjenester og tilknyttede tjenester samt annen virksomhet",
+      "som har naturlig sammenheng med dette, alt innenfor rammen av den",
+      "lovgivning som til enhver tid gjelder."
+     ],
+     "aktivitet": [
+      "Banken kan innenfor rammen av den lovgivning som",
+      "til enhver tid gjelder utføre alle forretninger og",
+      "tjenester som det er vanlig eller naturlig at",
+      "banker utfører."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-10-18",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 990000000,
+      "antallAksjer": 66000000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2024-10-18"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/953299216"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "935456444",
+     "navn": "STOREBRAND REAL ESTATE AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2025-05-08",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "66.300",
+      "beskrivelse": "Fondsforvaltningsvirksomhet"
+     },
+     "antallAnsatte": 33,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-13",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-11-06",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-13",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2025-03-17",
+     "institusjonellSektorkode": {
+      "kode": "4900",
+      "beskrivelse": "Øvrige finansielle foretak unntatt forsikring"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-09-19",
+     "vedtektsfestetFormaal": [
+      "Forvaltningsvirksomhet innenfor eiendom, herunder forvaltning av",
+      "alternative investeringsfond og yte aktiv forvaltning av investorers",
+      "portefølje og øvrige tjenester som selskapet har tillatelse til å yte",
+      "i henhold til selskapets til enhver tid gjeldende konsesjon samt øvrig",
+      "tilknyttet virksomhet."
+     ],
+     "aktivitet": [
+      "Eiendomsforvaltning på vegne av andre."
+     ],
+     "registreringsdatoForetaksregisteret": "2025-05-08",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 6600000,
+      "antallAksjer": 60,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2025-10-31"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/935456444"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "971142960",
+     "navn": "AMFI DRIFT STOREBRAND AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "OASEN KJØPESENTER AS",
+       "fraDato": "1995-03-12 18:00:00",
+       "tilDato": "2008-04-26 15:06:59"
+      },
+      {
+       "navn": "SANDENS DRIFT AS",
+       "fraDato": "2008-04-26 15:06:59",
+       "tilDato": "2011-03-14 11:03:52"
+      }
+     ],
+     "hjemmeside": "www.thon.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0105",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 489 Sentrum"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-03-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.320",
+      "beskrivelse": "Eiendomsforvaltning på oppdrag"
+     },
+     "antallAnsatte": 30,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2023-06-24",
+     "registreringsdatoMerverdiavgiftsregisteret": "2008-09-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2009-02-03",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6650",
+      "poststed": "SURNADAL",
+      "adresse": [
+       "Svartvassvegen 2"
+      ],
+      "kommune": "SURNADAL",
+      "kommunenummer": "1566"
+     },
+     "stiftelsesdato": "1994-09-09",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2011-02-28",
+     "vedtektsfestetFormaal": [
+      "Drift og forvaltning av kjøpesenter, samt andre oppgaver som naturlig",
+      "tilhører selskapets virksomhet."
+     ],
+     "aktivitet": [
+      "Drift av fast eiendom og alt som hermed står i forbindelse."
+     ],
+     "registreringsdatoForetaksregisteret": "1994-10-06",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 900000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "1994-10-06"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/971142960"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "931936492",
+     "navn": "STOREBRAND PENSJONSTJENESTER AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "AKTUAR CONSULT AS",
+       "fraDato": "1995-02-19 19:18:00",
+       "tilDato": "1997-04-09 22:16:56"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "66.290",
+      "beskrivelse": "Tjenester tilknyttet forsikringsvirksomhet ikke nevnt annet sted"
+     },
+     "antallAnsatte": 29,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-05-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-05-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1982-03-31",
+     "institusjonellSektorkode": {
+      "kode": "4900",
+      "beskrivelse": "Øvrige finansielle foretak unntatt forsikring"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2013-02-25",
+     "vedtektsfestetFormaal": [
+      "Forsikringsteknisk rådgivning og annen konsulent-",
+      "virksomhet, samt forvaltning og administrasjon av",
+      "pensjonskasser, pensjonsfond og legater."
+     ],
+     "aktivitet": [
+      "Forsikringsteknisk rådgivning og annen konsulent-",
+      "virksomhet, samt forvaltning og administrasjon av",
+      "pensjonskasser, pensjonsfond og legater."
+     ],
+     "registreringsdatoForetaksregisteret": "1988-11-23",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 3700000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "1997-04-07"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/931936492"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "916300484",
+     "navn": "STOREBRAND ASA",
+     "organisasjonsform": {
+      "kode": "ASA",
+      "beskrivelse": "Allmennaksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/ASA"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "UNI STOREBRAND ASA",
+       "fraDato": "1996-01-22 21:04:00",
+       "tilDato": "1996-09-26 20:03:51"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "64.210",
+      "beskrivelse": "Holdingforetak i finanskonsern"
+     },
+     "antallAnsatte": 9,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-10",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-10",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-01-13",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-01-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1847-05-04",
+     "institusjonellSektorkode": {
+      "kode": "4100",
+      "beskrivelse": "Holdingforetak i finanskonsern"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-04-09",
+     "vedtektsfestetFormaal": [
+      "Som morselskap i finanskonsern å forvalte sine eierinteresser i de",
+      "andre foretakene som driver pensjons-, forsikrings-, bank- og",
+      "kapitalforvaltningsvirksomhet samt virksomhet som er forbundet med",
+      "dette, innenfor rammen av den til enhver tid gjeldende lovgivning."
+     ],
+     "aktivitet": [
+      "Som morselskap i finanskonsern å forvalte sine eierinteresser i",
+      "konsernet i samsvar med finansinstitusjonsloven 2a-2, bokstav d."
+     ],
+     "registreringsdatoForetaksregisteret": "1988-08-18",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 2123818180,
+      "antallAksjer": 424763636,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-06-02"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/916300484"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "935597269",
+     "navn": "NYE STOREBRAND HAAKON VII'S GATE 10 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2025-05-30",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.120",
+      "beskrivelse": "Utvikling og salg av byggeprosjekter"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2025-04-23",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-06-26",
+     "vedtektsfestetFormaal": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "aktivitet": [
+      "Å eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse."
+     ],
+     "registreringsdatoForetaksregisteret": "2025-05-30",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 200000,
+      "antallAksjer": 100000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2025-08-07"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/935597269"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "935455685",
+     "navn": "NYE STOREBRAND SJØGATA 4 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "registreringsdatoEnhetsregisteret": "2025-05-08",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2025-03-25",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-03-25",
+     "vedtektsfestetFormaal": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "aktivitet": [
+      "Utleie av egen eller leid fast eiendom ellers."
+     ],
+     "registreringsdatoForetaksregisteret": "2025-05-08",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2025-05-08"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/935455685"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "833224972",
+     "navn": "STOREBRAND AIF AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "NFH 240325 AS",
+       "fraDato": "2024-03-26 15:42:34",
+       "tilDato": "2024-06-06 10:43:35"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2024-03-26",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "64.312",
+      "beskrivelse": "Alternative investeringsfond (aif) som ikke er verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2024-03-01",
+     "institusjonellSektorkode": {
+      "kode": "4500",
+      "beskrivelse": "Alternative investeringsfond (AIF) unntatt verdipapirfond"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-06-12",
+     "vedtektsfestetFormaal": [
+      "Alternativt investeringsfond og har som formål å direkte eller",
+      "indirekte investere i, og utvikle Lysaker Park Eiendom AS og",
+      "underliggende eiendommer, samt alt som står i naturlig forbindelse med",
+      "dette."
+     ],
+     "aktivitet": [
+      "Investering i aksjer og verdipapirer."
+     ],
+     "registreringsdatoForetaksregisteret": "2024-03-26",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 60000,
+      "antallAksjer": 3000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2024-07-11"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/833224972"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "919291591",
+     "navn": "STOREBRAND DRAMMENSVEIEN 185 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "HERKULES INVEST 246 AS",
+       "fraDato": "2017-07-12 15:42:22",
+       "tilDato": "2018-02-27 10:22:58"
+      },
+      {
+       "navn": "BORGARD HOLDING AS",
+       "fraDato": "2018-02-27 10:22:58",
+       "tilDato": "2021-08-31 16:12:04"
+      },
+      {
+       "navn": "BORGARD AS",
+       "fraDato": "2021-08-31 16:12:04",
+       "tilDato": "2026-08-24 13:21:52"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2017-07-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-07-01",
+     "registreringsdatoMerverdiavgiftsregisteret": "2021-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2021-06-29",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2017-06-27",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-06-04",
+     "vedtektsfestetFormaal": [
+      "Investere i fast eiendom eller selskaper som eier fast eiendom, og alt",
+      "som dermed står i forbindelse."
+     ],
+     "aktivitet": [
+      "Investering i fast eiendom eller selskaper som eier fast eiendom, og",
+      "alt som dermed står i forbindelse."
+     ],
+     "registreringsdatoForetaksregisteret": "2017-07-12",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-08-24"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/919291591"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "924353554",
+     "navn": "STOREBRAND FACILITIES AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2020-01-08",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2019-12-02",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2023-06-29",
+     "vedtektsfestetFormaal": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "aktivitet": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "registreringsdatoForetaksregisteret": "2020-01-08",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 200000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2023-09-14"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/924353554"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "963895410",
+     "navn": "STOREBRAND FILIPSTAD BRYGGE AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "UNI STOREBRAND NYBYGG AS",
+       "fraDato": "1995-02-20 01:20:00",
+       "tilDato": "1996-09-26 20:04:05"
+      },
+      {
+       "navn": "STOREBRAND NYBYGG AS",
+       "fraDato": "1996-09-26 20:04:05",
+       "tilDato": "2015-09-24 09:50:45"
+      }
+     ],
+     "hjemmeside": "www.storebrand.no/eiendom",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-20",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "1992-03-23",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-08-12",
+     "vedtektsfestetFormaal": [
+      "Eie og forvalte eiendommen Filipstad brygge 1 m fl, samt virksomhet",
+      "som står i forbindelse med dette."
+     ],
+     "aktivitet": [
+      "Eie, utbygge og forvalte fast eiendom samt",
+      "virksomhet som står i forbindelse med dette,",
+      "herunder eie aksjer i selskap med likeartet",
+      "formål."
+     ],
+     "registreringsdatoForetaksregisteret": "1992-05-08",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 132000000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-08-26"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/963895410"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "935700442",
+     "navn": "STOREBRAND RUSELØKKVEIEN 3 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2025-06-18",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2025-05-06",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-05-06",
+     "vedtektsfestetFormaal": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "aktivitet": [
+      "Å eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse."
+     ],
+     "registreringsdatoForetaksregisteret": "2025-06-18",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2025-06-18"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/935700442"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "935700434",
+     "navn": "STOREBRAND RUSELØKKVEIEN 5 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2025-07-01",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2025-05-06",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-06-06",
+     "vedtektsfestetFormaal": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "aktivitet": [
+      "Å eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse."
+     ],
+     "registreringsdatoForetaksregisteret": "2025-07-01",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2025-07-01"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/935700434"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "921849052",
+     "navn": "NYE STOREBRAND KJØPESENTER CITY SYD II AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2018-12-10",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2018-11-07",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2018-11-07",
+     "vedtektsfestetFormaal": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "aktivitet": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "registreringsdatoForetaksregisteret": "2018-12-10",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2018-12-21",
+     "fravalgRevisjonBeslutningsDato": "2018-12-12",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 50000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2018-12-10"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/921849052"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "921848692",
+     "navn": "NYE STOREBRAND LYSAKER TORG 5 - 25 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "NYE STOREBRAND KJØPESENTER CITY SYD AS",
+       "fraDato": "2018-12-10 14:04:28",
+       "tilDato": "2026-07-15 13:16:53"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2018-12-10",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.120",
+      "beskrivelse": "Utvikling og salg av byggeprosjekter"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2026-06-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "2026-05-29",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2026-06-23",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2018-11-07",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-06-30",
+     "vedtektsfestetFormaal": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "aktivitet": [
+      "Eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "registreringsdatoForetaksregisteret": "2018-12-10",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2018-12-21",
+     "fravalgRevisjonBeslutningsDato": "2018-12-12",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 100000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-07-17"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/921848692"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "927300362",
+     "navn": "NYE STOREBRAND RUSELØKKVEIEN 14 AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "NYE MØLLERGATA 2 AS",
+       "fraDato": "2021-06-19 14:36:13",
+       "tilDato": "2025-05-19 16:04:50"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2021-06-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-10-28",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-12",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2021-05-27",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-05-06",
+     "vedtektsfestetFormaal": [
+      "Å eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "aktivitet": [
+      "Å eie, utvikle, forvalte, utleie, kjøp og salg av fast eiendom og alt",
+      "som hermed står i forbindelse, herunder delta i andre selskap med",
+      "samme eller lignende formål."
+     ],
+     "registreringsdatoForetaksregisteret": "2021-06-19",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2021-06-19"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/927300362"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "925199664",
+     "navn": "STOREBRAND EIENDOMSFOND NORGE FEEDER AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1327",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Postboks 500"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2020-06-26",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.312",
+      "beskrivelse": "Alternative investeringsfond (aif) som ikke er verdipapirfond"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1366",
+      "poststed": "LYSAKER",
+      "adresse": [
+       "Professor Kohts vei 9"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2020-05-25",
+     "institusjonellSektorkode": {
+      "kode": "4500",
+      "beskrivelse": "Alternative investeringsfond (AIF) unntatt verdipapirfond"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-04-01",
+     "vedtektsfestetFormaal": [
+      "Å være et tilføringsfond til Storebrand Eiendomsfond Norge KS."
+     ],
+     "aktivitet": [
+      "Å være et tilføringsfond til Storebrand Eiendomsfond Norge KS."
+     ],
+     "registreringsdatoForetaksregisteret": "2020-06-26",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 67274385,
+      "antallAksjer": 13454877,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-06-09"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/925199664"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "first": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=storebrand&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&page=0&size=20&sort=antallAnsatte,desc"
+   },
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=storebrand&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   },
+   "next": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=storebrand&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&page=1&size=20&sort=antallAnsatte,desc"
+   },
+   "last": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=storebrand&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&page=2&size=20&sort=antallAnsatte,desc"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 42,
+   "totalPages": 3,
+   "number": 0
+  }
+ }
+}

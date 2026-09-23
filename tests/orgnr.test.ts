@@ -295,16 +295,21 @@ describe('resolveOrgnrAsync', () => {
   });
 
   it('falls back to hostname search when the sync cascade misses', async () => {
+    // The registered hjemmeside (live value) ties the hit to the host;
+    // AUTO needs that tie, a name match alone lands in the picker.
     searchMock.mockResolvedValue([
-      hit('YARA INTERNATIONAL ASA', '986228608', 'ASA'),
+      {
+        ...hit('YARA INTERNATIONAL ASA', '986228608', 'ASA'),
+        hjemmeside: 'www.yara.com',
+      },
     ]);
     const result = await resolveOrgnrAsync({
       url: 'https://www.yara.com/about',
       title: 'Yara — global crop nutrition',
     });
     expect(result).toBe('986228608');
-    // Pipeline issues multiple parallel queries (hjemmeside variants
-    // + navn variants); we don't pin the exact count.
+    // Pipeline issues multiple parallel queries (hjemmeside + navn
+    // variants); we don't pin the exact count.
     expect(searchMock).toHaveBeenCalled();
   });
 

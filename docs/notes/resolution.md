@@ -1,6 +1,6 @@
 # Resolution cascade
 
-Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`,
+Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`, `src/lib/hostname-score.ts`,
 `src/lib/hostname-search.ts`, `src/lib/company-load.ts`.
 
 <!-- SECTION: cascade -->
@@ -122,13 +122,23 @@ Bands are decided in `hostname-score.ts:decideBand`:
 
 | Band | Condition | Outcome |
 |---|---|---|
-| `auto` | top ≥ 75 AND top − runner-up ≥ 10 | resolve to top candidate |
+| `auto` | top ≥ 75 AND top − runner-up ≥ 10 AND top has a hjemmeside tie | resolve to top candidate |
 | `picker` | top ≥ 45 | popup + sidebar show top-N + "Ingen av disse" |
 | `none` | otherwise | sidebar shows empty state |
 
 The AUTO margin requirement is what prevents kjedebutikker (ELKJØP
 LEKNES vs ELKJØP SVOLVÆR, both 111 via hjemmeside-exact) from
 auto-resolving.
+
+**AUTO needs a hjemmeside tie.** The top candidate's registered
+hjemmeside must be the visited site, a page on it or a subdomain of
+it (`ScoreResult.hjemmesideTie`, see § hjemmeside-normalization). A
+name match alone is a guess: medium.com and bbc.co.uk scored 81 on
+unrelated Norwegian namesakes, and the UI renders an AUTO result like
+a verified one. So name-only winners go to the picker, even well-known
+ones whose registered site is elsewhere (orkla.com: no hjemmeside;
+equinor.no: equinor.com; komplett.no: komplettgroup.com) — the right
+answer is then the picker's first row.
 
 The picker row count is `MAX_PICKER_CANDIDATES` exported from
 `hostname-search.ts` — currently 4. The constant is tied to the
@@ -138,16 +148,30 @@ Bumping the constant requires extending the digit-key handler in
 `popup.ts` and `details.ts`.
 
 <!-- SECTION: label-extraction -->
-## Label extraction (multi-part TLDs, punycode)
+## Registrable domain and label (suffixes, platforms, punycode)
 
-`hostnameLabel` in `hostname-score.ts` picks the registrable label
-that seeds the name search. Two traps it handles:
+`registrableDomain` in `hostname-score.ts` reduces the visited host
+to the part a company registers (`nettbank.dnb.no` → `dnb.no`); Q1
+queries it and scoring compares hjemmeside against it.
+`hostnameLabel` takes its leftmost label to seed the name search.
+The traps they handle:
 
+- **Hosts that never reach brreg.** IPv4/IPv6 literals, single-label
+  hosts (`localhost`, `intranet`) and special-use/intranet TLDs
+  (`.local`, `.internal`, `.lan`, `.home.arpa`, `.corp`, `.test`, …)
+  return `undefined`. `resolveInternal` then answers band `none`
+  without a request and without a cache write — internal host names
+  used to go out as `hjemmeside=`/`navn=` queries.
 - **Multi-part public suffixes.** A small static list (`co.uk`,
   `com.au`, `kommune.no`, … — intentionally non-exhaustive, generic
   TLD knowledge, NOT curated company data) shifts the label one part
   left so `company.co.uk` → "company" and `oslo.kommune.no` → "oslo"
   instead of "co"/"kommune".
+- **Hosting platforms.** A second short list (`github.io`,
+  `pages.dev`, `netlify.app`, `myshopify.com`, `wixsite.com`, …)
+  treats the platform as a suffix, so the tenant is the brand
+  (`firma.pages.dev` → "firma", not "pages"). `sites.google.com` is
+  on it so the bare host abstains: its tenant lives in the path.
 - **Punycode.** `new URL().hostname` returns IDN labels in ACE form
   (`blåbær.no` → `xn--blbr-roah.no`). A minimal RFC 3492 decoder
   (`src/lib/punycode.ts`, decode only) restores the human label so
@@ -157,16 +181,56 @@ that seeds the name search. Two traps it handles:
   the sidebar falls to manual search instead of querying a raw
   `xn--` string that can never match.
 
+<!-- SECTION: queries -->
+## Brreg queries
+
+`runPipeline` in `hostname-search.ts` sends, in parallel: Q1
+`hjemmeside=<registrable domain>&sort=antallAnsatte,DESC&size=20`,
+and Q2 `navn=<variant>` (FORTLOEPENDE, org forms
+`AS,ASA,SA,BBL,ORGL,SF`, sorted by headcount) per Nordic variant of
+the label. Q3 drops the org-form filter only when Q1+Q2 return
+nothing.
+
+Brreg matches `hjemmeside` as a **substring** (live, 2026-09-23):
+`hjemmeside=nrk.no` also returns `www.nrk.no/...` rows, and
+`hjemmeside=sbanken.no` returns `www.tidsbanken.no`. So one query
+covers the `www.` form, and precision comes from scoring (§ below),
+not from the query. A popular domain returns hundreds of rows
+(obos.no: 600+ borettslag on `www.obos.no`); unsorted, the first page
+never reached OBOS BBL, so Q1 sorts by headcount. Trade-off: a short
+domain that is a substring of many others (`if.no` → `*if.no` sports
+clubs) fills the 20 rows with bigger unrelated organisations.
+
 <!-- SECTION: hjemmeside-normalization -->
-## Hjemmeside normalization
+## Hjemmeside matching
 
 Brreg's `hjemmeside` field is free text ("http://www.equinor.com",
-"https://orkla.com/", "tine.no/om"). `normalizeHjemmeside` in
-`hostname-score.ts` reduces it to a bare lowercase host (strip
-scheme, `www.`, path/port/query/fragment, trailing dots) before the
-exact/prefix/substring comparison, so an exact-host field earns the
-full +35 instead of leaking down to substring (+12). Scoring bands
-and thresholds are unchanged by normalization.
+"https://orkla.com/", "www.storebrand.no/eiendom"). Each entry (the
+field is split on commas, semicolons and whitespace first) is
+reduced by `normalizeHjemmeside` to a bare lowercase host (strip
+scheme, `www.`, path/port/query/fragment, trailing dots), then
+compared on domain-label boundaries only:
+
+| Relation | Example (visiting `storebrand.no`) | Points |
+|---|---|---|
+| exact — the site itself, no path | `https://www.storebrand.no/` | +35 |
+| page — a path on the site | `www.storebrand.no/eiendom` | +12 |
+| subdomain of the registrable domain | `kunde.storebrand.no` | +12 |
+| none — plain substring | `www.tidsbanken.no` for `sbanken.no` | 0 |
+
+"The site" is the visited host or its registrable domain, so
+`nettbank.dnb.no` ties to `www.dnb.no`. Page ties are weaker than
+exact because a big site has far more satellites registered on its
+pages (funds on `/fond`, property SPVs on `/eiendom`, NRK Urørt
+artists) than owners; scored as exact, Storebrand's SPVs pushed
+STOREBRAND ASA out of the picker. Any of the three relations counts as
+the hjemmeside tie AUTO needs (§ bands).
+
+The konkurs/avvikling penalty (−30) skips an exact tie: then the
+registry says this is the site's own company, and its status is the
+warning the user needs, not noise to rank away. It still applies to
+name-only and page/subdomain matches. Search never returns deleted
+entities, so there is no slettet case.
 
 <!-- SECTION: picker-choice -->
 ## Picker choice cache
