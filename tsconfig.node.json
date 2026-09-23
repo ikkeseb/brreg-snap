@@ -9,7 +9,10 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": ["node"],
+    // vite.config.ts imports scripts/build-graph.mjs; types come from its
+    // JSDoc.
+    "allowJs": true
   },
   "include": ["vite.config.ts", "vitest.config.ts"]
 }
