@@ -1,24 +1,28 @@
 name: Release
 
-# Tag-triggered release: build + package both browser targets and the
-# AMO source-review zip from the exact tagged tree, and attach them to
-# a GitHub Release. Kills the manual-release version-skew error class —
-# the artifacts can no longer be built from the wrong working tree.
-# Store uploads (AMO/CWS) stay manual; the `amo-submission-X.Y.Z` tag
-# still marks what was actually submitted.
+# Tag-triggered release (runbook: docs/release.md). `build` runs the full
+# gate on the tagged tree and packages both browser targets plus the AMO
+# source zip, with a read-only token. `reproduce` rebuilds the Firefox
+# package from the source zip the way an AMO reviewer does. Only then does
+# `publish` (no checkout, no dependency install) attest the zips and create
+# the GitHub Release. Store submission is separate and approved by hand
+# (publish.yml).
 
 on:
   push:
     tags: ['v[0-9]*']
 
-permissions:
-  contents: write
+permissions: {}
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
 
@@ -28,26 +32,97 @@ jobs:
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
+
+      # The one gate, same as CI and the pre-push hook.
       - run: pnpm verify
 
-      - name: Verify tag matches package.json version
+      - name: Tag matches package.json
         run: |
           pkg="v$(node -p "require('./package.json').version")"
           if [ "$pkg" != "$GITHUB_REF_NAME" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match package.json $pkg" >&2
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json $pkg"
             exit 1
           fi
+
+      - name: Release notes from CHANGELOG
+        run: node scripts/release-notes.mjs "${GITHUB_REF_NAME#v}" > release-notes.md
 
       - run: pnpm package:firefox
       - run: pnpm package:chrome
       - run: pnpm package:source
 
+      # Invariants, file set and stamped version of the zips themselves;
+      # writes their sha256 to the job summary.
+      - name: Verify the packages
+        run: node scripts/verify-package.mjs "${GITHUB_REF_NAME#v}" web-ext-artifacts
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release
+          path: |
+            web-ext-artifacts/*.zip
+            release-notes.md
+          if-no-files-found: error
+
+  # The reviewer path from BUILD.md: unzip the source zip, frozen install,
+  # package, and the result must match the release zip file for file.
+  reproduce:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release
+          path: dist
+
+      - name: Unzip the source zip
+        run: unzip -q "dist/brreg-snap-source-${GITHUB_REF_NAME#v}.zip" -d source
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          package_json_file: source/package.json
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: source/.node-version
+
+      - name: Build from source and compare
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          (cd source && pnpm install --frozen-lockfile && pnpm package:firefox)
+          mkdir rebuilt released
+          unzip -q "source/web-ext-artifacts/brreg-snap-$v.zip" -d rebuilt
+          unzip -q "dist/brreg-snap-$v.zip" -d released
+          diff -r rebuilt released
+          echo "Rebuilt from brreg-snap-source-$v.zip: identical to brreg-snap-$v.zip" >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    needs: [build, reproduce]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the Release
+      id-token: write # Sigstore certificate for the attestation
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release
+          path: dist
+
+      # Build provenance for each zip; check one with
+      # `gh attestation verify <zip> --repo ikkeseb/brreg-snap`.
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/*.zip
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" \
-            web-ext-artifacts/*.zip \
+          gh release create "$GITHUB_REF_NAME" dist/*.zip \
+            --repo "$GITHUB_REPOSITORY" \
             --verify-tag \
             --title "brreg-snap $GITHUB_REF_NAME" \
-            --notes "See [CHANGELOG.md](https://github.com/${GITHUB_REPOSITORY}/blob/${GITHUB_REF_NAME}/CHANGELOG.md) for details."
+            --notes-file dist/release-notes.md
