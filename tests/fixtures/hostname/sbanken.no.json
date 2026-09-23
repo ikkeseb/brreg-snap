@@ -1,0 +1,669 @@
+{
+ "hjemmeside=sbanken.no&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "971171324",
+     "navn": "SVENSKA HANDELSBANKEN AB NUF",
+     "organisasjonsform": {
+      "kode": "NUF",
+      "beskrivelse": "Norskregistrert utenlandsk foretak",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/NUF"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "HANDELSBANKEN norsk avdeling av utenlandsk foretak",
+       "fraDato": "2004-10-21 20:32:58",
+       "tilDato": "2004-12-09 10:01:03"
+      },
+      {
+       "navn": "HANDELSBANKEN",
+       "fraDato": "2004-12-09 10:01:03",
+       "tilDato": "2024-11-01 10:12:30"
+      }
+     ],
+     "hjemmeside": "www.handelsbanken.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0113",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 1342 Vika"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-20",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "64.190",
+      "beskrivelse": "Banker og kredittforetak"
+     },
+     "naeringskode2": {
+      "kode": "66.120",
+      "beskrivelse": "Verdipapirmegling"
+     },
+     "antallAnsatte": 1032,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2001-07-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-28",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0252",
+      "poststed": "OSLO",
+      "adresse": [
+       "Tjuvholmen allé 11"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "institusjonellSektorkode": {
+      "kode": "3200",
+      "beskrivelse": "Banker"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Bank."
+     ],
+     "registreringsdatoForetaksregisteret": "1994-10-26",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/971171324"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "942114184",
+     "navn": "HUSBANKEN",
+     "organisasjonsform": {
+      "kode": "ORGL",
+      "beskrivelse": "Organisasjonsledd",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/ORGL"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "DEN NORSKE STATS HUSBANK -",
+       "fraDato": "1995-08-09 15:11:00",
+       "tilDato": "2005-02-22 20:19:02"
+      },
+      {
+       "navn": "DEN NORSKE STATS HUSBANK",
+       "fraDato": "2005-02-22 20:19:02",
+       "tilDato": "2010-01-11 20:39:32"
+      }
+     ],
+     "hjemmeside": "www.husbanken.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "8002",
+      "poststed": "BODØ",
+      "adresse": [
+       "Postboks 1404"
+      ],
+      "kommune": "BODØ",
+      "kommunenummer": "1804"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-08-09",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "64.920",
+      "beskrivelse": "Annen kredittgivning"
+     },
+     "antallAnsatte": 372,
+     "harRegistrertAntallAnsatte": true,
+     "overordnetEnhet": "972417858",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "3045",
+      "poststed": "DRAMMEN",
+      "adresse": [
+       "Grønland 55"
+      ],
+      "kommune": "DRAMMEN",
+      "kommunenummer": "3301"
+     },
+     "institusjonellSektorkode": {
+      "kode": "3900",
+      "beskrivelse": "Statlige låneinstitutter mv."
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Offentlig forvaltningsvirksomhet"
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/942114184"
+      },
+      "overordnetEnhet": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/972417858"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "937901291",
+     "navn": "MELHUS SPAREBANK",
+     "organisasjonsform": {
+      "kode": "SPA",
+      "beskrivelse": "Sparebank",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/SPA"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.melhusbanken.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "7221",
+      "poststed": "MELHUS",
+      "adresse": [
+       "Postboks 40"
+      ],
+      "kommune": "MELHUS",
+      "kommunenummer": "5028"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "64.190",
+      "beskrivelse": "Banker og kredittforetak"
+     },
+     "antallAnsatte": 79,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2020-02-25",
+     "registreringsdatoMerverdiavgiftsregisteret": "2001-01-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2001-10-23",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "7224",
+      "poststed": "MELHUS",
+      "adresse": [
+       "Gimsbruvegen 5"
+      ],
+      "kommune": "MELHUS",
+      "kommunenummer": "5028"
+     },
+     "stiftelsesdato": "1840-10-03",
+     "institusjonellSektorkode": {
+      "kode": "3200",
+      "beskrivelse": "Banker"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2021-09-30",
+     "vedtektsfestetFormaal": [
+      "Sparebank."
+     ],
+     "aktivitet": [
+      "Sparebank."
+     ],
+     "registreringsdatoForetaksregisteret": "1991-02-18",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 277622500,
+      "type": "Eierandelskapital",
+      "valuta": "NOK",
+      "innbetalt": 277622500,
+      "fulltInnbetalt": true,
+      "innfortDato": "2017-12-13"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/937901291"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "999582214",
+     "navn": "TIDSBANKEN AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.tidsbanken.no",
+     "registreringsdatoEnhetsregisteret": "2013-01-29",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "58.290",
+      "beskrivelse": "Utgivelse av annen programvare"
+     },
+     "antallAnsatte": 54,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2013-01-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2013-02-20",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "5068",
+      "poststed": "BERGEN",
+      "adresse": [
+       "Conrad Mohrs veg 11"
+      ],
+      "kommune": "BERGEN",
+      "kommunenummer": "4601"
+     },
+     "stiftelsesdato": "2013-01-18",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-05-26",
+     "vedtektsfestetFormaal": [
+      "Selskapets virksomhet er utvikling av dataprogrammer,",
+      "internett-teknologi, samt programvareløsninger kombinert med",
+      "maskinvare. Kjøp og salg av programvare og utstyr, konsulenttjenester",
+      "og salg av informasjonsdatabaser."
+     ],
+     "aktivitet": [
+      "Utvikling av dataprogrammer, internett-teknologi, samt",
+      "programvareløsninger kombinert med maskinvare. Kjøp og salg av",
+      "programvare og utstyr, konsulenttjenester og salg av",
+      "informasjonsdatabaser."
+     ],
+     "registreringsdatoForetaksregisteret": "2013-01-29",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 48327,
+      "antallAksjer": 10000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2022-10-15"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/999582214"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "937901569",
+     "navn": "OPDALS SPAREBANK",
+     "organisasjonsform": {
+      "kode": "SPA",
+      "beskrivelse": "Sparebank",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/SPA"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.oppdalsbanken.no",
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "64.190",
+      "beskrivelse": "Banker og kredittforetak"
+     },
+     "antallAnsatte": 31,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2001-01-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2005-06-02",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "7340",
+      "poststed": "OPPDAL",
+      "adresse": [
+       "Sunndalsvegen 6"
+      ],
+      "kommune": "OPPDAL",
+      "kommunenummer": "5021"
+     },
+     "stiftelsesdato": "1856-01-28",
+     "institusjonellSektorkode": {
+      "kode": "3200",
+      "beskrivelse": "Banker"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2018-03-15",
+     "vedtektsfestetFormaal": [
+      "Utføre forretninger og tjenester som det er vanlig eller naturlig at",
+      "sparebanker kan utføre i henhold til den til enhver tid gjeldende",
+      "lovgivning og de til enhver tid gitte konsesjoner."
+     ],
+     "aktivitet": [
+      "Sparebank."
+     ],
+     "registreringsdatoForetaksregisteret": "1990-07-10",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/937901569"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "916927584",
+     "navn": "FRAMGANG SAMMEN STI",
+     "organisasjonsform": {
+      "kode": "STI",
+      "beskrivelse": "Stiftelse",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/STI"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "sbanken.no/framgang-sammen/",
+     "registreringsdatoEnhetsregisteret": "2016-04-18",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "94.991",
+      "beskrivelse": "Aktiviteter i fond/legat som støtter veldedige og allmennyttige formål"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "5058",
+      "poststed": "BERGEN",
+      "adresse": [
+       "Solheimsgaten 7C"
+      ],
+      "kommune": "BERGEN",
+      "kommunenummer": "4601"
+     },
+     "stiftelsesdato": "2016-01-13",
+     "institusjonellSektorkode": {
+      "kode": "7000",
+      "beskrivelse": "Ideelle organisasjoner"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": true,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Stiftelsens formål er å støtte initiativ, prosjekter, sosiale",
+      "entreprenører og organisasjoner som jobber for å hindre utenforskap,",
+      "og for å skape en god framtid og sosial integrering for barn og unge."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 100000,
+      "type": "Grunnkapital",
+      "valuta": "NOK",
+      "innbetalt": 100000,
+      "fulltInnbetalt": true,
+      "innfortDato": "2016-04-18"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/916927584"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "988083496",
+     "navn": "NTL FORENING 62 HUSBANKEN-BODØ",
+     "organisasjonsform": {
+      "kode": "FLI",
+      "beskrivelse": "Forening/lag/innretning",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/FLI"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.Husbanken.no",
+     "registreringsdatoEnhetsregisteret": "2005-04-25",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "94.200",
+      "beskrivelse": "Aktiviteter i arbeidstakerorganisasjoner"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "8006",
+      "poststed": "BODØ",
+      "adresse": [
+       "Torvgata 2"
+      ],
+      "kommune": "BODØ",
+      "kommunenummer": "1804"
+     },
+     "stiftelsesdato": "1983-04-22",
+     "institusjonellSektorkode": {
+      "kode": "7000",
+      "beskrivelse": "Ideelle organisasjoner"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Arbeidstakerorganisasjon"
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/988083496"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "998475147",
+     "navn": "FINANSFORBUNDET I HANDELSBANKEN",
+     "organisasjonsform": {
+      "kode": "FLI",
+      "beskrivelse": "Forening/lag/innretning",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/FLI"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "handelsbanken.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0113",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 1342 Vika"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2012-06-25",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "94.120",
+      "beskrivelse": "Aktiviteter i yrkessammenslutninger"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "telefon": "00 00 00 00",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0252",
+      "poststed": "OSLO",
+      "adresse": [
+       "Tjuvholmen allé 11"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1984-01-16",
+     "institusjonellSektorkode": {
+      "kode": "7000",
+      "beskrivelse": "Ideelle organisasjoner"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Foreningens formål er å samle og organisere alle ansatte i",
+      "Handelsbankkonsernets virksomhet i Norge, herunder også ansatte i",
+      "avdelinger i Norge, som er direkte underlagt svenske hovedavdelinger."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/998475147"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=sbanken.no&sort=antallAnsatte,DESC&size=20"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 8,
+   "totalPages": 1,
+   "number": 0
+  }
+ },
+ "navn=sb%C3%A5nken&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=sb%C3%A5nken&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "navn=sbanken&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=sbanken&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ }
+}

@@ -1,0 +1,500 @@
+{
+ "hjemmeside=medium.com&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "999999999",
+     "navn": "OLA NORDMANN A",
+     "organisasjonsform": {
+      "kode": "ENK",
+      "beskrivelse": "Enkeltpersonforetak",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/ENK"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "olapsychicmedium.com",
+     "registreringsdatoEnhetsregisteret": "2019-08-23",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "96.990",
+      "beskrivelse": "Andre personlige tjenester ikke nevnt annet sted"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "4624",
+      "poststed": "KRISTIANSAND S",
+      "adresse": [
+       "Eksempelveien 1"
+      ],
+      "kommune": "KRISTIANSAND",
+      "kommunenummer": "4204"
+     },
+     "institusjonellSektorkode": {
+      "kode": "8200",
+      "beskrivelse": "Personlig næringsdrivende"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Eksempelvirksomhet."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/999999999"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=medium.com&sort=antallAnsatte,DESC&size=20"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 1,
+   "totalPages": 1,
+   "number": 0
+  }
+ },
+ "navn=medium&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "923667326",
+     "navn": "MEDIUMTALL AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "LIABØ INVEST AS",
+       "fraDato": "2019-10-23 10:16:27",
+       "tilDato": "2020-06-24 15:51:15"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1364",
+      "poststed": "FORNEBU",
+      "adresse": [
+       "Lilleruts vei 79C"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "registreringsdatoEnhetsregisteret": "2019-10-23",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "47.710",
+      "beskrivelse": "Detaljhandel med klær"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2020-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2020-08-10",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2023-05-11",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2023-05-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1364",
+      "poststed": "FORNEBU",
+      "adresse": [
+       "Rolfsbuktveien 4B"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2019-10-07",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-06-05",
+     "vedtektsfestetFormaal": [
+      "Postordre-/internetthandel med tekstiler, utstyrsvarer og klær."
+     ],
+     "aktivitet": [
+      "Postordre-/internetthandel med tekstiler, utstyrsvarer og klær."
+     ],
+     "registreringsdatoForetaksregisteret": "2019-10-23",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 39164.71,
+      "antallAksjer": 3916471,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2022-11-14"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/923667326"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "913491718",
+     "navn": "MEDIUM AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "registreringsdatoEnhetsregisteret": "2014-04-09",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1404",
+      "poststed": "SIGGERUD",
+      "adresse": [
+       "Rausjøveien 22C"
+      ],
+      "kommune": "NORDRE FOLLO",
+      "kommunenummer": "3207"
+     },
+     "stiftelsesdato": "2014-02-21",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2021-08-02",
+     "vedtektsfestetFormaal": [
+      "Kjøp, salg og utvikling av fast eiendom. Herunder hus, leiligheter,",
+      "hytter og annen fast eiendom, samt delta i selskaper med samme formål.",
+      "Samt annen konsulentvirksomhet innen bygg, anlegg, media og",
+      "kommunikasjon."
+     ],
+     "aktivitet": [
+      "Kjøp og salg av eiendom. Utleie av eiendom. Konsulent innen bygg og",
+      "anlegg. Konsulent innen media og kommunikasjon."
+     ],
+     "registreringsdatoForetaksregisteret": "2014-04-09",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2014-04-09",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 1000000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2014-04-09"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/913491718"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "823726872",
+     "navn": "MEDIUMTALL INVEST AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "MARTIN STEFFENSEN INVEST AS",
+       "fraDato": "2019-11-28 09:32:32",
+       "tilDato": "2020-07-31 14:07:15"
+      }
+     ],
+     "registreringsdatoEnhetsregisteret": "2019-11-28",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "00.000",
+      "beskrivelse": "Uoppgitt"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1364",
+      "poststed": "FORNEBU",
+      "adresse": [
+       "Lilleruts vei 79C"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2019-10-16",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2021-10-08",
+     "vedtektsfestetFormaal": [
+      "Investering og eierskap i selskaper."
+     ],
+     "aktivitet": [
+      "Investering og eierskap i selskaper."
+     ],
+     "registreringsdatoForetaksregisteret": "2019-11-28",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2019-11-28",
+     "fravalgRevisjonBeslutningsDato": "2019-10-07",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 150,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2021-12-06"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/823726872"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "978670571",
+     "navn": "MULTI MEDIUM AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0276",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1997-07-03",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "73.110",
+      "beskrivelse": "Reklamebyråvirksomhet"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoMerverdiavgiftsregisteret": "2007-09-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2008-11-04",
+     "epostadresse": "post@example.invalid",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1081",
+      "poststed": "OSLO",
+      "adresse": [
+       "Professor Birkelands vei 24B"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1997-06-25",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2008-08-01",
+     "vedtektsfestetFormaal": [
+      "Import av forbruksvarer for videresalg. Eie andre selskaper og dermed",
+      "sammenhengende virksomhet."
+     ],
+     "aktivitet": [
+      "Import av forbruksvarer for videresalg. Eie andre selskaper og dermed",
+      "sammenhengende virksomhet."
+     ],
+     "registreringsdatoForetaksregisteret": "1997-07-22",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 100000,
+      "antallAksjer": 200,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2004-04-28"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/978670571"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "980093336",
+     "navn": "MEDIUM  INGENIØRTJENESTER AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "MEDIUM  AS",
+       "fraDato": "1998-09-23 08:58:29",
+       "tilDato": "1998-11-10 20:38:28"
+      }
+     ],
+     "registreringsdatoEnhetsregisteret": "1998-09-23",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "71.129",
+      "beskrivelse": "Annen teknisk konsulentvirksomhet"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "7020",
+      "poststed": "TRONDHEIM",
+      "adresse": [
+       "Gamle Åsvei 8"
+      ],
+      "kommune": "TRONDHEIM",
+      "kommunenummer": "5001"
+     },
+     "stiftelsesdato": "1998-08-27",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "1998-08-27",
+     "vedtektsfestetFormaal": [
+      "Ingeniørtjenester innenfor elektrobransjen, samt hva herunder står i",
+      "forbindelse med, herunder å delta i andre selskaper med lignende",
+      "virksomhet."
+     ],
+     "aktivitet": [
+      "Ingeniørtjenester innenfor elektrobransjen."
+     ],
+     "registreringsdatoForetaksregisteret": "1998-11-10",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2011-10-05",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 100000,
+      "antallAksjer": 1000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "1998-11-10"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/980093336"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=medium&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 5,
+   "totalPages": 1,
+   "number": 0
+  }
+ }
+}

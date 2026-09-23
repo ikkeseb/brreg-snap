@@ -1,0 +1,3626 @@
+{
+ "hjemmeside=obos.no&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "937052766",
+     "navn": "OBOS BBL",
+     "organisasjonsform": {
+      "kode": "BBL",
+      "beskrivelse": "Boligbyggelag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BBL"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "OSLO BOLIG OG SPARELAG",
+       "fraDato": "1995-03-12 16:39:00",
+       "tilDato": "2013-11-04 21:16:42"
+      }
+     ],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-03-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.120",
+      "beskrivelse": "Utvikling og salg av byggeprosjekter"
+     },
+     "antallAnsatte": 417,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "1970-01-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1995-03-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1938-02-18",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-06-09",
+     "vedtektsfestetFormaal": [
+      "Boligbyggelag."
+     ],
+     "aktivitet": [
+      "Boligbyggelag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-01-22",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/937052766"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "976485173",
+     "navn": "GULLHAUG BOLIGSAMEIE",
+     "organisasjonsform": {
+      "kode": "ESEK",
+      "beskrivelse": "Eierseksjonssameie",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/ESEK"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1996-05-29",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "antallAnsatte": 8,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2025-11-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2025-11-10",
+     "epostadresse": "post@example.invalid",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1989-03-09",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Boligsameie."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/976485173"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "948305720",
+     "navn": "CASINETTO BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0129",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 6666 St. Olavs plass"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "naeringskode2": {
+      "kode": "85.100",
+      "beskrivelse": "Førskoleundervisning og drift av barnehager"
+     },
+     "antallAnsatte": 8,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-07-15",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-07-10",
+     "epostadresse": "post@example.invalid",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0179",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1980-11-14",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-05-12",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1988-12-03",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/948305720"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "948808811",
+     "navn": "AMMERUDLIA BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0129",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 6666 St Olavs plass"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "antallAnsatte": 6,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-01-13",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-01-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0179",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1964-05-08",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2023-05-31",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-01-06",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/948808811"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "850429162",
+     "navn": "LOHØGDA BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0129",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 6666 St Olavs plass OBOS"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "antallAnsatte": 5,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-07-15",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-07-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0179",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/ OBOS",
+       "Hammersborg torg 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1962-09-21",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-05-30",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-02-09",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/850429162"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "946475610",
+     "navn": "LIAKOLLEN BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "antallAnsatte": 5,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1987-03-01",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-04-04",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-01-17",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/946475610"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "976788419",
+     "navn": "SAMEIET HOVSETER VAKTMESTERSENTRAL",
+     "organisasjonsform": {
+      "kode": "SAM",
+      "beskrivelse": "Tingsrettslig sameie",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/SAM"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1996-10-08",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2002-01-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2002-05-18",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-07-15",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-07-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "OBOS",
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1975-01-24",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2023",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "aktivitet": [
+      "Vaktmestertjenester overfor sameierne samt påta seg oppdrag innen",
+      "snøbrøyting, strøing, feiing eller andre vaktmestertjenester for andre",
+      "enn sameierne."
+     ],
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/976788419"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "950200030",
+     "navn": "BORETTSLAGET ETTERSTAD NORD",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1951-10-22",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2021-05-31",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-01-27",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/950200030"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "947854232",
+     "navn": "ELLINGSRUDJORDET BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0129",
+      "poststed": "OSLO",
+      "adresse": [
+       "OBOS  Postboks 6666  St Olavs Plass"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0179",
+      "poststed": "OSLO",
+      "adresse": [
+       "OBOS",
+       "Hammersborg torg 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1983-11-04",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-05-23",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-07-24",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/947854232"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "948515660",
+     "navn": "SOLFJELLET BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2015-01-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2015-08-13",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2021-03-13",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2021-03-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/OBOS Eiendomsforvaltning AS",
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1965-04-23",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2013-04-22",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1988-12-20",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/948515660"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "995562537",
+     "navn": "SAMEIET ØVRE VOLSDALSBERGA",
+     "organisasjonsform": {
+      "kode": "ESEK",
+      "beskrivelse": "Eierseksjonssameie",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/ESEK"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Eksempelveien 1",
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2010-06-22",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2025-09-13",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2025-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6003",
+      "poststed": "ÅLESUND",
+      "adresse": [
+       "v/OBOS",
+       "Ystenesgata 6B"
+      ],
+      "kommune": "ÅLESUND",
+      "kommunenummer": "1508"
+     },
+     "stiftelsesdato": "2010-03-08",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2021-03-29",
+     "vedtektsfestetFormaal": [
+      "Eierseksjonssameie."
+     ],
+     "aktivitet": [
+      "Eierseksjonssameie."
+     ],
+     "registreringsdatoForetaksregisteret": "2010-06-22",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/995562537"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "962170382",
+     "navn": "BORETTSLAGET KRONA",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "BORETTSLAGET O A DEVOLDSGT 7 B",
+       "fraDato": "1995-02-20 00:53:00",
+       "tilDato": "2010-08-21 14:28:21"
+      }
+     ],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/ OBOS Eiendomsforvaltning AS",
+       "S. 6529 BORETTSLAGET KRONA",
+       "Postboks 393  Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-20",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-02-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-02-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6003",
+      "poststed": "ÅLESUND",
+      "adresse": [
+       "Ystenesgata 6B"
+      ],
+      "kommune": "ÅLESUND",
+      "kommunenummer": "1508"
+     },
+     "stiftelsesdato": "1968-05-06",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2012-05-09",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1991-12-09",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/962170382"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "953484544",
+     "navn": "BORETTSLAGET BORGUNDVEGEN 166 AL",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "S. 6499 BRL BORGUNDVEGEN 166 AL",
+       "v/ OBOS Eiendomsforvaltning AS",
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-05-11",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-05-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6003",
+      "poststed": "ÅLESUND",
+      "adresse": [
+       "OBOS Eiendomsforvaltning AS",
+       "Ystenesgata 6B"
+      ],
+      "kommune": "ÅLESUND",
+      "kommunenummer": "1508"
+     },
+     "stiftelsesdato": "1961-05-18",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2005-05-09",
+     "vedtektsfestetFormaal": [
+      "Borettslaget."
+     ],
+     "aktivitet": [
+      "Borettslaget."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-11-17",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/953484544"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "953967626",
+     "navn": "BORETTSLAGET TUENESVEGEN 7 AL",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/ OBOS Eiendomsforvaltning AS",
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2024-11-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2024-11-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6003",
+      "poststed": "ÅLESUND",
+      "adresse": [
+       "Ystenesgata 6B"
+      ],
+      "kommune": "ÅLESUND",
+      "kommunenummer": "1508"
+     },
+     "stiftelsesdato": "1970-02-03",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2005-04-26",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1990-01-09",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/953967626"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "948473240",
+     "navn": "BREKKE BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0129",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-05-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-05-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0179",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1958-12-15",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-06-03",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1988-12-17",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/948473240"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "948512823",
+     "navn": "HAUGERUD BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/OBOS",
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2025-07-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2025-07-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/OBOS",
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1964-12-18",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-05-22",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1988-12-20",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/948512823"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "947429655",
+     "navn": "KORSGATA BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/OBOS",
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/OBOS",
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1983-03-04",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-04-21",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-04-09",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/947429655"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "950948183",
+     "navn": "NYLÆNDE BORETTSLAG",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/OBOS Eiendomsforvaltning AS",
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-05-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-05-10",
+     "epostadresse": "post@example.invalid",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "C/O Kari Nordmann",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1958-12-15",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-04-07",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-03-09",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/950948183"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "954004023",
+     "navn": "BORETTSLAGET ASPEHAUGEN AL",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "v/ OBOS Eiendomsforvaltning AS",
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2023-01-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2023-01-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6003",
+      "poststed": "ÅLESUND",
+      "adresse": [
+       "Ystenesgata 6B"
+      ],
+      "kommune": "ÅLESUND",
+      "kommunenummer": "1508"
+     },
+     "stiftelsesdato": "1972-11-15",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2005-04-26",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1990-01-20",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/954004023"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "955098021",
+     "navn": "BORETTSLAGET GISKEGATA 45 AL",
+     "organisasjonsform": {
+      "kode": "BRL",
+      "beskrivelse": "Borettslag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BRL"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "S.6485 Borettslaget Giskegata 45 AL",
+       "v/ OBOS Eiendomsforvaltning AS",
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "97.001",
+      "beskrivelse": "Aktiviteter i borettslag og boligsameier"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2022-09-13",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2022-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6003",
+      "poststed": "ÅLESUND",
+      "adresse": [
+       "Ystenesgata 6B"
+      ],
+      "kommune": "ÅLESUND",
+      "kommunenummer": "1508"
+     },
+     "stiftelsesdato": "1950-10-24",
+     "institusjonellSektorkode": {
+      "kode": "8300",
+      "beskrivelse": "Borettslag o.l."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2005-09-19",
+     "vedtektsfestetFormaal": [
+      "Borettslag."
+     ],
+     "aktivitet": [
+      "Borettslag."
+     ],
+     "registreringsdatoForetaksregisteret": "1990-03-10",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/955098021"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "first": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=obos.no&page=0&size=20&sort=antallAnsatte,desc"
+   },
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=obos.no&sort=antallAnsatte,DESC&size=20"
+   },
+   "next": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=obos.no&page=1&size=20&sort=antallAnsatte,desc"
+   },
+   "last": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=obos.no&page=31&size=20&sort=antallAnsatte,desc"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 638,
+   "totalPages": 32,
+   "number": 0
+  }
+ },
+ "navn=%C3%B8bos&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=%C3%B8bos&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "navn=ob%C3%B8s&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=ob%C3%B8s&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "navn=obos&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "937052766",
+     "navn": "OBOS BBL",
+     "organisasjonsform": {
+      "kode": "BBL",
+      "beskrivelse": "Boligbyggelag",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BBL"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "OSLO BOLIG OG SPARELAG",
+       "fraDato": "1995-03-12 16:39:00",
+       "tilDato": "2013-11-04 21:16:42"
+      }
+     ],
+     "hjemmeside": "www.obos.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-03-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.120",
+      "beskrivelse": "Utvikling og salg av byggeprosjekter"
+     },
+     "antallAnsatte": 417,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "1970-01-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1995-03-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1938-02-18",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-06-09",
+     "vedtektsfestetFormaal": [
+      "Boligbyggelag."
+     ],
+     "aktivitet": [
+      "Boligbyggelag."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-01-22",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/937052766"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "934261585",
+     "navn": "OBOS EIENDOMSFORVALTNING AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.320",
+      "beskrivelse": "Eiendomsforvaltning på oppdrag"
+     },
+     "antallAnsatte": 381,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "2001-07-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2001-08-02",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1983-07-07",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-01-05",
+     "vedtektsfestetFormaal": [
+      "Å forestå eiendomsforvaltning, herunder bolig",
+      "forvaltning og kapitalforvaltning. For øvrig kan",
+      "selskapet forestå forretningsførsel for bygg under",
+      "oppføring på vegne av stiftende boligselskaper.",
+      " ",
+      "- Assistere leieboere ved kjøp av eiendommer",
+      "  for dannelse av boligselskaper, borettslag",
+      "  og seksjonsleiligheter.",
+      " ",
+      "- Videre kan selskapet engasjere seg i virksomhet",
+      "  som hører inn under boligsamvirket og eiendoms-",
+      "  forvaltning generelt."
+     ],
+     "aktivitet": [
+      "Å forestå eiendomsforvaltning, herunder bolig",
+      "forvaltning og kapitalforvaltning. For øvrig kan",
+      "selskapet forestå forretningsførsel for bygg under",
+      "oppføring på vegne av stiftende boligselskaper.",
+      " ",
+      "- Assistere leieboere ved kjøp av eiendommer",
+      "  for dannelse av boligselskaper, borettslag",
+      "  og seksjonsleiligheter.",
+      " ",
+      "- Videre kan selskapet engasjere seg i virksomhet",
+      "  som hører inn under boligsamvirket og eiendoms-",
+      "  forvaltning generelt."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-05-02",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 1100000,
+      "antallAksjer": 1000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2020-01-17"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/934261585"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "930061212",
+     "navn": "OBOS BLOCK WATNE ENTREPRENØR AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "NFH 220925 AS",
+       "fraDato": "2022-10-20 10:39:12",
+       "tilDato": "2022-12-07 21:17:20"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2022-10-20",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "41.000",
+      "beskrivelse": "Oppføring av bygninger"
+     },
+     "antallAnsatte": 230,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2023-02-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2023-02-04",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2022-09-01",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-11-18",
+     "vedtektsfestetFormaal": [
+      "Å drive entreprenørvirksomhet samt enhver annen virksomhet i",
+      "tilknytning til dette."
+     ],
+     "aktivitet": [
+      "Entreprenørvirksomhet samt enhver annen virksomhet i tilknytning til",
+      "dette."
+     ],
+     "registreringsdatoForetaksregisteret": "2022-10-20",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 5518550,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2023-02-02"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/930061212"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "935283280",
+     "navn": "OBOS NYE HJEM AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "NORSK BOLIGFORVALTNING AS",
+       "fraDato": "1995-02-19 19:46:00",
+       "tilDato": "1995-04-04 20:23:00"
+      },
+      {
+       "navn": "OBOS UTVIKLING AS",
+       "fraDato": "1995-04-04 20:23:00",
+       "tilDato": "2001-01-22 20:38:51"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.120",
+      "beskrivelse": "Utvikling og salg av byggeprosjekter"
+     },
+     "antallAnsatte": 114,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "2001-01-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2003-09-13",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1984-01-12",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-04-29",
+     "vedtektsfestetFormaal": [
+      "Erverve og utvikle fast eiendom og virksomhet i",
+      "den forbindelse i egen regi eller ved deltakelse",
+      "i andre selskaper."
+     ],
+     "aktivitet": [
+      "Erverve og utvikle fast eiendom og virksomhet i",
+      "den forbindelse i egen regi eller ved deltakelse",
+      "i andre selskaper."
+     ],
+     "registreringsdatoForetaksregisteret": "1990-04-27",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 89162091,
+      "antallAksjer": 89162091,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2013-12-05"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/935283280"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "911986884",
+     "navn": "OBOS-BANKEN AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "OBOSBANKEN AS",
+       "fraDato": "2013-05-27 12:21:38",
+       "tilDato": "2014-07-29 11:54:24"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2013-05-27",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "64.190",
+      "beskrivelse": "Banker og kredittforetak"
+     },
+     "antallAnsatte": 95,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "2013-11-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2013-12-18",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2013-05-22",
+     "institusjonellSektorkode": {
+      "kode": "3200",
+      "beskrivelse": "Banker"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2021-04-22",
+     "vedtektsfestetFormaal": [
+      "Banken skal innenfor rammen av den lovgivning som til enhver tid",
+      "gjelder, utføre alle forretninger og tjenester som det er vanlig eller",
+      "naturlig at banker utfører."
+     ],
+     "aktivitet": [
+      "Banken skal innenfor rammen av den lovgivning som til enhver tid",
+      "gjelder, utføre alle forretninger og tjenester som det er vanlig eller",
+      "naturlig at banker utfører."
+     ],
+     "registreringsdatoForetaksregisteret": "2013-05-27",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 898000000,
+      "antallAksjer": 8980,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2021-02-16"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/911986884"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "931536532",
+     "navn": "OBOS PROSJEKT AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.obosprosjekt.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-03-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "71.121",
+      "beskrivelse": "Byggeteknisk konsulentvirksomhet"
+     },
+     "antallAnsatte": 88,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "1993-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1995-03-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1930-06-02",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "1996-08-28",
+     "vedtektsfestetFormaal": [
+      "Tilby tjenester innen prosjektledelse, bygge-",
+      "ledelse og byggekontroll og virksomhet forbundet",
+      "med dette for alle typer av bygge-, rehabilitering",
+      "og byfornyelses-prosjekter."
+     ],
+     "aktivitet": [
+      "Tilby tjenester innen prosjektledelse, bygge-",
+      "ledelse og byggekontroll og virksomhet forbundet",
+      "med dette for alle typer av bygge-, rehabilitering",
+      "og byfornyelses-prosjekter."
+     ],
+     "registreringsdatoForetaksregisteret": "1989-01-03",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 1000000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "1997-01-16"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/931536532"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "968757954",
+     "navn": "OBOS BLOCK WATNE AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "BLOCK WATNE AS",
+       "fraDato": "2001-10-18 20:43:08",
+       "tilDato": "2020-04-21 10:23:30"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-03-12",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "41.000",
+      "beskrivelse": "Oppføring av bygninger"
+     },
+     "antallAnsatte": 87,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-06-03",
+     "registreringsdatoMerverdiavgiftsregisteret": "2016-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-06-03",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1994-01-03",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-02-12",
+     "vedtektsfestetFormaal": [
+      "Å erverve og utvikle fast eiendom samt enhver annen virksomhet i",
+      "tilknytning til dette. Selskapet kan i den forbindelse yte lån og",
+      "stille sikkerheter."
+     ],
+     "aktivitet": [
+      "Utvikling og salg av byggeprosjekter."
+     ],
+     "registreringsdatoForetaksregisteret": "1994-02-22",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 58350000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2025-02-27"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/968757954"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "929229924",
+     "navn": "OBOS SAMFUNNSARENA AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2022-05-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.320",
+      "beskrivelse": "Eiendomsforvaltning på oppdrag"
+     },
+     "naeringskode2": {
+      "kode": "88.996",
+      "beskrivelse": "Andre sosialtjenester uten botilbud ellers"
+     },
+     "antallAnsatte": 76,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2023-10-12",
+     "registreringsdatoMerverdiavgiftsregisteret": "2023-09-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2023-10-12",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2022-03-15",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-03-15",
+     "vedtektsfestetFormaal": [
+      "Et instrument for å oppfylle deler av OBOS formål om å gi",
+      "tilbake til samfunnet og OBOS normale avkastningskrav er satt til",
+      "side. Selskapet skal i utviklingsområder foreta kapitalinnskudd i, -",
+      "og forvalte fysiske objekter som idrettshaller, kulturarenaer og",
+      "lokaler for øvrige samfunnsnyttige formål. De ulike prosjektene kan",
+      "gjennomføres i samarbeid og samhandling med ideelle organisasjoner som",
+      "idrettslag, lokale velforeninger, kulturinstitusjoner og",
+      "aktivitetsforeninger av ulike slag. Selskapet kan, der det er",
+      "hensiktsmessig, involvere seg økonomisk i andre selskaper, foreninger",
+      "og andre type institusjoner i form av delvis eierskap, medlem,",
+      "långiver og lignende. Selskapet vil rette engasjementet mot prosjekter",
+      "som kan komme samfunnet og flest mulig OBOS medlemmer til gode."
+     ],
+     "aktivitet": [
+      "Investere i, - og forvalte fysiske objekter som",
+      "idrettshaller, kulturarenaer og lokaler for øvrige samfunnsnyttige",
+      "formål."
+     ],
+     "registreringsdatoForetaksregisteret": "2022-05-19",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 3040000,
+      "antallAksjer": 3040,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2022-05-19"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/929229924"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "930869147",
+     "navn": "OBOS EIENDOM AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "AS OBOS-FORRETNINGSBYGG",
+       "fraDato": "1995-02-19 19:11:00",
+       "tilDato": "1999-03-30 18:40:57"
+      },
+      {
+       "navn": "OBOS FORRETNINGSBYGG AS",
+       "fraDato": "1999-03-30 18:40:57",
+       "tilDato": "2019-04-12 15:27:05"
+      }
+     ],
+     "hjemmeside": "www.obosforretningsbygg.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "naeringskode2": {
+      "kode": "68.110",
+      "beskrivelse": "Kjøp og salg av egen fast eiendom"
+     },
+     "antallAnsatte": 55,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "1994-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2003-09-13",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1987-08-24",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-05-12",
+     "vedtektsfestetFormaal": [
+      "Kjøpe, selge, feste eller leie eiendommer og å forestå oppføringen av",
+      "bygg og driften av eiendommene. Selskapet kan gjennom stiftelse av",
+      "aksjeselskaper, kjøp av aksjer/andeler eller på annen måte være",
+      "interessert i andre selskaper.",
+      " "
+     ],
+     "aktivitet": [
+      "Kjøpe, selge, feste eller leie eiendommer og",
+      "å forestå oppføringen av bygg og driften av",
+      "eiendommene."
+     ],
+     "registreringsdatoForetaksregisteret": "1988-12-03",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 175000000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-06-11"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/930869147"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "977040949",
+     "navn": "OBOS EIENDOMSMEGLERE AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "EXACT EIENDOMSMEGLERE AS",
+       "fraDato": "1996-12-20 20:21:42",
+       "tilDato": "2008-01-12 15:26:24"
+      },
+      {
+       "navn": "EXACT - OBOS EIENDOMSMEGLERE AS",
+       "fraDato": "2008-01-12 15:26:24",
+       "tilDato": "2011-01-13 20:23:26"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1996-12-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.310",
+      "beskrivelse": "Eiendomsmegling og andre formidlingstjenester for eiendom"
+     },
+     "antallAnsatte": 54,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "2001-07-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2001-04-09",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1996-12-03",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2022-12-05",
+     "vedtektsfestetFormaal": [
+      "Eiendomsmegling og annen virksomhet som står i",
+      "forbindelse med dette."
+     ],
+     "aktivitet": [
+      "Eiendomsmegling."
+     ],
+     "registreringsdatoForetaksregisteret": "1996-12-19",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 11000000,
+      "antallAksjer": 11000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2023-01-17"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/977040949"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "992874201",
+     "navn": "OBOS NETT AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "FIBEROPTIC SØR AS",
+       "fraDato": "2008-07-17 20:41:36",
+       "tilDato": "2011-01-05 20:29:26"
+      },
+      {
+       "navn": "OPENNET NORGE AS",
+       "fraDato": "2011-01-05 20:29:26",
+       "tilDato": "2019-09-18 12:03:26"
+      },
+      {
+       "navn": "OBOS OPENNET AS",
+       "fraDato": "2019-09-18 12:03:26",
+       "tilDato": "2024-10-02 16:36:46"
+      }
+     ],
+     "hjemmeside": "www.opennet.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2008-07-17",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "43.210",
+      "beskrivelse": "Elektrisk installasjonsarbeid"
+     },
+     "antallAnsatte": 30,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2011-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2011-09-27",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-04-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-04-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2008-06-19",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-09-09",
+     "vedtektsfestetFormaal": [
+      "Utbygging og drift av åpne bredbåndsnett."
+     ],
+     "aktivitet": [
+      "Utbygging av fiberoptiske bredbåndsnett og tilsvarende beslektet",
+      "virksomhet."
+     ],
+     "registreringsdatoForetaksregisteret": "2008-07-17",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 14578000,
+      "antallAksjer": 14578000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2024-10-02"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/992874201"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "982366879",
+     "navn": "OBOS FORNEBU AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "FORNEBU UTVIKLING AS",
+       "fraDato": "2000-09-18 08:51:46",
+       "tilDato": "2000-09-29 15:35:25"
+      },
+      {
+       "navn": "FORNEBU BOLIGSPAR AS",
+       "fraDato": "2000-09-29 15:35:25",
+       "tilDato": "2017-05-12 11:25:26"
+      }
+     ],
+     "hjemmeside": "www.fornebulandet.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2000-09-18",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "68.120",
+      "beskrivelse": "Utvikling og salg av byggeprosjekter"
+     },
+     "antallAnsatte": 27,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "2002-11-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2003-02-03",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1364",
+      "poststed": "FORNEBU",
+      "adresse": [
+       "Forneburingen 252"
+      ],
+      "kommune": "BÆRUM",
+      "kommunenummer": "3201"
+     },
+     "stiftelsesdato": "2000-09-11",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2026-03-27",
+     "vedtektsfestetFormaal": [
+      "Erverve, utvikle og selge (herunder i form av andelssalg/ syndikering)",
+      "fast eiendom, samt hva som står i forbindelse med dette."
+     ],
+     "aktivitet": [
+      "Erverv, utvikling og videresalg av fast eiendom (herunder i form av",
+      "andelssalg/ syndikering), samt hva som står i forbindelse med dette."
+     ],
+     "registreringsdatoForetaksregisteret": "2000-09-18",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 60000000,
+      "antallAksjer": 1,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2026-06-03"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/982366879"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "926649094",
+     "navn": "OBO BETTERMANN AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "Variator A/S",
+       "fraDato": "1995-02-19 18:50:00",
+       "tilDato": "2001-04-24 20:31:46"
+      },
+      {
+       "navn": "OBO BETTERMANN NORGE AS",
+       "fraDato": "2001-04-24 20:31:46",
+       "tilDato": "2007-10-27 14:52:47"
+      }
+     ],
+     "hjemmeside": "www.obo-bettermann.no",
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "46.500",
+      "beskrivelse": "Engroshandel med informasjons- og kommunikasjonsteknologiutstyr"
+     },
+     "antallAnsatte": 7,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "1977-09-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1995-02-19",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2024-01-13",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2024-01-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "2013",
+      "poststed": "SKJETTEN",
+      "adresse": [
+       "Hvamveien 4"
+      ],
+      "kommune": "LILLESTRØM",
+      "kommunenummer": "3205"
+     },
+     "stiftelsesdato": "1976-12-14",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2023-12-13",
+     "vedtektsfestetFormaal": [
+      "Handel med elektriske produkter og alt hva som dermed står i",
+      "forbindelse, herunder deltagelse i andre selskaper med lignende",
+      "formål."
+     ],
+     "aktivitet": [
+      "Salg av elektriske produkter og alt hva som der-",
+      "med står i forbindelse."
+     ],
+     "registreringsdatoForetaksregisteret": "1988-04-18",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 34500000,
+      "antallAksjer": 34500,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2017-12-21"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/926649094"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "912226980",
+     "navn": "OBOS FACTORING AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "OBOS SUPPORT AS",
+       "fraDato": "2013-07-20 14:59:18",
+       "tilDato": "2014-01-11 14:58:59"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2013-07-20",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "64.920",
+      "beskrivelse": "Annen kredittgivning"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-08-23",
+     "registreringsdatoMerverdiavgiftsregisteret": "2013-11-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2013-12-18",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2025-09-13",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2025-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2013-07-08",
+     "institusjonellSektorkode": {
+      "kode": "3600",
+      "beskrivelse": "Finansieringsforetak"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-09-25",
+     "vedtektsfestetFormaal": [
+      "Oppkjøp og inndriving av forfalte pengekrav for egen regning."
+     ],
+     "aktivitet": [
+      "Oppkjøp og inndriving av forfalte pengekrav for egen regning."
+     ],
+     "registreringsdatoForetaksregisteret": "2013-07-20",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 50940000,
+      "antallAksjer": 1698,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2024-10-31"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/912226980"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "921361440",
+     "navn": "OBOR GRUPPEN AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "registreringsdatoEnhetsregisteret": "2018-09-07",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "41.000",
+      "beskrivelse": "Oppføring av bygninger"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2018-09-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2018-11-06",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-11",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "2005",
+      "poststed": "RÆLINGEN",
+      "adresse": [
+       "Nedre Rælingsveg 117A"
+      ],
+      "kommune": "RÆLINGEN",
+      "kommunenummer": "3224"
+     },
+     "stiftelsesdato": "2018-07-30",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2018-07-30",
+     "vedtektsfestetFormaal": [
+      "Yte tjenester innen bygging, restaurering, renovering, herunder andre",
+      "produkter som naturlig faller sammen med dette, herunder å delta i",
+      "andre selskaper med lignende virksomhet, kjøp og salg av aksjer, eller",
+      "på annen måte gjøre seg interessert i andre foretagender."
+     ],
+     "aktivitet": [
+      "Yte tjenester innen bygging, restaurering, renovering, herunder andre",
+      "produkter som naturlig faller sammen med dette, herunder å delta i",
+      "andre selskaper med lignende virksomhet, kjøp og salg av aksjer, eller",
+      "på annen måte gjøre seg interessert i andre foretagender."
+     ],
+     "registreringsdatoForetaksregisteret": "2018-09-07",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2018-09-07",
+     "fravalgRevisjonBeslutningsDato": "2018-07-30",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2018-09-07"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/921361440"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "920297226",
+     "navn": "OBOS BLOCK WATNE ENEBOLIGER AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "BLOCK WATNE EAT AS",
+       "fraDato": "2018-01-24 15:25:07",
+       "tilDato": "2018-10-29 11:03:37"
+      },
+      {
+       "navn": "BLOCK WATNE FLUKS AS",
+       "fraDato": "2018-10-29 11:03:37",
+       "tilDato": "2024-02-20 10:40:30"
+      }
+     ],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2018-01-24",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "41.000",
+      "beskrivelse": "Oppføring av bygninger"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2018-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2018-08-15",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2022-01-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2022-01-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2017-12-13",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2024-02-01",
+     "vedtektsfestetFormaal": [
+      "Salg og oppføring av boliger, og annen virksomhet som naturlig hører",
+      "til dette."
+     ],
+     "aktivitet": [
+      "Oppføring av bygninger."
+     ],
+     "registreringsdatoForetaksregisteret": "2018-01-24",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 100000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2018-01-24"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/920297226"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "965419462",
+     "navn": "OBOW EIENDOM AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "ÅLESUND LAST OG BUSS AS",
+       "fraDato": "1995-02-20 01:50:00",
+       "tilDato": "2000-06-30 09:23:51"
+      }
+     ],
+     "registreringsdatoEnhetsregisteret": "1995-02-20",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6240",
+      "poststed": "ØRSKOG",
+      "adresse": [
+       "Olav Oksviks veg 7"
+      ],
+      "kommune": "ÅLESUND",
+      "kommunenummer": "1508"
+     },
+     "stiftelsesdato": "1992-11-23",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2017-10-12",
+     "vedtektsfestetFormaal": [
+      "Erverv og drift av eiendommer, samt ved aksjetegning eller på annen",
+      "måte gjøre seg interessert i andre foretak innen de forskjellige",
+      "bransjene."
+     ],
+     "aktivitet": [
+      "Eiendom."
+     ],
+     "registreringsdatoForetaksregisteret": "1993-01-15",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 95500,
+      "antallAksjer": 1910,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2017-12-08"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/965419462"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "935637317",
+     "navn": "OBORCHESTRA AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "registreringsdatoEnhetsregisteret": "2025-06-06",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "59.200",
+      "beskrivelse": "Produksjon og utgivelse av musikk- og lydopptak"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0487",
+      "poststed": "OSLO",
+      "adresse": [
+       "Kapellveien 53"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2025-05-06",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-05-06",
+     "vedtektsfestetFormaal": [
+      "Selge varer og tjenester innen produksjon av musikk og annet som",
+      "naturlig sammenfaller med dette, samt deltakelse i andre selskaper,",
+      "investeringer og nærliggende virksomhet."
+     ],
+     "aktivitet": [
+      "Produksjon av musikk."
+     ],
+     "registreringsdatoForetaksregisteret": "2025-06-06",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2025-06-06",
+     "fravalgRevisjonBeslutningsDato": "2025-05-06",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 30000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2025-06-06"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/935637317"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "911954737",
+     "navn": "OBOS NÆRKONTOR AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "STORBERGEN EIENDOMSMEGLING AS",
+       "fraDato": "2013-05-16 20:29:50",
+       "tilDato": "2013-10-08 20:31:05"
+      },
+      {
+       "navn": "STORBERGEN EIENDOMSMEGLER AS",
+       "fraDato": "2013-10-08 20:31:05",
+       "tilDato": "2021-03-11 10:19:41"
+      }
+     ],
+     "hjemmeside": "www.obos-eiendomsmeglere.no",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0179",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 6666 St. Olavs plass"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2013-05-16",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "82.200",
+      "beskrivelse": "Telefonvakttjenester og telefonsalg"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "telefon": "00 00 00 00",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0179",
+      "poststed": "OSLO",
+      "adresse": [
+       "Hammersborg torg 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2013-04-04",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": true,
+     "underAvviklingDato": "2026-09-08",
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2021-02-09",
+     "vedtektsfestetFormaal": [
+      "Utleie av næringslokaler samt det som naturlig står i forbindelse med",
+      "dette."
+     ],
+     "aktivitet": [
+      "Salg av abonnement for benyttelse av kontorplass i kontorlandskap."
+     ],
+     "registreringsdatoForetaksregisteret": "2013-05-16",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2026-07-10",
+     "fravalgRevisjonBeslutningsDato": "2026-06-10",
+     "erIKonsern": true,
+     "kapital": {
+      "belop": 1300000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2014-10-24"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/911954737"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "934070119",
+     "navn": "OBOS AKSJEINVESTERINGER AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0614",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 393 Alnabru"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "2024-09-10",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "00.000",
+      "beskrivelse": "Uoppgitt"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-07-15",
+     "registreringsdatoMerverdiavgiftsregisteret": "2025-05-24",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-07-15",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0581",
+      "poststed": "OSLO",
+      "adresse": [
+       "Standardveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2024-08-15",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2025-05-26",
+     "vedtektsfestetFormaal": [
+      "Selv, gjennom hel- eller deleide selskaper, eller ved samarbeide med",
+      "andre virksomheter, å forestå aksjeinvesteringer og andre finansielle",
+      "investeringer samt annen virksomhet beslektet med dette."
+     ],
+     "aktivitet": [
+      "Investering i børsnoterte og andre aksjeselskaper."
+     ],
+     "registreringsdatoForetaksregisteret": "2024-09-10",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 11800000,
+      "antallAksjer": 11800,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2025-07-01"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/934070119"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "first": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=obos&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&page=0&size=20&sort=antallAnsatte,desc"
+   },
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=obos&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   },
+   "next": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=obos&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&page=1&size=20&sort=antallAnsatte,desc"
+   },
+   "last": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=obos&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&page=1&size=20&sort=antallAnsatte,desc"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 32,
+   "totalPages": 2,
+   "number": 0
+  }
+ }
+}

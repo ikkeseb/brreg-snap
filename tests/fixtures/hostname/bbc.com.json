@@ -1,0 +1,434 @@
+{
+ "hjemmeside=bbc.com&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=bbc.com&sort=antallAnsatte,DESC&size=20"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "navn=bbc&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "922250537",
+     "navn": "BBC STUDIOS NORDIC PRODUCTIONS AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "STV PRODUCTION NORWAY AS",
+       "fraDato": "2019-03-04 21:10:30",
+       "tilDato": "2023-11-25 14:29:54"
+      }
+     ],
+     "registreringsdatoEnhetsregisteret": "2019-03-02",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "59.110",
+      "beskrivelse": "Produksjon av film, video og fjernsynsprogrammer"
+     },
+     "antallAnsatte": 20,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2019-03-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2019-04-15",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-11",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0476",
+      "poststed": "OSLO",
+      "adresse": [
+       "Myrens verksted 3P"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "2019-01-25",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2023-09-27",
+     "vedtektsfestetFormaal": [
+      "Å utvikle, produsere og distribuere bilde- og lydproduksjoner, samt",
+      "utvikling av salg av TV-formater, og slik nærliggende virksomhet."
+     ],
+     "aktivitet": [
+      "Å utvikle, produsere og distribuere bilde- og lydproduksjoner, samt",
+      "utvikling av salg av TV-formater, og slik nærliggende virksomhet."
+     ],
+     "registreringsdatoForetaksregisteret": "2019-03-02",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 300,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2019-03-02"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/922250537"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "913265726",
+     "navn": "BBC FRITID AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "VITRA DRIFT AS",
+       "fraDato": "2014-02-27 20:50:42",
+       "tilDato": "2014-10-29 20:22:30"
+      }
+     ],
+     "registreringsdatoEnhetsregisteret": "2014-02-27",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "47.810",
+      "beskrivelse": "Detaljhandel med motorvogner"
+     },
+     "antallAnsatte": 6,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2014-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2014-04-23",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-07-15",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-07-10",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "7224",
+      "poststed": "MELHUS",
+      "adresse": [
+       "Øysandvegen 70"
+      ],
+      "kommune": "MELHUS",
+      "kommunenummer": "5028"
+     },
+     "stiftelsesdato": "2014-01-22",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2015-04-09",
+     "vedtektsfestetFormaal": [
+      "Import/ eksport, salg av handelsvarer, rådgivning og deltakelse i",
+      "andre virksomheter."
+     ],
+     "aktivitet": [
+      "Omsetning av campingvogner og bobiler samt salg av tilhørende utstyr",
+      "og vedlikeholdstjenester av disse."
+     ],
+     "registreringsdatoForetaksregisteret": "2014-02-27",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 300000,
+      "antallAksjer": 300,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2015-04-23"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/913265726"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "922090513",
+     "navn": "BBC BAKKEJORD AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "registreringsdatoEnhetsregisteret": "2019-01-21",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "71.121",
+      "beskrivelse": "Byggeteknisk konsulentvirksomhet"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2019-03-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2019-03-25",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2019-05-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2019-05-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "1397",
+      "poststed": "NESØYA",
+      "adresse": [
+       "Hestesundveien 4A"
+      ],
+      "kommune": "ASKER",
+      "kommunenummer": "3203"
+     },
+     "stiftelsesdato": "2019-01-02",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2019-01-02",
+     "vedtektsfestetFormaal": [
+      "Salg av konsulenttjenester og rådgivning samt prosjektledelse innen",
+      "planlegging og oppfølging av byggeprosjekter og alt som hermed står i",
+      "denne forbindelse."
+     ],
+     "aktivitet": [
+      "Salg av konsulenttjenester og rådgivning samt prosjektledelse innen",
+      "planlegging og oppfølging av byggeprosjekter."
+     ],
+     "registreringsdatoForetaksregisteret": "2019-01-21",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2019-01-21",
+     "fravalgRevisjonBeslutningsDato": "2019-01-02",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2019-01-21"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/922090513"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "932324229",
+     "navn": "BBC AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "registreringsdatoEnhetsregisteret": "2023-10-24",
+     "registrertIMvaregisteret": true,
+     "naeringskode1": {
+      "kode": "79.902",
+      "beskrivelse": "Guide- og reiseledervirksomhet"
+     },
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoMerverdiavgiftsregisteret": "2024-01-22",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-01-22",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "4460",
+      "poststed": "MOI",
+      "adresse": [
+       "Hauklandsveien 12"
+      ],
+      "kommune": "LUND",
+      "kommunenummer": "1112"
+     },
+     "stiftelsesdato": "2023-09-22",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2023-09-22",
+     "vedtektsfestetFormaal": [
+      "Å drive persontransport, organisere turistgrupper og levering av",
+      "drosjetjenester. I tillegg vil selskapet tilby guidetjenester samt",
+      "tilby byggetjenester inkludert renovering og byggearbeid."
+     ],
+     "aktivitet": [
+      "Guide og reiseleder."
+     ],
+     "registreringsdatoForetaksregisteret": "2023-10-24",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2023-10-24",
+     "fravalgRevisjonBeslutningsDato": "2023-09-22",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 30000,
+      "antallAksjer": 100,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2023-10-24"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/932324229"
+      }
+     },
+     "respons_klasse": "Enhet"
+    },
+    {
+     "organisasjonsnummer": "886618182",
+     "navn": "BBC EIENDOM AS",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [
+      {
+       "navn": "GODIK NORGE AS",
+       "fraDato": "2004-03-04 21:06:49",
+       "tilDato": "2006-07-27 20:15:30"
+      }
+     ],
+     "registreringsdatoEnhetsregisteret": "2004-03-04",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "68.200",
+      "beskrivelse": "Utleie av egen eller leid fast eiendom"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "4846",
+      "poststed": "ARENDAL",
+      "adresse": [
+       "Moland Park"
+      ],
+      "kommune": "ARENDAL",
+      "kommunenummer": "4203"
+     },
+     "stiftelsesdato": "2004-02-09",
+     "institusjonellSektorkode": {
+      "kode": "2100",
+      "beskrivelse": "Private aksjeselskaper mv."
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2007-03-06",
+     "vedtektsfestetFormaal": [
+      "Eie og utleie av fast eiendom med alt som dermed står i forbindelse",
+      "samt gjennom aksjetegning eller på annen måte å delta i andre selskap",
+      "eller foretak."
+     ],
+     "aktivitet": [
+      "Eie og utleie av fast eiendom med alt som dermed står i forbindelse",
+      "samt gjennom aksjetegning eller på annen måte å delta i andre selskap",
+      "eller foretak."
+     ],
+     "registreringsdatoForetaksregisteret": "2004-03-04",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "fravalgRevisjonDato": "2018-02-16",
+     "fravalgRevisjonBeslutningsDato": "2017-12-30",
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 105000,
+      "antallAksjer": 5000,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "2007-04-02"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/886618182"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=bbc&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 5,
+   "totalPages": 1,
+   "number": 0
+  }
+ }
+}

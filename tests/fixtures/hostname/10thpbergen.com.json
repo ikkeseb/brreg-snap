@@ -1,0 +1,108 @@
+{
+ "hjemmeside=10thpbergen.com&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "931396145",
+     "navn": "10TH PLANET BERGEN JIU JITSU - DA",
+     "organisasjonsform": {
+      "kode": "DA",
+      "beskrivelse": "Ansvarlig selskap med delt ansvar",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/DA"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "10thpbergen.com",
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "5161",
+      "poststed": "LAKSEVÅG",
+      "adresse": [
+       "Eksempelveien 1"
+      ],
+      "kommune": "BERGEN",
+      "kommunenummer": "4601"
+     },
+     "registreringsdatoEnhetsregisteret": "2023-05-24",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "85.510",
+      "beskrivelse": "Undervisning innenfor idrett og rekreasjon"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "mobil": "000 00 000",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "5005",
+      "poststed": "BERGEN",
+      "adresse": [
+       "Eksempelveien 1"
+      ],
+      "kommune": "BERGEN",
+      "kommunenummer": "4601"
+     },
+     "stiftelsesdato": "2023-05-01",
+     "institusjonellSektorkode": {
+      "kode": "2300",
+      "beskrivelse": "Personlige foretak"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "konkurs": false,
+     "underAvvikling": true,
+     "underAvviklingDato": "2025-08-08",
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Bokmål",
+     "vedtektsdato": "2023-05-01",
+     "vedtektsfestetFormaal": [
+      "Idrett og rekreasjon: Undervisning i Jiu Jitsu."
+     ],
+     "aktivitet": [
+      "Undervisning i Brasiliansk Jiu Jitsu."
+     ],
+     "registreringsdatoForetaksregisteret": "2023-05-24",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/931396145"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=10thpbergen.com&sort=antallAnsatte,DESC&size=20"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 1,
+   "totalPages": 1,
+   "number": 0
+  }
+ },
+ "navn=10thpbergen&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=10thpbergen&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ }
+}
