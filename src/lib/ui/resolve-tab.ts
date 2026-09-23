@@ -9,6 +9,7 @@ import {
   searchByHostnameDetailed,
   type Candidate,
 } from '../hostname-search.js';
+import { isNotFoundError, lookupOrgnr } from '../company-load.js';
 import { resolveOrgnr } from '../orgnr.js';
 import type { ResolutionMethod } from '../resolution-method.js';
 
@@ -40,11 +41,26 @@ function hostOf(url: string): string | undefined {
   }
 }
 
+// False only when brreg answered that the orgnr is neither an enhet
+// nor an underenhet.
+async function exists(orgnr: string): Promise<boolean> {
+  try {
+    await lookupOrgnr(orgnr);
+    return true;
+  } catch (err) {
+    return !isNotFoundError(err);
+  }
+}
+
 // Band-aware cascade: sync regex first (URL/title), then a
 // picker-aware hostname search that tells us whether to auto-resolve,
 // show the picker, or fall through to the empty/manual-search state.
 // An orgnr the user rejected for this site («Feil bedrift?») is not
-// taken from the URL/title again: the hostname search decides instead.
+// taken from the URL/title again, and neither is one brreg doesn't
+// know (a chance-valid product id): the hostname search decides
+// instead. The existence check is the enhet fetch the view needs
+// anyway, cached for the load that follows; a network failure keeps
+// the orgnr so the load shows the real error.
 // The title rides along to the hostname search as a word-boundary hint
 // (hostname-search.ts § title segmentation).
 export async function resolveTabContext(
@@ -55,7 +71,9 @@ export async function resolveTabContext(
   const host = hostOf(url);
   const sync = resolveOrgnr({ url, title });
   if (sync && !(host && (await getRejectedChoices(host)).includes(sync.orgnr))) {
-    return { orgnr: sync.orgnr, host, method: sync.method };
+    if (await exists(sync.orgnr)) {
+      return { orgnr: sync.orgnr, host, method: sync.method };
+    }
   }
   if (!host) return {};
   const detailed = await searchByHostnameDetailed(host, title || undefined);

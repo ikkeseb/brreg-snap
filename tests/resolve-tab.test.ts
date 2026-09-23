@@ -4,6 +4,10 @@ vi.mock('../src/lib/hostname-search.js', () => ({
   searchByHostnameDetailed: vi.fn(),
   getRejectedChoices: vi.fn(async () => []),
 }));
+vi.mock('../src/lib/company-load.js', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../src/lib/company-load.js')>()),
+  lookupOrgnr: vi.fn(async () => ({})),
+}));
 vi.mock('../src/lib/orgnr.js', () => ({
   resolveOrgnr: vi.fn(() => undefined),
 }));
@@ -12,6 +16,7 @@ import {
   getRejectedChoices,
   searchByHostnameDetailed,
 } from '../src/lib/hostname-search.js';
+import { lookupOrgnr } from '../src/lib/company-load.js';
 import { resolveOrgnr } from '../src/lib/orgnr.js';
 import {
   isHostDerived,
@@ -22,6 +27,7 @@ import {
 const detailedMock = vi.mocked(searchByHostnameDetailed);
 const syncMock = vi.mocked(resolveOrgnr);
 const rejectedMock = vi.mocked(getRejectedChoices);
+const lookupMock = vi.mocked(lookupOrgnr);
 
 describe('resolveTabContext degraded flag', () => {
   beforeEach(() => {
@@ -135,5 +141,37 @@ describe('isHostDerived — who gets «Feil bedrift?»', () => {
     expect(isHostDerived('manual')).toBe(false);
     expect(isHostDerived('drill-in')).toBe(false);
     expect(isHostDerived(undefined)).toBe(false);
+  });
+});
+
+describe('resolveTabContext — a URL/title orgnr brreg does not know', () => {
+  beforeEach(() => {
+    detailedMock.mockReset();
+    syncMock.mockReset();
+    lookupMock.mockReset();
+    rejectedMock.mockResolvedValue([]);
+    syncMock.mockReturnValue({ orgnr: '900000006', method: 'url-path' });
+  });
+
+  it('falls through to the hostname search instead of a hard error', async () => {
+    // A chance-valid product id in the path: /enheter/ and /underenheter/ both 404.
+    lookupMock.mockRejectedValue(new Error('No entity found for orgnr 900000006.'));
+    detailedMock.mockResolvedValue({ band: 'none', candidates: [], complete: true });
+    const ctx = await resolveTabContext('https://shop.no/p/900000006', 'Sko');
+    expect(ctx.orgnr).toBeUndefined();
+    expect(detailedMock).toHaveBeenCalledWith('shop.no', 'Sko');
+  });
+
+  it('keeps the orgnr when brreg could not be asked: the load shows the real error', async () => {
+    lookupMock.mockRejectedValue(new TypeError('Failed to fetch'));
+    const ctx = await resolveTabContext('https://shop.no/p/900000006', '');
+    expect(ctx).toEqual({ orgnr: '900000006', host: 'shop.no', method: 'url-path' });
+    expect(detailedMock).not.toHaveBeenCalled();
+  });
+
+  it('checks existence with the lookup the view reuses from cache', async () => {
+    lookupMock.mockResolvedValue({ enhet: { organisasjonsnummer: '900000006', navn: 'X' } } as never);
+    await resolveTabContext('https://shop.no/p/900000006', '');
+    expect(lookupMock).toHaveBeenCalledWith('900000006');
   });
 });
