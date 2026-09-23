@@ -21,7 +21,7 @@ const candidates: Candidate[] = [enhetDnb, enhetEquinor].map((e) => ({
   evidence: 'navn',
 }));
 
-async function setupReject() {
+async function setupReject(title?: string) {
   installFakeDom();
   const { setupRejectChoice } = await import('../src/lib/ui/picker.js');
   const { createLoadSequence } = await import('../src/lib/panel-follow.js');
@@ -34,7 +34,7 @@ async function setupReject() {
   const showEmptyState = vi.fn();
   setupRejectChoice({
     buttonEl: buttonEl as unknown as HTMLButtonElement,
-    getContext: () => ({ host: 'dnb.no', orgnr: enhetDnb.organisasjonsnummer }),
+    getContext: () => ({ host: 'dnb.no', orgnr: enhetDnb.organisasjonsnummer, title }),
     claim: () => loads.begin(),
     showPicker,
     showEmptyState,
@@ -134,6 +134,22 @@ describe('«Feil bedrift?» reject flow', () => {
       'dnb.no',
       enhetDnb.organisasjonsnummer,
     );
+  });
+
+  it('re-runs the host search with the tab title, so its word hints survive', async () => {
+    const { buttonEl, showEmptyState, search } = await setupReject('DNB Bank | Privat');
+    search.mockResolvedValue({ band: 'none', candidates: [], complete: true });
+    buttonEl.click();
+    await vi.waitFor(() => expect(showEmptyState).toHaveBeenCalledWith('dnb.no'));
+    expect(search).toHaveBeenCalledWith('dnb.no', 'DNB Bank | Privat');
+  });
+
+  it('without a title the host search runs on the host alone', async () => {
+    const { buttonEl, showEmptyState, search } = await setupReject();
+    search.mockResolvedValue({ band: 'none', candidates: [], complete: true });
+    buttonEl.click();
+    await vi.waitFor(() => expect(showEmptyState).toHaveBeenCalledWith('dnb.no'));
+    expect(search).toHaveBeenCalledWith('dnb.no', undefined);
   });
 
   it('a flow that starts during the search wins over the late picker', async () => {

@@ -367,8 +367,11 @@ which:
 1. Appends the orgnr to `rejected:<site>` (24h TTL).
 2. Clears `picker-choice:<site>` if it equals the rejected orgnr.
 
-The next `searchByHostnameDetailed` reads the rejected list, passes
-it through `runPipeline` which filters rejected candidates before
+The flow then re-runs `searchByHostnameDetailed(host, title)` with the
+title of the tab the host came from (`getContext` on both surfaces; the
+panel only has one when it resolved that tab itself, not for a sync
+message or probe), so the title word hints (§ title-segmentation)
+survive a rejection. It reads the rejected list, passes it through `runPipeline` which filters rejected candidates before
 scoring, and stores the result under
 `hostname:<site>:rej:<sorted>` so the pre-rejection cache entry
 isn't served. `resolveTabContext` also skips a URL/title orgnr that
@@ -398,8 +401,8 @@ A run-together label can't match a registered name with spaces:
 `navn=rema1000` and `navn=detnorsketeatret` return 0 hits, while
 «REMA 1000 NORGE AS» and «LL DET NORSKE TEATRET» exist (live
 2026-09-24). The tab title usually spells the name out, so
-`resolveTabContext` passes it to `searchByHostnameDetailed(host,
-title)`, and `titleSegmentations(label, title)` (`hostname-score.ts`)
+`resolveTabContext` (and the «Feil bedrift?» re-run, § reject-override)
+passes it to `searchByHostnameDetailed(host, title)`, and `titleSegmentations(label, title)` (`hostname-score.ts`)
 looks for consecutive title words that together ARE the label.
 
 **What is sent.** Each extra query is exactly the hostname label with

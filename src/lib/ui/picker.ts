@@ -132,7 +132,9 @@ export function createPicker(opts: PickerOptions): PickerController {
 export interface RejectChoiceOptions {
   buttonEl: HTMLButtonElement;
   // Current host + orgnr at click time. Either missing → no-op.
-  getContext: () => { host?: string; orgnr?: string };
+  // `title`: the title of the tab the host came from, so the re-run
+  // keeps its word hints (hostname-search.ts § title segmentation).
+  getContext: () => { host?: string; orgnr?: string; title?: string };
   // The panel's load token (panel-follow.ts), claimed on the click. A
   // tab event or sync that starts during the write and the search then
   // wins over this flow's late picker. The popup has nothing else that
@@ -149,7 +151,7 @@ export function setupRejectChoice(opts: RejectChoiceOptions): void {
   const { buttonEl } = opts;
 
   async function handle(): Promise<void> {
-    const { host, orgnr } = opts.getContext();
+    const { host, orgnr, title } = opts.getContext();
     if (!host || !orgnr) return;
     const run = opts.claim?.();
     buttonEl.disabled = true;
@@ -157,7 +159,7 @@ export function setupRejectChoice(opts: RejectChoiceOptions): void {
       // The rejection is stored either way; only the paint is dropped.
       await addRejectedChoice(host, orgnr);
       if (run?.isStale()) return;
-      const detailed = await searchByHostnameDetailed(host);
+      const detailed = await searchByHostnameDetailed(host, title);
       if (run?.isStale()) return;
       if (detailed && detailed.candidates.length > 0) {
         // Always show picker (even if a single candidate now wins

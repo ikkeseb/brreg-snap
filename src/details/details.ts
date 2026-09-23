@@ -88,6 +88,9 @@ const BRREG_LINK_FALLBACK = 'https://virksomhet.brreg.no/nb/oppslag/enheter';
 // The orgnr asked for (URL, sync, search). For an underenhet that is
 // not the company on screen — see shownEnhetOrgnr.
 let currentOrgnr: string | undefined;
+// The title of the tab the follower last resolved, keyed by that tab's
+// host: «Feil bedrift?» re-runs the host search with its word hints.
+let lastTabTitle: { host: string; title: string } | undefined;
 // The enhet actually rendered: currentOrgnr, or its parent when
 // currentOrgnr is an underenhet. «Oppdater» drops both from the cache.
 let shownEnhetOrgnr: string | undefined;
@@ -153,7 +156,16 @@ const manualSearch = attachManualSearch({
 // event or sync that arrives meanwhile wins over its late picker.
 setupRejectChoice({
   buttonEl: rejectChoiceBtn,
-  getContext: () => ({ host: sourceLabel.get(), orgnr: currentOrgnr }),
+  getContext: () => {
+    const host = sourceLabel.get();
+    return {
+      host,
+      orgnr: currentOrgnr,
+      // Only the title of a tab on this very host: a view that came
+      // from a sync message or a probe has none to offer.
+      title: lastTabTitle?.host === host ? lastTabTitle?.title : undefined,
+    };
+  },
   claim: () => loads.begin(),
   showPicker,
   showEmptyState,
@@ -622,7 +634,11 @@ const follower = createPanelFollower({
     return tabs[0];
   },
   getTab: (tabId) => browser.tabs.get(tabId),
-  resolveTab: resolveTabContext,
+  resolveTab: async (url, title) => {
+    const ctx = await resolveTabContext(url, title);
+    lastTabTitle = ctx.host && title ? { host: ctx.host, title } : undefined;
+    return ctx;
+  },
   searchHost: searchByHostnameDetailed,
   onScreen: () => onScreen,
   show: showView,

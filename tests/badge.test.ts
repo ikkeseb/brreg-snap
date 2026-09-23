@@ -14,10 +14,12 @@ function fakeAction(opts: { withTextColor?: boolean; reject?: boolean } = {}) {
 }
 
 describe('setTrustBadge', () => {
-  it('danger: a red «!» on that tab only', async () => {
+  // Tone never by colour alone: danger «✕» and warn «!» differ in the
+  // glyph, not only in the colour.
+  it('danger: a red «✕» on that tab only', async () => {
     const api = fakeAction();
     await setTrustBadge(7, 'danger', api);
-    expect(api.setBadgeText).toHaveBeenCalledWith({ tabId: 7, text: '!' });
+    expect(api.setBadgeText).toHaveBeenCalledWith({ tabId: 7, text: '✕' });
     expect(api.setBadgeBackgroundColor).toHaveBeenCalledWith({ tabId: 7, color: '#b91c1c' });
     expect(api.setBadgeTextColor).toHaveBeenCalledWith({ tabId: 7, color: '#ffffff' });
   });
@@ -40,7 +42,7 @@ describe('setTrustBadge', () => {
   it('still sets the badge where setBadgeTextColor is missing', async () => {
     const api = fakeAction({ withTextColor: false });
     await setTrustBadge(7, 'danger', api);
-    expect(api.setBadgeText).toHaveBeenCalledWith({ tabId: 7, text: '!' });
+    expect(api.setBadgeText).toHaveBeenCalledWith({ tabId: 7, text: '✕' });
   });
 
   it('swallows the rejection for a tab that closed meanwhile', async () => {

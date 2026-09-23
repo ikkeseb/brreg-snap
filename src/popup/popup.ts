@@ -84,6 +84,8 @@ let currentResolutionMethod: ResolutionMethod | undefined;
 // window still goes into the panel path and the sync messages.
 let currentWindowId: number | undefined;
 let currentTabId: number | undefined;
+// The active tab's title: «Feil bedrift?» passes it to the host search.
+let currentTabTitle: string | undefined;
 // Monotonic guard for loadAndRender — from the empty state the user
 // can click a manual result then a recent entry in quick succession;
 // without this the last-to-RESOLVE fetch chain paints, which can be
@@ -126,7 +128,11 @@ const manualSearch = attachManualSearch({
 
 setupRejectChoice({
   buttonEl: rejectChoiceBtn,
-  getContext: () => ({ host: sourceLabel.get(), orgnr: currentOrgnr }),
+  getContext: () => ({
+    host: sourceLabel.get(),
+    orgnr: currentOrgnr,
+    title: currentTabTitle,
+  }),
   showPicker,
   showEmptyState,
 });
@@ -206,6 +212,7 @@ async function resolveFromActiveTab(): Promise<TabContext> {
   // Firefox, whose adapter ignores the target.
   currentWindowId = tab?.windowId;
   currentTabId = tab?.id;
+  currentTabTitle = tab?.title || undefined;
   return resolveTabContext(tab?.url ?? '', tab?.title ?? '');
 }
 

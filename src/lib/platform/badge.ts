@@ -1,4 +1,4 @@
-// Per-tab toolbar badge: a «!» on the brreg-snap button when the company
+// Per-tab toolbar badge: a glyph on the brreg-snap button when the company
 // resolved for that tab has something worth a look, so the warning is
 // visible before the user clicks. The surfaces call setTrustBadge after
 // a lookup, with the answer's tone and the tab they resolved.
@@ -11,11 +11,12 @@
 // for (Chromium: ExtensionActionRunner::DidFinishNavigation clears all
 // per-tab action values; Firefox resets them on location change).
 //
-// Both tones show the same «!» — the badge has room for about one
-// glyph — and the colour tells danger (red) from warn (amber). The
-// words live in the surfaces, which the badge only invites you to open.
+// The badge has room for about one glyph: the tone's own TONE_GLYPH
+// (danger «✕», warn «!»), so tone never rests on colour alone; the
+// colour (red / amber) repeats it. The words live in the surfaces,
+// which the badge only invites you to open.
 
-import type { Tone } from '../trust/types.js';
+import { TONE_GLYPH, type Tone } from '../trust/types.js';
 
 interface BadgeStyle {
   text: string;
@@ -26,8 +27,8 @@ interface BadgeStyle {
 // The light theme's --danger (shared.css) behind white, and the dark
 // theme's --warn amber behind near-black: both well above 4.5:1.
 const BADGE: Partial<Record<Tone, BadgeStyle>> = {
-  danger: { text: '!', background: '#b91c1c', color: '#ffffff' },
-  warn: { text: '!', background: '#fbbf24', color: '#1a1a1a' },
+  danger: { text: TONE_GLYPH.danger, background: '#b91c1c', color: '#ffffff' },
+  warn: { text: TONE_GLYPH.warn, background: '#fbbf24', color: '#1a1a1a' },
 };
 
 // The slice of browser.action this uses; tests pass a fake.
@@ -42,7 +43,7 @@ export interface BadgeApi {
   setBadgeTextColor?(details: { tabId: number; color: string }): Promise<unknown>;
 }
 
-// danger → red «!», warn → amber «!», ok / neutral / undefined (no
+// danger → red «✕», warn → amber «!», ok / neutral / undefined (no
 // company, lookup failed) → cleared. Best-effort: a tab that closed
 // meanwhile makes the calls reject, and that is swallowed.
 export async function setTrustBadge(
