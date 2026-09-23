@@ -1,12 +1,12 @@
 // Side-effect import: aliases `globalThis.browser = chrome` on Chromium
 // before any `browser.*` access. Must stay the first import.
 import '../lib/platform/globals.js';
-import { decideToggle } from '../lib/auto-sync-controller.js';
 import {
   AUTO_SYNC_STORAGE_KEY,
   getAutoSync,
   setAutoSync,
 } from '../lib/auto-sync-settings.js';
+import { createAutoSyncToggle } from '../lib/auto-sync-toggle.js';
 import { invalidateCache } from '../lib/brreg.js';
 import { isPermanentLoadError, loadCompany } from '../lib/company-load.js';
 import { formatRelativeTime } from '../lib/format.js';
@@ -24,7 +24,7 @@ import {
   readPanelHint,
 } from '../lib/panel-protocol.js';
 import { isFirefox } from '../lib/platform/engine.js';
-import { createTabWatcher, type TabWatcher } from '../lib/tab-sync.js';
+import { createTabWatcher } from '../lib/tab-sync.js';
 import { describeLoadError } from '../lib/ui/error-message.js';
 import { attachManualSearch } from '../lib/ui/manual-search.js';
 import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
@@ -500,176 +500,46 @@ function paintFetchedLabel(): void {
 // user closes the sidebar), so closing it stops every lookup by
 // construction. See docs/notes/sidebar-sync.md § panel-hosted-auto-sync.
 
-// Cached effective state of the toggle. Kept in sync with
-// storage + permission grant so handleToggleChange can call
-// browser.permissions.request *without* an await between the
-// click handler and the request — Firefox consumes the user
-// activation token across the first await, and consumed activation
-// makes permissions.request reject with "Firefox blokkerte
-// forespørselen".
-let currentAutoSyncEnabled = false;
-// Undefined only if the panel couldn't learn its window — then it
-// can't tell its own tabs from other windows' and doesn't follow any.
-let tabWatcher: TabWatcher | undefined;
-
-function applyAutoSync(enabled: boolean): void {
-  currentAutoSyncEnabled = enabled;
-  autoSyncToggle.checked = enabled;
-  if (enabled) tabWatcher?.attach();
-  else tabWatcher?.detach();
-}
-
 async function setupAutoSyncToggle(): Promise<void> {
   const windowId = await panelWindowId;
-  if (windowId !== undefined) {
-    tabWatcher = createTabWatcher({
-      tabs: browser.tabs,
-      windowId,
-      supportsUpdateFilter: isFirefox,
-      onTabChange: (tabId, tab) => {
-        void follower.followTab(tabId, tab);
-      },
-    });
-  }
-  await reconcileAutoSync();
+  const autoSync = createAutoSyncToggle({
+    toggle: autoSyncToggle,
+    showConsent: showAutoSyncConsent,
+    showStatus: showAutoSyncStatus,
+    permissions: browser.permissions,
+    getAutoSync,
+    setAutoSync,
+    // Only when the panel knows its window: otherwise it can't tell its
+    // own tabs from other windows' and follows none.
+    watcher:
+      windowId === undefined
+        ? undefined
+        : createTabWatcher({
+            tabs: browser.tabs,
+            windowId,
+            supportsUpdateFilter: isFirefox,
+            onTabChange: (tabId, tab) => {
+              void follower.followTab(tabId, tab);
+            },
+          }),
+  });
+  await autoSync.reconcile();
 
-  autoSyncToggle.addEventListener('change', () => {
-    // Switching on first says what auto-sync sends and to whom (store
-    // policies want the disclosure before the grant, and Firefox < 140
-    // has no built-in data-consent prompt). The «Slå på» click is then
-    // both the consent and the fresh gesture permissions.request needs.
-    if (autoSyncToggle.checked && !currentAutoSyncEnabled) {
-      autoSyncToggle.checked = false;
-      showAutoSyncConsent(true);
-      return;
-    }
-    showAutoSyncConsent(false);
-    void handleToggleChange(autoSyncToggle.checked);
-  });
-  consentAcceptBtn.addEventListener('click', () => {
-    showAutoSyncConsent(false);
-    autoSyncToggle.checked = true;
-    // No await before this call: handleToggleChange's first await is
-    // permissions.request (§ gesture-stack).
-    void handleToggleChange(true);
-  });
-  consentCancelBtn.addEventListener('click', () => {
-    showAutoSyncConsent(false);
-    autoSyncToggle.focus();
-  });
+  autoSyncToggle.addEventListener('change', () => autoSync.changed());
+  consentAcceptBtn.addEventListener('click', () => autoSync.accept());
+  consentCancelBtn.addEventListener('click', () => autoSync.cancel());
   consentEl.addEventListener('keydown', (ev) => {
-    if (ev.key !== 'Escape') return;
-    showAutoSyncConsent(false);
-    autoSyncToggle.focus();
+    if (ev.key === 'Escape') autoSync.cancel();
   });
-
-  // External revoke (about:addons / chrome://extensions) — detach and
-  // flip the checkbox live. Sync shim around the async handler so
-  // addListener gets a void-returning function.
-  browser.permissions.onRemoved.addListener(onPermissionsRemoved);
+  // A revoke outside the panel (about:addons): detach and untick live.
+  browser.permissions.onRemoved.addListener((perms) => {
+    void autoSync.permissionsRemoved(perms);
+  });
   // The toggle flipped in another window's panel: follow suit here.
   browser.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local' || !(AUTO_SYNC_STORAGE_KEY in changes)) return;
-    void reconcileAutoSync();
+    void autoSync.reconcile();
   });
-}
-
-async function reconcileAutoSync(): Promise<void> {
-  // The toggle is "on" only if storage says so AND the tabs permission
-  // is currently granted (the user can revoke externally via
-  // about:addons or chrome://extensions). `tabs` is an optional
-  // (runtime opt-in) permission in both manifests, so this flow is
-  // engine-agnostic.
-  const [storedOn, hasTabs] = await Promise.all([
-    getAutoSync(),
-    browser.permissions.contains({ permissions: ['tabs'] }),
-  ]);
-  // A click in this panel owns the state until its prompt settles.
-  if (toggleInFlight) return;
-  applyAutoSync(storedOn && hasTabs);
-  if (storedOn && !hasTabs) {
-    // Storage said on but permission was revoked externally. Reset.
-    await setAutoSync(false);
-  }
-}
-
-function onPermissionsRemoved(perms: browser.permissions.Permissions): void {
-  void handlePermissionsRemoved(perms);
-}
-
-async function handlePermissionsRemoved(
-  perms: browser.permissions.Permissions,
-): Promise<void> {
-  if (!perms.permissions?.includes('tabs')) return;
-  // Detach before any await so no tab event slips in after the revoke.
-  applyAutoSync(false);
-  await setAutoSync(false);
-  showAutoSyncStatus(null);
-}
-
-let toggleInFlight = false;
-
-async function handleToggleChange(desired: boolean): Promise<void> {
-  // Guard against rapid double-clicks racing the permissions.request
-  // prompt. Without this, a second click while the first await is
-  // pending interleaves the two decisions and the final visible state
-  // can contradict what the user last clicked.
-  if (toggleInFlight) return;
-  toggleInFlight = true;
-  autoSyncToggle.disabled = true;
-  // Capture before any awaits — currentAutoSyncEnabled is module-level
-  // and can be flipped by onPermissionsRemoved between calls.
-  const wasEnabled = currentAutoSyncEnabled;
-  try {
-    let grantOutcome: 'granted' | 'denied' | 'n/a' = 'n/a';
-    if (desired && !wasEnabled) {
-      // CRITICAL: permissions.request must be the first async call
-      // after the user's click. Any await before this consumes the
-      // user-activation token and Firefox blocks the prompt.
-      try {
-        const granted = await browser.permissions.request({
-          permissions: ['tabs'],
-        });
-        grantOutcome = granted ? 'granted' : 'denied';
-      } catch {
-        grantOutcome = 'denied';
-      }
-    }
-
-    const decision = decideToggle({
-      desired,
-      currentlyEnabled: wasEnabled,
-      grantOutcome,
-    });
-
-    // Visual checkbox state always follows the decision — important
-    // when the user denied the prompt and we need to revert the tick.
-    autoSyncToggle.checked = decision.nextEnabled;
-    // Detach first thing on the way off, so no tab event is resolved
-    // while the storage write and permission removal are pending.
-    if (decision.detachListeners) applyAutoSync(false);
-
-    if (decision.persist) {
-      await setAutoSync(decision.nextEnabled);
-      currentAutoSyncEnabled = decision.nextEnabled;
-    }
-    if (decision.attachListeners) applyAutoSync(true);
-
-    if (decision.removePermission) {
-      try {
-        await browser.permissions.remove({ permissions: ['tabs'] });
-      } catch {
-        // Best-effort: any failure here leaves the permission granted
-        // but storage already says off. User can revoke manually from
-        // about:addons if the inconsistency matters.
-      }
-    }
-
-    showAutoSyncStatus(decision.uiMessage);
-  } finally {
-    autoSyncToggle.disabled = false;
-    toggleInFlight = false;
-  }
 }
 
 function showAutoSyncConsent(show: boolean): void {

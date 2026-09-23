@@ -26,9 +26,13 @@ focus events; they all need `tabs` or content scripts.
 
 The sidebar exposes an "Auto-oppdater ved fane-bytte" toggle that
 requests `tabs` at runtime. Switching it on first shows an inline
-disclosure (what is sent, to whom, only while the panel is open); its
-«Slå på» button is the consent and the gesture that calls
-`permissions.request`. With it on, the panel page registers
+disclosure: the page you are on is looked up every time you switch
+tabs or open a new page, as long as a brreg-snap panel is open in any
+window; the domain goes to data.brreg.no, nothing to the developer.
+Its «Slå på» button is the consent and the gesture that calls
+`permissions.request`. The flow lives in `src/lib/auto-sync-toggle.ts`
+(tested without a DOM); `details.ts` only wires its events. With it
+on, the panel page registers
 `tabs.onActivated`/`onUpdated` for its own window and resolves the
 new tab itself — see sidebar-sync.md § panel-hosted-auto-sync. Nothing
 outside an open panel listens to tabs, so the grant never causes a
@@ -60,8 +64,10 @@ have no wake-up problem to begin with.
 
 Firefox consumes the user-activation token on the first await in a
 click handler. If `permissions.request` lands *after* that first
-await, the browser blocks the prompt with "Firefox blokkerte
-forespørselen".
+await, Firefox rejects it without a prompt («permissions.request may
+only be called from a user input handler»), and the panel can only
+report «Tilgang til fanene ble ikke gitt». `tests/auto-sync-toggle.test.ts`
+pins that «Slå på» reaches the request synchronously.
 
 Same constraint for `sidebarAction.open` from the context menu.
 That's why `background.ts` menu handler does a sync `deriveSync`
