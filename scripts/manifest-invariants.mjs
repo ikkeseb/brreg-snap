@@ -77,6 +77,71 @@ export const DATA_COLLECTION = {
   chrome: undefined,
 };
 
+const ICONS_TOOLBAR = {
+  16: 'icons/icon-16.png',
+  32: 'icons/icon-32.png',
+  48: 'icons/icon-48.png',
+};
+
+/**
+ * The structural blocks, exact per target: what makes the package start
+ * and which local page each surface opens. Chrome's worker must be
+ * `type: 'module'` (the built worker has imports; the default is a
+ * classic script), and no surface may point at a URL.
+ * @type {Record<Target, Record<string, unknown>>}
+ */
+export const STRUCTURE = {
+  firefox: {
+    manifest_version: 3,
+    background: { scripts: ['background/background.js'], type: 'module' },
+    action: {
+      default_title: 'brreg-snap',
+      default_popup: 'popup/popup.html',
+      default_icon: ICONS_TOOLBAR,
+    },
+    sidebar_action: {
+      default_title: 'brreg-snap',
+      default_panel: 'details/details.html',
+      default_icon: { 16: 'icons/icon-16.png', 32: 'icons/icon-32.png' },
+      open_at_install: false,
+    },
+    icons: { ...ICONS_TOOLBAR, 128: 'icons/icon-128.png' },
+  },
+  chrome: {
+    manifest_version: 3,
+    background: { service_worker: 'background/background.js', type: 'module' },
+    action: {
+      default_title: 'brreg-snap',
+      default_popup: 'popup/popup.html',
+      default_icon: ICONS_TOOLBAR,
+    },
+    side_panel: { default_path: 'details/details.html' },
+    icons: { ...ICONS_TOOLBAR, 128: 'icons/icon-128.png' },
+  },
+};
+
+/**
+ * Every package file the manifest points at, deduplicated, in manifest
+ * order. verify:dist checks each exists in dist-<target>/.
+ * @param {Record<string, any>} manifest
+ * @returns {string[]}
+ */
+export function referencedFiles(manifest) {
+  const bg = manifest.background ?? {};
+  const panel = manifest.sidebar_action ?? {};
+  const files = [
+    ...(bg.scripts ?? []),
+    bg.service_worker,
+    manifest.action?.default_popup,
+    ...Object.values(manifest.action?.default_icon ?? {}),
+    panel.default_panel,
+    manifest.side_panel?.default_path,
+    ...Object.values(panel.default_icon ?? {}),
+    ...Object.values(manifest.icons ?? {}),
+  ];
+  return [...new Set(files.filter((f) => typeof f === 'string'))];
+}
+
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const show = (v) => (v === undefined ? 'undefined' : JSON.stringify(v));
 
@@ -102,6 +167,7 @@ export function check(manifest, target, pkg) {
     if (!(key in manifest)) out.push(`top-level key "${key}" is missing`);
   }
 
+  for (const [key, want] of Object.entries(STRUCTURE[target])) exact(key, want);
   exact('permissions', PERMISSIONS[target]);
   exact('optional_permissions', OPTIONAL_PERMISSIONS);
   exact('host_permissions', HOST_PERMISSIONS);

@@ -6,6 +6,7 @@ import {
   CSP as EXPECTED_CSP,
   DATA_COLLECTION,
   PERMISSIONS as EXPECTED_PERMISSIONS,
+  referencedFiles,
 } from '../scripts/manifest-invariants.mjs';
 
 // The security model IS the product differentiator (CLAUDE.md
@@ -138,5 +139,109 @@ describe('manifest invariants catch escape hatches', () => {
     expect(violations).toContain('top-level key "browser_specific_settings" is not allowed');
     expect(violations.some((v) => v.startsWith('data_collection_permissions'))).toBe(true);
     expect(violations.some((v) => v.startsWith('version'))).toBe(true);
+  });
+});
+
+// Structure: a manifest can keep every permission right and still not
+// start (Chrome's worker defaults to a classic script, which can't run
+// the built ES-module worker) or point a surface at a remote page.
+describe('manifest invariants pin the structural blocks', () => {
+  type Mutable = Record<string, Record<string, unknown>>;
+  const clone = (target: 'firefox' | 'chrome'): Mutable =>
+    structuredClone(manifests[target]) as unknown as Mutable;
+  const violations = (target: 'firefox' | 'chrome', mutate: (m: Mutable) => void): string[] => {
+    const m = clone(target);
+    mutate(m);
+    return check(m, target, pkg);
+  };
+
+  interface Mutation {
+    target: 'firefox' | 'chrome';
+    key: string;
+    mutate: (m: Mutable) => void;
+  }
+  const mutations: Record<string, Mutation> = {
+    'chrome: background.type dropped': {
+      target: 'chrome',
+      key: 'background',
+      mutate: (m) => void delete m.background!.type,
+    },
+    'chrome: service_worker points at a missing file': {
+      target: 'chrome',
+      key: 'background',
+      mutate: (m) => void (m.background!.service_worker = 'background/missing.js'),
+    },
+    'chrome: service_worker is a URL': {
+      target: 'chrome',
+      key: 'background',
+      mutate: (m) => void (m.background!.service_worker = 'https://evil.example/sw.js'),
+    },
+    'chrome: side_panel.default_path is a URL': {
+      target: 'chrome',
+      key: 'side_panel',
+      mutate: (m) => void (m.side_panel!.default_path = 'https://evil.example/panel.html'),
+    },
+    'chrome: manifest_version 2': {
+      target: 'chrome',
+      key: 'manifest_version',
+      mutate: (m) => void ((m as Record<string, unknown>).manifest_version = 2),
+    },
+    'firefox: manifest_version 2': {
+      target: 'firefox',
+      key: 'manifest_version',
+      mutate: (m) => void ((m as Record<string, unknown>).manifest_version = 2),
+    },
+    'firefox: background.type dropped': {
+      target: 'firefox',
+      key: 'background',
+      mutate: (m) => void delete m.background!.type,
+    },
+    'firefox: background.scripts is a URL': {
+      target: 'firefox',
+      key: 'background',
+      mutate: (m) => void (m.background!.scripts = ['https://evil.example/bg.js']),
+    },
+    'firefox: sidebar_action.default_panel is a URL': {
+      target: 'firefox',
+      key: 'sidebar_action',
+      mutate: (m) => void (m.sidebar_action!.default_panel = 'https://evil.example/'),
+    },
+    'chrome: action.default_popup moved': {
+      target: 'chrome',
+      key: 'action',
+      mutate: (m) => void (m.action!.default_popup = 'popup/other.html'),
+    },
+    'firefox: an extra icon': {
+      target: 'firefox',
+      key: 'icons',
+      mutate: (m) => void (m.icons!['256'] = 'icons/icon-256.png'),
+    },
+  };
+
+  it.each(Object.entries(mutations))('rejects %s', (_name, { target, key, mutate }) => {
+    const v = violations(target, mutate);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatch(new RegExp(`^${key} must be exactly`));
+  });
+
+  it('lists every package file the manifest points at (verify:dist checks they exist)', () => {
+    expect(referencedFiles(manifests.chrome)).toEqual([
+      'background/background.js',
+      'popup/popup.html',
+      'icons/icon-16.png',
+      'icons/icon-32.png',
+      'icons/icon-48.png',
+      'details/details.html',
+      'icons/icon-128.png',
+    ]);
+    expect(referencedFiles(manifests.firefox)).toEqual([
+      'background/background.js',
+      'popup/popup.html',
+      'icons/icon-16.png',
+      'icons/icon-32.png',
+      'icons/icon-48.png',
+      'details/details.html',
+      'icons/icon-128.png',
+    ]);
   });
 });
