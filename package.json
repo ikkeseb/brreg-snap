@@ -29,12 +29,12 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/firefox-webext-browser": "^143.0.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
+    "eslint": "^10.11.0",
     "pngjs": "^7.0.0",
-    "typescript": "^5.4.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
     "vite": "^5.2.0",
     "vitest": "^1.5.0",
     "web-ext": "^7.11.0"
