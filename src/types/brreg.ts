@@ -108,7 +108,7 @@ export interface Underenhet {
 
 
 export interface Regnskap {
-  id?: { orgnr: string };
+  id?: number;
   journalnr?: string;
   regnskapsperiode?: { fraDato?: string; tilDato?: string };
   regnkapsprinsipper?: { smaaForetak?: boolean; regnskapsregler?: string };

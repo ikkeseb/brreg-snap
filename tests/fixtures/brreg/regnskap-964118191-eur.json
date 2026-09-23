@@ -1,0 +1,79 @@
+[
+  {
+    "id": 7141385,
+    "journalnr": "2026670877",
+    "regnskapstype": "SELSKAP",
+    "virksomhet": {
+      "organisasjonsnummer": "964118191",
+      "organisasjonsform": "ASA",
+      "morselskap": true
+    },
+    "regnskapsperiode": {
+      "fraDato": "2025-01-01",
+      "tilDato": "2025-12-31"
+    },
+    "valuta": "EUR",
+    "avviklingsregnskap": false,
+    "oppstillingsplan": "store",
+    "revisjon": {
+      "ikkeRevidertAarsregnskap": false,
+      "fravalgRevisjon": false
+    },
+    "regnkapsprinsipper": {
+      "smaaForetak": false,
+      "regnskapsregler": "regnskapslovenAlminneligRegler"
+    },
+    "egenkapitalGjeld": {
+      "sumEgenkapitalGjeld": 7081000000,
+      "egenkapital": {
+        "sumEgenkapital": 2856000000,
+        "opptjentEgenkapital": {
+          "sumOpptjentEgenkapital": 986000000
+        },
+        "innskuttEgenkapital": {
+          "sumInnskuttEgenkaptial": 1870000000
+        }
+      },
+      "gjeldOversikt": {
+        "sumGjeld": 4225000000,
+        "kortsiktigGjeld": {
+          "sumKortsiktigGjeld": 1850000000
+        },
+        "langsiktigGjeld": {
+          "sumLangsiktigGjeld": 2375000000
+        }
+      }
+    },
+    "eiendeler": {
+      "sumEiendeler": 7081000000,
+      "omloepsmidler": {
+        "sumOmloepsmidler": 2272000000
+      },
+      "anleggsmidler": {
+        "sumAnleggsmidler": 4809000000
+      }
+    },
+    "resultatregnskapResultat": {
+      "ordinaertResultatFoerSkattekostnad": 64000000,
+      "aarsresultat": 64000000,
+      "finansresultat": {
+        "nettoFinans": -178000000,
+        "finansinntekt": {
+          "sumFinansinntekter": -42000000
+        },
+        "finanskostnad": {
+          "sumFinanskostnad": 136000000
+        }
+      },
+      "driftsresultat": {
+        "driftsresultat": 242000000,
+        "driftsinntekter": {
+          "sumDriftsinntekter": 1887000000
+        },
+        "driftskostnad": {
+          "sumDriftskostnad": 1645000000
+        }
+      }
+    }
+  }
+]

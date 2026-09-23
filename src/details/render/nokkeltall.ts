@@ -1,4 +1,8 @@
-import { formatNok, formatNokCompact, formatPercent } from '../../lib/format.js';
+import {
+  formatMoney,
+  formatMoneyCompact,
+  formatPercent,
+} from '../../lib/format.js';
 import {
   egenkapitalandelTone,
   isConsecutiveYear,
@@ -70,20 +74,21 @@ export function renderNokkeltall(
     nokkeltallBody.appendChild(header);
 
     const dl = makeGrid();
-    addRow(dl, 'Driftsinntekter', formatNok(latest.driftsinntekter));
-    addRow(dl, 'Driftsresultat', formatNok(latest.driftsresultat), {
+    const money = (v: number | undefined) => formatMoney(v, latest.valuta);
+    addRow(dl, 'Driftsinntekter', money(latest.driftsinntekter));
+    addRow(dl, 'Driftsresultat', money(latest.driftsresultat), {
       sign: latest.driftsresultat,
     });
-    addRow(dl, 'Resultat før skatt', formatNok(latest.resultatFoerSkatt), {
+    addRow(dl, 'Resultat før skatt', money(latest.resultatFoerSkatt), {
       sign: latest.resultatFoerSkatt,
     });
-    addRow(dl, 'Årsresultat', formatNok(latest.aarsresultat), {
+    addRow(dl, 'Årsresultat', money(latest.aarsresultat), {
       sign: latest.aarsresultat,
     });
-    addRow(dl, 'Egenkapital', formatNok(latest.egenkapital), {
+    addRow(dl, 'Egenkapital', money(latest.egenkapital), {
       sign: latest.egenkapital,
     });
-    addRow(dl, 'Gjeld', formatNok(latest.gjeld));
+    addRow(dl, 'Gjeld', money(latest.gjeld));
     addRow(dl, 'Egenkapitalandel', formatPercent(latest.egenkapitalandel), {
       sign: latest.egenkapitalandel,
       tone: egenkapitalandelTone(latest.egenkapitalandel),
@@ -107,13 +112,14 @@ function renderBalance(latest: KeyFigures): HTMLElement {
   wrap.appendChild(header);
 
   const dl = makeGrid();
-  addRow(dl, 'Resultat før skatt', formatNok(latest.resultatFoerSkatt), {
+  const money = (v: number | undefined) => formatMoney(v, latest.valuta);
+  addRow(dl, 'Resultat før skatt', money(latest.resultatFoerSkatt), {
     sign: latest.resultatFoerSkatt,
   });
-  addRow(dl, 'Egenkapital', formatNok(latest.egenkapital), {
+  addRow(dl, 'Egenkapital', money(latest.egenkapital), {
     sign: latest.egenkapital,
   });
-  addRow(dl, 'Gjeld', formatNok(latest.gjeld));
+  addRow(dl, 'Gjeld', money(latest.gjeld));
   addRow(dl, 'Egenkapitalandel', formatPercent(latest.egenkapitalandel), {
     sign: latest.egenkapitalandel,
     tone: egenkapitalandelTone(latest.egenkapitalandel),
@@ -158,7 +164,7 @@ function renderTrendTable(figures: KeyFigures[]): HTMLElement {
       const td = document.createElement('td');
       const figure = document.createElement('span');
       figure.className = 'trend-figure';
-      figure.textContent = formatNokCompact(value) ?? '—';
+      figure.textContent = formatMoneyCompact(value, f.valuta) ?? '—';
       td.appendChild(figure);
       if (col.signed && typeof value === 'number' && value < 0) {
         td.dataset.sign = 'neg';

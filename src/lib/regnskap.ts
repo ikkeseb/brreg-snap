@@ -8,6 +8,10 @@ export interface KeyFigures {
   // YYYY of the period end, or '' when brreg omitted tilDato.
   year: string;
   tilDato: string;
+  // ISO currency of every money figure below. Mostly NOK, but filers
+  // reporting in a functional currency use USD/EUR (Equinor, Mowi).
+  // Undefined when brreg omits it; format as NOK then.
+  valuta?: string;
   driftsinntekter?: number;
   driftsresultat?: number;
   resultatFoerSkatt?: number;
@@ -121,6 +125,7 @@ export function keyFigures(r: Regnskap): KeyFigures {
   return {
     year: tilDato.slice(0, 4),
     tilDato,
+    valuta: r.valuta,
     driftsinntekter: res?.driftsresultat?.driftsinntekter?.sumDriftsinntekter,
     driftsresultat: res?.driftsresultat?.driftsresultat,
     resultatFoerSkatt: res?.ordinaertResultatFoerSkattekostnad,

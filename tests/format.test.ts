@@ -3,12 +3,18 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Adresse, Kode } from '../src/types/brreg.js';
 import {
   formatAddress,
+  formatDateNo,
+  formatMoney,
+  formatMoneyCompact,
   formatNaering,
-  formatNok,
-  formatNokCompact,
   formatPercent,
   formatRelativeTime,
+  parseIsoDate,
 } from '../src/lib/format.js';
+import { keyFigures } from '../src/lib/regnskap.js';
+import type { Regnskap } from '../src/types/brreg.js';
+import equinorRegnskap from './fixtures/brreg/regnskap-923609016-usd.json';
+import mowiRegnskap from './fixtures/brreg/regnskap-964118191-eur.json';
 
 // Characterization tests — these lock in the CURRENT behavior of the
 // pure formatting helpers ahead of the Chrome port. They assert the
@@ -18,86 +24,96 @@ import {
 // from the source template literal.
 const NBSP = ' ';
 
-describe('formatNok', () => {
+describe('formatMoney (NOK / no valuta)', () => {
   describe('nullish / NaN inputs return undefined', () => {
     it('undefined', () => {
-      expect(formatNok(undefined)).toBeUndefined();
+      expect(formatMoney(undefined)).toBeUndefined();
     });
 
     it('null (cast through — runtime guard catches it)', () => {
-      expect(formatNok(null as unknown as number)).toBeUndefined();
+      expect(formatMoney(null as unknown as number)).toBeUndefined();
     });
 
     it('NaN', () => {
-      expect(formatNok(Number.NaN)).toBeUndefined();
+      expect(formatMoney(Number.NaN)).toBeUndefined();
     });
   });
 
   describe('mrd (>= 1e9) bucket, 1 fraction digit', () => {
     it('37 877 000 000 -> "37,9 mrd kr" (rounds half-up at one decimal)', () => {
-      expect(formatNok(37_877_000_000)).toBe('37,9 mrd kr');
+      expect(formatMoney(37_877_000_000)).toBe('37,9 mrd kr');
     });
 
     it('exactly 1e9 -> "1,0 mrd kr" (lower boundary, inclusive)', () => {
-      expect(formatNok(1e9)).toBe('1,0 mrd kr');
+      expect(formatMoney(1e9)).toBe('1,0 mrd kr');
     });
   });
 
   describe('mill (>= 1e6, < 1e9) bucket, 1 fraction digit', () => {
     it('5 500 000 -> "5,5 mill kr"', () => {
-      expect(formatNok(5_500_000)).toBe('5,5 mill kr');
+      expect(formatMoney(5_500_000)).toBe('5,5 mill kr');
     });
 
     it('exactly 1e6 -> "1,0 mill kr" (lower boundary, inclusive)', () => {
-      expect(formatNok(1e6)).toBe('1,0 mill kr');
+      expect(formatMoney(1e6)).toBe('1,0 mill kr');
     });
 
-    it('999 999 999 -> "1' + NBSP + '000,0 mill kr" (below 1e9, rounds up across grouping)', () => {
-      // Surprising boundary: just under the mrd threshold so it stays in
-      // the mill bucket, yet rounds to 1000,0 with an NBSP group sep.
-      expect(formatNok(999_999_999)).toBe(`1${NBSP}000,0 mill kr`);
+    it('999 999 999 -> "1,0 mrd kr" (rounding carries into the next unit)', () => {
+      // Just under the mrd threshold, but it rounds to 1000,0 mill —
+      // which must be shown as the next unit, not "1 000,0 mill kr".
+      expect(formatMoney(999_999_999)).toBe('1,0 mrd kr');
+      expect(formatMoney(999_950_000)).toBe('1,0 mrd kr');
+    });
+
+    it('999 940 000 -> "999,9 mill kr" (does not carry when it rounds down)', () => {
+      expect(formatMoney(999_940_000)).toBe(`999,9 mill kr`);
     });
   });
 
   describe('tusen (>= 1e3, < 1e6) bucket, 0 fraction digits', () => {
     it('12 345 -> "12 tusen kr" (integer division display, truncates via rounding to 12)', () => {
-      expect(formatNok(12_345)).toBe('12 tusen kr');
+      expect(formatMoney(12_345)).toBe('12 tusen kr');
     });
 
     it('exactly 1e3 -> "1 tusen kr" (lower boundary, inclusive)', () => {
-      expect(formatNok(1e3)).toBe('1 tusen kr');
+      expect(formatMoney(1e3)).toBe('1 tusen kr');
     });
 
-    it('999 999 -> "1' + NBSP + '000 tusen kr" (below 1e6, rounds up across grouping)', () => {
-      expect(formatNok(999_999)).toBe(`1${NBSP}000 tusen kr`);
+    it('999 500 -> "1,0 mill kr" (rounding carries into the next unit)', () => {
+      expect(formatMoney(999_500)).toBe('1,0 mill kr');
+      expect(formatMoney(999_999)).toBe('1,0 mill kr');
+    });
+
+    it('999 499 -> "999 tusen kr" (does not carry when it rounds down)', () => {
+      expect(formatMoney(999_499)).toBe('999 tusen kr');
     });
   });
 
   describe('plain kr (< 1e3) bucket, 0 fraction digits', () => {
     it('999 -> "999 kr" (upper edge of plain bucket)', () => {
-      expect(formatNok(999)).toBe('999 kr');
+      expect(formatMoney(999)).toBe('999 kr');
     });
 
     it('500 -> "500 kr"', () => {
-      expect(formatNok(500)).toBe('500 kr');
+      expect(formatMoney(500)).toBe('500 kr');
     });
 
     it('0 -> "0 kr" (zero is NOT undefined; falls through to plain bucket)', () => {
-      expect(formatNok(0)).toBe('0 kr');
+      expect(formatMoney(0)).toBe('0 kr');
     });
   });
 
   describe('negative values carry a leading "-" via the sign prefix', () => {
     it('-250 -> "-250 kr"', () => {
-      expect(formatNok(-250)).toBe('-250 kr');
+      expect(formatMoney(-250)).toBe('-250 kr');
     });
 
     it('-1e9 -> "-1,0 mrd kr"', () => {
-      expect(formatNok(-1e9)).toBe('-1,0 mrd kr');
+      expect(formatMoney(-1e9)).toBe('-1,0 mrd kr');
     });
 
     it('-5 500 000 -> "-5,5 mill kr"', () => {
-      expect(formatNok(-5_500_000)).toBe('-5,5 mill kr');
+      expect(formatMoney(-5_500_000)).toBe('-5,5 mill kr');
     });
   });
 });
@@ -279,20 +295,78 @@ describe('formatNaering', () => {
   });
 });
 
-describe('formatNokCompact', () => {
+const EQUINOR_USD: Regnskap[] = equinorRegnskap;
+const MOWI_EUR: Regnskap[] = mowiRegnskap;
+
+describe('formatMoney with a foreign valuta', () => {
+  // Live shapes: Equinor files in USD, Mowi in EUR. Printing "kr" here
+  // understated Equinor's revenue roughly tenfold.
+  it('labels Equinor (USD) figures with the currency code, not kr', () => {
+    const f = keyFigures(EQUINOR_USD[0]!);
+    expect(f.valuta).toBe('USD');
+    expect(formatMoney(f.driftsinntekter, f.valuta)).toBe('68,0 mrd USD');
+    expect(formatMoney(f.aarsresultat, f.valuta)).toBe('5,7 mrd USD');
+  });
+
+  it('labels Mowi (EUR) figures with EUR', () => {
+    const f = keyFigures(MOWI_EUR[0]!);
+    expect(f.valuta).toBe('EUR');
+    expect(formatMoney(f.driftsinntekter, f.valuta)).toBe('1,9 mrd EUR');
+  });
+
+  it('prints kr for NOK in any case, and for a missing valuta', () => {
+    expect(formatMoney(5_500_000, 'NOK')).toBe('5,5 mill kr');
+    expect(formatMoney(5_500_000, 'nok')).toBe('5,5 mill kr');
+    expect(formatMoney(5_500_000, undefined)).toBe('5,5 mill kr');
+  });
+
+  it('keeps the sign and small amounts', () => {
+    expect(formatMoney(-250, 'EUR')).toBe('-250 EUR');
+  });
+});
+
+describe('formatMoneyCompact', () => {
   it('drops the " kr" suffix but keeps the magnitude word', () => {
-    expect(formatNokCompact(37_877_000_000)).toBe('37,9 mrd');
-    expect(formatNokCompact(5_200_000)).toBe('5,2 mill');
-    expect(formatNokCompact(850_000)).toBe('850 tusen');
+    expect(formatMoneyCompact(37_877_000_000)).toBe('37,9 mrd');
+    expect(formatMoneyCompact(5_200_000, 'NOK')).toBe('5,2 mill');
+    expect(formatMoneyCompact(850_000)).toBe('850 tusen');
+  });
+
+  it('keeps a foreign currency code — dropping it would read as kroner', () => {
+    expect(formatMoneyCompact(67_956_000_000, 'USD')).toBe('68,0 mrd USD');
   });
 
   it('keeps the sign on losses', () => {
-    expect(formatNokCompact(-1_200_000_000)).toBe('-1,2 mrd');
+    expect(formatMoneyCompact(-1_200_000_000)).toBe('-1,2 mrd');
   });
 
-  it('returns undefined for nullish / NaN (passthrough from formatNok)', () => {
-    expect(formatNokCompact(undefined)).toBeUndefined();
-    expect(formatNokCompact(Number.NaN)).toBeUndefined();
+  it('returns undefined for nullish / NaN', () => {
+    expect(formatMoneyCompact(undefined)).toBeUndefined();
+    expect(formatMoneyCompact(Number.NaN, 'USD')).toBeUndefined();
+  });
+});
+
+describe('parseIsoDate / formatDateNo', () => {
+  // A date-only string must be the same calendar day in every time
+  // zone. new Date('2002-09-12') is UTC midnight — the 11th west of UTC.
+  // (Vitest workers can't switch TZ at runtime, so this pins the
+  // local-midnight contract rather than simulating New York.)
+  it('reads a date-only string as local midnight', () => {
+    expect(parseIsoDate('2002-09-12')).toEqual(new Date(2002, 8, 12));
+    expect(formatDateNo('2002-09-12')).toBe('12. sep. 2002');
+  });
+
+  it('rejects impossible dates instead of rolling them over', () => {
+    expect(parseIsoDate('2002-13-45')).toBeUndefined();
+    expect(parseIsoDate('2026-02-30')).toBeUndefined();
+    expect(formatDateNo('not-a-date')).toBeUndefined();
+    expect(formatDateNo(undefined)).toBeUndefined();
+  });
+
+  it('still parses full timestamps', () => {
+    expect(parseIsoDate('2026-09-23T12:00:00Z')?.getTime()).toBe(
+      Date.UTC(2026, 8, 23, 12),
+    );
   });
 });
 

@@ -14,8 +14,8 @@ export function formatNaering(kode: Kode | undefined): string | undefined {
 // Whole-percent string in nb-NO with a non-breaking space before the
 // sign ("42 %", "-25 %"). Returns undefined for nullish/NaN so addRow
 // skips it. Builds the sign with an ASCII '-' (same convention as
-// formatNok) rather than letting Intl emit a U+2212 minus, so the kr
-// and % figures share the same minus glyph in the UI.
+// formatMoney) rather than letting Intl emit a U+2212 minus, so the
+// money and % figures share the same minus glyph in the UI.
 export function formatPercent(value: number | undefined): string | undefined {
   if (value === undefined || value === null || Number.isNaN(value)) {
     return undefined;
@@ -35,42 +35,97 @@ export function formatAddress(addr: Adresse | undefined): string | undefined {
   return lines.length > 0 ? lines.join(', ') : undefined;
 }
 
-// Format an NOK amount as a compact human-friendly string. Brreg
-// reports figures in plain kroner, so 37_877_000_000 → "37,9 mrd kr".
-// Picks the largest unit that keeps the integer portion under 1000
-// to avoid showing "37 877 mill kr" which is wider and harder to scan.
-export function formatNok(value: number | undefined): string | undefined {
+// Magnitude units, largest first. Two tiers get one decimal ("37,9
+// mrd"); tusen and plain amounts are whole numbers.
+const MONEY_UNITS = [
+  { size: 1e9, word: ' mrd', digits: 1 },
+  { size: 1e6, word: ' mill', digits: 1 },
+  { size: 1e3, word: ' tusen', digits: 0 },
+  { size: 1, word: '', digits: 0 },
+] as const;
+
+// "37,9 mrd" / "850 tusen" / "500": the number and magnitude word, no
+// currency. Picks the largest unit that keeps the integer part under
+// 1000 AFTER rounding — 999 500 must read "1,0 mill", not "1 000 tusen".
+function formatMagnitude(value: number | undefined): string | undefined {
   if (value === undefined || value === null || Number.isNaN(value)) return undefined;
   const abs = Math.abs(value);
   const sign = value < 0 ? '-' : '';
-  const fmt = (n: number, digits: number): string =>
-    n.toLocaleString('nb-NO', {
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits,
-    });
-  if (abs >= 1e9) return `${sign}${fmt(abs / 1e9, 1)} mrd kr`;
-  if (abs >= 1e6) return `${sign}${fmt(abs / 1e6, 1)} mill kr`;
-  if (abs >= 1e3) return `${sign}${fmt(abs / 1e3, 0)} tusen kr`;
-  return `${sign}${fmt(abs, 0)} kr`;
+  let i = MONEY_UNITS.findIndex((u) => abs >= u.size);
+  if (i === -1) i = MONEY_UNITS.length - 1;
+  // toFixed rounds half-up on the exact binary value, like Intl's
+  // default, so this predicts the digits Intl is about to print.
+  while (i > 0) {
+    const u = MONEY_UNITS[i]!;
+    if (Number((abs / u.size).toFixed(u.digits)) < 1000) break;
+    i--;
+  }
+  const unit = MONEY_UNITS[i]!;
+  const text = (abs / unit.size).toLocaleString('nb-NO', {
+    minimumFractionDigits: unit.digits,
+    maximumFractionDigits: unit.digits,
+  });
+  return `${sign}${text}${unit.word}`;
 }
 
-// Same magnitude formatting as formatNok but without the " kr" suffix.
-// Used in the dense multi-year trend table, where every cell is monetary
-// (and a "kr"-labelled balance block sits right below it): repeating
-// "kr" 9× both adds noise and makes "63,4 mrd kr" wrap to two lines in a
-// narrow side panel. The "mrd"/"mill"/"tusen" magnitude word stays, so
-// the figures remain unambiguous.
-export function formatNokCompact(value: number | undefined): string | undefined {
-  return formatNok(value)?.replace(/ kr$/, '');
+// A regnskap's figures are in its `valuta`: NOK for most filers, but
+// companies reporting in a functional currency file in USD or EUR
+// (Equinor, Aker BP, Mowi). "kr" is right only for NOK; anything else
+// gets its ISO code so 67 956 000 000 USD never reads as kroner.
+function isNok(valuta: string | undefined): boolean {
+  return !valuta || valuta.toUpperCase() === 'NOK';
+}
+
+// Compact money string: 37_877_000_000 → "37,9 mrd kr", or with a
+// foreign valuta "68,0 mrd USD". Undefined for nullish/NaN so addRow
+// skips it.
+export function formatMoney(
+  value: number | undefined,
+  valuta?: string,
+): string | undefined {
+  const amount = formatMagnitude(value);
+  if (amount === undefined) return undefined;
+  return `${amount} ${isNok(valuta) ? 'kr' : valuta!.toUpperCase()}`;
+}
+
+// formatMoney without the " kr" suffix, for the dense multi-year trend
+// table, where every cell is monetary: repeating "kr" 9× adds noise and
+// makes "63,4 mrd kr" wrap in a narrow side panel. The magnitude word
+// stays, so figures remain unambiguous. A foreign currency keeps its
+// code — dropping it would silently relabel USD as kroner.
+export function formatMoneyCompact(
+  value: number | undefined,
+  valuta?: string,
+): string | undefined {
+  return isNok(valuta) ? formatMagnitude(value) : formatMoney(value, valuta);
+}
+
+// brreg dates are date-only ISO strings ("2002-09-12"). `new Date()`
+// reads those as UTC midnight, which is the previous calendar day
+// anywhere west of UTC — so date-only input becomes LOCAL midnight here.
+// Other ISO forms parse as before. Undefined for missing/invalid input.
+export function parseIsoDate(iso: string | undefined): Date | undefined {
+  if (!iso) return undefined;
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  if (!m) {
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime()) ? undefined : date;
+  }
+  const [y, mo, d] = [Number(m[1]), Number(m[2]) - 1, Number(m[3])];
+  const date = new Date(y, mo, d);
+  // new Date(y, m, d) rolls "2002-13-45" over instead of failing.
+  if (date.getFullYear() !== y || date.getMonth() !== mo || date.getDate() !== d) {
+    return undefined;
+  }
+  return date;
 }
 
 // ISO date ("2002-09-12") → "12. sep. 2002". brreg serialises dates as
 // ISO strings; raw ISO in the UI forces the reader to re-parse it.
 // Returns undefined for missing/unparsable input so addRow skips it.
 export function formatDateNo(iso: string | undefined): string | undefined {
-  if (!iso) return undefined;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return undefined;
+  const date = parseIsoDate(iso);
+  if (!date) return undefined;
   return date.toLocaleDateString('nb-NO', {
     day: 'numeric',
     month: 'short',
