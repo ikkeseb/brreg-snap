@@ -77,6 +77,16 @@ export const DATA_COLLECTION = {
   chrome: undefined,
 };
 
+/**
+ * What a package may contain at its root (scripts/verify-dist.mjs checks
+ * dist-*, scripts/verify-package.mjs the release zips). .map files sit
+ * inside these directories and are stripped at packaging.
+ */
+export const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'chunks', 'icons', 'assets'];
+
+/** Runtime code generation, forbidden by CLAUDE.md § Security constraints. */
+export const CODEGEN = [/(?<![\w$])eval\s*\(/, /(?<![\w$.])(?:new\s+)?Function\s*\(/];
+
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const show = (v) => (v === undefined ? 'undefined' : JSON.stringify(v));
 
