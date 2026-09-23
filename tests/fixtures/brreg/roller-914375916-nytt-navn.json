@@ -1,0 +1,187 @@
+{
+  "rollegrupper": [
+    {
+      "type": {
+        "kode": "STYR",
+        "beskrivelse": "Styre",
+        "_links": {
+          "self": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/roller/rollegruppetyper/STYR"
+          }
+        }
+      },
+      "sistEndret": "2026-09-01",
+      "roller": [
+        {
+          "type": {
+            "kode": "LEDE",
+            "beskrivelse": "Styrets leder",
+            "_links": {
+              "self": {
+                "href": "https://data.brreg.no/enhetsregisteret/api/roller/rolletyper/LEDE"
+              }
+            }
+          },
+          "person": {
+            "fodselsdato": "1970-01-01",
+            "navn": {
+              "fornavn": "Ola",
+              "etternavn": "Nordmann"
+            },
+            "erDoed": false
+          },
+          "avregistrert": false,
+          "rekkefolge": 0
+        },
+        {
+          "type": {
+            "kode": "MEDL",
+            "beskrivelse": "Styremedlem",
+            "_links": {
+              "self": {
+                "href": "https://data.brreg.no/enhetsregisteret/api/roller/rolletyper/MEDL"
+              }
+            }
+          },
+          "person": {
+            "fodselsdato": "1980-01-01",
+            "navn": {
+              "fornavn": "Kari",
+              "etternavn": "Nordmann"
+            },
+            "erDoed": false
+          },
+          "avregistrert": false,
+          "rekkefolge": 1
+        },
+        {
+          "type": {
+            "kode": "MEDL",
+            "beskrivelse": "Styremedlem",
+            "_links": {
+              "self": {
+                "href": "https://data.brreg.no/enhetsregisteret/api/roller/rolletyper/MEDL"
+              }
+            }
+          },
+          "person": {
+            "fodselsdato": "1975-01-01",
+            "navn": {
+              "fornavn": "Per",
+              "etternavn": "Eksempel"
+            },
+            "erDoed": false
+          },
+          "avregistrert": false,
+          "rekkefolge": 2
+        }
+      ]
+    },
+    {
+      "type": {
+        "kode": "REVI",
+        "beskrivelse": "Revisor",
+        "_links": {
+          "self": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/roller/rollegruppetyper/REVI"
+          }
+        }
+      },
+      "sistEndret": "2026-09-23",
+      "roller": [
+        {
+          "type": {
+            "kode": "REVI",
+            "beskrivelse": "Revisor",
+            "_links": {
+              "self": {
+                "href": "https://data.brreg.no/enhetsregisteret/api/roller/rolletyper/REVI"
+              }
+            }
+          },
+          "enhet": {
+            "organisasjonsnummer": "987009713",
+            "organisasjonsform": {
+              "kode": "AS",
+              "beskrivelse": "Aksjeselskap",
+              "_links": {
+                "self": {
+                  "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+                }
+              }
+            },
+            "navn": [
+              "PRICEWATERHOUSECOOPERS AS"
+            ],
+            "godkjenningsstatus": "Godkjent revisjonsforetak",
+            "erSlettet": false,
+            "_links": {
+              "self": {
+                "href": "https://data.brreg.no/enhetsregisteret/api/enheter/987009713"
+              }
+            }
+          },
+          "avregistrert": false,
+          "rekkefolge": 0
+        }
+      ]
+    },
+    {
+      "type": {
+        "kode": "REGN",
+        "beskrivelse": "Regnskapsfører",
+        "_links": {
+          "self": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/roller/rollegruppetyper/REGN"
+          }
+        }
+      },
+      "sistEndret": "2026-09-23",
+      "roller": [
+        {
+          "type": {
+            "kode": "REGN",
+            "beskrivelse": "Regnskapsfører",
+            "_links": {
+              "self": {
+                "href": "https://data.brreg.no/enhetsregisteret/api/roller/rolletyper/REGN"
+              }
+            }
+          },
+          "enhet": {
+            "organisasjonsnummer": "922633452",
+            "organisasjonsform": {
+              "kode": "AS",
+              "beskrivelse": "Aksjeselskap",
+              "_links": {
+                "self": {
+                  "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+                }
+              }
+            },
+            "navn": [
+              "AIDER AS"
+            ],
+            "godkjenningsstatus": "Godkjent regnskapsforetak",
+            "erSlettet": false,
+            "_links": {
+              "self": {
+                "href": "https://data.brreg.no/enhetsregisteret/api/enheter/922633452"
+              }
+            }
+          },
+          "avregistrert": false,
+          "rekkefolge": 0
+        }
+      ]
+    }
+  ],
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/914375916/roller"
+    },
+    "enhet": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/914375916"
+    }
+  }
+}

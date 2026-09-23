@@ -1,0 +1,157 @@
+{
+  "_embedded": {
+    "oppdaterteEnheter": [
+      {
+        "oppdateringsid": 25152016,
+        "dato": "2026-09-01T10:30:11.706Z",
+        "organisasjonsnummer": "914375916",
+        "endringstype": "Endring",
+        "endringer": [
+          {
+            "op": "add",
+            "path": "/postadresse",
+            "value": {
+              "land": "Norge",
+              "landkode": "NO",
+              "postnummer": "0201",
+              "poststed": "OSLO",
+              "adresse": [
+                "c/o Eksempel Eiendom AS",
+                "Postboks 1 Solli"
+              ],
+              "kommune": "OSLO",
+              "kommunenummer": "0301"
+            }
+          },
+          {
+            "op": "replace",
+            "path": "/forretningsadresse/postnummer",
+            "value": "0256"
+          },
+          {
+            "op": "replace",
+            "path": "/forretningsadresse/adresse/0",
+            "value": "Eksempelveien 2"
+          },
+          {
+            "op": "replace",
+            "path": "/vedtektsdato",
+            "value": "2026-07-01"
+          },
+          {
+            "op": "replace",
+            "path": "/navn",
+            "value": "TOLLBUGATA 17 OSLO AS"
+          },
+          {
+            "op": "replace",
+            "path": "/vedtektsfestetFormaal/0",
+            "value": "Å eie, drive utleie og utvikling av fast eiendom, og alt annet som"
+          },
+          {
+            "op": "replace",
+            "path": "/vedtektsfestetFormaal/1",
+            "value": "står i naturlig forbindelse med dette."
+          },
+          {
+            "op": "add",
+            "path": "/historiskeNavn/-",
+            "value": {
+              "navn": "OPULENS NÆRING 4 AS",
+              "fraDato": "2014-10-29 14:14:38",
+              "tilDato": "2026-09-01 12:29:08"
+            }
+          }
+        ],
+        "_links": {
+          "enhet": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/enheter/914375916"
+          }
+        }
+      },
+      {
+        "oppdateringsid": 25048345,
+        "dato": "2026-08-11T22:03:42.412Z",
+        "organisasjonsnummer": "914375916",
+        "endringstype": "Endring",
+        "endringer": [
+          {
+            "op": "remove",
+            "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
+          },
+          {
+            "op": "remove",
+            "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
+          },
+          {
+            "op": "replace",
+            "path": "/harRegistrertAntallAnsatte",
+            "value": false
+          }
+        ],
+        "_links": {
+          "enhet": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/enheter/914375916"
+          }
+        }
+      },
+      {
+        "oppdateringsid": 24659998,
+        "dato": "2026-06-18T18:00:15.546Z",
+        "organisasjonsnummer": "914375916",
+        "endringstype": "Endring",
+        "endringer": [
+          {
+            "op": "replace",
+            "path": "/sisteInnsendteAarsregnskap",
+            "value": "2025"
+          }
+        ],
+        "_links": {
+          "enhet": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/enheter/914375916"
+          }
+        }
+      },
+      {
+        "oppdateringsid": 24585313,
+        "dato": "2026-06-11T22:04:03.816Z",
+        "organisasjonsnummer": "914375916",
+        "endringstype": "Endring",
+        "endringer": [
+          {
+            "op": "add",
+            "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+            "value": "2026-06-11"
+          },
+          {
+            "op": "add",
+            "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+            "value": "2026-06-10"
+          },
+          {
+            "op": "replace",
+            "path": "/harRegistrertAntallAnsatte",
+            "value": true
+          }
+        ],
+        "_links": {
+          "enhet": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/enheter/914375916"
+          }
+        }
+      }
+    ]
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/oppdateringer/enheter?organisasjonsnummer=914375916&dato=2026-03-25T00:00:00.000Z&includeChanges=true&size=100&sort=id,DESC"
+    }
+  },
+  "page": {
+    "size": 100,
+    "totalElements": 4,
+    "totalPages": 1,
+    "number": 0
+  }
+}

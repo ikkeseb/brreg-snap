@@ -14,16 +14,41 @@ export interface Kode {
 }
 
 // A registry annotation (påtegning) on the entity, e.g. on its name or
-// business address. Typed for completeness; not rendered.
+// business address: «Foretaksregisteret har grunn til å anta at
+// forretningsadressen er feil. …». Quoted by src/lib/trust/merknader.ts.
 export interface Paategning {
   infotype?: string;
   tekst?: string;
   innfoertDato?: string;
 }
 
+// A former name. Both dates are local date-times with a space, not ISO
+// dates: "2026-09-01 12:29:08". Added by brreg 2026-06-16.
+export interface HistoriskNavn {
+  navn?: string;
+  fraDato?: string;
+  tilDato?: string;
+}
+
+// Share capital, as registered (brreg 2025-11-13).
+export interface Kapital {
+  belop?: number;
+  antallAksjer?: number;
+  // «Aksjekapital», …
+  type?: string;
+  bundet?: number;
+  valuta?: string;
+  innbetalt?: number;
+  fulltInnbetalt?: boolean;
+  innfortDato?: string;
+}
+
 export interface Enhet {
   organisasjonsnummer: string;
   navn: string;
+  // Former names, oldest first as brreg lists them (not guaranteed:
+  // read by date).
+  historiskeNavn?: HistoriskNavn[];
   organisasjonsform?: Kode;
   // 'Enhet', or 'SlettetEnhet' for the minimal body of a deleted entity.
   respons_klasse?: string;
@@ -61,6 +86,9 @@ export interface Enhet {
   underAvvikling?: boolean;
   underAvviklingDato?: string;
   underTvangsavviklingEllerTvangsopplosning?: boolean;
+  // Set (ISO date) while the company is under rekonstruksjonsforhandling.
+  // A date only: brreg has no boolean for this status.
+  underRekonstruksjonsforhandlingDato?: string;
   // Forced dissolution: brreg sets one ISO date per reason, so which
   // field is present says WHY (missing accounts, missing daglig leder…).
   tvangsopplostPgaManglendeRegnskapDato?: string;
@@ -72,6 +100,16 @@ export interface Enhet {
   vedtektsfestetFormaal?: string[];
   aktivitet?: string[];
   paategninger?: Paategning[];
+  // Date of the articles of association in force.
+  vedtektsdato?: string;
+  kapital?: Kapital;
+  // Part of a konsern (group) per the register.
+  erIKonsern?: boolean;
+  // The country whose law governs a foreign entity. Present on UTLA
+  // entities; live NUF samples (2026-09-24) carry none, so a NUF's
+  // country comes from its forretningsadresse.
+  underlagtLovgivningLandKode?: string;
+  underlagtLovgivningLand?: string;
   // Year (YYYY string) of the latest annual accounts filed with
   // Regnskapsregisteret. Present even when the regnskap endpoint itself
   // can't serve the filing (banks, insurers).
