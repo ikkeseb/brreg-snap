@@ -118,6 +118,10 @@ export interface ManualSearchController {
   // Clear input + results, cancel any pending debounce, and bump the
   // runId so an in-flight response can't paint into a fresh state.
   reset(): void;
+  // Put `query` in the input and search for it now, no debounce — the
+  // panel's selection lookup («Slå opp «…» i brreg-snap»). Same rules
+  // as typing: min length, capped, newer input wins.
+  search(query: string): void;
 }
 
 export function attachManualSearch(
@@ -137,8 +141,9 @@ export function attachManualSearch(
     liveRegion.textContent = text;
   }
 
-  opts.inputEl.addEventListener('input', () => {
+  function schedule(delayMs: number): void {
     if (timer) clearTimeout(timer);
+    timer = undefined;
     runId += 1;
     const value = opts.inputEl.value.trim();
     if (value.length < MIN_QUERY_LENGTH) {
@@ -149,9 +154,17 @@ export function attachManualSearch(
     }
     opts.onQueryActive?.();
     const capped = value.slice(0, MAX_QUERY_LENGTH);
+    if (delayMs === 0) {
+      void run(capped);
+      return;
+    }
     timer = setTimeout(() => {
       void run(capped);
-    }, DEBOUNCE_MS);
+    }, delayMs);
+  }
+
+  opts.inputEl.addEventListener('input', () => {
+    schedule(DEBOUNCE_MS);
   });
 
   async function run(query: string): Promise<void> {
@@ -215,6 +228,10 @@ export function attachManualSearch(
         clearTimeout(timer);
         timer = undefined;
       }
+    },
+    search(query: string): void {
+      opts.inputEl.value = query;
+      schedule(0);
     },
   };
 }

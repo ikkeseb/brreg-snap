@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: 2026-09-23. Applies to brreg-snap 1.3.1 and later._
+_Last updated: 2026-09-24. Applies to brreg-snap 1.3.1 and later._
 
 brreg-snap is a browser extension for Firefox and Chrome that shows
 public information about Norwegian companies from
@@ -15,8 +15,8 @@ says exactly what is sent, when, and what is kept on your device.
   public API of Brønnøysundregistrene, a Norwegian government agency.
 - It sends the domain of the site you look up (for example `dnb.no`
   when you are on `nettbank.dnb.no`; subdomains are not sent). It
-  never sends the full page address, the page title, page content or
-  cookies.
+  never sends the full page address, the page title or cookies, and
+  never page content unless you select text and choose to look it up.
 - Nothing goes to the developer or to any other party. There is no
   developer server, no analytics, no ads and no telemetry.
 - Lookups happen when you ask for one. If you turn on the optional
@@ -30,7 +30,8 @@ The extension contacts `data.brreg.no` only when you:
 
 1. click the brreg-snap toolbar button,
 2. open the brreg-snap sidebar (Firefox) or side panel (Chrome),
-3. choose «Vis i brreg-snap sidebar» in the right-click menu,
+3. choose «Vis i brreg-snap sidebar» or «Slå opp «…» i brreg-snap» in
+   the right-click menu,
 4. type in the search box, or click a company, link or button inside
    the extension, or
 5. have turned on «Auto-oppdater ved fane-bytte». Then every time
@@ -53,10 +54,11 @@ any other site.
 | The main word of that domain, plus Norwegian spellings of it | `elkjop`, `elkjøp` (on `elkjop.no`) | Finds companies whose name matches the domain |
 | An organisation number | `923609016` | Fetches the company's registry entry, roles, sub-units and accounts. The number comes from the page address or title (read on your device), from a search result, from a link in the extension, or from your recent lookups |
 | Text you type in the search box | `equinor` | Searches the register by company name |
+| Text you select, only when you choose «Slå opp «…» i brreg-snap» in the right-click menu (at most 100 characters) | `Kiwi Norge` | Searches the register by company name, as if you had typed it. If the selection contains an organisation number, only that number is sent |
 
 Never sent: the full page address (path and query string), the page
-title, page content, cookies or login data, or any identifier for you
-or your browser.
+title, page content other than text you select and look up, cookies or
+login data, or any identifier for you or your browser.
 
 As with any web request, Brønnøysundregistrene's servers see your IP
 address and standard browser request headers. Their own terms apply to
@@ -87,7 +89,7 @@ Removing the extension deletes all of it.
 |---|---|
 | `activeTab` | Read the address and title of the current tab when you click the toolbar button, the sidebar button or the right-click menu item. No access to page content. |
 | `storage` | The cache, recent list and setting above. |
-| `menus` (Firefox) / `contextMenus` (Chrome) | The «Vis i brreg-snap sidebar» right-click item. |
+| `menus` (Firefox) / `contextMenus` (Chrome) | The «Vis i brreg-snap sidebar» and «Slå opp «…» i brreg-snap» right-click items. |
 | `sidePanel` (Chrome only) | Show the details view in Chrome's side panel. |
 | `https://data.brreg.no/*` | Talk to the register's API. The only site the extension connects to. |
 | `tabs` (optional, off by default) | Requested only when you turn on «Auto-oppdater ved fane-bytte» and confirm the notice that says what it sends. It lets an open panel read the address and title of the page in front when you switch tabs or open a new page. Turning the setting off gives the permission back. On Firefox you can also remove it in `about:addons`; on Chrome, removing the extension removes it too. |

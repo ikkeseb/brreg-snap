@@ -1,6 +1,8 @@
 // The popup is the entire toolbar UI surface. The background script
-// hosts only the context menu: registering it on install/startup and
-// opening the panel when it's clicked.
+// hosts only the entry points that open the panel: the two context-menu
+// items (the page, and «Slå opp «…»» on selected text) and, on Chrome,
+// the «open-panel» keyboard command. Firefox opens its sidebar from the
+// built-in `_execute_sidebar_action` command, which needs no listener.
 //
 // It registers no tab listeners. Auto-sync («Auto-oppdater ved
 // fane-bytte») lives in the panel itself (details.ts), which exists
@@ -14,10 +16,30 @@
 import '../lib/platform/globals.js';
 import { sidebar } from '../lib/platform/sidebar.js';
 import { menus } from '../lib/platform/menus.js';
-import { notifyPanel, panelPath } from '../lib/panel-protocol.js';
+import { extractOrgnrFromText } from '../lib/orgnr.js';
+import {
+  normalizeQuery,
+  notifyPanel,
+  panelPath,
+  type PanelTarget,
+} from '../lib/panel-protocol.js';
 import { deriveSync } from '../lib/tab-sync.js';
 
 const MENU_ID = 'show-in-brreg-sidebar';
+const SELECTION_MENU_ID = 'lookup-selection';
+// Chrome only (manifest.chrome.json `commands`): Chrome has no built-in
+// command that opens the side panel, but sidePanel.open() accepts a
+// keyboard shortcut as the user gesture.
+const OPEN_PANEL_COMMAND = 'open-panel';
+
+// The fields of tabs.Tab the entry points read. activeTab fills url
+// and title for the tab the gesture was on.
+interface GestureTab {
+  id?: number;
+  windowId?: number;
+  url?: string;
+  title?: string;
+}
 
 function registerMenu(): void {
   // `menus` resolves to browser.menus on Firefox and chrome.contextMenus
@@ -39,6 +61,16 @@ function registerMenu(): void {
     },
     () => void browser.runtime.lastError,
   );
+  // %s is the selected text; both engines shorten a long selection in
+  // the menu label themselves.
+  menus.create(
+    {
+      id: SELECTION_MENU_ID,
+      title: 'Slå opp «%s» i brreg-snap',
+      contexts: ['selection'],
+    },
+    () => void browser.runtime.lastError,
+  );
 }
 
 // Top-level, synchronous registration: the background is a
@@ -56,30 +88,30 @@ function hostFromUrl(url: string | undefined): string | undefined {
   }
 }
 
-menus.onClicked.addListener((info, tab) => {
-  if (info.menuItemId !== MENU_ID) return;
-  // SYNC resolve only — setPanel + open must fire inside the user-
-  // gesture stack and the first await would consume the activation
-  // token. See docs/notes/permissions-model.md § gesture-stack.
-  // (Chrome's sidePanel.open enforces the same live-gesture rule.)
+// setPanel + open, synchronously: both must fire inside the user-
+// gesture stack and the first await would consume the activation
+// token. See docs/notes/permissions-model.md § gesture-stack. (Chrome's
+// sidePanel.open enforces the same live-gesture rule.)
+//
+// The target is encoded into the panel path, stamped with this
+// gesture's time and window, so a panel opened by it shows the target
+// even if a follow-up message races the panel's listener registration
+// — while the same path, left behind as the global panel URL or loaded
+// into another window's open panel, can't override that panel's own
+// tab. The adapter resolves this relative path to an absolute URL on
+// Firefox and feeds it to setOptions on Chrome.
+function openPanel(target: PanelTarget, tab: GestureTab | undefined): void {
+  sidebar.setPanel(panelPath(target, Date.now(), tab?.windowId));
+  sidebar.open({ windowId: tab?.windowId, tabId: tab?.id });
+}
+
+// «Vis i brreg-snap sidebar» and Chrome's open-panel shortcut: show
+// what the page resolves to.
+function openOnPage(tab: GestureTab | undefined): void {
+  // SYNC resolve only — see openPanel.
   const sync = deriveSync(tab?.url, tab?.title);
   const host = hostFromUrl(tab?.url);
-
-  // Encode the target into the panel path, stamped with this click's
-  // time and window, so a panel opened by this click shows it even if
-  // the message below races the panel's listener registration — while
-  // the same path, left behind as the global panel URL or loaded into
-  // another window's open panel, can't override that panel's own tab.
-  // The adapter resolves this relative path to an absolute URL on
-  // Firefox and feeds it to setOptions on Chrome.
-  sidebar.setPanel(
-    panelPath(
-      sync ? { orgnr: sync.orgnr } : host ? { nomatch: host } : undefined,
-      Date.now(),
-      tab?.windowId,
-    ),
-  );
-  sidebar.open({ windowId: tab?.windowId, tabId: tab?.id });
+  openPanel(sync ? { orgnr: sync.orgnr } : host ? { nomatch: host } : undefined, tab);
 
   // For the already-open case: Firefox's global setPanel reloads an
   // open sidebar in only one window, not necessarily this one
@@ -93,4 +125,47 @@ menus.onClicked.addListener((info, tab) => {
       ? { type: 'sync', windowId, orgnr: sync.orgnr, host: sync.host, method: 'url' }
       : { type: 'no-match', windowId, host },
   );
+}
+
+// «Slå opp «…» i brreg-snap» on selected text. An orgnr in it (any
+// printed form, the single valid one) opens that company as the user's
+// own choice ('manual': no «synket fra», no «Feil bedrift?»). Any other
+// text opens the panel's search on it. Only the orgnr or the text
+// itself ever leaves the browser — and only because the user chose
+// this item.
+function openOnSelection(
+  selectionText: string | undefined,
+  tab: GestureTab | undefined,
+): void {
+  const orgnr = extractOrgnrFromText(selectionText ?? '');
+  const query = orgnr ? undefined : normalizeQuery(selectionText);
+  openPanel(
+    orgnr ? { orgnr, method: 'manual' } : query ? { query } : undefined,
+    tab,
+  );
+
+  const windowId = tab?.windowId;
+  if (windowId === undefined) return;
+  if (orgnr) {
+    void notifyPanel({ type: 'sync', windowId, orgnr, method: 'manual' });
+  } else if (query) {
+    void notifyPanel({ type: 'search', windowId, query });
+  }
+}
+
+menus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId === MENU_ID) openOnPage(tab);
+  else if (info.menuItemId === SELECTION_MENU_ID) {
+    openOnSelection(info.selectionText, tab);
+  }
+});
+
+// Firefox's typings omit the tab argument Chrome (86+) and Firefox
+// (77+) pass to onCommand.
+type CommandListener = (command: string, tab?: GestureTab) => void;
+const commands = (
+  browser as { commands?: { onCommand: { addListener(cb: CommandListener): void } } }
+).commands;
+commands?.onCommand.addListener((command, tab) => {
+  if (command === OPEN_PANEL_COMMAND) openOnPage(tab);
 });

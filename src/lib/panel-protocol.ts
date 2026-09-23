@@ -38,6 +38,13 @@ export type PanelMessage =
       type: 'no-match';
       windowId: number;
       host?: string;
+    }
+  | {
+      // «Slå opp «…» i brreg-snap» on selected text that holds no
+      // orgnr: the panel prefills its search with the text and runs it.
+      type: 'search';
+      windowId: number;
+      query: string;
     };
 
 const METHODS: readonly ResolutionMethod[] = [
@@ -52,6 +59,18 @@ function optionalString(value: unknown): value is string | undefined {
   return value === undefined || typeof value === 'string';
 }
 
+// Longest query the panel searches for — the manual search caps what
+// it sends to brreg at the same length.
+export const QUERY_MAX_LENGTH = 100;
+
+// Selected text as a search query: whitespace (line breaks from a
+// multi-line selection included) collapsed, trimmed, capped. Undefined
+// when nothing is left.
+export function normalizeQuery(text: string | undefined): string | undefined {
+  const query = (text ?? '').replace(/\s+/g, ' ').trim();
+  return query ? query.slice(0, QUERY_MAX_LENGTH).trim() : undefined;
+}
+
 // Receiver-side guard. Anything malformed is ignored rather than
 // half-applied.
 export function parsePanelMessage(msg: unknown): PanelMessage | undefined {
@@ -62,6 +81,10 @@ export function parsePanelMessage(msg: unknown): PanelMessage | undefined {
   }
   if (m.type === 'no-match') {
     return { type: 'no-match', windowId: m.windowId, host: m.host };
+  }
+  if (m.type === 'search' && typeof m.query === 'string') {
+    const query = normalizeQuery(m.query);
+    return query ? { type: 'search', windowId: m.windowId, query } : undefined;
   }
   if (
     m.type === 'sync' &&
@@ -102,7 +125,14 @@ export async function notifyPanel(msg: PanelMessage): Promise<void> {
 
 // --- panel URL hint --------------------------------------------------
 
-export type PanelTarget = { orgnr: string } | { nomatch: string } | undefined;
+export type PanelTarget =
+  // `method` travels with the orgnr when the opener knows the panel
+  // must not read it as the site's own (a selection lookup is the
+  // user's choice: 'manual').
+  | { orgnr: string; method?: ResolutionMethod }
+  | { nomatch: string }
+  | { query: string }
+  | undefined;
 
 // How long a hint counts as "just written by the open that loaded
 // this panel". A sidebar/side panel loads well within a second of the
@@ -123,8 +153,14 @@ export function panelPath(
 ): string {
   if (!target) return PANEL_PAGE;
   const params = new URLSearchParams();
-  if ('orgnr' in target) params.set('orgnr', target.orgnr);
-  else params.set('nomatch', target.nomatch);
+  if ('orgnr' in target) {
+    params.set('orgnr', target.orgnr);
+    if (target.method) params.set('m', target.method);
+  } else if ('nomatch' in target) {
+    params.set('nomatch', target.nomatch);
+  } else {
+    params.set('q', target.query);
+  }
   params.set('at', String(now));
   if (windowId !== undefined) params.set('w', String(windowId));
   return `${PANEL_PAGE}?${params.toString()}`;
@@ -132,7 +168,12 @@ export function panelPath(
 
 export interface PanelHint {
   orgnr?: string;
+  // How the opener resolved `orgnr`, when it said.
+  method?: ResolutionMethod;
   nomatch?: string;
+  // Text to search for (selection lookup). Honoured only while fresh:
+  // a leftover must never re-send it to brreg on a later open.
+  query?: string;
   // True only when a deliberate open stamped this URL moments ago.
   fresh: boolean;
 }
@@ -153,14 +194,23 @@ export function readPanelHint(
   const orgnrParam = params.get('orgnr');
   const orgnr =
     orgnrParam && isValidOrgnr(orgnrParam) ? orgnrParam : undefined;
+  const methodParam = params.get('m');
+  const method =
+    orgnr !== undefined && METHODS.includes(methodParam as ResolutionMethod)
+      ? (methodParam as ResolutionMethod)
+      : undefined;
   const nomatch = params.get('nomatch') || undefined;
+  const query = normalizeQuery(params.get('q') ?? undefined);
   const at = Number(params.get('at'));
   const age = now - at;
   const fresh =
-    (orgnr !== undefined || nomatch !== undefined) &&
+    (orgnr !== undefined || nomatch !== undefined || query !== undefined) &&
     params.has('at') &&
     Number.isFinite(at) &&
     age >= 0 &&
     age <= PANEL_HINT_FRESH_MS;
-  return { orgnr, nomatch, fresh };
+  const hint: PanelHint = { orgnr, nomatch, fresh };
+  if (method) hint.method = method;
+  if (query) hint.query = query;
+  return hint;
 }
