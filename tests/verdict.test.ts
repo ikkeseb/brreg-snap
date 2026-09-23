@@ -3,6 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { deriveVerdict, yearsSince } from '../src/lib/ui/verdict.js';
 import type { Enhet, RegnskapResponse } from '../src/types/brreg.js';
 import dnbEnhet from './fixtures/brreg/enhet-984851006-dnb.json';
+import equinorEnhet from './fixtures/brreg/enhet-923609016-equinor.json';
+import konkursEnhet from './fixtures/brreg/enhet-915330193-konkurs.json';
+import slettetEnhet from './fixtures/brreg/enhet-989566733-slettet.json';
+import tvangEnhet from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
 
 // Fixed "today" so age math is deterministic.
 const NOW = new Date('2026-07-04T12:00:00Z');
@@ -71,9 +75,79 @@ describe('deriveVerdict — status', () => {
     const s = signal(makeEnhet({ underAvvikling: true }), undefined, 'status');
     expect(s).toMatchObject({ value: 'Under avvikling', tone: 'warn' });
   });
+
+  it('an active company carries no status detail', () => {
+    expect(signal(makeEnhet(), undefined, 'status')?.detail).toBeUndefined();
+  });
+
+  it('says since when for a konkurs (live 1VASK AS)', () => {
+    const s = signal(konkursEnhet as Enhet, undefined, 'status');
+    expect(s).toMatchObject({
+      value: 'Konkurs',
+      detail: 'siden 26.08.2026',
+      tone: 'danger',
+    });
+  });
+
+  it('says why for a forced dissolution (live 1779 HOLDING AS)', () => {
+    const s = signal(tvangEnhet as Enhet, undefined, 'status');
+    expect(s).toMatchObject({
+      value: 'Tvangsavvikling',
+      detail: 'mangler regnskap',
+    });
+  });
+
+  it('dates a deletion (live SlettetEnhet)', () => {
+    const s = signal(slettetEnhet as Enhet, undefined, 'status');
+    expect(s).toMatchObject({ value: 'Slettet', detail: '15.09.2026' });
+  });
+
+  it('turns the other green cells neutral under a danger status', () => {
+    const signals = deriveVerdict(
+      konkursEnhet as Enhet,
+      regnskapWithYear('2025'),
+      NOW,
+    );
+    expect(signals.find((s) => s.key === 'regnskap')?.tone).toBe('neutral');
+    expect(signals.find((s) => s.key === 'status')?.tone).toBe('danger');
+  });
 });
 
 describe('deriveVerdict — alder', () => {
+  it('counts from stiftelsesdato, not the 1995 register floor (live Equinor)', () => {
+    const s = signal(equinorEnhet as Enhet, undefined, 'alder');
+    // Founded 1972-09-18; on 2026-07-04 that is 53 whole years.
+    expect(s).toMatchObject({ value: '53 år', detail: 'stiftet 1972' });
+  });
+
+  it('falls back to the earliest registration date', () => {
+    const s = signal(
+      makeEnhet({
+        registreringsdatoEnhetsregisteret: '1995-03-12',
+        registreringsdatoForetaksregisteret: '1988-04-28',
+      }),
+      undefined,
+      'alder',
+    );
+    expect(s).toMatchObject({ value: '38 år', detail: 'reg. 1988' });
+  });
+
+  it('flags a brand-new company as warn, labelled by its founding year', () => {
+    const s = signal(
+      makeEnhet({
+        stiftelsesdato: '2026-01-15',
+        registreringsdatoEnhetsregisteret: '2026-02-01',
+      }),
+      undefined,
+      'alder',
+    );
+    expect(s).toMatchObject({
+      value: 'Under 1 år',
+      detail: 'stiftet 2026',
+      tone: 'warn',
+    });
+  });
+
   it('renders whole years with the registration year as detail', () => {
     const s = signal(makeEnhet(), undefined, 'alder');
     expect(s).toMatchObject({
@@ -109,11 +183,24 @@ describe('deriveVerdict — ansatte', () => {
     expect(s?.tone).toBe('neutral');
   });
 
-  it('states "Ingen" for zero/missing without judging', () => {
-    for (const antallAnsatte of [0, undefined]) {
-      const s = signal(makeEnhet({ antallAnsatte }), undefined, 'ansatte');
+  it('states "Ingen" when the register says none, without judging', () => {
+    for (const enhet of [
+      makeEnhet({ antallAnsatte: 0 }),
+      makeEnhet({ antallAnsatte: undefined, harRegistrertAntallAnsatte: false }),
+      konkursEnhet as Enhet, // live: harRegistrertAntallAnsatte false
+    ]) {
+      const s = signal(enhet, undefined, 'ansatte');
       expect(s).toMatchObject({ value: 'Ingen', tone: 'neutral' });
     }
+  });
+
+  it('is omitted for a deleted entity, which carries no employee data', () => {
+    expect(signal(slettetEnhet as Enhet, undefined, 'ansatte')).toBeUndefined();
+  });
+
+  it('is omitted when the payload says nothing about employees', () => {
+    const s = signal(makeEnhet({ antallAnsatte: undefined }), undefined, 'ansatte');
+    expect(s).toBeUndefined();
   });
 });
 

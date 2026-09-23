@@ -1,0 +1,27 @@
+{
+  "organisasjonsnummer": "989566733",
+  "navn": "ROLS AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+      }
+    }
+  },
+  "historiskeNavn": [
+    {
+      "navn": "FJAS AS",
+      "fraDato": "2006-03-13 20:19:35",
+      "tilDato": "2019-11-20 12:44:57"
+    }
+  ],
+  "slettedato": "2026-09-15",
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/989566733"
+    }
+  },
+  "respons_klasse": "SlettetEnhet"
+}

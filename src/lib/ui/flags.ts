@@ -17,6 +17,39 @@ import type { Enhet } from '../../types/brreg.js';
 export interface FlagSpec {
   label: string;
   severity?: 'ok' | 'warn' | 'danger';
+  // When a negative status took effect (ISO date), if brreg says.
+  since?: string;
+  // Why, for a forced dissolution ("mangler regnskap").
+  reason?: string;
+}
+
+// Forced-dissolution reasons. brreg sets one date field per reason; the
+// first present one names the status. Order = most common first.
+const TVANG_REASONS: ReadonlyArray<[keyof Enhet, string]> = [
+  ['tvangsopplostPgaManglendeRegnskapDato', 'mangler regnskap'],
+  ['tvangsopplostPgaManglendeDagligLederDato', 'mangler daglig leder'],
+  ['tvangsopplostPgaManglendeRevisorDato', 'mangler revisor'],
+  ['tvangsopplostPgaMangelfulltStyreDato', 'mangelfullt styre'],
+  ['tvangsavvikletPgaManglendeSlettingDato', 'manglende sletting'],
+];
+
+function tvangFlag(enhet: Enhet): FlagSpec {
+  const flag: FlagSpec = { label: 'Tvangsavvikling', severity: 'danger' };
+  for (const [field, reason] of TVANG_REASONS) {
+    const date = enhet[field];
+    if (typeof date === 'string' && date) {
+      flag.since = date;
+      flag.reason = reason;
+      break;
+    }
+  }
+  return flag;
+}
+
+// A flag with its date attached only when brreg has one, so the spec
+// stays minimal (and equality-comparable) for undated statuses.
+function dated(flag: FlagSpec, since: string | undefined): FlagSpec {
+  return since ? { ...flag, since } : flag;
 }
 
 // Status-pill derivation shared by both surfaces. Slettet is checked
@@ -32,12 +65,18 @@ export function deriveStatusFlags(enhet: Enhet): FlagSpec[] {
     enhet.underTvangsavviklingEllerTvangsopplosning;
   const flags: FlagSpec[] = [];
   if (!negativeStatus) flags.push({ label: 'Aktiv', severity: 'ok' });
-  if (slettet) flags.push({ label: 'Slettet', severity: 'danger' });
-  if (enhet.konkurs) flags.push({ label: 'Konkurs', severity: 'danger' });
-  if (enhet.underAvvikling)
-    flags.push({ label: 'Under avvikling', severity: 'warn' });
-  if (enhet.underTvangsavviklingEllerTvangsopplosning)
-    flags.push({ label: 'Tvangsavvikling', severity: 'danger' });
+  if (slettet) {
+    flags.push(dated({ label: 'Slettet', severity: 'danger' }, enhet.slettedato));
+  }
+  if (enhet.konkurs) {
+    flags.push(dated({ label: 'Konkurs', severity: 'danger' }, enhet.konkursdato));
+  }
+  if (enhet.underAvvikling) {
+    flags.push(
+      dated({ label: 'Under avvikling', severity: 'warn' }, enhet.underAvviklingDato),
+    );
+  }
+  if (enhet.underTvangsavviklingEllerTvangsopplosning) flags.push(tvangFlag(enhet));
   return flags;
 }
 

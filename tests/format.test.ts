@@ -4,6 +4,7 @@ import type { Adresse, Kode } from '../src/types/brreg.js';
 import {
   formatAddress,
   formatDateNo,
+  formatDateNumeric,
   formatMoney,
   formatMoneyCompact,
   formatNaering,
@@ -361,6 +362,12 @@ describe('parseIsoDate / formatDateNo', () => {
     expect(parseIsoDate('2026-02-30')).toBeUndefined();
     expect(formatDateNo('not-a-date')).toBeUndefined();
     expect(formatDateNo(undefined)).toBeUndefined();
+  });
+
+  it('formats the compact numeric form for verdict cells', () => {
+    expect(formatDateNumeric('2026-08-26')).toBe('26.08.2026');
+    expect(formatDateNumeric('2026-01-04')).toBe('04.01.2026');
+    expect(formatDateNumeric('garbage')).toBeUndefined();
   });
 
   it('still parses full timestamps', () => {

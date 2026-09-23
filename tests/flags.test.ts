@@ -6,6 +6,9 @@ import {
   primaryStatusFlag,
 } from '../src/lib/ui/flags.js';
 import type { Enhet } from '../src/types/brreg.js';
+import konkursEnhet from './fixtures/brreg/enhet-915330193-konkurs.json';
+import slettetEnhet from './fixtures/brreg/enhet-989566733-slettet.json';
+import tvangEnhet from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
 
 const base: Enhet = { organisasjonsnummer: '910000000', navn: 'Test AS' };
 
@@ -22,9 +25,9 @@ describe('deriveStatusFlags', () => {
   // minimal SlettetEnhet body (live-verified on 933004708, slettedato
   // 2024-05-31) where konkurs/avvikling booleans are absent. Deriving
   // status from those alone rendered a green "Aktiv" flag.
-  it('slettedato -> Slettet (danger), no Aktiv', () => {
+  it('slettedato -> Slettet (danger, dated), no Aktiv', () => {
     expect(deriveStatusFlags({ ...base, slettedato: '2024-05-31' })).toEqual([
-      { label: 'Slettet', severity: 'danger' },
+      { label: 'Slettet', severity: 'danger', since: '2024-05-31' },
     ]);
   });
 
@@ -68,6 +71,52 @@ describe('deriveStatusFlags', () => {
 
   it('empty-string slettedato is not treated as deleted', () => {
     expect(labels({ ...base, slettedato: '' })).toEqual(['Aktiv']);
+  });
+});
+
+describe('deriveStatusFlags — when and why (live shapes)', () => {
+  it('dates a konkurs from konkursdato', () => {
+    const konkurs: Enhet = konkursEnhet;
+    expect(primaryStatusFlag(konkurs)).toEqual({
+      label: 'Konkurs',
+      severity: 'danger',
+      since: '2026-08-26',
+    });
+  });
+
+  it('names the reason for a forced dissolution', () => {
+    const tvang: Enhet = tvangEnhet;
+    expect(primaryStatusFlag(tvang)).toEqual({
+      label: 'Tvangsavvikling',
+      severity: 'danger',
+      since: '2026-06-04',
+      reason: 'mangler regnskap',
+    });
+  });
+
+  it('dates a deleted entity from slettedato', () => {
+    const slettet: Enhet = slettetEnhet;
+    expect(primaryStatusFlag(slettet)).toMatchObject({
+      label: 'Slettet',
+      since: '2026-09-15',
+    });
+  });
+
+  it('dates under avvikling from underAvviklingDato', () => {
+    expect(
+      primaryStatusFlag({
+        ...base,
+        underAvvikling: true,
+        underAvviklingDato: '2026-03-01',
+      }),
+    ).toEqual({ label: 'Under avvikling', severity: 'warn', since: '2026-03-01' });
+  });
+
+  it('leaves an undated status undated', () => {
+    expect(primaryStatusFlag({ ...base, konkurs: true })).toEqual({
+      label: 'Konkurs',
+      severity: 'danger',
+    });
   });
 });
 

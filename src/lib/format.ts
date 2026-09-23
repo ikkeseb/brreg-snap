@@ -133,6 +133,16 @@ export function formatDateNo(iso: string | undefined): string | undefined {
   });
 }
 
+// ISO date → "26.08.2026": the compact form for a verdict cell, where
+// "26. aug. 2026" would be cut off. Undefined for missing/invalid input.
+export function formatDateNumeric(iso: string | undefined): string | undefined {
+  const date = parseIsoDate(iso);
+  if (!date) return undefined;
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  return `${dd}.${mm}.${date.getFullYear()}`;
+}
+
 // Integer with nb-NO thousands separators ("7 536"). Returns undefined
 // for nullish/NaN so addRow skips it.
 export function formatCount(value: number | undefined): string | undefined {

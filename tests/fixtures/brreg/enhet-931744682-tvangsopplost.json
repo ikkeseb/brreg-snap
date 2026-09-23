@@ -1,0 +1,75 @@
+{
+  "organisasjonsnummer": "931744682",
+  "navn": "1779 HOLDING AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+      }
+    }
+  },
+  "historiskeNavn": [],
+  "registreringsdatoEnhetsregisteret": "2023-07-20",
+  "registrertIMvaregisteret": false,
+  "naeringskode1": {
+    "kode": "00.000",
+    "beskrivelse": "Uoppgitt"
+  },
+  "harRegistrertAntallAnsatte": false,
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "1779",
+    "poststed": "HALDEN",
+    "adresse": [
+      "Eksempelveien 1"
+    ],
+    "kommune": "HALDEN",
+    "kommunenummer": "3101"
+  },
+  "stiftelsesdato": "2023-06-06",
+  "institusjonellSektorkode": {
+    "kode": "2100",
+    "beskrivelse": "Private aksjeselskaper mv."
+  },
+  "registrertIForetaksregisteret": true,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2023",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": true,
+  "tvangsopplostPgaManglendeRegnskapDato": "2026-06-04",
+  "maalform": "Bokmål",
+  "vedtektsdato": "2023-06-06",
+  "vedtektsfestetFormaal": [
+    "Investere i selskaper og eiendom og alt annet som naturlig faller",
+    "sammen med dette, herunder å delta i andre selskaper med lignende",
+    "virksomhet, kjøp og salg av aksjer, eller på annen måte gjøre seg",
+    "interessert i andre foretagende."
+  ],
+  "aktivitet": [
+    "Holdingselskap."
+  ],
+  "registreringsdatoForetaksregisteret": "2023-07-20",
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "fravalgRevisjonDato": "2023-07-20",
+  "fravalgRevisjonBeslutningsDato": "2023-06-06",
+  "erIKonsern": false,
+  "kapital": {
+    "belop": 30000,
+    "antallAksjer": 30000,
+    "type": "Aksjekapital",
+    "valuta": "NOK",
+    "innfortDato": "2023-07-20"
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/931744682"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

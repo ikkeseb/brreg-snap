@@ -1,0 +1,73 @@
+{
+  "organisasjonsnummer": "915330193",
+  "navn": "1VASK AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+      }
+    }
+  },
+  "historiskeNavn": [],
+  "registreringsdatoEnhetsregisteret": "2015-05-04",
+  "registrertIMvaregisteret": false,
+  "naeringskode1": {
+    "kode": "81.210",
+    "beskrivelse": "Rengjøring av bygninger"
+  },
+  "harRegistrertAntallAnsatte": false,
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "6887",
+    "poststed": "LÆRDAL",
+    "adresse": [
+      "Eksempelveien 1"
+    ],
+    "kommune": "LÆRDAL",
+    "kommunenummer": "4642"
+  },
+  "stiftelsesdato": "2015-04-17",
+  "institusjonellSektorkode": {
+    "kode": "2100",
+    "beskrivelse": "Private aksjeselskaper mv."
+  },
+  "registrertIForetaksregisteret": true,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2024",
+  "konkurs": true,
+  "konkursdato": "2026-08-26",
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "maalform": "Nynorsk",
+  "vedtektsdato": "2015-04-17",
+  "vedtektsfestetFormaal": [
+    "Reinhaldstenester og det som naturleg høyrer til det. Selskapet kan",
+    "også investere i andre verksemder."
+  ],
+  "aktivitet": [
+    "Reinhaldstenester og det som naturleg høyrer til dette. Selskapet kan",
+    "også investere i andre selskap."
+  ],
+  "registreringsdatoForetaksregisteret": "2015-05-04",
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "fravalgRevisjonDato": "2015-05-04",
+  "erIKonsern": false,
+  "kapital": {
+    "belop": 30000,
+    "antallAksjer": 30,
+    "type": "Aksjekapital",
+    "valuta": "NOK",
+    "innfortDato": "2015-05-04"
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/915330193"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

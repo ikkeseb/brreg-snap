@@ -5,6 +5,7 @@ import {
   formatNaering,
 } from '../../lib/format.js';
 import { findRoleHolder } from '../../lib/roller.js';
+import { deriveStatusFlags } from '../../lib/ui/flags.js';
 import type { Enhet, RollerResponse } from '../../types/brreg.js';
 import { $, addLink, addRow } from './dom.js';
 
@@ -15,6 +16,14 @@ const contactList = $('contact-list') as HTMLDListElement;
 export function renderOverview(enhet: Enhet, roller: RollerResponse): void {
   overviewList.replaceChildren();
   addRow(overviewList, 'Organisasjonsform', enhet.organisasjonsform?.beskrivelse);
+  // When (and for a forced dissolution, why) each negative status took
+  // effect. The verdict cell has room for only one of the two.
+  for (const flag of deriveStatusFlags(enhet)) {
+    const date = formatDateNo(flag.since);
+    if (!date) continue;
+    addRow(overviewList, flag.label, flag.reason ? `${date} (${flag.reason})` : date);
+  }
+  addRow(overviewList, 'Stiftet', formatDateNo(enhet.stiftelsesdato));
   addRow(
     overviewList,
     'Registrert',

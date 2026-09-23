@@ -2,8 +2,9 @@
 // answer rendered directly under the company name on both surfaces.
 // Four signals, each derivable from data the surfaces already fetch:
 //
-//   STATUS    primary status (Aktiv / Konkurs / Slettet / …)
-//   ALDER     years since Enhetsregisteret registration
+//   STATUS    primary status (Aktiv / Konkurs / Slettet / …), with its
+//             date or reason when brreg has one
+//   ALDER     years since founding (stiftelsesdato), else registration
 //   ANSATTE   registered employee count
 //   REGNSKAP  latest filed year (Enhet.sisteInnsendteAarsregnskap,
 //             topped up by the regnskap response)
@@ -13,9 +14,9 @@
 // never guessed — a failed regnskap fetch must not render as "not
 // filed".
 
-import { formatCount } from '../format.js';
+import { formatCount, formatDateNumeric, parseIsoDate } from '../format.js';
 import { sortRegnskapDesc } from '../regnskap.js';
-import { primaryStatusFlag } from './flags.js';
+import { primaryStatusFlag, type FlagSpec } from './flags.js';
 import type { Enhet, RegnskapResponse } from '../../types/brreg.js';
 
 export type VerdictTone = 'ok' | 'warn' | 'danger' | 'neutral';
@@ -43,14 +44,23 @@ export function yearsSince(
   iso: string | undefined,
   now: Date,
 ): number | undefined {
-  if (!iso) return undefined;
-  const then = new Date(iso);
-  if (Number.isNaN(then.getTime())) return undefined;
+  const then = parseIsoDate(iso);
+  if (!then) return undefined;
   let years = now.getFullYear() - then.getFullYear();
   const anniversary = new Date(then);
   anniversary.setFullYear(then.getFullYear() + years);
   if (anniversary > now) years -= 1;
   return years < 0 ? 0 : years;
+}
+
+// "Konkurs · siden 26.08.2026", "Tvangsavvikling · mangler regnskap",
+// "Slettet · 15.09.2026". A reason beats a date: the date of a forced
+// dissolution matters less than why (and Oversikt carries both).
+function statusDetail(flag: FlagSpec): string | undefined {
+  if (flag.reason) return flag.reason;
+  const date = formatDateNumeric(flag.since);
+  if (!date) return undefined;
+  return flag.label === 'Slettet' ? date : `siden ${date}`;
 }
 
 function statusSignal(enhet: Enhet): VerdictSignal {
@@ -61,22 +71,49 @@ function statusSignal(enhet: Enhet): VerdictSignal {
       : primary.severity === 'warn'
         ? 'warn'
         : 'danger';
-  return { key: 'status', label: 'Status', value: primary.label, tone };
+  const signal: VerdictSignal = {
+    key: 'status',
+    label: 'Status',
+    value: primary.label,
+    tone,
+  };
+  const detail = statusDetail(primary);
+  if (detail) signal.detail = detail;
+  return signal;
+}
+
+// What the company's age is counted from. The founding date when brreg
+// has it; otherwise the earliest registration. Enhetsregisteret starts
+// in 1995, so registration alone floors every older company at "31 år
+// · reg. 1995" (Equinor was founded in 1972).
+function ageBasis(
+  enhet: Enhet,
+): { iso: string; word: 'stiftet' | 'reg.' } | undefined {
+  if (enhet.stiftelsesdato && parseIsoDate(enhet.stiftelsesdato)) {
+    return { iso: enhet.stiftelsesdato, word: 'stiftet' };
+  }
+  const registered = [
+    enhet.registreringsdatoEnhetsregisteret,
+    enhet.registreringsdatoForetaksregisteret,
+  ]
+    .filter((d): d is string => d !== undefined && parseIsoDate(d) !== undefined)
+    .sort();
+  return registered[0] ? { iso: registered[0], word: 'reg.' } : undefined;
 }
 
 function alderSignal(enhet: Enhet, now: Date): VerdictSignal | undefined {
-  const reg = enhet.registreringsdatoEnhetsregisteret;
-  const years = yearsSince(reg, now);
-  if (years === undefined) return undefined;
-  const regYear = reg!.slice(0, 4);
+  const basis = ageBasis(enhet);
+  const years = yearsSince(basis?.iso, now);
+  if (!basis || years === undefined) return undefined;
+  const detail = `${basis.word} ${basis.iso.slice(0, 4)}`;
   if (years < 1) {
-    // A brand-new registration is a genuine caution signal for a trust
+    // A brand-new company is a genuine caution signal for a trust
     // assessment — not an accusation, so the wording stays factual.
     return {
       key: 'alder',
       label: 'Alder',
       value: 'Under 1 år',
-      detail: `reg. ${regYear}`,
+      detail,
       tone: 'warn',
     };
   }
@@ -84,14 +121,20 @@ function alderSignal(enhet: Enhet, now: Date): VerdictSignal | undefined {
     key: 'alder',
     label: 'Alder',
     value: `${years} år`,
-    detail: `reg. ${regYear}`,
+    detail,
     tone: 'neutral',
   };
 }
 
-function ansatteSignal(enhet: Enhet): VerdictSignal {
+function ansatteSignal(enhet: Enhet): VerdictSignal | undefined {
   const count = enhet.antallAnsatte;
   if (typeof count !== 'number' || count <= 0) {
+    // A SlettetEnhet carries no employee data at all, so "Ingen" would
+    // be a guess — omit. Only say "Ingen" when the register does.
+    if (enhet.slettedato) return undefined;
+    if (count === undefined && enhet.harRegistrertAntallAnsatte === undefined) {
+      return undefined;
+    }
     // Zero employees is normal for holdings and dormant entities —
     // stated, not judged.
     return {
@@ -169,7 +212,7 @@ function regnskapSignal(
   // unconditional filing duty AND the company is old enough to have
   // had a deadline.
   const form = enhet.organisasjonsform?.kode?.toUpperCase() ?? '';
-  const age = yearsSince(enhet.registreringsdatoEnhetsregisteret, now);
+  const age = yearsSince(ageBasis(enhet)?.iso, now);
   const shouldHaveFiled =
     REGNSKAPSPLIKT_FORMS.has(form) &&
     age !== undefined &&
@@ -188,12 +231,20 @@ export function deriveVerdict(
   regnskap: RegnskapResponse | undefined,
   now: Date = new Date(),
 ): VerdictSignal[] {
-  const signals: VerdictSignal[] = [statusSignal(enhet)];
+  const status = statusSignal(enhet);
+  const signals: VerdictSignal[] = [status];
   const alder = alderSignal(enhet, now);
   if (alder) signals.push(alder);
-  signals.push(ansatteSignal(enhet));
+  const ansatte = ansatteSignal(enhet);
+  if (ansatte) signals.push(ansatte);
   const regnskapSig = regnskapSignal(enhet, regnskap, now);
   if (regnskapSig) signals.push(regnskapSig);
+  // A green "2024 levert" next to a red "Konkurs" reads as mixed
+  // reassurance. Under a danger status, the other cells stay factual
+  // but lose their green.
+  if (status.tone === 'danger') {
+    for (const s of signals) if (s !== status && s.tone === 'ok') s.tone = 'neutral';
+  }
   return signals;
 }
 
@@ -225,6 +276,7 @@ export function renderVerdict(
       const detail = document.createElement('span');
       detail.className = 'verdict-detail';
       detail.textContent = signal.detail;
+      detail.title = signal.detail;
       cell.appendChild(detail);
     }
     container.appendChild(cell);

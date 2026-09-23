@@ -13,17 +13,34 @@ export interface Kode {
   beskrivelse?: string;
 }
 
+// A registry annotation (påtegning) on the entity, e.g. on its name or
+// business address. Typed for completeness; not rendered.
+export interface Paategning {
+  infotype?: string;
+  tekst?: string;
+  innfoertDato?: string;
+}
+
 export interface Enhet {
   organisasjonsnummer: string;
   navn: string;
   organisasjonsform?: Kode;
+  // 'Enhet', or 'SlettetEnhet' for the minimal body of a deleted entity.
+  respons_klasse?: string;
+  // Founding date (ISO). Enhetsregisteret itself only starts in 1995, so
+  // for older companies this is the only honest age basis.
+  stiftelsesdato?: string;
   registreringsdatoEnhetsregisteret?: string;
+  registreringsdatoForetaksregisteret?: string;
   registrertIMvaregisteret?: boolean;
   registrertIForetaksregisteret?: boolean;
   registrertIStiftelsesregisteret?: boolean;
   registrertIFrivillighetsregisteret?: boolean;
   naeringskode1?: Kode;
   antallAnsatte?: number;
+  // Present on every live Enhet (false = no employees registered);
+  // absent on a SlettetEnhet, which carries no employee data at all.
+  harRegistrertAntallAnsatte?: boolean;
   forretningsadresse?: Adresse;
   postadresse?: Adresse;
   hjemmeside?: string;
@@ -37,8 +54,21 @@ export interface Enhet {
   // first or a dissolved entity renders as active.
   slettedato?: string;
   konkurs?: boolean;
+  konkursdato?: string;
   underAvvikling?: boolean;
+  underAvviklingDato?: string;
   underTvangsavviklingEllerTvangsopplosning?: boolean;
+  // Forced dissolution: brreg sets one ISO date per reason, so which
+  // field is present says WHY (missing accounts, missing daglig leder…).
+  tvangsopplostPgaManglendeRegnskapDato?: string;
+  tvangsopplostPgaManglendeDagligLederDato?: string;
+  tvangsopplostPgaManglendeRevisorDato?: string;
+  tvangsopplostPgaMangelfulltStyreDato?: string;
+  tvangsavvikletPgaManglendeSlettingDato?: string;
+  // Free-text purpose and activity lines, as registered. Not rendered.
+  vedtektsfestetFormaal?: string[];
+  aktivitet?: string[];
+  paategninger?: Paategning[];
   // Year (YYYY string) of the latest annual accounts filed with
   // Regnskapsregisteret. Present even when the regnskap endpoint itself
   // can't serve the filing (banks, insurers).
