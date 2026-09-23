@@ -4,6 +4,7 @@ import {
   fetchEnhet,
   fetchRegnskap,
   fetchRoller,
+  fetchUnderenhet,
   fetchUnderenheter,
   getFetchedAt,
   invalidateCache,
@@ -11,6 +12,8 @@ import {
   searchEnheterWithParams,
 } from '../src/lib/brreg.js';
 import regnskap500 from './fixtures/brreg/regnskap-984851006-500.json';
+import underenhetAlta from './fixtures/brreg/underenhet-973160834.json';
+import underenhetSlettet from './fixtures/brreg/underenhet-915821537-slettet.json';
 import underenheterEmpty from './fixtures/brreg/underenheter-931744682-empty.json';
 import underenheterPage from './fixtures/brreg/underenheter-984661185-page.json';
 
@@ -252,6 +255,47 @@ describe('fetchUnderenheter', () => {
     });
     fetchMock.mockResolvedValue(jsonResponse(underenheterPage));
     expect((await fetchUnderenheter('984661185')).total).toBe(133);
+  });
+});
+
+describe('fetchUnderenhet', () => {
+  it('returns the underenhet with its parent (live DNB AVD ALTA)', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(underenhetAlta));
+    const u = await fetchUnderenhet('973160834');
+    expect(u).toMatchObject({
+      navn: 'DNB BANK ASA AVD ALTA',
+      overordnetEnhet: '984851006',
+    });
+    const url = String(fetchMock.mock.calls[0]?.[0]);
+    expect(url).toBe(
+      'https://data.brreg.no/enhetsregisteret/api/underenheter/973160834',
+    );
+  });
+
+  it('caches a hit', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(underenhetAlta));
+    await fetchUnderenhet('973160834');
+    await fetchUnderenhet('973160834');
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('resolves undefined on 404 (not an underenhet)', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}, 404));
+    expect(await fetchUnderenhet('984851006')).toBeUndefined();
+  });
+
+  it('returns a deleted one as-is: slettedato, no parent (live shape)', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(underenhetSlettet));
+    const u = await fetchUnderenhet('915821537');
+    expect(u?.slettedato).toBe('2026-09-21');
+    expect(u?.overordnetEnhet).toBeUndefined();
+  });
+
+  it('rejects on failure and on an unexpected shape', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}, 503));
+    await expect(fetchUnderenhet('973160834')).rejects.toThrow(/503/);
+    fetchMock.mockResolvedValue(jsonResponse({ foo: 1 }));
+    await expect(fetchUnderenhet('973160834')).rejects.toThrow(/shape/);
   });
 });
 

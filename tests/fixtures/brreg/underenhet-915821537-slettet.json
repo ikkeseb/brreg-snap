@@ -1,0 +1,38 @@
+{
+  "organisasjonsnummer": "915821537",
+  "navn": "EIKSUND INVEST AS ENGROS",
+  "organisasjonsform": {
+    "kode": "BEDR",
+    "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BEDR"
+      }
+    }
+  },
+  "historiskeNavn": [
+    {
+      "navn": "EIKSUND INTERNATIONAL AS",
+      "fraDato": "2015-08-25 20:10:55",
+      "tilDato": "2017-06-26 11:36:24"
+    },
+    {
+      "navn": "INNOVATERA AS",
+      "fraDato": "2017-06-26 11:36:24",
+      "tilDato": "2023-01-09 08:38:04"
+    },
+    {
+      "navn": "INNOVATERA",
+      "fraDato": "2023-01-09 08:38:04",
+      "tilDato": "2026-07-21 20:19:23"
+    }
+  ],
+  "slettedato": "2026-09-21",
+  "nedleggelsesdato": "2021-01-01",
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter/915821537"
+    }
+  },
+  "respons_klasse": "SlettetUnderEnhet"
+}

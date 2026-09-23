@@ -1,0 +1,69 @@
+{
+  "organisasjonsnummer": "973160834",
+  "navn": "DNB BANK ASA AVD ALTA",
+  "organisasjonsform": {
+    "kode": "BEDR",
+    "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BEDR"
+      }
+    }
+  },
+  "historiskeNavn": [
+    {
+      "navn": "DEN NORSKE BANK AS",
+      "fraDato": "1995-02-23 04:14:00",
+      "tilDato": "1998-05-27 19:08:40"
+    },
+    {
+      "navn": "DEN NORSKE BANK ASA ALTA",
+      "fraDato": "1999-04-17 10:40:10",
+      "tilDato": "2004-02-18 20:37:57"
+    },
+    {
+      "navn": "DNB NOR BANK ASA DEN NORSKE BANK ALTA",
+      "fraDato": "2004-02-18 20:37:57",
+      "tilDato": "2006-08-08 20:34:00"
+    },
+    {
+      "navn": "DNB NOR BANK ASA AVD ALTA",
+      "fraDato": "2006-08-08 20:34:00",
+      "tilDato": "2011-11-15 21:19:49"
+    }
+  ],
+  "registreringsdatoEnhetsregisteret": "1995-02-23",
+  "registrertIMvaregisteret": false,
+  "naeringskode1": {
+    "kode": "64.190",
+    "beskrivelse": "Banker og kredittforetak"
+  },
+  "antallAnsatte": 16,
+  "harRegistrertAntallAnsatte": true,
+  "overordnetEnhet": "984851006",
+  "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+  "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+  "telefon": "55219020",
+  "oppstartsdato": "1975-01-01",
+  "datoEierskifte": "2004-01-19",
+  "beliggenhetsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "9510",
+    "poststed": "ALTA",
+    "adresse": [
+      "Løkkeveien 41"
+    ],
+    "kommune": "ALTA",
+    "kommunenummer": "5601"
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter/973160834"
+    },
+    "overordnetEnhet": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/984851006"
+    }
+  },
+  "respons_klasse": "Underenhet"
+}

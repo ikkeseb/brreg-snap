@@ -25,7 +25,13 @@ const REGNSKAP_UNAVAILABLE_TTL_MS = 6 * 60 * 60 * 1000;
 
 // Cache-key prefixes used by all fetchers. invalidateCache() and
 // getFetchedAt() walk these for everything related to a single orgnr.
-const CACHE_PREFIXES = ['enhet', 'roller', 'underenheter', 'regnskap'] as const;
+const CACHE_PREFIXES = [
+  'enhet',
+  'underenhet',
+  'roller',
+  'underenheter',
+  'regnskap',
+] as const;
 
 function isEnhet(value: unknown): value is Enhet {
   return (
@@ -142,6 +148,35 @@ function isUnderenhet(value: unknown): value is Underenhet {
       'string' &&
     typeof (value as { navn?: unknown }).navn === 'string'
   );
+}
+
+// One underenhet (a branch or department) by its own orgnr — the
+// fallback when an orgnr typed in or found in a URL is not an enhet.
+// Resolves undefined on 404 ("not an underenhet either") so a lookup
+// chain can move on without try/catch; throws on network and other
+// failures like the other fetchers. A deleted one still answers 200, as
+// a SlettetUnderEnhet with a slettedato and no overordnetEnhet.
+export async function fetchUnderenhet(
+  orgnr: string,
+): Promise<Underenhet | undefined> {
+  const key = `underenhet:${orgnr}`;
+  const cached = await cacheGet<Underenhet>(key);
+  if (cached) return cached;
+
+  const res = await fetch(`${API}/underenheter/${orgnr}`, {
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (res.status === 404) return undefined;
+  if (!res.ok) {
+    throw new Error(`brreg underenhet API returned ${res.status}.`);
+  }
+  const data: unknown = await res.json();
+  if (!isUnderenhet(data)) {
+    throw new Error('brreg returned an unexpected response shape.');
+  }
+  await cacheSet(key, data);
+  return data;
 }
 
 // One request, first 100 rows (alphabetical) — enough for a panel list.

@@ -82,10 +82,18 @@ pipeline caches its outcome for 24h, and an offline moment disguised
 as "no hits" gets pinned as a day-long "no match" (see
 `docs/notes/cache.md` § failure-no-cache for the caching rule).
 
-The detail fetchers (`fetchEnhet`, `fetchRoller`, `fetchUnderenheter`,
-`fetchRegnskap`) keep their documented special cases — roller 404 →
-empty, regnskap 404 → empty, regnskap 500 → unavailable (above) —
-and throw on everything else.
+The detail fetchers (`fetchEnhet`, `fetchUnderenhet`, `fetchRoller`,
+`fetchUnderenheter`, `fetchRegnskap`) keep their documented special
+cases — roller 404 → empty, regnskap 404 → empty, regnskap 500 →
+unavailable (above), underenhet 404 → `undefined` (so an orgnr lookup
+can fall back without try/catch) — and throw on everything else.
+Callers turn a soft dependency's rejection into `undefined` and render
+"Kunne ikke hente …", never the empty state.
+
+`fetchUnderenheter` returns `{ items, total }`: one request, first 100
+rows, with `total` from `page.totalElements` (Posten Bring 984661185:
+133). A parent with none has no `_embedded` at all, only
+`page.totalElements: 0`.
 
 Every fetch in `brreg.ts` carries `AbortSignal.timeout(8000)`
 (Firefox 100+ / Chrome 103+). A timeout aborts the fetch with a
