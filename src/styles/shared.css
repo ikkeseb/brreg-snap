@@ -91,6 +91,15 @@ body {
   color: var(--fg);
 }
 
+/* The hidden attribute always wins. The UA's [hidden]{display:none}
+ * loses to any author display rule, which left `.back-link`
+ * (inline-block) and an empty `.flags` row (flex) on screen while
+ * "hidden". Toggle visibility with the attribute only; never give it
+ * a display value. */
+[hidden] {
+  display: none !important;
+}
+
 .visually-hidden {
   position: absolute;
   width: 1px;

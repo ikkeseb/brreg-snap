@@ -483,10 +483,6 @@ footer a:hover {
   border-radius: 2px;
 }
 
-[role='tabpanel'][hidden] {
-  display: none;
-}
-
 #footer-updated {
   font-variant-numeric: tabular-nums;
 }
