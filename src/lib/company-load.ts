@@ -28,6 +28,7 @@ import { deriveKonsern, fetchKonsernstruktur, type Konsern } from './konsern.js'
 import type {
   Enhet,
   EnhetOppdatering,
+  KonsernNode,
   RegnskapResponse,
   RollerResponse,
   Underenhet,
@@ -99,6 +100,10 @@ export interface LoadCompanyOptions {
   konsern?: boolean;
   // The annual-report year list (for the PDF links).
   aarsregnskapYears?: boolean;
+  // A group tree already in hand (the company the user drilled in
+  // from). When the orgnr sits in it, its place is derived from that
+  // tree instead of fetched: drilling within a group costs no request.
+  konsernTree?: KonsernNode;
 }
 
 function fetchSoftParts(orgnr: string, opts: LoadCompanyOptions): Promise<SoftParts> {
@@ -125,14 +130,25 @@ function fetchSoftParts(orgnr: string, opts: LoadCompanyOptions): Promise<SoftPa
   }));
 }
 
-// null = asked, and the company is in no group (erIKonsern false, a
-// 404, or brreg's tree doesn't list it); undefined = couldn't ask.
-function loadKonsern(enhet: Enhet): Promise<Konsern | null | undefined> {
-  if (enhet.erIKonsern !== true) return Promise.resolve(null);
+interface KonsernPart {
+  // null = asked, and the company is in no group (erIKonsern false, a
+  // 404, or brreg's tree doesn't list it); undefined = couldn't ask.
+  konsern: Konsern | null | undefined;
+  // The whole tree it was derived from, for the next drill-in.
+  tree?: KonsernNode;
+}
+
+function loadKonsern(enhet: Enhet, known: KonsernNode | undefined): Promise<KonsernPart> {
+  if (enhet.erIKonsern !== true) return Promise.resolve({ konsern: null });
   const orgnr = enhet.organisasjonsnummer;
+  const fromKnown = known ? deriveKonsern(known, orgnr) : undefined;
+  if (known && fromKnown) return Promise.resolve({ konsern: fromKnown, tree: known });
   return fetchKonsernstruktur(orgnr)
-    .then((tree) => (tree && deriveKonsern(tree, orgnr)) ?? null)
-    .catch((): undefined => undefined);
+    .then((tree): KonsernPart => {
+      const konsern = (tree && deriveKonsern(tree, orgnr)) ?? null;
+      return tree && konsern ? { konsern, tree } : { konsern };
+    })
+    .catch((): KonsernPart => ({ konsern: undefined }));
 }
 
 export interface CompanyData extends OrgnrMatch, SoftParts {
@@ -140,6 +156,9 @@ export interface CompanyData extends OrgnrMatch, SoftParts {
   // its group, null when it is in none, undefined when brreg couldn't
   // be asked.
   konsern: Konsern | null | undefined;
+  // The group tree `konsern` was derived from; pass it back as
+  // `konsernTree` when drilling into another company in it.
+  konsernTree?: KonsernNode;
   // When this data was fetched from brreg (ms epoch): the oldest of its
   // cached parts, since a cache hit can be up to a day old.
   fetchedAt: number;
@@ -160,7 +179,7 @@ export async function loadCompany(
   // it can only start now.
   const [soft, konsern] = await Promise.all([
     shown === orgnr ? guessed : fetchSoftParts(shown, opts),
-    opts.konsern ? loadKonsern(match.enhet) : undefined,
+    opts.konsern ? loadKonsern(match.enhet, opts.konsernTree) : undefined,
   ]);
   const ages = await Promise.all(
     [...new Set([orgnr, shown])].map((n) => getFetchedAt(n)),
@@ -169,5 +188,7 @@ export async function loadCompany(
   // Nothing cached (the write failed) means it all came from brreg
   // just now.
   const fetchedAt = cached.length > 0 ? Math.min(...cached) : Date.now();
-  return { ...match, ...soft, konsern, fetchedAt };
+  const data: CompanyData = { ...match, ...soft, konsern: konsern?.konsern, fetchedAt };
+  if (konsern?.tree) data.konsernTree = konsern.tree;
+  return data;
 }

@@ -77,6 +77,17 @@ function formatMagnitude(value: number | undefined): string | undefined {
   return `${sign}${text}${unit.word}`;
 }
 
+// «68,0» + «mrd»: the Økonomi rows print the magnitude word apart from
+// the number, in a lighter weight. The currency goes in the heading.
+export function formatAmountParts(
+  value: number | undefined,
+): { amount: string; unit: string } | undefined {
+  const text = formatMagnitude(value);
+  if (text === undefined) return undefined;
+  const m = / (mrd|mill|tusen)$/.exec(text);
+  return m ? { amount: text.slice(0, m.index), unit: m[1]! } : { amount: text, unit: '' };
+}
+
 // A regnskap's figures are in its `valuta`: NOK for most filers, but
 // companies reporting in a functional currency file in USD or EUR
 // (Equinor, Aker BP, Mowi). "kr" is right only for NOK; anything else

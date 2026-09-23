@@ -9,6 +9,7 @@ import {
   lookupOrgnr,
 } from '../src/lib/company-load.js';
 import { describeLoadError } from '../src/lib/ui/error-message.js';
+import type { KonsernNode } from '../src/types/brreg.js';
 import enhetDnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import enhetEquinor from './fixtures/brreg/enhet-923609016-equinor.json';
 import enhetTvangsopplost from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
@@ -278,6 +279,29 @@ describe('loadCompany — opt-in konsern and annual-report years', () => {
     expect(company.konsern?.groupSize).toBe(54);
     expect(company.aarsregnskapYears?.[0]).toBe('2025');
     expect(urls()).toContain(`${KONSERN}/923609016`);
+  });
+
+  it('derives a drill-in within the group from the tree in hand, without a fetch', async () => {
+    const tree = konsernEquinor as unknown as KonsernNode;
+    const child = tree.children![0]!.organisasjonsnummer;
+    const { urls } = routeBrreg({
+      [`${API}/enheter/${child}`]: () =>
+        json({ ...enhetEquinor, organisasjonsnummer: child, navn: tree.children![0]!.navn }),
+    });
+    const company = await loadCompany(child, { konsern: true, konsernTree: tree });
+    expect(company.konsern?.role).toBe('member');
+    expect(company.konsern?.top.orgnr).toBe('923609016');
+    expect(company.konsernTree).toBe(tree);
+    expect(urls().some((u) => u.includes('konsernstruktur'))).toBe(false);
+  });
+
+  it('hands back the fetched tree for the next drill-in', async () => {
+    routeBrreg({
+      [`${API}/enheter/923609016`]: () => json(enhetEquinor),
+      [`${KONSERN}/923609016`]: () => json(konsernEquinor),
+    });
+    const company = await loadCompany('923609016', { konsern: true });
+    expect(company.konsernTree?.organisasjonsnummer).toBe('923609016');
   });
 
   it('the popup variant asks for neither', async () => {

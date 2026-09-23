@@ -1,6 +1,6 @@
 // Recent-companies stack shown in both surfaces' empty states so the
 // user can re-open recently viewed orgnrs without re-typing or
-// re-resolving.
+// re-resolving. The rows are painted by lib/view/components/search.ts.
 // storage.session scope — cleared when the browser restarts, which
 // matches "recent" intent (history is the long-term store, not us) and
 // keeps install-time permissions to activeTab/storage/menus only.
@@ -12,6 +12,9 @@ export interface RecentEntry {
   orgnr: string;
   navn: string;
   ts: number;
+  // A danger status worth a mark next to the name («Konkurs»,
+  // «Slettet»), as it stood when the company was viewed.
+  status?: string;
 }
 
 interface StorageShape {
@@ -27,7 +30,8 @@ export async function getRecent(): Promise<RecentEntry[]> {
       (e): e is RecentEntry =>
         typeof e?.orgnr === 'string' &&
         typeof e?.navn === 'string' &&
-        typeof e?.ts === 'number',
+        typeof e?.ts === 'number' &&
+        (e.status === undefined || typeof e.status === 'string'),
     );
   } catch {
     return [];
@@ -71,16 +75,19 @@ export async function renderRecentSection(
   }
 }
 
-export async function pushRecent(orgnr: string, navn: string): Promise<void> {
+export async function pushRecent(
+  orgnr: string,
+  navn: string,
+  status?: string,
+): Promise<void> {
   try {
     const existing = await getRecent();
     // Dedupe by orgnr — re-visiting moves the entry to the top instead
     // of producing duplicates that crowd out other recents.
     const filtered = existing.filter((e) => e.orgnr !== orgnr);
-    const next: RecentEntry[] = [
-      { orgnr, navn, ts: Date.now() },
-      ...filtered,
-    ].slice(0, MAX_ENTRIES);
+    const entry: RecentEntry = { orgnr, navn, ts: Date.now() };
+    if (status) entry.status = status;
+    const next: RecentEntry[] = [entry, ...filtered].slice(0, MAX_ENTRIES);
     await browser.storage.session.set({ [STORAGE_KEY]: next });
   } catch {
     /* silent — recent list is a nice-to-have, never block the render */

@@ -418,3 +418,14 @@ describe('formatOrgnr', () => {
     expect(formatOrgnr('923 609 016')).toBe('923 609 016');
   });
 });
+
+describe('formatAmountParts', () => {
+  it('splits the magnitude word from the number', async () => {
+    const { formatAmountParts } = await import('../src/lib/format.js');
+    expect(formatAmountParts(67_956_000_000)).toEqual({ amount: '68,0', unit: 'mrd' });
+    expect(formatAmountParts(-1_200_000)).toEqual({ amount: '-1,2', unit: 'mill' });
+    expect(formatAmountParts(850_000)).toEqual({ amount: '850', unit: 'tusen' });
+    expect(formatAmountParts(500)).toEqual({ amount: '500', unit: '' });
+    expect(formatAmountParts(undefined)).toBeUndefined();
+  });
+});
