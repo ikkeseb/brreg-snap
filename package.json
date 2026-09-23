@@ -38,7 +38,7 @@
     "typescript-eslint": "^8.70.1",
     "vite": "^8.3.0",
     "vitest": "^5.0.1",
-    "web-ext": "^7.11.0"
+    "web-ext": "^10.7.0"
   },
   "repository": {
     "type": "git",
