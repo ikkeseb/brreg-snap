@@ -31,12 +31,12 @@ export interface SidebarAdapter {
    *  stack — both engines consume the activation token on the first
    *  await, and Chrome's sidePanel.open hard-requires a live gesture. */
   open(target: OpenTarget): void;
-  /** Whether a panel is currently visible. Firefox can answer; Chrome
-   *  has no query API, so it optimistically returns true — every caller
-   *  treats the follow-up setPanel/sendMessage as best-effort and
-   *  swallows the "no receiver" rejection when the panel is in fact
-   *  closed. */
-  isOpen(): Promise<boolean>;
+  /** Whether a panel is open in `windowId` (omitted: the topmost
+   *  window). Firefox can answer; Chrome has no query API, so it
+   *  optimistically returns true — callers treat the follow-up message
+   *  as best-effort and swallow the "no receiver" rejection when the
+   *  panel is in fact closed. */
+  isOpen(windowId?: number): Promise<boolean>;
 }
 
 // Minimal local typing for chrome.sidePanel — only the two methods we
@@ -69,8 +69,10 @@ const firefoxSidebar: SidebarAdapter = {
   open() {
     void browser.sidebarAction.open().catch(() => {});
   },
-  isOpen() {
-    return browser.sidebarAction.isOpen({});
+  isOpen(windowId) {
+    return browser.sidebarAction.isOpen(
+      windowId !== undefined ? { windowId } : {},
+    );
   },
 };
 

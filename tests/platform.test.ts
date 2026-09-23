@@ -104,6 +104,13 @@ describe('platform/sidebar — Firefox (sidebarAction) branch', () => {
     await expect(sidebar.isOpen()).resolves.toBe(true);
     expect(m.isOpen).toHaveBeenCalledWith({});
   });
+
+  it('isOpen asks about the given window (sidebars are per window)', async () => {
+    const m = installFirefox();
+    const { sidebar } = await import('../src/lib/platform/sidebar.js');
+    await sidebar.isOpen(4);
+    expect(m.isOpen).toHaveBeenCalledWith({ windowId: 4 });
+  });
 });
 
 describe('platform/sidebar — Chrome (sidePanel) branch', () => {
