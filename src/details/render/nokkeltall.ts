@@ -262,6 +262,8 @@ function renderUnavailable(response: RegnskapResponse, enhet: Enhet): HTMLElemen
   }
   const p = document.createElement('p');
   const a = document.createElement('a');
+  // Styling hook: details.css themes links per context (dd a, footer a).
+  a.className = 'nokkeltall-link';
   a.href = `https://virksomhet.brreg.no/nb/oppslag/enheter/${enhet.organisasjonsnummer}`;
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
