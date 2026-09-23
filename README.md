@@ -32,7 +32,7 @@ pages you browse and never reads their DOM.
 | `storage` | Cache brreg responses and domain lookups locally (`storage.session`, 24h TTL, gone when the browser closes), keep the 5 most recent companies, and persist the "Auto-oppdater" toggle (`storage.local`) |
 | `menus` | Register the "Vis i brreg-snap sidebar" right-click item. On Mozilla's no-prompt list — silent at install, does not grant tab snooping (activeTab still required, granted per click). |
 | `host_permissions: https://data.brreg.no/*` | Fetch from the public brreg API. Only domain we contact. |
-| `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater ved fane-bytte" in the sidebar. Requested at runtime via the browser's permission prompt; revocable from the extension manager (`about:addons` / `chrome://extensions`) or by flipping the toggle off (which calls `permissions.remove`). Install dialog stays silent. |
+| `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater ved fane-bytte" in the sidebar. Switching it on first shows a notice of what is sent; its «Slå på» button requests `tabs` via the browser's permission prompt. Flipping the toggle off gives it back (`permissions.remove`); on Firefox it can also be revoked in `about:addons`. `tabs` is not in the install dialog. |
 
 On Chrome the equivalent install set is `activeTab` + `storage` +
 `contextMenus` + `sidePanel` + the same `data.brreg.no` host. Only the
@@ -57,11 +57,15 @@ panel is open. There is no `cookies`, `webRequest`, or `<all_urls>`
 access — the security posture stays "no DOM, no network beyond
 data.brreg.no".
 
-What does leave the browser: to find the company, the extension sends
-the site's domain (and name words derived from it) to data.brreg.no.
-It goes only to that public registry, never to the developer. Firefox
-declares this as `browsingActivity` data collection, the Chrome Web
-Store as "Web history" — see [PRIVACY.md](PRIVACY.md).
+What does leave the browser, to find the company: the site's
+registrable domain (`dnb.no` for `nettbank.dnb.no`; subdomains are
+not sent) and a name label derived from it (`dnb`), an orgnr found in
+the page address or title, and text typed into the search box. IP
+addresses and reserved local names (`localhost`, `.local`, `.lan` …)
+are never sent. It all goes only to data.brreg.no, never to the
+developer. Firefox declares this as `browsingActivity` data
+collection, the Chrome Web Store as "Web history" — see
+[PRIVACY.md](PRIVACY.md).
 
 Total reviewable surface is intentionally small: `src/` is a few
 thousand lines of TypeScript with zero runtime dependencies — no
@@ -102,11 +106,11 @@ When you click the toolbar icon:
    - **Hostname → brreg search** — multi-query pipeline (hjemmeside
      field + Nordic-folded name search) with confidence scoring
      (`src/lib/hostname-search.ts`, `src/lib/hostname-score.ts`).
-     Sends the hostname and its main label to brreg, never the full
-     URL or the title. Auto-resolves only when one candidate is
-     clearly ahead; popup and sidebar show a "Mente du …?" picker
-     when several plausible companies tie, and refuse rather than
-     guess wrong.
+     Sends only the registrable domain (`nettbank.dnb.no` → `dnb.no`)
+     and its main label to brreg, never the full URL or the title.
+     Auto-resolves only when one candidate is clearly ahead; popup
+     and sidebar show a "Mente du …?" picker when several plausible
+     companies tie, and refuse rather than guess wrong.
    - **Free-text search fallback** — if nothing else matches, popup
      and sidebar show a search box that hits brreg's search endpoint.
 3. Fetch the entity from `data.brreg.no/enhetsregisteret/api/enheter/<orgnr>`.
@@ -117,10 +121,11 @@ lookups don't hammer the API.
 
 A sidebar panel (toolbar sidebar icon or "Vis i brreg-snap sidebar"
 from the page right-click menu) renders the same data with a deeper
-layout — board members, regnskap, underenheter. With "Auto-oppdater
-ved fane-bytte" enabled the sidebar requests the `tabs` permission at
-runtime and re-resolves the orgnr when you switch tabs, as long as
-the panel is open.
+layout — board members, regnskap, underenheter. Turning on
+"Auto-oppdater ved fane-bytte" shows what will be sent, then requests
+the `tabs` permission; from then on the panel looks up the page you
+are on every time you switch tabs or open a new page, as long as a
+brreg-snap panel is open.
 
 ## Project layout
 

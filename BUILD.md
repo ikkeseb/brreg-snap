@@ -160,10 +160,10 @@ Norwegian business registry API). This is enforced by:
 
 There are no content scripts, no `<all_urls>` permissions, and no
 remote-loaded code. To find the company behind a site, the extension
-sends that site's hostname (and name words derived from it) to
-data.brreg.no, which is why the manifest declares `browsingActivity`
-in `data_collection_permissions`. See [PRIVACY.md](PRIVACY.md) for the
-full data flow.
+sends that site's registrable domain (`dnb.no` for `nettbank.dnb.no`)
+and a name label derived from it to data.brreg.no, which is why the
+manifest declares `browsingActivity` in `data_collection_permissions`.
+See [PRIVACY.md](PRIVACY.md) for the full data flow.
 
 ## Verification
 
