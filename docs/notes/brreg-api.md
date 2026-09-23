@@ -117,15 +117,23 @@ in `4ec8d12` since they were dead code. Don't reintroduce them — and
 don't waste a session trying to re-discover the gap.
 
 <!-- SECTION: search-drops-dots -->
-## Brreg name search drops periods
+## Name search and dots: the dot is matched literally
 
-`?navn=FINN.no` returns garbage — the search index normalises away
-punctuation. There's no client-side workaround: quoting and escaping
-both fail because the API drops the dot internally. Hostnames whose
-legal name contains punctuation (FINN.no is the canonical case)
-therefore don't resolve via brreg; the sidebar's manual search box
-is the fallback. The extension does not carry a curated override
-table to paper over this — see CLAUDE.md § "No curated data".
+The anchor name is historical: this note used to say the index drops
+periods. Measured 2026-09-24 (and asserted weekly by the canary), it
+doesn't. `?navn=APOTERA.NO` finds APOTERA.NO AS and `?navn=APOTERANO`
+finds nothing, so a legal name with a dot is found by exactly that
+name. `?navn=FINN.no` returns 0 hits because no entity is registered
+under that name. finn.no's company is VEND MARKETPLACES AS, formerly
+FINN NO AS with no dot. The default search method ORs the words
+instead: `?navn=FINN.NO AS` returns ~440,000 hits via "AS".
+
+The hostname resolver never sends a dot: it searches the label
+(`finn`), not the host. When a brand's legal name differs from its
+domain, as with finn.no, brreg can't bridge it, and the sidebar's
+manual search box is the fallback. The extension does not carry a
+curated override table to paper over this. See CLAUDE.md § "No
+curated data".
 
 <!-- SECTION: docs-links -->
 ## Check the docs before curling
@@ -140,3 +148,41 @@ Frivillighetsregister, etc.):
 
 Reach for these before probing endpoints by trial-and-error — most
 field shapes and pagination quirks are spelled out there.
+
+<!-- SECTION: live-canary -->
+## The live canary checks these facts weekly
+
+`pnpm test:live` runs `tests/live/**` against the live API, using its
+own `vitest.live.config.ts`. `pnpm test` and `pnpm verify` never run it.
+It has two files:
+
+- `contracts.test.ts` runs one test per SECTION anchor in this note,
+  named after the anchor, plus a meta-test that fails when an anchor
+  has no test. It also checks the entity shapes the code reads (DNB,
+  Equinor in USD, a konkurs AS with a BOBE bostyrer, a slettet entity,
+  an ENK, a NUF, an underenhet, roller with `avregistrert` and no
+  `fratraadt`), the search semantics the resolver depends on (no Nordic
+  folding, hjemmeside substring, `organisasjonsnummer=`), and the 1.4
+  endpoints (konsernstruktur, oppdateringer, `kopi/{orgnr}/aar`). Two
+  tests are deliberate tripwires. `regnskap-single-year-only` fails when
+  Equinor's regnskap returns more than one year. The Endringslogg test
+  fails when brreg adds a changelog entry: read the entry, then bump
+  `ENDRINGSLOGG_NEWEST`. Responses go through the shipped fetchers and
+  helpers. About 40 requests, sequential, with a 250 ms pause.
+- `resolver-corpus.test.ts` runs the shipped `searchByHostnameDetailed`
+  over about 35 hosts, each with an expected outcome. Only an auto
+  resolution to the wrong company fails a test. The ledger (band,
+  candidates, verdict per host, request count) is printed after the
+  run. About 120 requests.
+
+It runs in CI via `.github/workflows/canary.yml`, weekly (Mondays
+04:23 UTC) and on `workflow_dispatch`. A failure opens the one open
+issue labelled `canary`, or comments on it if one is open, with the
+failing test names and a run link. The same workflow runs `pnpm audit
+--audit-level high` as a report-only step. It also calls
+`.github/workflows/keepalive.yml`, which re-enables every scheduled
+workflow so GitHub's 60-day inactivity rule doesn't switch them off.
+
+To run it locally, use `pnpm test:live`, or pass one file:
+`pnpm test:live tests/live/resolver-corpus.test.ts`. When brreg
+changes on purpose, update the test and this note in the same commit.

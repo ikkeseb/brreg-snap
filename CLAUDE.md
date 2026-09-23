@@ -53,6 +53,7 @@ pnpm lint:ext                              # web-ext lint on dist-firefox/; fail
 pnpm verify:dist                           # dist manifests + the files they reference, file set, no eval/Function (AST); run both builds first
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
+pnpm test:live                             # live brreg canary: API contracts + resolver corpus (network; not in verify)
 pnpm exec vitest run tests/orgnr.test.ts   # single file
 pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # single test by name
 pnpm build                                 # = build:firefox (default target)
@@ -96,7 +97,7 @@ note before reading the source file.
 | Session cache (TTL, sweep, data age), failures never cached, race guards (manual search `runId`, popup `loadRunId`, the panel's load token) | `src/lib/session-cache.ts`, `brreg.ts`, `hostname-search.ts`, `ui/manual-search.ts`, `panel-follow.ts`, `src/popup/popup.ts`, `src/details/details.ts` | `docs/notes/cache.md`             |
 | Sidebar sync: panel-hosted auto-sync, window-scoped messages, same-view keep | `src/details/details.ts`, `src/lib/panel-protocol.ts`, `panel-follow.ts`, `tab-sync.ts`, `popup/popup.ts`, `background/background.ts` | `docs/notes/sidebar-sync.md`      |
 | Permissions: `activeTab` limits, runtime `tabs` opt-in + consent step, gesture-stack rules, background wake-up, `browsingActivity` declaration | `public/manifest.*.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts` | `docs/notes/permissions-model.md` |
-| brreg API: regnskap base URL + latest year only, regnskap 500 = not in the open API, error contract (search throws, `[]` = real empty), no signatur, search drops dots | `src/lib/brreg.ts`, `regnskap.ts` | `docs/notes/brreg-api.md`         |
+| brreg API: regnskap base URL + latest year only, regnskap 500 = not in the open API, error contract (search throws, `[]` = real empty), no signatur, name search matches a dot literally (finn.no misses because FINN was renamed), live canary | `src/lib/brreg.ts`, `regnskap.ts`, `tests/live/` | `docs/notes/brreg-api.md`         |
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
 
 Sidebar render functions are pure DOM writers in `src/details/render/*.ts`
