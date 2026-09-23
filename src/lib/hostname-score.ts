@@ -388,7 +388,8 @@ export function scoreCandidate(
   return { score, reasons, hjemmesideTie };
 }
 
-// Thresholds — tuned against scripts/benchmark-hostname.mjs.
+// Thresholds — tuned against the hostname benchmark, now the live resolver corpus
+// (tests/live/resolver-corpus.test.ts, `pnpm test:live`).
 //
 // AUTO: top must be confidently above the noise floor (75) AND
 // clearly ahead of the runner-up (+10) so kjedebutikker (ELKJØP

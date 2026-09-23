@@ -23,6 +23,7 @@
     "lint:ext": "node scripts/lint-ext.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:live": "vitest run --config vitest.live.config.ts",
     "typecheck": "tsc -p tsconfig.json && tsc -p tests/tsconfig.json && tsc -p tsconfig.node.json",
     "lint": "eslint --max-warnings 0 .",
     "verify:fast": "pnpm run typecheck && pnpm run lint && pnpm run test",

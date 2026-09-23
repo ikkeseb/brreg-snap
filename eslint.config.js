@@ -96,7 +96,7 @@ export default defineConfig(
   // Root config files live in tsconfig.node.json, which the project
   // service can't discover (it only finds files named tsconfig.json).
   {
-    files: ['vite.config.ts', 'vitest.config.ts'],
+    files: ['vite.config.ts', 'vitest.config.ts', 'vitest.live.config.ts'],
     languageOptions: {
       parserOptions: {
         projectService: false,
