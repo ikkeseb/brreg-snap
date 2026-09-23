@@ -8,6 +8,12 @@ import { describe, expect, it } from 'vitest';
 // runtime opt-in only, and a strict CSP. These tests pin the SOURCE
 // manifests so a violating change fails `pnpm test` locally; CI
 // additionally re-checks the stamped dist manifests after build.
+//
+// The Firefox data-collection declaration is pinned too: it is what
+// the install prompt tells users, and it must say the same thing as
+// PRIVACY.md and the store privacy forms (the visited site's domain
+// goes to data.brreg.no = `browsingActivity`). A silent flip back to
+// "none" would be a false claim to every user.
 
 interface Manifest {
   version: string;
@@ -16,6 +22,9 @@ interface Manifest {
   host_permissions?: string[];
   content_scripts?: unknown;
   content_security_policy?: { extension_pages?: string };
+  browser_specific_settings?: {
+    gecko?: { data_collection_permissions?: unknown };
+  };
 }
 
 const load = (file: string): Manifest =>
@@ -76,5 +85,24 @@ describe.each(['firefox', 'chrome'] as const)('manifest.%s', (target) => {
 
   it('version matches package.json', () => {
     expect(m.version).toBe(pkg.version);
+  });
+});
+
+// `required`, not `optional`: every click lookup sends the domain, so
+// there is no opt-out that leaves the extension useful. Exact match —
+// an extra type, an `optional` list or `has_previous_consent` must be a
+// deliberate, reviewed change.
+const EXPECTED_FIREFOX_DATA_COLLECTION = { required: ['browsingActivity'] };
+
+describe('data collection declaration', () => {
+  it('Firefox declares browsingActivity as required data collection', () => {
+    expect(
+      manifests.firefox.browser_specific_settings?.gecko
+        ?.data_collection_permissions,
+    ).toEqual(EXPECTED_FIREFOX_DATA_COLLECTION);
+  });
+
+  it('Chrome ships no gecko block (the CWS privacy form declares it)', () => {
+    expect(manifests.chrome).not.toHaveProperty('browser_specific_settings');
   });
 });
