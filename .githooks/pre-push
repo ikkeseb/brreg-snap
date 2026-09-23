@@ -1,0 +1,14 @@
+#!/bin/sh
+# Pre-push gate: runs `pnpm verify`, the same command CI runs.
+# Wired by `pnpm install` (the `prepare` script sets
+# core.hooksPath=.githooks). Bypass consciously with `git push --no-verify`.
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "pre-push: pnpm is not on PATH (common in GUI git clients), so the" >&2
+  echo "pre-push: 'pnpm verify' gate can't run and the push is blocked." >&2
+  echo "pre-push: push from a terminal where pnpm works, or skip the gate" >&2
+  echo "pre-push: consciously with: git push --no-verify" >&2
+  exit 1
+fi
+
+exec pnpm verify

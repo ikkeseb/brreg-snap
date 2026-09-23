@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { fakeBrowser } from './helpers/fake-browser.js';
 import {
   AUTO_SYNC_STORAGE_KEY,

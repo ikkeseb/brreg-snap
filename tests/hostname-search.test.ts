@@ -35,7 +35,7 @@ function hit(
     organisasjonsnummer,
     organisasjonsform: { kode: 'AS' },
     ...extra,
-  } as SearchHit;
+  };
 }
 
 describe('queryFromHostname', () => {
@@ -142,8 +142,8 @@ describe('searchByHostnameDetailed', () => {
     const result = await searchByHostnameDetailed('eksfin.no');
     const q3Call = searchMock.mock.calls.find(
       (call) =>
-        (call[0] as URLSearchParams).has('navn') &&
-        !(call[0] as URLSearchParams).has('organisasjonsform'),
+        call[0].has('navn') &&
+        !call[0].has('organisasjonsform'),
     );
     expect(q3Call).toBeDefined();
     expect(result).toBeDefined();
@@ -176,7 +176,7 @@ describe('brreg queries', () => {
   });
 
   const calls = () =>
-    searchMock.mock.calls.map((c) => Object.fromEntries(c[0] as URLSearchParams));
+    searchMock.mock.calls.map((c) => Object.fromEntries(c[0]));
 
   it('sends one hjemmeside query on the registrable domain, sorted by headcount', async () => {
     // Brreg matches hjemmeside as a substring, so the www. variant was a

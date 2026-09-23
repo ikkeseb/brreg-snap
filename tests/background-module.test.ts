@@ -65,7 +65,7 @@ function installBrowserMock(
     engine,
     forbid: ['tabs', 'windows', 'permissions', 'storage'],
   });
-  return fake.browser as unknown as BrowserMock;
+  return fake.browser;
 }
 
 async function loadBackground(): Promise<void> {

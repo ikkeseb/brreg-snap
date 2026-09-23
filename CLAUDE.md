@@ -41,10 +41,19 @@ This project uses **pnpm** (pinned via `packageManager` in
 `package.json`). Don't run `npm install` — it will recreate
 `package-lock.json` next to `pnpm-lock.yaml` and drift the dep tree.
 
+The gate is `pnpm verify` (CI, the release workflow and the pre-push
+hook all run it): `verify:fast` (typecheck + lint + test), both builds,
+`verify:dist`, `lint:ext`. `pnpm install` points git at the committed
+hook (`prepare` sets `core.hooksPath .githooks`); `git push --no-verify`
+is the conscious bypass.
+
 ```bash
+pnpm verify                                # the full gate (about 12 s)
+pnpm verify:fast                           # typecheck + lint + test
 pnpm typecheck                             # tsc: src, tests/, tsconfig.node.json projects
-pnpm lint:ts                               # ESLint on src/**/*.ts
+pnpm lint                                  # ESLint on src, tests, scripts, configs; 0 warnings
 pnpm lint:ext                              # web-ext lint on dist-firefox/ (run build first)
+pnpm verify:dist                           # dist manifest invariants (run both builds first)
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
 pnpm exec vitest run tests/orgnr.test.ts   # single file

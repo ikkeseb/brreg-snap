@@ -122,7 +122,6 @@ describe('pushRecent', () => {
     const mock = installStorageMock();
     for (let i = 1; i <= 6; i++) {
       vi.setSystemTime(new Date(2026, 5, 1, 12, 0, i, 0));
-      // eslint-disable-next-line no-await-in-loop
       await pushRecent(String(i), `Company ${i}`);
     }
     const list = stored(mock) as Array<{ orgnr: string }>;

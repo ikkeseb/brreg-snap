@@ -20,12 +20,15 @@
     "package:firefox": "pnpm run build:firefox && web-ext build --source-dir dist-firefox --artifacts-dir web-ext-artifacts --overwrite-dest --ignore-files \"**/*.map\" \"icons/README.md\"",
     "package:chrome": "pnpm run build:chrome && web-ext build --source-dir dist-chrome --artifacts-dir web-ext-artifacts --filename \"brreg-snap-chrome-{version}.zip\" --overwrite-dest --ignore-files \"**/*.map\" \"icons/README.md\"",
     "package:source": "node scripts/package-source.mjs",
-    "lint:ext": "pnpm run lint:ext:firefox",
-    "lint:ext:firefox": "web-ext lint --source-dir dist-firefox",
-    "lint:ts": "eslint \"src/**/*.ts\"",
+    "lint:ext": "web-ext lint --source-dir dist-firefox",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc -p tsconfig.json && tsc -p tests/tsconfig.json && tsc -p tsconfig.node.json"
+    "typecheck": "tsc -p tsconfig.json && tsc -p tests/tsconfig.json && tsc -p tsconfig.node.json",
+    "lint": "eslint --max-warnings 0 .",
+    "verify:fast": "pnpm run typecheck && pnpm run lint && pnpm run test",
+    "verify:dist": "node scripts/verify-dist.mjs",
+    "verify": "pnpm run verify:fast && pnpm run build:firefox && pnpm run build:chrome && pnpm run verify:dist && pnpm run lint:ext",
+    "prepare": "node scripts/install-hooks.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

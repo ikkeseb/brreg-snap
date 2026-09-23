@@ -46,9 +46,8 @@ From the root of the unzipped source zip (or a checkout of the tag):
 
 ```bash
 pnpm install --frozen-lockfile      # uses pnpm-lock.yaml exactly
-pnpm test                           # unit tests (vitest)
-pnpm typecheck                      # tsc --noEmit, zero errors
-pnpm lint:ts                        # eslint, zero warnings
+pnpm verify                         # typecheck, eslint (zero warnings), tests,
+                                    # both builds, manifest invariants, web-ext lint
 pnpm package                        # builds Firefox + produces the package
 ```
 
