@@ -22,11 +22,12 @@ unsigned packages to compare against: `brreg-snap-<version>.zip`
 - **OS**: any. Release packages are built by CI on Ubuntu. The
   repository forces LF line endings (`.gitattributes`), so Windows,
   macOS and Linux produce the same bytes (see Reproducibility below).
-  On Windows, the repo's `.npmrc` (`shell-emulator=true`) makes the
-  POSIX-style `BROWSER=…` env prefixes in the package scripts work
-  under pnpm — no WSL needed.
-- **Node.js**: ≥ 18 (tested on v25.8.1; any 18 LTS / 20 LTS / 22 LTS
-  release should work).
+  The package scripts use no shell-specific syntax (the browser target
+  is a `--mode` flag), so they run under cmd.exe too — no WSL needed.
+- **Node.js**: `^22.13 || ^24 || >=26` (`engines` in `package.json`:
+  the supported ranges of Vite 8, Vitest 5 and ESLint 10). CI builds
+  the release with the version in `.node-version` (24); tested on
+  v24.20.0.
 - **pnpm**: 10.33.0 (pinned via the `packageManager` field in
   `package.json`).
 
@@ -45,9 +46,8 @@ From the root of the unzipped source zip (or a checkout of the tag):
 
 ```bash
 pnpm install --frozen-lockfile      # uses pnpm-lock.yaml exactly
-pnpm test                           # unit tests (vitest)
-pnpm typecheck                      # tsc --noEmit, zero errors
-pnpm lint:ts                        # eslint, zero warnings
+pnpm verify                         # typecheck, eslint (zero warnings), tests,
+                                    # both builds, manifest invariants, web-ext lint
 pnpm package                        # builds Firefox + produces the package
 ```
 
@@ -129,7 +129,7 @@ diff -r mine ci                             # expect no output
 
 ## Minification
 
-The build uses esbuild's minifier (default Vite production setting).
+The build uses Vite's default minifier (Oxc, since Vite 8).
 Source maps are emitted for every JavaScript bundle into
 `dist-firefox/` for local debugging, but are **excluded from the
 packaged `.zip`/`.xpi`** (they are dead weight for end users — the
@@ -146,7 +146,8 @@ dynamic-function constructor — verifiable with
 ## Dependencies
 
 - **Runtime**: zero. The shipped bundle contains no third-party
-  JavaScript. `pnpm audit --prod` returns 0.
+  JavaScript. `package.json` has no `dependencies` field; `pnpm verify`
+  fails if one appears or if `src/` imports a package.
 - **Dev-only**: TypeScript, ESLint, Vite, Vitest, web-ext, and their
   transitive dependencies. None of these ship in the `.xpi`.
 

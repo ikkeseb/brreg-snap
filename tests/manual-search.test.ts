@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { fakeBrowser } from './helpers/fake-browser.js';
 import {
   attachManualSearch,
   parseOrgnrQuery,
@@ -111,21 +112,7 @@ beforeEach(() => {
   fetchMock.mockReset();
   vi.stubGlobal('fetch', fetchMock);
   // The lookups cache in storage.session; start every test cold.
-  const store = new Map<string, unknown>();
-  vi.stubGlobal('browser', {
-    storage: {
-      session: {
-        get: async (key: string | string[] | null) => {
-          const keys = key === null ? [...store.keys()] : Array.isArray(key) ? key : [key];
-          return Object.fromEntries(keys.filter((k) => store.has(k)).map((k) => [k, store.get(k)]));
-        },
-        set: async (entries: Record<string, unknown>) => {
-          for (const [k, v] of Object.entries(entries)) store.set(k, v);
-        },
-        remove: async () => {},
-      },
-    },
-  });
+  fakeBrowser();
 });
 
 afterEach(() => {

@@ -41,17 +41,26 @@ This project uses **pnpm** (pinned via `packageManager` in
 `package.json`). Don't run `npm install` — it will recreate
 `package-lock.json` next to `pnpm-lock.yaml` and drift the dep tree.
 
+The gate is `pnpm verify` (CI, the release workflow and the pre-push
+hook all run it): `verify:fast` (typecheck + lint + test), both builds,
+`verify:dist`, `lint:ext`. `pnpm install` points git at the committed
+hook (`prepare` sets `core.hooksPath .githooks`); `git push --no-verify`
+is the conscious bypass.
+
 ```bash
-pnpm typecheck                             # tsc --noEmit
-pnpm lint:ts                               # ESLint on src/**/*.ts
-pnpm lint:ext                              # web-ext lint on dist-firefox/ (run build first)
+pnpm verify                                # the full gate (about 12 s)
+pnpm verify:fast                           # typecheck + lint + test
+pnpm typecheck                             # tsc: src, tests/, tsconfig.node.json projects
+pnpm lint                                  # ESLint on src, tests, scripts (not scripts/preview/), configs; 0 warnings
+pnpm lint:ext                              # web-ext lint on dist-firefox/; fails on errors + unlisted warnings
+pnpm verify:dist                           # dist manifests + the files they reference, file set, no eval/Function (AST); run both builds first
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
 pnpm exec vitest run tests/orgnr.test.ts   # single file
 pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # single test by name
 pnpm build                                 # = build:firefox (default target)
-pnpm build:firefox                         # BROWSER=firefox -> dist-firefox/
-pnpm build:chrome                          # BROWSER=chrome   -> dist-chrome/
+pnpm build:firefox                         # vite build --mode firefox -> dist-firefox/
+pnpm build:chrome                          # vite build --mode chrome   -> dist-chrome/
 pnpm watch                                 # vite build --watch (firefox target)
 pnpm dev                                   # = dev:firefox (build + web-ext run, FF profile)
 pnpm dev:chrome                            # build:chrome + web-ext run -t chromium
@@ -66,7 +75,7 @@ parity for the side panel; load `dist-chrome/` unpacked via
 
 ### Dual-browser build (chrome-port)
 
-One source tree, two targets via `BROWSER=firefox|chrome`. Outputs go
+One source tree, two targets via `vite build --mode firefox|chrome`. Outputs go
 to `dist-firefox/` and `dist-chrome/`; the matching
 `public/manifest.<browser>.json` is copied to `manifest.json` by the
 `copy-static-assets` plugin in `vite.config.ts` (`publicDir` is
@@ -155,7 +164,10 @@ PRs that relax any of the above will be rejected.
 ## Dependencies
 
 Zero runtime dependencies in the shipped bundle (everything is
-inlined TypeScript). `pnpm audit --prod` should always return 0.
-The advisories in `web-ext`'s transitive chain are dev-only and do
-not enter the extension — defer the breaking `web-ext` 10.x upgrade
-until something actually exercises a vulnerable path.
+inlined TypeScript). `pnpm verify` enforces it: the build fails when
+any module outside `src/`, or any non-`.ts` script, enters the bundle
+graph (`scripts/build-graph.mjs`); ESLint bans non-relative imports in
+`src/`; `verify:dist` fails if `package.json` gains a `dependencies`
+field. Every package is a dev
+dependency, so `pnpm audit` advisories concern the toolchain, not the
+extension.

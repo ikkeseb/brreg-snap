@@ -82,7 +82,7 @@ describe('deriveVerdict — status', () => {
   });
 
   it('says since when for a konkurs (live 1VASK AS)', () => {
-    const s = signal(konkursEnhet as Enhet, undefined, 'status');
+    const s = signal(konkursEnhet, undefined, 'status');
     expect(s).toMatchObject({
       value: 'Konkurs',
       detail: 'siden 26.08.2026',
@@ -91,7 +91,7 @@ describe('deriveVerdict — status', () => {
   });
 
   it('says why for a forced dissolution (live 1779 HOLDING AS)', () => {
-    const s = signal(tvangEnhet as Enhet, undefined, 'status');
+    const s = signal(tvangEnhet, undefined, 'status');
     expect(s).toMatchObject({
       value: 'Tvangsavvikling',
       detail: 'mangler regnskap',
@@ -99,13 +99,13 @@ describe('deriveVerdict — status', () => {
   });
 
   it('dates a deletion (live SlettetEnhet)', () => {
-    const s = signal(slettetEnhet as Enhet, undefined, 'status');
+    const s = signal(slettetEnhet, undefined, 'status');
     expect(s).toMatchObject({ value: 'Slettet', detail: '15.09.2026' });
   });
 
   it('turns the other green cells neutral under a danger status', () => {
     const signals = deriveVerdict(
-      konkursEnhet as Enhet,
+      konkursEnhet,
       regnskapWithYear('2025'),
       NOW,
     );
@@ -116,7 +116,7 @@ describe('deriveVerdict — status', () => {
 
 describe('deriveVerdict — alder', () => {
   it('counts from stiftelsesdato, not the 1995 register floor (live Equinor)', () => {
-    const s = signal(equinorEnhet as Enhet, undefined, 'alder');
+    const s = signal(equinorEnhet, undefined, 'alder');
     // Founded 1972-09-18; on 2026-07-04 that is 53 whole years.
     expect(s).toMatchObject({ value: '53 år', detail: 'stiftet 1972' });
   });
@@ -198,7 +198,7 @@ describe('deriveVerdict — ansatte', () => {
   it('says «1–4» when the register flags employees but gives no count', () => {
     // Live shape: brreg drops antallAnsatte below five employees and
     // keeps harRegistrertAntallAnsatte true. This used to read «Ingen».
-    const s = signal(smallEmployer as Enhet, undefined, 'ansatte');
+    const s = signal(smallEmployer, undefined, 'ansatte');
     expect(smallEmployer).not.toHaveProperty('antallAnsatte');
     expect(s).toEqual({
       key: 'ansatte',
