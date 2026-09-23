@@ -57,7 +57,7 @@ their API.
 
 ## What is stored on your device
 
-Nothing is synced or sent anywhere.
+None of this is synced or sent anywhere.
 
 - **Lookup cache** (`storage.session`): register responses keyed by
   organisation number, and the lookup result for each domain you
@@ -96,7 +96,7 @@ Removing the extension deletes all of it.
   adheres to the Chrome Web Store User Data Policy, including the
   Limited Use requirements. The data is used only to show you the
   company behind a site. It is not sold, not used for advertising or
-  creditworthiness, and not read by anyone.
+  creditworthiness, and the developer never receives it.
 
 ## Source code
 
