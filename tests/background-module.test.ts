@@ -19,14 +19,14 @@ vi.mock('../src/lib/brreg.js', () => ({
 }));
 
 import { searchEnheterWithParams } from '../src/lib/brreg.js';
+import { fakeBrowser } from './helpers/fake-browser.js';
 
-function makeListenerSpy() {
-  return { addListener: vi.fn(), removeListener: vi.fn() };
-}
+type Fn = ReturnType<typeof vi.fn>;
+type EventSpy = { addListener: Fn; removeListener: Fn };
 
 type MenusMock = {
-  create: ReturnType<typeof vi.fn>;
-  onClicked: ReturnType<typeof makeListenerSpy>;
+  create: Fn;
+  onClicked: EventSpy;
 };
 
 // The context-menu API lives under a different namespace per engine
@@ -39,26 +39,10 @@ function menusSpy(mock: unknown): MenusMock {
   return api;
 }
 
-// Any access to browser.tabs / permissions / storage from the
-// background throws — so a module that registered tab listeners (or
-// gated on the toggle) would fail at import, not pass silently.
-function forbidden(name: string): unknown {
-  return new Proxy(
-    {},
-    {
-      get(_t, prop) {
-        throw new Error(`background touched browser.${name}.${String(prop)}`);
-      },
-    },
-  );
-}
-
-type Fn = ReturnType<typeof vi.fn>;
-
 interface BrowserMock {
   runtime: {
-    onInstalled: ReturnType<typeof makeListenerSpy>;
-    onStartup: ReturnType<typeof makeListenerSpy>;
+    onInstalled: EventSpy;
+    onStartup: EventSpy;
     sendMessage: Fn;
   };
   sidebarAction?: { setPanel: Fn; open: Fn };
@@ -67,44 +51,21 @@ interface BrowserMock {
   contextMenus?: MenusMock;
 }
 
+// The shared fake exposes only the engine's own namespaces: Firefox has
+// sidebarAction and, under the `menus` permission, `browser.menus` —
+// `browser.contextMenus` is UNDEFINED there. Chromium has sidePanel and
+// only `chrome.contextMenus`. Any access to browser.tabs / windows /
+// permissions / storage throws, so a module that registered tab
+// listeners (or gated on the toggle) would fail at import, not pass
+// silently.
 function installBrowserMock(
   engine: 'firefox' | 'chrome' = 'firefox',
 ): BrowserMock {
-  const mock = {
-    tabs: forbidden('tabs'),
-    permissions: forbidden('permissions'),
-    storage: forbidden('storage'),
-    runtime: {
-      onInstalled: makeListenerSpy(),
-      onStartup: makeListenerSpy(),
-      sendMessage: vi.fn(async () => undefined),
-      getURL: vi.fn((p: string) => `moz-extension://test/${p}`),
-      lastError: undefined,
-    },
-    // Engine marker + context-menu namespace, both engine-realistic.
-    // Firefox exposes sidebarAction and, under the `menus` permission,
-    // `browser.menus` — `browser.contextMenus` is UNDEFINED there.
-    // Chromium exposes sidePanel and only `chrome.contextMenus` (no
-    // `menus`). engine.ts feature-detects on 'sidebarAction'.
-    ...(engine === 'firefox'
-      ? {
-          sidebarAction: {
-            setPanel: vi.fn(async () => undefined),
-            open: vi.fn(async () => undefined),
-          },
-          menus: { create: vi.fn(), onClicked: makeListenerSpy() },
-        }
-      : {
-          sidePanel: {
-            setOptions: vi.fn(async () => undefined),
-            open: vi.fn(async () => undefined),
-          },
-          contextMenus: { create: vi.fn(), onClicked: makeListenerSpy() },
-        }),
-  };
-  (globalThis as { browser?: unknown }).browser = mock;
-  (globalThis as { chrome?: unknown }).chrome = mock;
-  return mock as unknown as BrowserMock;
+  const fake = fakeBrowser({
+    engine,
+    forbid: ['tabs', 'windows', 'permissions', 'storage'],
+  });
+  return fake.browser as unknown as BrowserMock;
 }
 
 async function loadBackground(): Promise<void> {

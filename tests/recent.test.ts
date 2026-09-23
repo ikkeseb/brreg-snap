@@ -1,43 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { fakeBrowser } from './helpers/fake-browser.js';
 import { getRecent, pushRecent } from '../src/lib/ui/recent.js';
 
 // Characterization tests for the popup "recent companies" stack. Locks
 // in the current behavior (storage.session backing, MAX 5, dedupe-by-
 // orgnr most-recent-first, shape validation, error-swallowing) before
-// the Chrome port. Mocking follows tests/tab-sync.test.ts: assign a
-// plain object to globalThis.browser with vi.fn()-backed
-// storage.session.{get,set}.
+// the Chrome port. storage.session comes from the shared browser fake.
 
 const STORAGE_KEY = 'recent-companies';
 
 type StorageMap = Record<string, unknown>;
 
-// Installs a storage.session mock whose get() returns a partial map for
-// the requested string key (matching the native API surface that
-// recent.ts calls with a single string). The returned handle exposes
-// the backing store and the spies so tests can seed data, assert
-// writes, or swap in rejecting implementations. Return type is inferred
-// so the vi.fn() mock generics survive (a named interface field of
-// ReturnType<typeof vi.fn> is invariant and rejects the narrow mocks).
+// Installs the shared fake (tests/helpers/fake-browser.ts) with the
+// given storage.session contents. The returned handle exposes the
+// backing store and the get/set spies so tests can seed data, assert
+// writes, or swap in rejecting implementations.
 function installStorageMock(initial: StorageMap = {}) {
-  const store: StorageMap = { ...initial };
-  const get = vi.fn((keys: string | string[]): Promise<StorageMap> => {
-    const list = Array.isArray(keys) ? keys : [keys];
-    const out: StorageMap = {};
-    for (const k of list) {
-      if (k in store) out[k] = store[k];
-    }
-    return Promise.resolve(out);
-  });
-  const set = vi.fn((entries: StorageMap): Promise<void> => {
-    Object.assign(store, entries);
-    return Promise.resolve();
-  });
-  (globalThis as { browser?: unknown }).browser = {
-    storage: { session: { get, set } },
-  };
-  return { store, get, set };
+  const fake = fakeBrowser({ storage: { session: initial } });
+  const { get, set } = fake.storage.session;
+  return { store: fake.stores.session, get, set };
 }
 
 describe('getRecent', () => {

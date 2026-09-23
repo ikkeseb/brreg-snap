@@ -62,6 +62,10 @@ export default defineConfig(({ mode }) => {
     plugins: [
       {
         name: 'copy-static-assets',
+        // Build only: the dev server (and anything that loads this config
+        // in serve mode) calls closeBundle too, which would write a
+        // manifest over a stale dist-*/.
+        apply: 'build',
         closeBundle() {
           const dist = resolve(import.meta.dirname, outDir);
           if (!existsSync(dist)) mkdirSync(dist, { recursive: true });

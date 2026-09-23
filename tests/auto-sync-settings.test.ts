@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fakeBrowser } from './helpers/fake-browser.js';
 import {
   AUTO_SYNC_STORAGE_KEY,
   getAutoSync,
@@ -8,31 +9,7 @@ import {
 type StorageMap = Record<string, unknown>;
 
 function installStorageMock(initial: StorageMap = {}): StorageMap {
-  const store: StorageMap = { ...initial };
-  // The webextension-polyfill / native browser API both expose
-  // storage.local.get with a string or string[] arg returning a partial map.
-  (globalThis as { browser?: unknown }).browser = {
-    storage: {
-      local: {
-        get: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          const out: StorageMap = {};
-          for (const k of list) {
-            if (k in store) out[k] = store[k];
-          }
-          return out;
-        }),
-        set: vi.fn(async (entries: StorageMap) => {
-          Object.assign(store, entries);
-        }),
-        remove: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          for (const k of list) delete store[k];
-        }),
-      },
-    },
-  };
-  return store;
+  return fakeBrowser({ storage: { local: initial } }).stores.local;
 }
 
 describe('auto-sync-settings', () => {
