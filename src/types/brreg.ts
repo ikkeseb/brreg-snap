@@ -103,8 +103,6 @@ export interface Enhet {
   // Date of the articles of association in force.
   vedtektsdato?: string;
   kapital?: Kapital;
-  // Part of a konsern (group) per the register.
-  erIKonsern?: boolean;
   // The country whose law governs a foreign entity. Present on UTLA
   // entities; live NUF samples (2026-09-24) carry none, so a NUF's
   // country comes from its forretningsadresse.
@@ -114,6 +112,9 @@ export interface Enhet {
   // Regnskapsregisteret. Present even when the regnskap endpoint itself
   // can't serve the filing (banks, insurers).
   sisteInnsendteAarsregnskap?: string;
+  // true when brreg has the entity in a konsern (group); present on
+  // every live Enhet. Gates the /konsernstruktur fetch.
+  erIKonsern?: boolean;
 }
 
 export type SearchHit = Pick<Enhet, 'organisasjonsnummer' | 'navn'> &
@@ -193,6 +194,33 @@ export interface UnderenheterPage {
   total: number;
 }
 
+// One node of GET /enhetsregisteret/api/konsernstruktur/{orgnr}. The
+// response is the WHOLE group rooted at its top parent, whichever
+// member was asked for. The root carries only organisasjonsnummer,
+// navn, organisasjonsform and children; every other node also has the
+// link to its parent. A company owned through several parents appears
+// once under each (see docs/notes/brreg-api.md § konsernstruktur).
+export interface KonsernNode {
+  organisasjonsnummer: string;
+  navn: string;
+  organisasjonsform?: Kode;
+  // KDAT «Konsern datter», KMOR «Konsern mor» (a mid-level parent),
+  // KGRL «Konsern grunnlag» (a partial stake that counts towards
+  // control together with other links).
+  knytningsform?: Kode;
+  // Ownership basis as brreg writes it: «100%», «100 %», «99,99%»,
+  // «95,0%» — or text («Indirekte mor»).
+  grunnlag?: string;
+  // Level as brreg numbers it. Does not always match the depth in the
+  // tree (51 of ~990 live nodes disagreed); derive depth from the tree.
+  nivaa?: number;
+  parentOrganisasjonsnummer?: string;
+  parentNavn?: string;
+  // ISO date of the link.
+  dato?: string;
+  // Absent (never []) on a leaf.
+  children?: KonsernNode[];
+}
 
 export interface Regnskap {
   id?: number;

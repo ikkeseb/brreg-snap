@@ -16,7 +16,7 @@ const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 // Firefox 100+ / Chrome 103+ — well below our minimum targets. An
 // abort rejects the fetch, which counts as a failure like any other
 // network error — callers decide what failure means.
-export const FETCH_TIMEOUT_MS = 8000;
+const FETCH_TIMEOUT_MS = 8000;
 
 // The longest Retry-After a 429 may ask for and still get its one
 // retry. Longer than this the user is better served by «prøv igjen»
@@ -68,14 +68,17 @@ const REGNSKAP_UNAVAILABLE_TTL_MS = 6 * 60 * 60 * 1000;
 
 // Cache-key prefixes used by all fetchers. invalidateCache() and
 // getFetchedAt() walk these for everything related to a single orgnr.
+// 'endringer', 'konsern' and 'aarsregnskap' belong to
+// src/lib/brreg-endringer.ts, src/lib/konsern.ts and src/lib/aarsregnskap.ts.
 const CACHE_PREFIXES = [
   'enhet',
   'underenhet',
   'roller',
   'underenheter',
   'regnskap',
-  // The change feed (src/lib/brreg-endringer.ts).
   'endringer',
+  'konsern',
+  'aarsregnskap',
 ] as const;
 
 function isEnhet(value: unknown): value is Enhet {

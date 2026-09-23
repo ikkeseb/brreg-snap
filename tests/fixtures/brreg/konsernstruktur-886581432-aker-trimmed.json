@@ -1,0 +1,283 @@
+{
+  "organisasjonsnummer": "881653192",
+  "navn": "THE RESOURCE GROUP TRG AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap"
+  },
+  "children": [
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "STRENDENE EIENDOM AS",
+      "organisasjonsnummer": "998656192",
+      "parentNavn": "THE RESOURCE GROUP TRG AS",
+      "parentOrganisasjonsnummer": "881653192",
+      "grunnlag": "100%",
+      "dato": "2018-02-08",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "TRG HOLDING AS",
+      "organisasjonsnummer": "981936248",
+      "parentNavn": "THE RESOURCE GROUP TRG AS",
+      "parentOrganisasjonsnummer": "881653192",
+      "grunnlag": "99,71%",
+      "dato": "2018-02-08",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KMOR",
+            "beskrivelse": "Konsern mor"
+          },
+          "navn": "AKER ASA",
+          "organisasjonsnummer": "886581432",
+          "parentNavn": "TRG HOLDING AS",
+          "parentOrganisasjonsnummer": "981936248",
+          "grunnlag": "66,99%",
+          "dato": "2018-02-08",
+          "organisasjonsform": {
+            "kode": "ASA",
+            "beskrivelse": "Allmennaksjeselskap"
+          },
+          "children": [
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "AKER HOLDING AS",
+              "organisasjonsnummer": "991368965",
+              "parentNavn": "AKER ASA",
+              "parentOrganisasjonsnummer": "886581432",
+              "grunnlag": "70,0%",
+              "dato": "2021-11-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "AKER BIOMARINE ASA",
+              "organisasjonsnummer": "913915062",
+              "parentNavn": "AKER ASA",
+              "parentOrganisasjonsnummer": "886581432",
+              "grunnlag": "100%",
+              "dato": "2021-11-12",
+              "organisasjonsform": {
+                "kode": "ASA",
+                "beskrivelse": "Allmennaksjeselskap"
+              },
+              "children": [
+                {
+                  "nivaa": 2,
+                  "knytningsform": {
+                    "kode": "KGRL",
+                    "beskrivelse": "Konsern grunnlag"
+                  },
+                  "navn": "THE QRILL COMPANY AS",
+                  "organisasjonsnummer": "988354139",
+                  "parentNavn": "AKER BIOMARINE ASA",
+                  "parentOrganisasjonsnummer": "913915062",
+                  "grunnlag": "40,0%",
+                  "dato": "2018-02-08",
+                  "organisasjonsform": {
+                    "kode": "AS",
+                    "beskrivelse": "Aksjeselskap"
+                  },
+                  "children": [
+                    {
+                      "nivaa": 3,
+                      "knytningsform": {
+                        "kode": "KDAT",
+                        "beskrivelse": "Konsern datter"
+                      },
+                      "navn": "THE QRILL COMPANY SERVICES AS",
+                      "organisasjonsnummer": "911773430",
+                      "parentNavn": "THE QRILL COMPANY AS",
+                      "parentOrganisasjonsnummer": "988354139",
+                      "grunnlag": "100%",
+                      "dato": "2018-03-03",
+                      "organisasjonsform": {
+                        "kode": "AS",
+                        "beskrivelse": "Aksjeselskap"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "ANTARCTIC HARVESTING HOLDING AS",
+      "organisasjonsnummer": "914386632",
+      "parentNavn": "THE RESOURCE GROUP TRG AS",
+      "parentOrganisasjonsnummer": "881653192",
+      "grunnlag": "100%",
+      "dato": "2018-02-08",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "THE QRILL COMPANY AS",
+          "organisasjonsnummer": "988354139",
+          "parentNavn": "ANTARCTIC HARVESTING HOLDING AS",
+          "parentOrganisasjonsnummer": "914386632",
+          "grunnlag": "60,0%",
+          "dato": "2018-02-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "children": [
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "THE QRILL COMPANY SERVICES AS",
+              "organisasjonsnummer": "911773430",
+              "parentNavn": "THE QRILL COMPANY AS",
+              "parentOrganisasjonsnummer": "988354139",
+              "grunnlag": "100%",
+              "dato": "2018-03-03",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "nivaa": 2,
+      "knytningsform": {
+        "kode": "KGRL",
+        "beskrivelse": "Konsern grunnlag"
+      },
+      "navn": "AKER ASA",
+      "organisasjonsnummer": "886581432",
+      "parentNavn": "THE RESOURCE GROUP TRG AS",
+      "parentOrganisasjonsnummer": "881653192",
+      "grunnlag": "1,19%",
+      "dato": "2018-02-08",
+      "organisasjonsform": {
+        "kode": "ASA",
+        "beskrivelse": "Allmennaksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 3,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "AKER HOLDING AS",
+          "organisasjonsnummer": "991368965",
+          "parentNavn": "AKER ASA",
+          "parentOrganisasjonsnummer": "886581432",
+          "grunnlag": "70,0%",
+          "dato": "2021-11-12",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 3,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "AKER BIOMARINE ASA",
+          "organisasjonsnummer": "913915062",
+          "parentNavn": "AKER ASA",
+          "parentOrganisasjonsnummer": "886581432",
+          "grunnlag": "100%",
+          "dato": "2021-11-12",
+          "organisasjonsform": {
+            "kode": "ASA",
+            "beskrivelse": "Allmennaksjeselskap"
+          },
+          "children": [
+            {
+              "nivaa": 2,
+              "knytningsform": {
+                "kode": "KGRL",
+                "beskrivelse": "Konsern grunnlag"
+              },
+              "navn": "THE QRILL COMPANY AS",
+              "organisasjonsnummer": "988354139",
+              "parentNavn": "AKER BIOMARINE ASA",
+              "parentOrganisasjonsnummer": "913915062",
+              "grunnlag": "40,0%",
+              "dato": "2018-02-08",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              },
+              "children": [
+                {
+                  "nivaa": 3,
+                  "knytningsform": {
+                    "kode": "KDAT",
+                    "beskrivelse": "Konsern datter"
+                  },
+                  "navn": "THE QRILL COMPANY SERVICES AS",
+                  "organisasjonsnummer": "911773430",
+                  "parentNavn": "THE QRILL COMPANY AS",
+                  "parentOrganisasjonsnummer": "988354139",
+                  "grunnlag": "100%",
+                  "dato": "2018-03-03",
+                  "organisasjonsform": {
+                    "kode": "AS",
+                    "beskrivelse": "Aksjeselskap"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

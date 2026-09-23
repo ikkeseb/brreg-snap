@@ -11,6 +11,9 @@ import {
 import { describeLoadError } from '../src/lib/ui/error-message.js';
 import enhetDnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import enhetEquinor from './fixtures/brreg/enhet-923609016-equinor.json';
+import enhetTvangsopplost from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
+import konsernEquinor from './fixtures/brreg/konsernstruktur-923609016-equinor.json';
+import yearsEquinor from './fixtures/brreg/aarsregnskap-aar-923609016.json';
 import feedEquinor from './fixtures/brreg/oppdateringer-923609016-equinor.json';
 import regnskapDnb500 from './fixtures/brreg/regnskap-984851006-500.json';
 import regnskapEquinor from './fixtures/brreg/regnskap-923609016-usd.json';
@@ -21,6 +24,8 @@ import underenheterEmpty from './fixtures/brreg/underenheter-931744682-empty.jso
 
 const API = 'https://data.brreg.no/enhetsregisteret/api';
 const REGNSKAP = 'https://data.brreg.no/regnskapsregisteret/regnskap';
+const KONSERN = `${API}/konsernstruktur`;
+const KOPI = `${REGNSKAP}/aarsregnskap/kopi`;
 
 type StorageMap = Record<string, unknown>;
 
@@ -255,5 +260,86 @@ describe('loadCompany', () => {
     const company = await loadCompany('923609016');
     expect(Object.keys(store)).toEqual([]);
     expect(company.fetchedAt).toBe(now);
+  });
+});
+
+describe('loadCompany — opt-in konsern and annual-report years', () => {
+  it('the panel variant gets the company’s place in its group and the years', async () => {
+    const { urls } = routeBrreg({
+      [`${API}/enheter/923609016`]: () => json(enhetEquinor),
+      [`${KONSERN}/923609016`]: () => json(konsernEquinor),
+      [`${KOPI}/923609016/aar`]: () => json(yearsEquinor),
+    });
+    const company = await loadCompany('923609016', {
+      konsern: true,
+      aarsregnskapYears: true,
+    });
+    expect(company.konsern?.role).toBe('top');
+    expect(company.konsern?.groupSize).toBe(54);
+    expect(company.aarsregnskapYears?.[0]).toBe('2025');
+    expect(urls()).toContain(`${KONSERN}/923609016`);
+  });
+
+  it('the popup variant asks for neither', async () => {
+    const { urls } = routeBrreg({
+      [`${API}/enheter/923609016`]: () => json(enhetEquinor),
+    });
+    const company = await loadCompany('923609016');
+    expect(company.konsern).toBeUndefined();
+    expect(company.aarsregnskapYears).toBeUndefined();
+    expect(urls().some((u) => u.includes('konsernstruktur'))).toBe(false);
+    expect(urls().some((u) => u.includes('/kopi/'))).toBe(false);
+  });
+
+  it('does not ask for the group when the Enhet says it is in none', async () => {
+    const { urls } = routeBrreg({
+      [`${API}/enheter/931744682`]: () => json(enhetTvangsopplost),
+      [`${KOPI}/931744682/aar`]: () => json(['2023']),
+    });
+    const company = await loadCompany('931744682', {
+      konsern: true,
+      aarsregnskapYears: true,
+    });
+    expect(company.konsern).toBeNull();
+    expect(company.aarsregnskapYears).toEqual(['2023']);
+    expect(urls().some((u) => u.includes('konsernstruktur'))).toBe(false);
+  });
+
+  it('reads a konsernstruktur 404 as «in no group», not as a failure', async () => {
+    routeBrreg({ [`${API}/enheter/923609016`]: () => json(enhetEquinor) });
+    const company = await loadCompany('923609016', { konsern: true });
+    expect(company.konsern).toBeNull();
+  });
+
+  it('maps failures to undefined and still loads the company', async () => {
+    routeBrreg({
+      [`${API}/enheter/923609016`]: () => json(enhetEquinor),
+      [`${KONSERN}/923609016`]: () => json({}, 503),
+      [`${KOPI}/923609016/aar`]: () => json({}, 429),
+    });
+    const company = await loadCompany('923609016', {
+      konsern: true,
+      aarsregnskapYears: true,
+    });
+    expect(company.enhet.navn).toBe('EQUINOR ASA');
+    expect(company.konsern).toBeUndefined();
+    expect(company.aarsregnskapYears).toBeUndefined();
+  });
+
+  it('an underenhet orgnr asks about the parent’s group and years', async () => {
+    const { urls } = routeBrreg({
+      [`${API}/underenheter/973160834`]: () => json(underenhetAlta),
+      [`${API}/enheter/984851006`]: () => json(enhetDnb),
+      [`${KOPI}/984851006/aar`]: () => json(['2024', '2025']),
+    });
+    const company = await loadCompany('973160834', {
+      konsern: true,
+      aarsregnskapYears: true,
+    });
+    expect(company.aarsregnskapYears).toEqual(['2025', '2024']);
+    // DNB BANK ASA has erIKonsern true; its 404 here reads as no group.
+    expect(company.konsern).toBeNull();
+    expect(urls()).toContain(`${KONSERN}/984851006`);
+    expect(urls()).not.toContain(`${KONSERN}/973160834`);
   });
 });
