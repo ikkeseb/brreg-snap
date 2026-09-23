@@ -116,8 +116,8 @@ Bumping the constant requires extending the digit-key handler in
 ## Registrable domain and label (suffixes, platforms, punycode)
 
 `registrableDomain` in `hostname-score.ts` reduces the visited host
-to the part a company registers (`nettbank.dnb.no` → `dnb.no`);
-scoring compares hjemmeside against it.
+to the part a company registers (`nettbank.dnb.no` → `dnb.no`); Q1
+queries it and scoring compares hjemmeside against it.
 `hostnameLabel` takes its leftmost label to seed the name search.
 The traps they handle:
 
@@ -145,6 +145,26 @@ The traps they handle:
   signal: `resolveInternal` treats a falsy label as band `none`, so
   the sidebar falls to manual search instead of querying a raw
   `xn--` string that can never match.
+
+<!-- SECTION: queries -->
+## Brreg queries
+
+`runPipeline` in `hostname-search.ts` sends, in parallel: Q1
+`hjemmeside=<registrable domain>&sort=antallAnsatte,DESC&size=20`,
+and Q2 `navn=<variant>` (FORTLOEPENDE, org forms
+`AS,ASA,SA,BBL,ORGL,SF`, sorted by headcount) per Nordic variant of
+the label. Q3 drops the org-form filter only when Q1+Q2 return
+nothing.
+
+Brreg matches `hjemmeside` as a **substring** (live, 2026-09-23):
+`hjemmeside=nrk.no` also returns `www.nrk.no/...` rows, and
+`hjemmeside=sbanken.no` returns `www.tidsbanken.no`. So one query
+covers the `www.` form, and precision comes from scoring (§ below),
+not from the query. A popular domain returns hundreds of rows
+(obos.no: 600+ borettslag on `www.obos.no`); unsorted, the first page
+never reached OBOS BBL, so Q1 sorts by headcount. Trade-off: a short
+domain that is a substring of many others (`if.no` → `*if.no` sports
+clubs) fills the 20 rows with bigger unrelated organisations.
 
 <!-- SECTION: hjemmeside-normalization -->
 ## Hjemmeside matching

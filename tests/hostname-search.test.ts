@@ -207,7 +207,7 @@ describe('searchByHostnameDetailed', () => {
   it('falls back to Q3 (no org-form filter) when Q1+Q2 yields zero', async () => {
     searchMock.mockImplementation(async (params: URLSearchParams) => {
       if (params.has('hjemmeside')) return [];
-      if (params.get('organisasjonsform') === 'AS,ASA,SA,ORGL,SF') return [];
+      if (params.has('organisasjonsform')) return [];
       // Q3 has no organisasjonsform set.
       return [
         hit('EKSPORTFINANSIERING NORGE', '999000001', {
@@ -218,7 +218,9 @@ describe('searchByHostnameDetailed', () => {
 
     const result = await searchByHostnameDetailed('eksfin.no');
     const q3Call = searchMock.mock.calls.find(
-      (call) => !(call[0] as URLSearchParams).has('organisasjonsform'),
+      (call) =>
+        (call[0] as URLSearchParams).has('navn') &&
+        !(call[0] as URLSearchParams).has('organisasjonsform'),
     );
     expect(q3Call).toBeDefined();
     expect(result).toBeDefined();
@@ -234,6 +236,26 @@ describe('brreg queries', () => {
 
   const calls = () =>
     searchMock.mock.calls.map((c) => Object.fromEntries(c[0] as URLSearchParams));
+
+  it('sends one hjemmeside query on the registrable domain, sorted by headcount', async () => {
+    // Brreg matches hjemmeside as a substring, so the www. variant was a
+    // redundant second request; unsorted, the first 10 rows of obos.no
+    // were borettslag and OBOS BBL never became a candidate.
+    await searchByHostnameDetailed('nettbank.dnb.no');
+    const q1 = calls().filter((p) => 'hjemmeside' in p);
+    expect(q1).toEqual([
+      { hjemmeside: 'dnb.no', sort: 'antallAnsatte,DESC', size: '20' },
+    ]);
+  });
+
+  it('keeps BBL in the name query\'s org-form filter', async () => {
+    await searchByHostnameDetailed('obos.no');
+    const q2 = calls().filter((p) => 'organisasjonsform' in p);
+    expect(q2.length).toBeGreaterThan(0);
+    for (const p of q2) {
+      expect(p.organisasjonsform?.split(',')).toContain('BBL');
+    }
+  });
 
   it('queries the tenant on hosting-platform subdomains', async () => {
     await searchByHostnameDetailed('firma.pages.dev');

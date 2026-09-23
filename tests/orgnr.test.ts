@@ -303,8 +303,8 @@ describe('resolveOrgnrAsync', () => {
       title: 'Yara — global crop nutrition',
     });
     expect(result).toBe('986228608');
-    // Pipeline issues multiple parallel queries (hjemmeside variants
-    // + navn variants); we don't pin the exact count.
+    // Pipeline issues multiple parallel queries (hjemmeside + navn
+    // variants); we don't pin the exact count.
     expect(searchMock).toHaveBeenCalled();
   });
 
