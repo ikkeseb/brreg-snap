@@ -28,7 +28,7 @@ import {
   type TabContext,
 } from '../lib/ui/resolve-tab.js';
 import { createSourceLabel } from '../lib/ui/source-label.js';
-import { avdelingNote } from '../lib/ui/summary-lines.js';
+import { avdelingNote, revenueLine } from '../lib/ui/summary-lines.js';
 import { deriveVerdict, renderVerdict } from '../lib/ui/verdict.js';
 import type { SearchHit } from '../types/brreg.js';
 
@@ -283,7 +283,7 @@ async function loadAndRender(
   try {
     // Roller and regnskap are extra API calls but live behind the same
     // 24h session cache, and both feed the quick glance: daglig leder
-    // in the rows, "leverer regnskap?" in the verdict strip.
+    // in the rows, "leverer regnskap?" and revenue from the filing.
     // They are soft dependencies — a failure maps to undefined
     // ("couldn't ask"): the verdict omits what it can't back, and the
     // Daglig leder row says it couldn't fetch rather than "—" (none
@@ -337,6 +337,9 @@ function renderEnhet({ enhet, avdeling, roller, regnskap }: CompanyData): void {
   const dl = document.createElement('dl');
   addRow(dl, 'Form', enhet.organisasjonsform?.beskrivelse);
   addRow(dl, 'Næring', formatNaering(enhet.naeringskode1));
+  // How big: the latest filing's driftsinntekter, from the regnskap the
+  // verdict already needed. Omitted when there is no figure.
+  addRow(dl, 'Omsetning', revenueLine(regnskap));
   // Always render daglig leder, even when missing, so the user sees we
   // looked — "—" means "no role registered", distinct from "we couldn't
   // check". Other rows can legitimately be missing on certain forms
