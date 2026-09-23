@@ -1,0 +1,13 @@
+{
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/oppdateringer/enheter?organisasjonsnummer=984851006&dato=2026-09-20T00:00:00.000Z&includeChanges=true&size=100&sort=id,DESC"
+    }
+  },
+  "page": {
+    "size": 100,
+    "totalElements": 0,
+    "totalPages": 0,
+    "number": 0
+  }
+}

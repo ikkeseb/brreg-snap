@@ -9,14 +9,14 @@ import type {
   UnderenheterPage,
 } from '../types/brreg.js';
 
-const API = 'https://data.brreg.no/enhetsregisteret/api';
+export const API = 'https://data.brreg.no/enhetsregisteret/api';
 const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 // Hard cap per request so a hung connection fails fast instead of
 // leaving the UI in a spinner. AbortSignal.timeout() is supported in
 // Firefox 100+ / Chrome 103+ — well below our minimum targets. An
 // abort rejects the fetch, which counts as a failure like any other
 // network error — callers decide what failure means.
-const FETCH_TIMEOUT_MS = 8000;
+export const FETCH_TIMEOUT_MS = 8000;
 
 // The longest Retry-After a 429 may ask for and still get its one
 // retry. Longer than this the user is better served by «prøv igjen»
@@ -46,8 +46,9 @@ export function parseRetryAfter(
 // more than MAX_RETRY_AFTER_MS. Otherwise the 429 response is handed
 // back as is, and the caller's `!res.ok` branch turns it into the
 // usual transient «returned 429» error (docs/notes/brreg-api.md
-// § rate-limit).
-async function brregFetch(url: string | URL): Promise<Response> {
+// § rate-limit). Exported so the other brreg fetchers (the change feed,
+// konsern, annual reports) get the same timeout and 429 rule.
+export async function brregFetch(url: string | URL): Promise<Response> {
   const init = (): RequestInit => ({
     headers: { Accept: 'application/json' },
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
@@ -73,6 +74,8 @@ const CACHE_PREFIXES = [
   'roller',
   'underenheter',
   'regnskap',
+  // The change feed (src/lib/brreg-endringer.ts).
+  'endringer',
 ] as const;
 
 function isEnhet(value: unknown): value is Enhet {

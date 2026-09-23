@@ -71,8 +71,9 @@ brreg page. The verdict strip reads the filing year from that Enhet
 field first, so a 500 no longer blanks the cell. Only when the Enhet
 has no year does the regnskap response decide it: no response or a
 bare 500 omits the cell, a 500 naming its plan gives «Levert ·
-spesialregnskap», nothing filed gives «Mangler» or «Ingen»
-(`regnskapSignal` in `src/lib/ui/verdict.ts`).
+spesialregnskap», nothing filed gives «Mangler», «Ingen» or «Ikke pliktig»
+(`regnskapSignal` in `src/lib/trust/signals.ts`; staleness and the
+ENK case: `docs/notes/trust.md` § signals).
 
 <!-- SECTION: error-contract -->
 ## Error contract: search throws, [] means a real empty result
@@ -86,7 +87,8 @@ as "no hits" gets pinned as a day-long "no match" (see
 `docs/notes/cache.md` § failure-no-cache for the caching rule).
 
 The detail fetchers (`fetchEnhet`, `fetchUnderenhet`, `fetchRoller`,
-`fetchUnderenheter`, `fetchRegnskap`) keep their documented special
+`fetchUnderenheter`, `fetchRegnskap`, and `fetchEndringer` in
+`src/lib/brreg-endringer.ts`, see `docs/notes/trust.md` § endringer) keep their documented special
 cases — roller 404 → empty, regnskap 404 → empty, regnskap 500 →
 unavailable (above), underenhet 404 → `undefined` (so an orgnr lookup
 can fall back without try/catch) — and throw on everything else.
@@ -101,7 +103,8 @@ rows, with `total` from `page.totalElements` (Posten Bring 984661185:
 133). A parent with none has no `_embedded` at all, only
 `page.totalElements: 0`.
 
-Every fetch in `brreg.ts` goes through `brregFetch` and carries
+Every brreg fetch goes through `brregFetch` in `brreg.ts` (the change
+feed in `brreg-endringer.ts` too) and carries
 `AbortSignal.timeout(8000)` (Firefox 100+ / Chrome 103+). A timeout
 aborts the fetch with a rejection, which counts as a failure like any
 other. The only retry is the one below.

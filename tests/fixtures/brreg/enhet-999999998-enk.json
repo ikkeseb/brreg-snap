@@ -1,0 +1,65 @@
+{
+  "organisasjonsnummer": "999999998",
+  "navn": "KARI EKSEMPEL ART & DESIGN",
+  "organisasjonsform": {
+    "kode": "ENK",
+    "beskrivelse": "Enkeltpersonforetak",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/ENK"
+      }
+    }
+  },
+  "historiskeNavn": [
+    {
+      "navn": "KARI EKSEMPEL",
+      "fraDato": "2023-06-03 11:07:05",
+      "tilDato": "2026-09-01 09:59:36"
+    }
+  ],
+  "registreringsdatoEnhetsregisteret": "2023-06-03",
+  "registrertIMvaregisteret": true,
+  "naeringskode1": {
+    "kode": "90.120",
+    "beskrivelse": "Skapende kunstnerisk virksomhet innenfor visuell kunst"
+  },
+  "harRegistrertAntallAnsatte": false,
+  "registreringsdatoMerverdiavgiftsregisteret": "2026-01-01",
+  "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2026-01-13",
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "3113",
+    "poststed": "TØNSBERG",
+    "adresse": [
+      "Eksempelveien 3"
+    ],
+    "kommune": "TØNSBERG",
+    "kommunenummer": "3905"
+  },
+  "institusjonellSektorkode": {
+    "kode": "8200",
+    "beskrivelse": "Personlig næringsdrivende"
+  },
+  "registrertIForetaksregisteret": false,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "maalform": "Bokmål",
+  "aktivitet": [
+    "Kunstmaler.",
+    "Markedsføring og reklame.",
+    "Foredragsholder."
+  ],
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "erIKonsern": false,
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/999999998"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

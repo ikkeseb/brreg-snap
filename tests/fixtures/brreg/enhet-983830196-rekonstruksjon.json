@@ -1,0 +1,93 @@
+{
+  "organisasjonsnummer": "983830196",
+  "navn": "RUTA ENTREPRENØR AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+      }
+    }
+  },
+  "historiskeNavn": [
+    {
+      "navn": "NIDAROS PROSJEKTUTVIKLING AS",
+      "fraDato": "2001-11-20 20:34:43",
+      "tilDato": "2006-03-13 20:26:12"
+    },
+    {
+      "navn": "KVALVIN AS",
+      "fraDato": "2006-03-13 20:26:12",
+      "tilDato": "2007-11-28 20:31:59"
+    }
+  ],
+  "hjemmeside": "www.ruta.no",
+  "registreringsdatoEnhetsregisteret": "2001-11-20",
+  "registrertIMvaregisteret": true,
+  "naeringskode1": {
+    "kode": "41.000",
+    "beskrivelse": "Oppføring av bygninger"
+  },
+  "antallAnsatte": 160,
+  "harRegistrertAntallAnsatte": true,
+  "registreringsdatoMerverdiavgiftsregisteret": "2002-01-01",
+  "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2003-04-22",
+  "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+  "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "7079",
+    "poststed": "FLATÅSEN",
+    "adresse": [
+      "Øvre Flatåsveg 12"
+    ],
+    "kommune": "TRONDHEIM",
+    "kommunenummer": "5001"
+  },
+  "stiftelsesdato": "2001-08-01",
+  "institusjonellSektorkode": {
+    "kode": "2100",
+    "beskrivelse": "Private aksjeselskaper mv."
+  },
+  "registrertIForetaksregisteret": true,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2025",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "underRekonstruksjonsforhandlingDato": "2026-09-02",
+  "maalform": "Bokmål",
+  "vedtektsdato": "2025-06-10",
+  "vedtektsfestetFormaal": [
+    "Bygg- og anleggsvirksomhet, mannskapsutleie, prosjektutvikling, kjøp",
+    "og salg av boliger og dertil hørende virksomhet. Deltakelse i andre",
+    "foretak v/ oppkjøp, salg og styrearbeid.",
+    " "
+  ],
+  "aktivitet": [
+    "Bygg- og anleggsvirksomhet, mannskapsutleie, prosjektutvikling, kjøp",
+    "og salg av bolier og dertil hørende virksomhet. Deltakelse i andre",
+    "foretak v/ oppkjøp, salg og styrearbeid.",
+    " "
+  ],
+  "registreringsdatoForetaksregisteret": "2001-11-20",
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "erIKonsern": false,
+  "kapital": {
+    "belop": 732000.0,
+    "antallAksjer": 732,
+    "type": "Aksjekapital",
+    "valuta": "NOK",
+    "innfortDato": "2025-09-16"
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/983830196"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

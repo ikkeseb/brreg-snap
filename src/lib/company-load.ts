@@ -2,14 +2,17 @@
 // decides what a failed fetch means. Shared by the popup and the panel.
 //
 // - The Enhet is the hard dependency: if it fails, the view fails.
-// - roller / underenheter / regnskap are soft: a failure maps to
-//   undefined ("couldn't ask"), which each renderer states as such.
-//   That is distinct from an empty registry answer ("none registered").
+// - roller / underenheter / regnskap / endringer are soft: a failure
+//   maps to undefined ("couldn't ask"), which each renderer states as
+//   such. That is distinct from an empty registry answer ("none
+//   registered"). underenheter and endringer are opt-in.
 // - An orgnr that is not an enhet may be an underenhet: a branch or
 //   department, the number on a store receipt or a branch page. brreg
 //   has no enhet for it, so the view shows its parent and carries the
 //   branch along as `avdeling`.
 
+import { fetchEndringer } from './brreg-endringer.js';
+import { endringerSince } from './trust/endringer.js';
 import {
   fetchEnhet,
   fetchRegnskap,
@@ -20,6 +23,7 @@ import {
 } from './brreg.js';
 import type {
   Enhet,
+  EnhetOppdatering,
   RegnskapResponse,
   RollerResponse,
   Underenhet,
@@ -74,16 +78,35 @@ interface SoftParts {
   roller: RollerResponse | undefined;
   regnskap: RegnskapResponse | undefined;
   underenheter: UnderenheterPage | undefined;
+  // The change feed for deriveEndringer (src/lib/trust/endringer.ts).
+  endringer: EnhetOppdatering[] | undefined;
 }
 
-function fetchSoftParts(orgnr: string, withUnderenheter: boolean): Promise<SoftParts> {
+export interface LoadCompanyOptions {
+  // The popup doesn't list underenheter, so it doesn't fetch them.
+  underenheter?: boolean;
+  // The change feed: one extra request, for the «Endringer» items.
+  endringer?: boolean;
+}
+
+function fetchSoftParts(orgnr: string, opts: LoadCompanyOptions): Promise<SoftParts> {
   return Promise.all([
     fetchRoller(orgnr).catch((): RollerResponse | undefined => undefined),
     fetchRegnskap(orgnr).catch((): RegnskapResponse | undefined => undefined),
-    withUnderenheter
+    opts.underenheter
       ? fetchUnderenheter(orgnr).catch((): UnderenheterPage | undefined => undefined)
       : undefined,
-  ]).then(([roller, regnskap, underenheter]) => ({ roller, regnskap, underenheter }));
+    opts.endringer
+      ? fetchEndringer(orgnr, endringerSince(new Date())).catch(
+          (): EnhetOppdatering[] | undefined => undefined,
+        )
+      : undefined,
+  ]).then(([roller, regnskap, underenheter, endringer]) => ({
+    roller,
+    regnskap,
+    underenheter,
+    endringer,
+  }));
 }
 
 export interface CompanyData extends OrgnrMatch, SoftParts {
@@ -94,19 +117,17 @@ export interface CompanyData extends OrgnrMatch, SoftParts {
 
 export async function loadCompany(
   orgnr: string,
-  // The popup doesn't list underenheter, so it doesn't fetch them.
-  opts: { underenheter?: boolean } = {},
+  opts: LoadCompanyOptions = {},
 ): Promise<CompanyData> {
-  const withUnderenheter = opts.underenheter ?? false;
   // Start the soft fetches alongside the Enhet: the user waits on the
   // slowest request, and almost every orgnr is an enhet. They never
   // reject, so leaving them behind on the underenhet path is safe.
-  const guessed = fetchSoftParts(orgnr, withUnderenheter);
+  const guessed = fetchSoftParts(orgnr, opts);
   const match = await lookupOrgnr(orgnr);
   const shown = match.enhet.organisasjonsnummer;
   // An underenhet has no roller or regnskap of its own; the parent's
   // are what the view shows.
-  const soft = shown === orgnr ? await guessed : await fetchSoftParts(shown, withUnderenheter);
+  const soft = shown === orgnr ? await guessed : await fetchSoftParts(shown, opts);
   const ages = await Promise.all(
     [...new Set([orgnr, shown])].map((n) => getFetchedAt(n)),
   );

@@ -99,6 +99,7 @@ note before reading the source file.
 | Permissions: `activeTab` limits, runtime `tabs` opt-in + consent step, gesture-stack rules, background wake-up, `browsingActivity` declaration | `public/manifest.*.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts` | `docs/notes/permissions-model.md` |
 | brreg API: regnskap base URL + latest year only, regnskap 500 = not in the open API, error contract (search throws, `[]` = real empty), no signatur, search drops dots | `src/lib/brreg.ts`, `regnskap.ts` | `docs/notes/brreg-api.md`         |
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
+| Trust view: answer priority, signals (deadline-aware regnskap, rekonstruksjon, NUF), merknader (påtegninger), endringer + the change feed | `src/lib/trust/*.ts`, `src/lib/brreg-endringer.ts`, `company-load.ts` | `docs/notes/trust.md`             |
 
 Sidebar render functions are pure DOM writers in `src/details/render/*.ts`
 (one module per section: header, overview, roles, parent, underenheter,
@@ -108,9 +109,10 @@ note — grep the source.
 Frontend system (since Phase 3, 2026-07-04): design tokens + all shared
 components live in `src/styles/shared.css` (dark base, light theme via
 `prefers-color-scheme`); the surface CSS files keep layout/scale only.
-The verdict strip (`src/lib/ui/verdict.ts`) synthesizes status / alder /
-ansatte / regnskap under the company name on both surfaces — a signal
-whose fetch failed is OMITTED, never rendered as "not filed". Visual
+The verdict strip (`src/lib/ui/verdict.ts`, rendering
+`deriveSignals` from `src/lib/trust/signals.ts`) synthesizes status /
+alder / ansatte / regnskap under the company name on both surfaces — a
+signal whose fetch failed is OMITTED, never rendered as "not filed". Visual
 dev loop: `scripts/preview/` runs the real bundles against the live API
 in a plain browser tab (see its README for limits).
 

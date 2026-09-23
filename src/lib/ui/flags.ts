@@ -58,11 +58,14 @@ function dated(flag: FlagSpec, since: string | undefined): FlagSpec {
 // that only looks at those would fall through to "Aktiv".
 export function deriveStatusFlags(enhet: Enhet): FlagSpec[] {
   const slettet = Boolean(enhet.slettedato);
+  // brreg marks rekonstruksjonsforhandling with a date field only.
+  const rekonstruksjon = Boolean(enhet.underRekonstruksjonsforhandlingDato);
   const negativeStatus =
     slettet ||
     enhet.konkurs ||
     enhet.underAvvikling ||
-    enhet.underTvangsavviklingEllerTvangsopplosning;
+    enhet.underTvangsavviklingEllerTvangsopplosning ||
+    rekonstruksjon;
   const flags: FlagSpec[] = [];
   if (!negativeStatus) flags.push({ label: 'Aktiv', severity: 'ok' });
   if (slettet) {
@@ -77,6 +80,14 @@ export function deriveStatusFlags(enhet: Enhet): FlagSpec[] {
     );
   }
   if (enhet.underTvangsavviklingEllerTvangsopplosning) flags.push(tvangFlag(enhet));
+  if (rekonstruksjon) {
+    flags.push(
+      dated(
+        { label: 'Rekonstruksjon', severity: 'warn' },
+        enhet.underRekonstruksjonsforhandlingDato,
+      ),
+    );
+  }
   return flags;
 }
 

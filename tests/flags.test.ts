@@ -7,6 +7,7 @@ import {
 } from '../src/lib/ui/flags.js';
 import type { Enhet } from '../src/types/brreg.js';
 import konkursEnhet from './fixtures/brreg/enhet-915330193-konkurs.json';
+import rekonstruksjonEnhet from './fixtures/brreg/enhet-983830196-rekonstruksjon.json';
 import slettetEnhet from './fixtures/brreg/enhet-989566733-slettet.json';
 import tvangEnhet from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
 
@@ -110,6 +111,25 @@ describe('deriveStatusFlags — when and why (live shapes)', () => {
         underAvviklingDato: '2026-03-01',
       }),
     ).toEqual({ label: 'Under avvikling', severity: 'warn', since: '2026-03-01' });
+  });
+
+  it('flags rekonstruksjon from its date field (live RUTA ENTREPRENØR AS)', () => {
+    // brreg has no boolean for it: the date is the status.
+    const enhet: Enhet = rekonstruksjonEnhet;
+    expect(enhet.konkurs).toBe(false);
+    expect(deriveStatusFlags(enhet)).toEqual([
+      { label: 'Rekonstruksjon', severity: 'warn', since: '2026-09-02' },
+    ]);
+  });
+
+  it('keeps a danger status primary over rekonstruksjon', () => {
+    expect(
+      primaryStatusFlag({
+        ...base,
+        konkurs: true,
+        underRekonstruksjonsforhandlingDato: '2026-01-02',
+      }).label,
+    ).toBe('Konkurs');
   });
 
   it('leaves an undated status undated', () => {

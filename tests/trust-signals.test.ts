@@ -1,16 +1,26 @@
 import { describe, expect, it } from 'vitest';
 
-import { deriveVerdict, yearsSince } from '../src/lib/ui/verdict.js';
+import {
+  deriveSignals,
+  expectedLatestFiledYear,
+  monthsSince,
+  yearsSince,
+} from '../src/lib/trust/signals.js';
+import { deriveVerdict } from '../src/lib/ui/verdict.js';
 import type { Enhet, RegnskapResponse } from '../src/types/brreg.js';
 import dnbEnhet from './fixtures/brreg/enhet-984851006-dnb.json';
+import enkEnhet from './fixtures/brreg/enhet-999999998-enk.json';
+import nufEnhet from './fixtures/brreg/enhet-997808533-nuf.json';
+import rekonstruksjonEnhet from './fixtures/brreg/enhet-983830196-rekonstruksjon.json';
 import equinorEnhet from './fixtures/brreg/enhet-923609016-equinor.json';
 import konkursEnhet from './fixtures/brreg/enhet-915330193-konkurs.json';
 import slettetEnhet from './fixtures/brreg/enhet-989566733-slettet.json';
 import smallEmployer from './fixtures/brreg/enhet-999999999-ansatte-1-4.json';
 import tvangEnhet from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
 
-// Fixed "today" so age math is deterministic.
-const NOW = new Date('2026-07-04T12:00:00Z');
+// Fixed "today", at local noon so the calendar math is the same in
+// every time zone.
+const NOW = new Date(2026, 6, 4, 12);
 
 function makeEnhet(overrides: Partial<Enhet> = {}): Enhet {
   return {
@@ -30,7 +40,7 @@ function regnskapWithYear(year: string): RegnskapResponse {
 }
 
 function signal(enhet: Enhet, regnskap: RegnskapResponse | undefined, key: string) {
-  return deriveVerdict(enhet, regnskap, NOW).find((s) => s.key === key);
+  return deriveSignals(enhet, regnskap, NOW).find((s) => s.key === key);
 }
 
 describe('yearsSince', () => {
@@ -52,7 +62,7 @@ describe('yearsSince', () => {
   });
 });
 
-describe('deriveVerdict — status', () => {
+describe('deriveSignals — status', () => {
   it('active company gets an ok status', () => {
     const s = signal(makeEnhet(), undefined, 'status');
     expect(s).toMatchObject({ value: 'Aktiv', tone: 'ok' });
@@ -104,7 +114,7 @@ describe('deriveVerdict — status', () => {
   });
 
   it('turns the other green cells neutral under a danger status', () => {
-    const signals = deriveVerdict(
+    const signals = deriveSignals(
       konkursEnhet,
       regnskapWithYear('2025'),
       NOW,
@@ -114,7 +124,7 @@ describe('deriveVerdict — status', () => {
   });
 });
 
-describe('deriveVerdict — alder', () => {
+describe('deriveSignals — alder', () => {
   it('counts from stiftelsesdato, not the 1995 register floor (live Equinor)', () => {
     const s = signal(equinorEnhet, undefined, 'alder');
     // Founded 1972-09-18; on 2026-07-04 that is 53 whole years.
@@ -177,7 +187,7 @@ describe('deriveVerdict — alder', () => {
   });
 });
 
-describe('deriveVerdict — ansatte', () => {
+describe('deriveSignals — ansatte', () => {
   it('formats the count with nb-NO separators', () => {
     const s = signal(makeEnhet(), undefined, 'ansatte');
     expect(s?.value).toBe((7536).toLocaleString('nb-NO'));
@@ -219,7 +229,7 @@ describe('deriveVerdict — ansatte', () => {
   });
 });
 
-describe('deriveVerdict — regnskap', () => {
+describe('deriveSignals — regnskap', () => {
   it('is omitted entirely when the fetch failed (undefined response)', () => {
     expect(signal(makeEnhet(), undefined, 'regnskap')).toBeUndefined();
   });
@@ -311,18 +321,61 @@ describe('deriveVerdict — regnskap', () => {
     expect(s).toMatchObject({ value: 'Mangler', tone: 'warn' });
   });
 
-  it('stays neutral for forms without an unconditional filing duty', () => {
+  it('says «Ikke pliktig» for an ENK with nothing filed (live shape: 404)', () => {
+    // An ENK never sends accounts to Regnskapsregisteret; «Ingen · ikke
+    // innsendt» read like a failure.
+    const enk: Enhet = enkEnhet;
+    expect(enk.sisteInnsendteAarsregnskap).toBeUndefined();
+    const s = signal(enk, { items: [] }, 'regnskap');
+    expect(s).toEqual({
+      key: 'regnskap',
+      label: 'Regnskap',
+      value: 'Ikke pliktig',
+      detail: 'enkeltpersonforetak',
+      tone: 'neutral',
+    });
+  });
+
+  it('does not call a big ENK «Ikke pliktig» (over 20 employees can mean a duty)', () => {
+    // Live: 13 of the 100 largest ENKs have filed accounts.
+    const big: Enhet = { ...(enkEnhet as Enhet), antallAnsatte: 21 };
+    expect(signal(big, { items: [] }, 'regnskap')).toMatchObject({
+      value: 'Ingen',
+      detail: 'ikke innsendt',
+      tone: 'neutral',
+    });
+    const small: Enhet = { ...(enkEnhet as Enhet), antallAnsatte: 20 };
+    expect(signal(small, { items: [] }, 'regnskap')?.value).toBe('Ikke pliktig');
+  });
+
+  it('shows a big ENK\'s filed year, and an old one without judging it', () => {
+    const enk: Enhet = { ...(enkEnhet as Enhet), antallAnsatte: 145 };
+    expect(
+      signal({ ...enk, sisteInnsendteAarsregnskap: '2025' }, { items: [] }, 'regnskap'),
+    ).toMatchObject({ value: '2025', detail: 'levert', tone: 'ok' });
+    // It may have shrunk below the threshold since.
+    expect(
+      signal({ ...enk, sisteInnsendteAarsregnskap: '2009' }, { items: [] }, 'regnskap'),
+    ).toMatchObject({ value: '2009', detail: 'siste innsendte', tone: 'neutral' });
+  });
+
+  it('keeps an ENK omitted when the regnskap fetch failed', () => {
+    expect(signal(enkEnhet as Enhet, undefined, 'regnskap')).toBeUndefined();
+  });
+
+  it('stays a neutral «Ingen» for forms whose duty depends on size', () => {
     const s = signal(
       makeEnhet({
-        organisasjonsform: {
-          kode: 'ENK',
-          beskrivelse: 'Enkeltpersonforetak',
-        },
+        organisasjonsform: { kode: 'ANS', beskrivelse: 'Ansvarlig selskap' },
       }),
       { items: [] },
       'regnskap',
     );
-    expect(s).toMatchObject({ value: 'Ingen', tone: 'neutral' });
+    expect(s).toMatchObject({
+      value: 'Ingen',
+      detail: 'ikke innsendt',
+      tone: 'neutral',
+    });
   });
 
   it('gives a young AS grace before warning about missing regnskap', () => {
@@ -342,9 +395,146 @@ describe('deriveVerdict — regnskap', () => {
   });
 });
 
-describe('deriveVerdict — composition', () => {
+describe('deriveSignals — regnskap deadline (31 July the year after)', () => {
+  const JULY = new Date(2026, 6, 31, 12);
+  const AUGUST = new Date(2026, 7, 1, 12);
+
+  it('expects the previous year from August, the one before until then', () => {
+    expect(expectedLatestFiledYear(JULY)).toBe(2024);
+    expect(expectedLatestFiledYear(AUGUST)).toBe(2025);
+    expect(expectedLatestFiledYear(new Date(2026, 0, 1))).toBe(2024);
+    expect(expectedLatestFiledYear(new Date(2026, 11, 31))).toBe(2025);
+  });
+
+  it.each([
+    // [latest filed, now, tone]
+    ['2024', JULY, 'ok'],
+    ['2024', AUGUST, 'warn'], // the 2025 deadline has passed
+    ['2025', AUGUST, 'ok'],
+    ['2023', JULY, 'warn'],
+    ['2026', AUGUST, 'ok'],
+  ] as const)('%s filed on %s → %s', (year, now, tone) => {
+    const s = deriveSignals(
+      makeEnhet({ sisteInnsendteAarsregnskap: year }),
+      undefined,
+      now,
+    ).find((x) => x.key === 'regnskap');
+    expect(s).toMatchObject({
+      value: year,
+      detail: tone === 'ok' ? 'levert' : 'siste innsendte',
+      tone,
+    });
+  });
+
+  it('flags a September 2026 company whose latest filing is 2024 (was green)', () => {
+    const s = deriveSignals(
+      makeEnhet({ sisteInnsendteAarsregnskap: '2024' }),
+      { items: [] },
+      new Date(2026, 8, 24),
+    ).find((x) => x.key === 'regnskap');
+    expect(s?.tone).toBe('warn');
+  });
+
+  it('says «Mangler» once a full year\'s deadline has passed since founding', () => {
+    // Founded 2024: the 2024 accounts were due July 2025, so by August
+    // 2026 the 2025 ones are late too.
+    const enhet = makeEnhet({ stiftelsesdato: '2024-10-01' });
+    const at = (now: Date) =>
+      deriveSignals(enhet, { items: [] }, now).find((x) => x.key === 'regnskap');
+    expect(at(JULY)).toMatchObject({ value: 'Ingen', tone: 'neutral' });
+    expect(at(AUGUST)).toMatchObject({ value: 'Mangler', tone: 'warn' });
+  });
+});
+
+describe('deriveSignals — rekonstruksjon and foreign entities', () => {
+  it('shows rekonstruksjon as a dated warn status (live RUTA ENTREPRENØR AS)', () => {
+    const s = signal(rekonstruksjonEnhet, undefined, 'status');
+    expect(s).toEqual({
+      key: 'status',
+      label: 'Status',
+      value: 'Rekonstruksjon',
+      detail: 'siden 02.09.2026',
+      tone: 'warn',
+    });
+  });
+
+  it('names the home country of a NUF (live SKANSKA SK)', () => {
+    const s = signal(nufEnhet, undefined, 'status');
+    expect(s).toEqual({
+      key: 'status',
+      label: 'Status',
+      value: 'Aktiv',
+      detail: 'utenlandsk foretak (SK)',
+      tone: 'ok',
+    });
+  });
+
+  it('leaves the country out when a NUF only has a Norwegian address', () => {
+    const s = signal(
+      makeEnhet({
+        organisasjonsform: { kode: 'NUF' },
+        forretningsadresse: { landkode: 'NO' },
+      }),
+      undefined,
+      'status',
+    );
+    expect(s?.detail).toBe('utenlandsk foretak');
+  });
+
+  it('prefers the governing-law country when brreg gives one (UTLA)', () => {
+    const s = signal(
+      makeEnhet({
+        organisasjonsform: { kode: 'UTLA' },
+        underlagtLovgivningLandKode: 'DK',
+        forretningsadresse: { landkode: 'SE' },
+      }),
+      undefined,
+      'status',
+    );
+    expect(s?.detail).toBe('utenlandsk foretak (DK)');
+  });
+
+  it('lets a negative status detail win over the foreign-entity note', () => {
+    const s = signal(
+      makeEnhet({
+        organisasjonsform: { kode: 'NUF' },
+        forretningsadresse: { landkode: 'SE' },
+        konkurs: true,
+        konkursdato: '2026-01-02',
+      }),
+      undefined,
+      'status',
+    );
+    expect(s?.detail).toBe('siden 02.01.2026');
+  });
+
+  it('says nothing foreign about a Norwegian AS', () => {
+    expect(signal(makeEnhet(), undefined, 'status')?.detail).toBeUndefined();
+  });
+});
+
+describe('monthsSince', () => {
+  it('counts whole months, the day of month included', () => {
+    expect(monthsSince('2026-01-04', NOW)).toBe(6);
+    expect(monthsSince('2026-01-05', NOW)).toBe(5);
+    expect(monthsSince('2026-07-01', NOW)).toBe(0);
+    expect(monthsSince('2027-01-01', NOW)).toBe(0);
+    expect(monthsSince(undefined, NOW)).toBeUndefined();
+  });
+});
+
+describe('deriveVerdict (adapter until the UI rewrite)', () => {
+  it('returns exactly what deriveSignals does', () => {
+    const enhet = equinorEnhet as Enhet;
+    expect(deriveVerdict(enhet, undefined, NOW)).toEqual(
+      deriveSignals(enhet, undefined, NOW),
+    );
+  });
+});
+
+describe('deriveSignals — composition', () => {
   it('keeps a stable signal order: status, alder, ansatte, regnskap', () => {
-    const keys = deriveVerdict(
+    const keys = deriveSignals(
       makeEnhet(),
       regnskapWithYear('2024'),
       NOW,
