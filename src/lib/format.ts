@@ -143,6 +143,15 @@ export function formatDateNumeric(iso: string | undefined): string | undefined {
   return `${dd}.${mm}.${date.getFullYear()}`;
 }
 
+// "3 registrerte." / "1 registrert." — or "Viser 100 av 133." when a
+// list is a capped page, so it never passes for the full count.
+export function formatListCount(shown: number, total: number): string {
+  if (total > shown) {
+    return `Viser ${formatCount(shown)} av ${formatCount(total)}.`;
+  }
+  return `${formatCount(shown)} registrert${shown === 1 ? '' : 'e'}.`;
+}
+
 // Integer with nb-NO thousands separators ("7 536"). Returns undefined
 // for nullish/NaN so addRow skips it.
 export function formatCount(value: number | undefined): string | undefined {

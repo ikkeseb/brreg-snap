@@ -1,0 +1,157 @@
+{
+  "_embedded": {
+    "underenheter": [
+      {
+        "organisasjonsnummer": "918018395",
+        "navn": "POSTEN BRING AS ALFASET OMDELING",
+        "organisasjonsform": {
+          "kode": "BEDR",
+          "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+          "_links": {
+            "self": {
+              "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BEDR"
+            }
+          }
+        },
+        "historiskeNavn": [
+          {
+            "navn": "POSTEN NORGE AS ALFASET OMDELING",
+            "fraDato": "2016-11-07 20:17:02",
+            "tilDato": "2023-06-13 21:31:03"
+          }
+        ],
+        "registreringsdatoEnhetsregisteret": "2016-11-07",
+        "registrertIMvaregisteret": false,
+        "naeringskode1": {
+          "kode": "53.100",
+          "beskrivelse": "Landsdekkende posttjenester"
+        },
+        "antallAnsatte": 62,
+        "harRegistrertAntallAnsatte": true,
+        "overordnetEnhet": "984661185",
+        "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+        "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+        "oppstartsdato": "2016-11-07",
+        "beliggenhetsadresse": {
+          "land": "Norge",
+          "landkode": "NO",
+          "postnummer": "0668",
+          "poststed": "OSLO",
+          "adresse": [
+            "Alfaset 3 Industriveien 1"
+          ],
+          "kommune": "OSLO",
+          "kommunenummer": "0301"
+        },
+        "_links": {
+          "self": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/underenheter/918018395"
+          },
+          "overordnetEnhet": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/enheter/984661185"
+          }
+        },
+        "respons_klasse": "Underenhet"
+      },
+      {
+        "organisasjonsnummer": "983498221",
+        "navn": "POSTEN BRING AS ALNABRU BEDRIFTSSENTER",
+        "organisasjonsform": {
+          "kode": "BEDR",
+          "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+          "_links": {
+            "self": {
+              "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/BEDR"
+            }
+          }
+        },
+        "historiskeNavn": [
+          {
+            "navn": "ALNABRU BEDRIFTSSENTER",
+            "fraDato": "2001-06-30 14:32:10",
+            "tilDato": "2002-10-23 23:11:40"
+          },
+          {
+            "navn": "POSTEN NORGE AS KONSUMENT BEDRIFTSSENTER ALNABRU",
+            "fraDato": "2002-10-23 23:11:40",
+            "tilDato": "2007-03-26 23:22:45"
+          },
+          {
+            "navn": "POSTEN NORGE AS POST BEDRIFTSSENTER ALNABRU",
+            "fraDato": "2007-03-26 23:22:45",
+            "tilDato": "2013-01-08 21:17:45"
+          },
+          {
+            "navn": "POSTEN NORGE AS ALNABRU BEDRIFTSSENTER",
+            "fraDato": "2014-01-23 22:10:36",
+            "tilDato": "2023-06-13 21:30:44"
+          }
+        ],
+        "postadresse": {
+          "land": "Norge",
+          "landkode": "NO",
+          "postnummer": "0614",
+          "poststed": "OSLO",
+          "adresse": [
+            "Postboks 0128 Alnabru"
+          ],
+          "kommune": "OSLO",
+          "kommunenummer": "0301"
+        },
+        "registreringsdatoEnhetsregisteret": "2001-06-30",
+        "registrertIMvaregisteret": false,
+        "naeringskode1": {
+          "kode": "53.100",
+          "beskrivelse": "Landsdekkende posttjenester"
+        },
+        "antallAnsatte": 11,
+        "harRegistrertAntallAnsatte": true,
+        "overordnetEnhet": "984661185",
+        "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-03-11",
+        "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-03-10",
+        "oppstartsdato": "2001-01-01",
+        "datoEierskifte": "2002-07-01",
+        "beliggenhetsadresse": {
+          "land": "Norge",
+          "landkode": "NO",
+          "postnummer": "0581",
+          "poststed": "OSLO",
+          "adresse": [
+            "Persveien 34"
+          ],
+          "kommune": "OSLO",
+          "kommunenummer": "0301"
+        },
+        "_links": {
+          "self": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/underenheter/983498221"
+          },
+          "overordnetEnhet": {
+            "href": "https://data.brreg.no/enhetsregisteret/api/enheter/984661185"
+          }
+        },
+        "respons_klasse": "Underenhet"
+      }
+    ]
+  },
+  "_links": {
+    "first": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter?overordnetEnhet=984661185&page=0&size=100"
+    },
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter?overordnetEnhet=984661185&size=100"
+    },
+    "next": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter?overordnetEnhet=984661185&page=1&size=100"
+    },
+    "last": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/underenheter?overordnetEnhet=984661185&page=1&size=100"
+    }
+  },
+  "page": {
+    "size": 100,
+    "totalElements": 133,
+    "totalPages": 2,
+    "number": 0
+  }
+}

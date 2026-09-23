@@ -3,12 +3,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   fetchEnhet,
   fetchRegnskap,
+  fetchRoller,
+  fetchUnderenheter,
   getFetchedAt,
   invalidateCache,
   searchEnheter,
   searchEnheterWithParams,
 } from '../src/lib/brreg.js';
 import regnskap500 from './fixtures/brreg/regnskap-984851006-500.json';
+import underenheterEmpty from './fixtures/brreg/underenheter-931744682-empty.json';
+import underenheterPage from './fixtures/brreg/underenheter-984661185-page.json';
 
 type StorageMap = Record<string, unknown>;
 
@@ -207,6 +211,59 @@ describe('fetchRegnskap special-casing', () => {
     const result = await fetchRegnskap('123456785');
     expect(result.items).toHaveLength(1);
     expect(result.unavailable).toBeUndefined();
+  });
+});
+
+describe('fetchUnderenheter', () => {
+  it('returns the true total with the first page (live Posten: 133)', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(underenheterPage));
+    const page = await fetchUnderenheter('984661185');
+    expect(page.total).toBe(133);
+    expect(page.items.map((u) => u.organisasjonsnummer)).toEqual([
+      '918018395',
+      '983498221',
+    ]);
+  });
+
+  it('reads a parent with none (no _embedded) as an empty page', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(underenheterEmpty));
+    expect(await fetchUnderenheter('931744682')).toEqual({ items: [], total: 0 });
+  });
+
+  it('never reports a total below what it returned', async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        _embedded: {
+          underenheter: [{ organisasjonsnummer: '918018395', navn: 'A' }],
+        },
+      }),
+    );
+    expect((await fetchUnderenheter('984661185')).total).toBe(1);
+  });
+
+  it('rejects on failure, so the UI can tell it from "none registered"', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}, 503));
+    await expect(fetchUnderenheter('984661185')).rejects.toThrow(/503/);
+  });
+
+  it('ignores a cached entry in the old bare-array shape', async () => {
+    installStorageMock({
+      'underenheter:984661185': { value: [], expiresAt: Date.now() + 60_000 },
+    });
+    fetchMock.mockResolvedValue(jsonResponse(underenheterPage));
+    expect((await fetchUnderenheter('984661185')).total).toBe(133);
+  });
+});
+
+describe('fetchRoller', () => {
+  it('404 → empty roles (none registered), cached', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}, 404));
+    expect(await fetchRoller('933724751')).toEqual({ rollegrupper: [] });
+  });
+
+  it('rejects on failure, so the UI can tell it from "none registered"', async () => {
+    fetchMock.mockRejectedValue(new TypeError('NetworkError'));
+    await expect(fetchRoller('923609016')).rejects.toThrow();
   });
 });
 

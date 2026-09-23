@@ -7,17 +7,22 @@ import type {
   RolleGruppe,
   RollerResponse,
 } from '../../types/brreg.js';
-import { $, emptyState, makeNavLink } from './dom.js';
+import { $, emptyLine, emptyState, makeNavLink } from './dom.js';
 
 const rolesBody = $('roles-body');
 
 type Navigate = (orgnr: string) => void;
 
+// undefined = the roller fetch failed: say so, never "Ingen registrerte".
 export function renderRoles(
-  roller: RollerResponse,
+  roller: RollerResponse | undefined,
   onNavigate: Navigate,
 ): void {
   rolesBody.innerHTML = '';
+  if (!roller) {
+    rolesBody.appendChild(emptyLine('Kunne ikke hente roller. Prøv igjen senere.'));
+    return;
+  }
   const groups = roller.rollegrupper ?? [];
   const nonEmpty = groups.filter((g) => (g.roller?.length ?? 0) > 0);
   if (nonEmpty.length === 0) {

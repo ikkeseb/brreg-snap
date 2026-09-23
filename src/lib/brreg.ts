@@ -6,6 +6,7 @@ import type {
   RollerResponse,
   SearchHit,
   Underenhet,
+  UnderenheterPage,
 } from '../types/brreg.js';
 
 const API = 'https://data.brreg.no/enhetsregisteret/api';
@@ -143,10 +144,15 @@ function isUnderenhet(value: unknown): value is Underenhet {
   );
 }
 
-export async function fetchUnderenheter(orgnr: string): Promise<Underenhet[]> {
+// One request, first 100 rows (alphabetical) — enough for a panel list.
+// The true count rides along in `total` so the UI can say it's capped.
+export async function fetchUnderenheter(
+  orgnr: string,
+): Promise<UnderenheterPage> {
   const key = `underenheter:${orgnr}`;
-  const cached = await cacheGet<Underenhet[]>(key);
-  if (cached) return cached;
+  const cached = await cacheGet<UnderenheterPage>(key);
+  // Shape check: this key held a bare array before `total` existed.
+  if (cached && Array.isArray(cached.items)) return cached;
 
   const url = new URL(`${API}/underenheter`);
   url.searchParams.set('overordnetEnhet', orgnr);
@@ -160,11 +166,18 @@ export async function fetchUnderenheter(orgnr: string): Promise<Underenhet[]> {
   }
   const data = (await res.json()) as {
     _embedded?: { underenheter?: unknown[] };
+    page?: { totalElements?: unknown };
   };
-  const raw = data._embedded?.underenheter ?? [];
-  const safe = raw.filter(isUnderenhet);
-  await cacheSet(key, safe);
-  return safe;
+  // A parent with none gets no _embedded at all, just page.totalElements 0.
+  const items = (data._embedded?.underenheter ?? []).filter(isUnderenhet);
+  const reported = data.page?.totalElements;
+  const total =
+    typeof reported === 'number' && reported >= items.length
+      ? reported
+      : items.length;
+  const page: UnderenheterPage = { items, total };
+  await cacheSet(key, page);
+  return page;
 }
 
 function isRegnskap(value: unknown): value is Regnskap {

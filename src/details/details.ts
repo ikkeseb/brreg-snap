@@ -26,7 +26,7 @@ import type {
   RegnskapResponse,
   RollerResponse,
   SearchHit,
-  Underenhet,
+  UnderenheterPage,
 } from '../types/brreg.js';
 import { $ } from './render/dom.js';
 import { renderHeader } from './render/header.js';
@@ -313,14 +313,16 @@ async function loadOrgnr(
 
   try {
     // Run in parallel — none of these depend on each other and the
-    // user is waiting on the slowest of four.
+    // user is waiting on the slowest of four. The three soft
+    // dependencies map a failure to undefined = "couldn't ask", distinct
+    // from "asked, none registered": each renderer says it couldn't
+    // fetch instead of claiming an empty registry.
     const [enhet, roller, underenheter, regnskap] = await Promise.all([
       fetchEnhet(orgnr),
-      fetchRoller(orgnr).catch(() => ({ rollegrupper: [] }) as RollerResponse),
-      fetchUnderenheter(orgnr).catch(() => [] as Underenhet[]),
-      // undefined = "couldn't ask", distinct from "asked, nothing
-      // filed" — the verdict strip omits its regnskap signal and the
-      // Nøkkeltall tab explains, instead of claiming an empty registry.
+      fetchRoller(orgnr).catch((): RollerResponse | undefined => undefined),
+      fetchUnderenheter(orgnr).catch(
+        (): UnderenheterPage | undefined => undefined,
+      ),
       fetchRegnskap(orgnr).catch(
         (): RegnskapResponse | undefined => undefined,
       ),

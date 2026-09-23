@@ -5,6 +5,7 @@ import {
   formatAddress,
   formatDateNo,
   formatDateNumeric,
+  formatListCount,
   formatMoney,
   formatMoneyCompact,
   formatNaering,
@@ -344,6 +345,18 @@ describe('formatMoneyCompact', () => {
   it('returns undefined for nullish / NaN', () => {
     expect(formatMoneyCompact(undefined)).toBeUndefined();
     expect(formatMoneyCompact(Number.NaN, 'USD')).toBeUndefined();
+  });
+});
+
+describe('formatListCount', () => {
+  it('counts a complete list', () => {
+    expect(formatListCount(1, 1)).toBe('1 registrert.');
+    expect(formatListCount(3, 3)).toBe('3 registrerte.');
+  });
+
+  it('says a capped page is capped (Posten: 100 of 133)', () => {
+    expect(formatListCount(100, 133)).toBe('Viser 100 av 133.');
+    expect(formatListCount(100, 1234)).toBe(`Viser 100 av 1${NBSP}234.`);
   });
 });
 

@@ -13,7 +13,11 @@ const overviewList = $('overview-list') as HTMLDListElement;
 const contactCard = $('contact');
 const contactList = $('contact-list') as HTMLDListElement;
 
-export function renderOverview(enhet: Enhet, roller: RollerResponse): void {
+export function renderOverview(
+  enhet: Enhet,
+  // undefined = the roller fetch failed.
+  roller: RollerResponse | undefined,
+): void {
   overviewList.replaceChildren();
   addRow(overviewList, 'Organisasjonsform', enhet.organisasjonsform?.beskrivelse);
   // When (and for a forced dissolution, why) each negative status took
@@ -34,7 +38,13 @@ export function renderOverview(enhet: Enhet, roller: RollerResponse): void {
   // Who runs it / who vouches for the books — all from the same roller
   // response already fetched for daglig leder. addRow skips any that are
   // absent (a firm may have no registered styreleder, revisor, or
-  // regnskapsfører), so these rows appear only when there's a holder.
+  // regnskapsfører), so these rows appear only when there's a holder —
+  // which is why a failed fetch needs its own row: silently dropping
+  // them would read as "none registered".
+  if (!roller) {
+    addRow(overviewList, 'Roller', 'Kunne ikke hentes');
+    return;
+  }
   addRow(overviewList, 'Daglig leder', findRoleHolder(roller, 'DAGL'));
   addRow(overviewList, 'Styreleder', findRoleHolder(roller, 'LEDE'));
   addRow(overviewList, 'Revisor', findRoleHolder(roller, 'REVI'));

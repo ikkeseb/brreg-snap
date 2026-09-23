@@ -1,14 +1,24 @@
 import { buildOrgnrCopyButton } from '../../lib/copy-orgnr.js';
-import type { Underenhet } from '../../types/brreg.js';
-import { $, emptyState } from './dom.js';
+import { formatListCount } from '../../lib/format.js';
+import type { UnderenheterPage } from '../../types/brreg.js';
+import { $, emptyLine, emptyState } from './dom.js';
 
 const underenheterSection = $('underenheter');
 const underenheterBody = $('underenheter-body');
 
-export function renderUnderenheter(items: Underenhet[]): void {
+// undefined = the fetch failed. That must read as "couldn't check", not
+// as the registry fact "none registered".
+export function renderUnderenheter(page: UnderenheterPage | undefined): void {
   underenheterSection.hidden = false;
   underenheterBody.innerHTML = '';
 
+  if (!page) {
+    underenheterBody.appendChild(
+      emptyLine('Kunne ikke hente underenheter. Prøv igjen senere.'),
+    );
+    return;
+  }
+  const { items } = page;
   if (items.length === 0) {
     underenheterBody.appendChild(
       emptyState('Ingen registrerte underenheter.'),
@@ -20,7 +30,7 @@ export function renderUnderenheter(items: Underenhet[]): void {
   summary.className = 'empty';
   summary.style.fontStyle = 'normal';
   summary.style.color = 'var(--muted)';
-  summary.textContent = `${items.length} registrert${items.length === 1 ? '' : 'e'}.`;
+  summary.textContent = formatListCount(items.length, page.total);
   underenheterBody.appendChild(summary);
 
   const table = document.createElement('table');

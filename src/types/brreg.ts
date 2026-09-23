@@ -131,6 +131,9 @@ export interface RollerResponse {
 export interface Underenhet {
   organisasjonsnummer: string;
   navn: string;
+  // 'Underenhet', or 'SlettetUnderEnhet' for a deleted one — whose
+  // minimal body has a slettedato and NO overordnetEnhet.
+  respons_klasse?: string;
   overordnetEnhet?: string;
   organisasjonsform?: Kode;
   naeringskode1?: Kode;
@@ -138,6 +141,15 @@ export interface Underenhet {
   beliggenhetsadresse?: Adresse;
   oppstartsdato?: string;
   nedleggelsesdato?: string;
+  slettedato?: string;
+}
+
+// The first page of a parent's underenheter. `total` is brreg's
+// page.totalElements, so a capped page can say "Viser 100 av 133"
+// instead of passing 100 off as the full count.
+export interface UnderenheterPage {
+  items: Underenhet[];
+  total: number;
 }
 
 

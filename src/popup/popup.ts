@@ -296,12 +296,13 @@ async function loadAndRender(
     // Roller and regnskap are extra API calls but live behind the same
     // 24h session cache, and both feed the quick glance: daglig leder
     // in the rows, "leverer regnskap?" in the verdict strip. They are
-    // soft dependencies — on failure the verdict omits the signal
-    // (undefined ≠ "not filed") and the roller rows render empty.
+    // soft dependencies — a failure maps to undefined ("couldn't ask"):
+    // the verdict omits what it can't back, and the Daglig leder row
+    // says it couldn't fetch rather than "—" (none registered).
     const [enhet, roller, regnskap] = await Promise.all([
       fetchEnhet(orgnr),
       fetchRoller(orgnr).catch(
-        () => ({ rollegrupper: [] }) as RollerResponse,
+        (): RollerResponse | undefined => undefined,
       ),
       fetchRegnskap(orgnr).catch(
         (): RegnskapResponse | undefined => undefined,
@@ -317,7 +318,7 @@ async function loadAndRender(
 
 function renderEnhet(
   enhet: Enhet,
-  roller: RollerResponse,
+  roller: RollerResponse | undefined,
   regnskap: RegnskapResponse | undefined,
 ): void {
   setState('result');
@@ -351,14 +352,18 @@ function renderEnhet(
   addRow(dl, 'Form', enhet.organisasjonsform?.beskrivelse);
   addRow(dl, 'Næring', formatNaering(enhet.naeringskode1));
   // Always render daglig leder, even when missing, so the user sees we
-  // looked — empty fallback distinguishes "no role registered" from
-  // "we forgot to check". Other rows can legitimately be missing on
-  // certain forms (ENK has no Form-suffix, foreign entities lack næring).
-  addRow(dl, 'Daglig leder', findRoleHolder(roller, 'DAGL') ?? '—');
+  // looked — "—" means "no role registered", distinct from "we couldn't
+  // check". Other rows can legitimately be missing on certain forms
+  // (ENK has no Form-suffix, foreign entities lack næring).
+  addRow(
+    dl,
+    'Daglig leder',
+    roller ? (findRoleHolder(roller, 'DAGL') ?? '—') : 'Kunne ikke hentes',
+  );
   // Styreleder is the natural "who else runs it" companion; shown only
   // when registered so the fast-glance popup stays tight (the sidebar
   // overview carries the fuller revisor/regnskapsfører set).
-  addRow(dl, 'Styreleder', findRoleHolder(roller, 'LEDE'));
+  if (roller) addRow(dl, 'Styreleder', findRoleHolder(roller, 'LEDE'));
   addRow(dl, 'Adresse', formatAddress(enhet.forretningsadresse));
   if (enhet.hjemmeside) {
     const href = enhet.hjemmeside.startsWith('http')
