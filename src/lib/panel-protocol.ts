@@ -20,7 +20,10 @@
 //     panel in any other window reads it as no hint at all.
 
 import { isValidOrgnr } from './mod11.js';
-import type { ResolutionMethod } from './ui/resolve-tab.js';
+import {
+  RESOLUTION_METHODS,
+  type ResolutionMethod,
+} from './resolution-method.js';
 
 export type PanelMessage =
   | {
@@ -39,14 +42,6 @@ export type PanelMessage =
       windowId: number;
       host?: string;
     };
-
-const METHODS: readonly ResolutionMethod[] = [
-  'host-auto',
-  'host-pick',
-  'url',
-  'manual',
-  'drill-in',
-];
 
 function optionalString(value: unknown): value is string | undefined {
   return value === undefined || typeof value === 'string';
@@ -67,7 +62,7 @@ export function parsePanelMessage(msg: unknown): PanelMessage | undefined {
     m.type === 'sync' &&
     typeof m.orgnr === 'string' &&
     isValidOrgnr(m.orgnr) &&
-    METHODS.includes(m.method as ResolutionMethod)
+    RESOLUTION_METHODS.includes(m.method as ResolutionMethod)
   ) {
     return {
       type: 'sync',

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { SearchHit } from '../src/types/brreg.js';
+import type { Candidate } from '../src/lib/hostname-search.js';
 import enhetDnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import enhetEquinor from './fixtures/brreg/enhet-923609016-equinor.json';
 import { FakeElement, fakeEvent, installFakeDom } from './helpers/fake-dom.js';
@@ -16,7 +16,10 @@ vi.mock('../src/lib/hostname-search.js', () => ({
   searchByHostnameDetailed: vi.fn(),
 }));
 
-const candidates: SearchHit[] = [enhetDnb, enhetEquinor];
+const candidates: Candidate[] = [enhetDnb, enhetEquinor].map((e) => ({
+  ...e,
+  evidence: 'navn',
+}));
 
 async function setupReject() {
   installFakeDom();
@@ -119,13 +122,13 @@ describe('«Feil bedrift?» reject flow', () => {
     const { buttonEl, showPicker, addRejectedChoice, search } = await setupReject();
     search.mockResolvedValue({
       band: 'auto',
-      candidates: [enhetEquinor],
+      candidates: [candidates[1]!],
       choice: enhetEquinor.organisasjonsnummer,
       complete: true,
     });
     buttonEl.click();
     await vi.waitFor(() =>
-      expect(showPicker).toHaveBeenCalledWith('dnb.no', [enhetEquinor]),
+      expect(showPicker).toHaveBeenCalledWith('dnb.no', [candidates[1]]),
     );
     expect(addRejectedChoice).toHaveBeenCalledWith(
       'dnb.no',
@@ -136,7 +139,7 @@ describe('«Feil bedrift?» reject flow', () => {
   it('a flow that starts during the search wins over the late picker', async () => {
     const { buttonEl, loads, showPicker, showEmptyState, search } =
       await setupReject();
-    let answer!: (value: { band: 'none'; candidates: SearchHit[]; complete: boolean }) => void;
+    let answer!: (value: { band: 'none'; candidates: Candidate[]; complete: boolean }) => void;
     search.mockReturnValue(
       new Promise((resolve) => {
         answer = resolve;

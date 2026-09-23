@@ -1,0 +1,224 @@
+{
+ "navn=detnorsketeatret&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=detnorsketeatret&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "hjemmeside=detnorsketeatret.no&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "914222249",
+     "navn": "VENNER AV DET NORSKE TEATERET",
+     "organisasjonsform": {
+      "kode": "FLI",
+      "beskrivelse": "Forening/lag/innretning",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/FLI"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "hjemmeside": "www.detnorsketeatret.no/vennelaget",
+     "registreringsdatoEnhetsregisteret": "2014-10-13",
+     "registrertIMvaregisteret": false,
+     "naeringskode1": {
+      "kode": "94.992",
+      "beskrivelse": "Aktiviteter i andre medlemsorganisasjoner ellers"
+     },
+     "harRegistrertAntallAnsatte": false,
+     "epostadresse": "post@example.invalid",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0164",
+      "poststed": "OSLO",
+      "adresse": [
+       "c/o Eksempel",
+       "Eksempelveien 1"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1946-12-30",
+     "institusjonellSektorkode": {
+      "kode": "7000",
+      "beskrivelse": "Ideelle organisasjoner"
+     },
+     "registrertIForetaksregisteret": false,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": true,
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Nynorsk",
+     "aktivitet": [
+      "Verne og styrke Det Norske Teateret."
+     ],
+     "registreringsdatoFrivillighetsregisteret": "2014-10-13",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/914222249"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?hjemmeside=detnorsketeatret.no&sort=antallAnsatte,DESC&size=20"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 1,
+   "totalPages": 1,
+   "number": 0
+  }
+ },
+ "navn=detn%C3%B8rsketeatret&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=detn%C3%B8rsketeatret&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "navn=detnorskete%C3%A5tret&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=detnorskete%C3%A5tret&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 0,
+   "totalPages": 0,
+   "number": 0
+  }
+ },
+ "navn=det+norske+teatret&navnMetodeForSoek=FORTLOEPENDE&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&size=20&sort=antallAnsatte%2CDESC": {
+  "_embedded": {
+   "enheter": [
+    {
+     "organisasjonsnummer": "921196164",
+     "navn": "LL DET NORSKE TEATRET",
+     "organisasjonsform": {
+      "kode": "AS",
+      "beskrivelse": "Aksjeselskap",
+      "_links": {
+       "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+       }
+      }
+     },
+     "historiskeNavn": [],
+     "postadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0110",
+      "poststed": "OSLO",
+      "adresse": [
+       "Postboks 1238 Vika"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "registreringsdatoEnhetsregisteret": "1995-02-19",
+     "registrertIMvaregisteret": true,
+     "frivilligMvaRegistrertBeskrivelser": [
+      "Utleier av bygg eller anlegg"
+     ],
+     "naeringskode1": {
+      "kode": "90.202",
+      "beskrivelse": "Utøvende kunstnerisk virksomhet og underholdningsvirksomhet innenfor scenekunst"
+     },
+     "antallAnsatte": 306,
+     "harRegistrertAntallAnsatte": true,
+     "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2014-01-18",
+     "registreringsdatoMerverdiavgiftsregisteret": "2001-05-01",
+     "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2001-06-13",
+     "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+     "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+     "telefon": "00 00 00 00",
+     "forretningsadresse": {
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "0164",
+      "poststed": "OSLO",
+      "adresse": [
+       "Kristian IVs gate 8"
+      ],
+      "kommune": "OSLO",
+      "kommunenummer": "0301"
+     },
+     "stiftelsesdato": "1912-11-22",
+     "institusjonellSektorkode": {
+      "kode": "6100",
+      "beskrivelse": "Statsforvaltningen"
+     },
+     "registrertIForetaksregisteret": true,
+     "registrertIStiftelsesregisteret": false,
+     "registrertIFrivillighetsregisteret": false,
+     "sisteInnsendteAarsregnskap": "2025",
+     "konkurs": false,
+     "underAvvikling": false,
+     "underTvangsavviklingEllerTvangsopplosning": false,
+     "maalform": "Nynorsk",
+     "vedtektsdato": "2016-04-24",
+     "vedtektsfestetFormaal": [
+      "Å syna fram skodespel på norskt mål i bygd og by."
+     ],
+     "aktivitet": [
+      "Å syna fram skodespel på norskt mål i bygd og by."
+     ],
+     "registreringsdatoForetaksregisteret": "1990-11-01",
+     "registrertIPartiregisteret": false,
+     "paategninger": [],
+     "erIKonsern": false,
+     "kapital": {
+      "belop": 4908800,
+      "type": "Aksjekapital",
+      "valuta": "NOK",
+      "innfortDato": "1991-04-16"
+     },
+     "_links": {
+      "self": {
+       "href": "https://data.brreg.no/enhetsregisteret/api/enheter/921196164"
+      }
+     },
+     "respons_klasse": "Enhet"
+    }
+   ]
+  },
+  "_links": {
+   "self": {
+    "href": "https://data.brreg.no/enhetsregisteret/api/enheter?navn=det%20norske%20teatret&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS,ASA,SA,BBL,ORGL,SF&sort=antallAnsatte,DESC"
+   }
+  },
+  "page": {
+   "size": 20,
+   "totalElements": 1,
+   "totalPages": 1,
+   "number": 0
+  }
+ }
+}

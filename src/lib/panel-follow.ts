@@ -5,10 +5,13 @@
 // callbacks; the ordering and "is this still the latest?" logic lives
 // here so it can be tested without a DOM.
 
-import type { DetailedResult } from './hostname-search.js';
+import type { Candidate, DetailedResult } from './hostname-search.js';
 import type { PanelHint } from './panel-protocol.js';
-import type { ResolutionMethod, TabContext } from './ui/resolve-tab.js';
-import type { SearchHit } from '../types/brreg.js';
+import {
+  UNKNOWN_URL_METHOD,
+  type ResolutionMethod,
+} from './resolution-method.js';
+import type { TabContext } from './ui/resolve-tab.js';
 
 // --- load token -------------------------------------------------------
 //
@@ -46,7 +49,7 @@ export type PanelView =
       method: ResolutionMethod;
       host?: string;
     }
-  | { kind: 'picker'; host: string; candidates: SearchHit[] }
+  | { kind: 'picker'; host: string; candidates: Candidate[] }
   | { kind: 'empty'; host?: string; degraded?: boolean };
 
 export function viewFromContext(ctx: TabContext): PanelView {
@@ -54,7 +57,7 @@ export function viewFromContext(ctx: TabContext): PanelView {
     return {
       kind: 'company',
       orgnr: ctx.orgnr,
-      method: ctx.method ?? 'url',
+      method: ctx.method ?? UNKNOWN_URL_METHOD,
       host: ctx.host,
     };
   }
@@ -147,7 +150,7 @@ export function chooseStart(
     return viewFromContext(tab);
   }
   if (hint.orgnr !== undefined) {
-    return { kind: 'company', orgnr: hint.orgnr, method: 'url' };
+    return { kind: 'company', orgnr: hint.orgnr, method: UNKNOWN_URL_METHOD };
   }
   if (hint.nomatch !== undefined) return { kind: 'probe', host: hint.nomatch };
   return tab ? viewFromContext(tab) : { kind: 'empty' };
