@@ -9,19 +9,14 @@ fallback because AMO requires at least one English locale.
 
 ## Upload
 
-Upload only the assets of the GitHub Release for tag `v<version>`,
-which CI builds from the tagged tree: `brreg-snap-<version>.zip` (the
-package) and `brreg-snap-source-<version>.zip` (answer **Yes** to "Do
-you need to submit source code?"). Never a local build.
-
-Afterwards, record what went up as an annotated tag on the release
-commit, carrying both digests:
-
-```bash
-gh release view v<version> --json assets --jq '.assets[] | [.name, .digest] | @tsv'
-git tag -a amo-submission-<version> v<version>^{commit} \
-  -m "AMO <version>: brreg-snap-<version>.zip sha256:… source sha256:…"
-```
+The publish workflow uploads the assets of the GitHub Release for tag
+`v<version>`, which CI builds from the tagged tree:
+`brreg-snap-<version>.zip` (the package) and
+`brreg-snap-source-<version>.zip` (the source for review), with the
+release notes and reviewer notes from the version's submission kit. It
+then tags `amo-submission-<version>` on the release commit with both
+digests. Never a local build. The flow and the manual fallback:
+`docs/release.md`.
 
 ## Add-on URL slug
 
@@ -51,9 +46,12 @@ MIT (matches `LICENSE` in the repo).
 ## Privacy policy
 
 AMO hosts its own copy of the policy text; it doesn't follow a URL.
-Paste the full contents of `PRIVACY.md` into the listing's privacy
-policy field on every submission where `PRIVACY.md` changed. AMO
-renders its Markdown.
+The field keeps every newline and renders only a Markdown subset
+(emphasis, links, code, lists): no headings, no tables. So it gets a
+reflowed copy of `PRIVACY.md`, not the file itself: `pnpm release`
+renders it into the version's submission kit (one line per paragraph,
+headings as bold lines, tables as lists). Paste that on every
+submission where `PRIVACY.md` changed.
 
 ## Data collection
 
@@ -71,6 +69,7 @@ notes for reviewers below say how consent works there.
 
 ## Norwegian listing (primary — `nb-NO`)
 
+<!-- SECTION: summary-nb -->
 ### Summary (kort beskrivelse, ≤ 250 tegn)
 
 > Slå opp norske bedrifter i Brønnøysundregistrene med ett klikk. Henter status, daglig leder, styret, nøkkeltall og regnskap direkte fra data.brreg.no. Ingen content scripts, ingen tredjeparts-trackere.
@@ -79,6 +78,7 @@ notes for reviewers below say how consent works there.
 «signaturrett» — den finnes ikke i det åpne API-et og vises ikke i
 produktet; fjernet fra all listing-tekst 2026-07-05.)
 
+<!-- SECTION: description-nb -->
 ### Description (lang beskrivelse, markdown OK)
 
 > **brreg-snap** henter bedriftsinfo fra Brønnøysundregistrene rett
@@ -129,12 +129,14 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 
 ## English listing (secondary — `en-US`)
 
+<!-- SECTION: summary-en -->
 ### Summary (≤ 250 chars)
 
 > Look up Norwegian companies in the public Brønnøysund Register with one click. Shows status, CEO, board, key figures, and accounts straight from data.brreg.no. No content scripts, no third-party trackers.
 
 (206 chars — under the limit.)
 
+<!-- SECTION: description-en -->
 ### Description
 
 > **brreg-snap** surfaces Norwegian company information from the
@@ -183,6 +185,7 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 
 ---
 
+<!-- SECTION: permission-justifications -->
 ## Permission justifications
 
 These are pasted into the "Notes for Reviewers" field. One line per
@@ -229,6 +232,7 @@ permission, explaining why each is necessary.
   `permissions.remove` when switched off; the permission can also be
   revoked from `about:addons` at any time.
 
+<!-- SECTION: reviewer-notes -->
 ## Notes for reviewers
 
 > This add-on is a popup and sidebar company lookup tool for
@@ -262,12 +266,13 @@ permission, explaining why each is necessary.
 > sidebar shows its own disclosure of what is sent and to whom, and
 > its «Slå på» button is the explicit consent.
 >
-> The build uses esbuild minification through Vite. Source maps are
+> The build uses Vite's default minifier (Oxc). Source maps are
 > excluded from the package; the complete original source is the
 > attached source zip (`git archive` of tag `v<version>`). Build
 > instructions are in `BUILD.md` at the repo root — reproduction is
-> `pnpm install --frozen-lockfile && pnpm package` with Node ≥ 18
-> and pnpm 10.33.0 (pinned via the `packageManager` field). The
+> `pnpm install --frozen-lockfile && pnpm package` with Node 24
+> (`.node-version`; `engines` allows `^22.13 || ^24 || >=26`) and
+> pnpm 10.33.0 (pinned via the `packageManager` field). The
 > unzipped package matches the CI build attached to the GitHub
 > Release for `v<version>`.
 >

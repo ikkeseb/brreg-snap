@@ -4,6 +4,8 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
+## [Unreleased]
+
 ## [1.3.1] — 2026-09-23
 
 Correctness and privacy patch. brreg's open API changed after 1.3.0
