@@ -28,3 +28,39 @@ jobs:
       # The one gate (package.json): typecheck, lint, test, both builds,
       # dist invariants, web-ext lint. Same command as the pre-push hook.
       - run: pnpm verify
+
+  # Browser smoke (tests/e2e/, playwright.config.ts): the preview harness
+  # on recorded fixtures plus one real unpacked Chromium load. Its own job
+  # because it needs a browser; not part of `pnpm verify`.
+  smoke:
+    needs: ci
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # The bundled Chromium runs extensions headless: no xvfb needed.
+      - run: pnpm exec playwright install --with-deps chromium
+
+      # Builds dist-chrome, then runs every project.
+      - run: pnpm smoke
+
+      # Every state x width x theme, for review without running anything.
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: smoke-screenshots
+          path: test-results/
+          if-no-files-found: ignore
