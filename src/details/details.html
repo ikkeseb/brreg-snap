@@ -25,6 +25,28 @@
           </div>
         </div>
         <p id="auto-sync-status" class="auto-sync-status" role="status" aria-live="polite" hidden></p>
+        <div
+          id="auto-sync-consent"
+          class="auto-sync-consent"
+          role="group"
+          aria-labelledby="auto-sync-consent-text"
+          hidden
+        >
+          <p id="auto-sync-consent-text">
+            Auto-oppdater slår opp hver fane du bytter til: domenet sendes
+            til Brønnøysundregistrene (data.brreg.no), bare mens dette
+            panelet er åpent. Ingenting sendes til utvikleren. Nettleseren
+            spør deretter om tilgang til fanene.
+          </p>
+          <div class="auto-sync-consent-actions">
+            <button type="button" id="auto-sync-consent-accept" class="retry-button">
+              Slå på
+            </button>
+            <button type="button" id="auto-sync-consent-cancel" class="ghost-link">
+              Avbryt
+            </button>
+          </div>
+        </div>
       </header>
       <section id="status" class="visually-hidden" aria-live="polite"></section>
       <div id="error-actions" class="error-actions" hidden>

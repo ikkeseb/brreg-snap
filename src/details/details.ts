@@ -59,6 +59,9 @@ const footerUpdated = $('footer-updated');
 const updatedTime = $('updated-time') as HTMLTimeElement;
 const refreshBtn = $('refresh-data') as HTMLButtonElement;
 const autoSyncToggle = $('auto-sync-toggle') as HTMLInputElement;
+const consentEl = $('auto-sync-consent');
+const consentAcceptBtn = $('auto-sync-consent-accept') as HTMLButtonElement;
+const consentCancelBtn = $('auto-sync-consent-cancel') as HTMLButtonElement;
 const autoSyncStatus = $('auto-sync-status');
 const footerSource = $('footer-source');
 const sourceHostEl = $('source-host');
@@ -531,7 +534,33 @@ async function setupAutoSyncToggle(): Promise<void> {
   await reconcileAutoSync();
 
   autoSyncToggle.addEventListener('change', () => {
+    // Switching on first says what auto-sync sends and to whom (store
+    // policies want the disclosure before the grant, and Firefox < 140
+    // has no built-in data-consent prompt). The «Slå på» click is then
+    // both the consent and the fresh gesture permissions.request needs.
+    if (autoSyncToggle.checked && !currentAutoSyncEnabled) {
+      autoSyncToggle.checked = false;
+      showAutoSyncConsent(true);
+      return;
+    }
+    showAutoSyncConsent(false);
     void handleToggleChange(autoSyncToggle.checked);
+  });
+  consentAcceptBtn.addEventListener('click', () => {
+    showAutoSyncConsent(false);
+    autoSyncToggle.checked = true;
+    // No await before this call: handleToggleChange's first await is
+    // permissions.request (§ gesture-stack).
+    void handleToggleChange(true);
+  });
+  consentCancelBtn.addEventListener('click', () => {
+    showAutoSyncConsent(false);
+    autoSyncToggle.focus();
+  });
+  consentEl.addEventListener('keydown', (ev) => {
+    if (ev.key !== 'Escape') return;
+    showAutoSyncConsent(false);
+    autoSyncToggle.focus();
   });
 
   // External revoke (about:addons / chrome://extensions) — detach and
@@ -641,6 +670,11 @@ async function handleToggleChange(desired: boolean): Promise<void> {
     autoSyncToggle.disabled = false;
     toggleInFlight = false;
   }
+}
+
+function showAutoSyncConsent(show: boolean): void {
+  consentEl.hidden = !show;
+  if (show) consentAcceptBtn.focus();
 }
 
 function showAutoSyncStatus(message: string | null): void {

@@ -25,7 +25,10 @@ focus events; they all need `tabs` or content scripts.
 ## Tab-sync via runtime `tabs` opt-in is the supported path
 
 The sidebar exposes an "Auto-oppdater ved fane-bytte" toggle that
-requests `tabs` at runtime. With it on, the panel page registers
+requests `tabs` at runtime. Switching it on first shows an inline
+disclosure (what is sent, to whom, only while the panel is open); its
+«Slå på» button is the consent and the gesture that calls
+`permissions.request`. With it on, the panel page registers
 `tabs.onActivated`/`onUpdated` for its own window and resolves the
 new tab itself — see sidebar-sync.md § panel-hosted-auto-sync. Nothing
 outside an open panel listens to tabs, so the grant never causes a
