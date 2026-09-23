@@ -139,8 +139,7 @@ const manualSearch = attachManualSearch({
   inputEl: manualQueryEl,
   resultsEl: manualResultsEl,
   onSelect: (hit) => {
-    setHistoryOrgnr(hit.organisasjonsnummer, 'manual', false);
-    void loadOrgnr(hit.organisasjonsnummer, 'manual');
+    loadManualPick(hit.organisasjonsnummer);
   },
 });
 
@@ -273,6 +272,17 @@ function navigateToRelated(orgnr: string): void {
   void loadOrgnr(orgnr, 'drill-in', { focusResult: true });
 }
 
+// A company picked from the manual search or the recents list. The
+// empty state it came from may name a host («Ingen bedrift identifisert
+// på example.com»), but the pick has nothing to do with that site:
+// clear the source label, as navigateToRelated does, so the footer
+// doesn't claim «Synket fra example.com».
+function loadManualPick(orgnr: string): void {
+  sourceLabel.set(undefined);
+  setHistoryOrgnr(orgnr, 'manual', false);
+  void loadOrgnr(orgnr, 'manual');
+}
+
 function setState(
   state: 'loading' | 'result' | 'error' | 'picker' | 'empty',
 ): void {
@@ -358,8 +368,7 @@ function showEmptyState(host?: string, degraded = false): void {
       : 'Sidepanelet ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
   manualSearch.reset();
   void renderRecentSection(recentSectionEl, recentListEl, (entry) => {
-    setHistoryOrgnr(entry.orgnr, 'manual', false);
-    void loadOrgnr(entry.orgnr, 'manual');
+    loadManualPick(entry.orgnr);
   });
   // Focus the search box only when the sidebar window itself has
   // focus — with auto-sync on, a tab switch to an unresolvable site

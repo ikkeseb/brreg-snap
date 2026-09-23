@@ -137,7 +137,7 @@ change of the active tab, most of which stay on the same company.
 ## Background repaints must not steal focus or lie in the footer
 
 With auto-sync on, the panel repaints on tab switches while the user
-is working in the page. Two rules in `details.ts`:
+is working in the page. The rules, in `details.ts` unless noted:
 
 - `showEmptyState` focuses the manual-search input only when
   `document.hasFocus()` — an unconditional `focus()` yanked the
@@ -149,6 +149,10 @@ is working in the page. Two rules in `details.ts`:
 - The stamp is the data's age (`loadCompany`'s `fetchedAt`, the
   oldest cached part), never the paint time: a cache hit can be a
   day old. See `docs/notes/cache.md` § 24h-session.
+- "Synket fra `<host>`" appears only for a company resolved from the
+  page. A drill-in, a manual-search pick and a recents pick clear the
+  label (`navigateToRelated`, `loadManualPick`), and the popup sends
+  no host with a manual pick (`syncSidebarIfOpen` in `popup.ts`).
 
 <!-- SECTION: shared-ui-modules -->
 ## Popup and sidebar share their resolution UX via `src/lib/ui/`

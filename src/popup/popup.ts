@@ -247,12 +247,15 @@ async function syncOpenPanel(msg: PanelMessage): Promise<void> {
 
 function syncSidebarIfOpen(orgnr: string): void {
   if (currentWindowId === undefined) return;
+  const method = currentResolutionMethod ?? 'url';
   void syncOpenPanel({
     type: 'sync',
     windowId: currentWindowId,
     orgnr,
-    host: sourceLabel.get(),
-    method: currentResolutionMethod ?? 'url',
+    // A manual pick has nothing to do with the tab's site: without a
+    // host the panel's footer doesn't claim «Synket fra <host>».
+    host: method === 'manual' ? undefined : sourceLabel.get(),
+    method,
   });
 }
 
