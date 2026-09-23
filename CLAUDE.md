@@ -51,9 +51,9 @@ is the conscious bypass.
 pnpm verify                                # the full gate (about 12 s)
 pnpm verify:fast                           # typecheck + lint + test
 pnpm typecheck                             # tsc: src, tests/, tsconfig.node.json projects
-pnpm lint                                  # ESLint on src, tests, scripts, configs; 0 warnings
+pnpm lint                                  # ESLint on src, tests, scripts (not scripts/preview/), configs; 0 warnings
 pnpm lint:ext                              # web-ext lint on dist-firefox/; fails on errors + unlisted warnings
-pnpm verify:dist                           # dist manifests, file set, no eval (run both builds first)
+pnpm verify:dist                           # dist manifests + the files they reference, file set, no eval/Function (AST); run both builds first
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
 pnpm exec vitest run tests/orgnr.test.ts   # single file
@@ -164,8 +164,10 @@ PRs that relax any of the above will be rejected.
 ## Dependencies
 
 Zero runtime dependencies in the shipped bundle (everything is
-inlined TypeScript). `pnpm verify` enforces it: ESLint bans
-non-relative imports in `src/`, and `verify:dist` fails if
-`package.json` gains a `dependencies` field. Every package is a dev
+inlined TypeScript). `pnpm verify` enforces it: the build fails when
+any module outside `src/`, or any non-`.ts` script, enters the bundle
+graph (`scripts/build-graph.mjs`); ESLint bans non-relative imports in
+`src/`; `verify:dist` fails if `package.json` gains a `dependencies`
+field. Every package is a dev
 dependency, so `pnpm audit` advisories concern the toolchain, not the
 extension.
