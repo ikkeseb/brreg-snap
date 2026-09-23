@@ -28,8 +28,9 @@ says exactly what is sent, when, and what is kept on your device.
 
 The extension contacts `data.brreg.no` only when you:
 
-1. click the brreg-snap toolbar button,
-2. open the brreg-snap sidebar (Firefox) or side panel (Chrome),
+1. click the brreg-snap toolbar button or press its keyboard shortcut,
+2. open the brreg-snap sidebar (Firefox) or side panel (Chrome), by
+   button or keyboard shortcut,
 3. choose «Vis i brreg-snap sidebar» or «Slå opp «…» i brreg-snap» in
    the right-click menu,
 4. type in the search box, or click a company, link or button inside
@@ -87,7 +88,7 @@ Removing the extension deletes all of it.
 
 | Permission | Why |
 |---|---|
-| `activeTab` | Read the address and title of the current tab when you click the toolbar button, the sidebar button or the right-click menu item. No access to page content. |
+| `activeTab` | Read the address and title of the current tab when you click the toolbar button, the sidebar button or a right-click menu item, or press a brreg-snap keyboard shortcut. No access to page content. |
 | `storage` | The cache, recent list and setting above. |
 | `menus` (Firefox) / `contextMenus` (Chrome) | The «Vis i brreg-snap sidebar» and «Slå opp «…» i brreg-snap» right-click items. |
 | `sidePanel` (Chrome only) | Show the details view in Chrome's side panel. |
