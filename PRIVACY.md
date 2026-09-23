@@ -13,14 +13,16 @@ says exactly what is sent, when, and what is kept on your device.
 
 - The extension talks to one service only: `data.brreg.no`, the
   public API of Brønnøysundregistrene, a Norwegian government agency.
-- It sends the domain of the site you look up (for example
-  `example.no`). It never sends the full page address, the page
-  title, page content or cookies.
+- It sends the domain of the site you look up (for example `dnb.no`
+  when you are on `nettbank.dnb.no`; subdomains are not sent). It
+  never sends the full page address, the page title, page content or
+  cookies.
 - Nothing goes to the developer or to any other party. There is no
   developer server, no analytics, no ads and no telemetry.
-- Lookups happen when you ask for one. The optional «Auto-oppdater
-  ved fane-bytte» setting also looks up the tabs you switch to, but
-  only while the brreg-snap sidebar / side panel is open.
+- Lookups happen when you ask for one. If you turn on the optional
+  «Auto-oppdater ved fane-bytte» setting, brreg-snap also looks up
+  the page you are on every time you switch tabs or open a new page,
+  as long as a brreg-snap sidebar / side panel is open.
 
 ## When data is sent
 
@@ -31,19 +33,24 @@ The extension contacts `data.brreg.no` only when you:
 3. choose «Vis i brreg-snap sidebar» in the right-click menu,
 4. type in the search box, or click a company, link or button inside
    the extension, or
-5. have turned on «Auto-oppdater ved fane-bytte» and switch tabs or
-   load a new page while the sidebar / side panel is open. Closing
-   the panel stops this.
+5. have turned on «Auto-oppdater ved fane-bytte». Then every time
+   you switch tabs or open a new page, the page you are on is looked
+   up, as long as a brreg-snap sidebar / side panel is open. The
+   setting covers every window; each open panel follows the tabs of
+   its own window. Closing the panel stops this.
 
-IP addresses (like `192.168.1.10`) and local network names (like
-`localhost`) are never sent.
+IP addresses (like `192.168.1.10`) and reserved local names are never
+sent: `localhost`, names without a dot, and endings such as `.local`,
+`.lokal`, `.internal`, `.intern`, `.lan`, `.home.arpa` and `.priv`.
+Other names that only work on a private network are looked up like
+any other site.
 
 ## What is sent
 
 | Data | Example | Why |
 |---|---|---|
-| The site's domain name, with and without `www.` | `example.no`, `www.example.no` | Finds companies that list that domain as their website |
-| The main word of the domain, plus Norwegian spellings of it | `elkjop`, `elkjøp` | Finds companies whose name matches the domain |
+| The site's registrable domain. Subdomains and `www.` are not sent | `dnb.no` (on `nettbank.dnb.no`) | Finds companies that list that domain as their website |
+| The main word of that domain, plus Norwegian spellings of it | `elkjop`, `elkjøp` (on `elkjop.no`) | Finds companies whose name matches the domain |
 | An organisation number | `923609016` | Fetches the company's registry entry, roles, sub-units and accounts. The number comes from the page address or title (read on your device), from a search result, from a link in the extension, or from your recent lookups |
 | Text you type in the search box | `equinor` | Searches the register by company name |
 
@@ -60,9 +67,9 @@ their API.
 None of this is synced or sent anywhere.
 
 - **Lookup cache** (`storage.session`): register responses keyed by
-  organisation number, and the lookup result for each domain you
+  organisation number, and the lookup result for each site you
   looked up, including a company you picked or rejected for that
-  domain. It makes repeat visits instant and spares the API. Entries
+  site. It makes repeat visits instant and spares the API. Entries
   expire after 24 hours, and the whole cache is cleared when you close
   the browser.
 - **Recent companies** (`storage.session`): the last 5 companies you
@@ -83,7 +90,7 @@ Removing the extension deletes all of it.
 | `menus` (Firefox) / `contextMenus` (Chrome) | The «Vis i brreg-snap sidebar» right-click item. |
 | `sidePanel` (Chrome only) | Show the details view in Chrome's side panel. |
 | `https://data.brreg.no/*` | Talk to the register's API. The only site the extension connects to. |
-| `tabs` (optional, off by default) | Requested only when you turn on «Auto-oppdater ved fane-bytte», so that while the panel is open, brreg-snap can read the address and title of the tab you switch to. Turning the setting off gives the permission back; you can also revoke it in `about:addons` (Firefox) or `chrome://extensions` (Chrome). |
+| `tabs` (optional, off by default) | Requested only when you turn on «Auto-oppdater ved fane-bytte» and confirm the notice that says what it sends. It lets an open panel read the address and title of the page in front when you switch tabs or open a new page. Turning the setting off gives the permission back. On Firefox you can also remove it in `about:addons`; on Chrome, removing the extension removes it too. |
 
 ## Store declarations
 

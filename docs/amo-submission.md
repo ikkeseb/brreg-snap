@@ -64,7 +64,8 @@ user looks up is sent to data.brreg.no. Firefox 140+ shows it in the
 install prompt, and existing users get an update prompt («New required
 data collection») the first time a version adds it. Why required, not
 optional: `docs/notes/permissions-model.md`
-§ data-collection-declaration.
+§ data-collection-declaration. Firefox 115–139 ignore the key; the
+notes for reviewers below say how consent works there.
 
 ---
 
@@ -92,8 +93,9 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 > - Eventuelle underenheter (avdelinger) og overordnet enhet
 >
 > **Sidebar-panel** gir samme informasjon med dypere oppslag. Slå
-> på "Auto-oppdater ved fane-bytte" for å la sidebaren oppdatere
-> seg når du bytter fane, så lenge den er åpen.
+> på "Auto-oppdater ved fane-bytte" for å la sidebaren slå opp siden
+> du ser på hver gang du bytter fane eller åpner en ny side, så lenge
+> den er åpen.
 >
 > **Smart oppslag**: Utvidelsen finner organisasjonsnummeret enten
 > direkte i adressen eller sidetittelen, eller ved å søke i brreg på
@@ -103,17 +105,22 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 >
 > **Sikkerhet og personvern**:
 >
-> - Domenet til nettstedet du slår opp sendes til `data.brreg.no`
->   for å finne bedriften — aldri til utvikleren eller andre.
+> - For å finne bedriften sendes domenet til nettstedet du slår opp
+>   (for eksempel `dnb.no` for `nettbank.dnb.no`; underdomener sendes
+>   ikke), eller et organisasjonsnummer fra adressen eller
+>   sidetittelen, til `data.brreg.no` — aldri til utvikleren eller
+>   andre.
 > - Ingen content scripts. Utvidelsen leser ikke innholdet på
 >   nettsidene du besøker.
 > - Eneste eksterne tjeneste er `data.brreg.no` —
 >   Brønnøysundregistrenes åpne API.
 > - Ingen analytics, ingen tredjeparts-trackere, ingen telemetri.
 > - Null runtime-avhengigheter i den bygde utvidelsen.
-> - Auto-oppdater-funksjonen krever `tabs`-tilgang som utvidelsen
->   ber om kun ved første aktivering — du kan trekke den tilbake
->   når som helst fra `about:addons`.
+> - Auto-oppdater slår opp siden du ser på hver gang du bytter fane
+>   eller åpner en ny side, så lenge et brreg-snap-panel er åpent.
+>   Den krever `tabs`-tilgang, som utvidelsen ber om først når du
+>   slår den på, etter en kort forklaring av hva som sendes. Slå den
+>   av, eller trekk tilgangen tilbake i `about:addons`, når som helst.
 >
 > Kildekoden er åpen under MIT-lisens på
 > [github.com/ikkeseb/brreg-snap](https://github.com/ikkeseb/brreg-snap).
@@ -142,8 +149,9 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 > - Sub-units (underenheter) and parent unit, where registered
 >
 > A **sidebar panel** shows the same data in a deeper layout.
-> Enable "Auto-oppdater ved fane-bytte" to have the sidebar
-> re-resolve as you switch tabs while it is open.
+> Enable "Auto-oppdater ved fane-bytte" to have the sidebar look up
+> the page you are on every time you switch tabs or open a new page,
+> while it is open.
 >
 > **Smart resolution**: the extension finds the organisation number
 > either directly in the page address or title, or by searching
@@ -153,17 +161,22 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 >
 > **Security and privacy**:
 >
-> - The domain of the site you look up is sent to `data.brreg.no`
->   to find the company — never to the developer or anyone else.
+> - To find the company, the domain of the site you look up (for
+>   example `dnb.no` for `nettbank.dnb.no`; subdomains are not sent),
+>   or an organisation number from the page address or title, is sent
+>   to `data.brreg.no` — never to the developer or anyone else.
 > - No content scripts. The extension never reads the DOM or text
 >   of pages you visit.
 > - The only external service contacted is `data.brreg.no` — the
 >   public API operated by Brønnøysundregistrene.
 > - No analytics, no third-party trackers, no telemetry.
 > - Zero runtime dependencies in the shipped bundle.
-> - The auto-sync feature requires the `tabs` permission, which
->   the extension only requests when you first toggle it on. You
->   can revoke it at any time from `about:addons`.
+> - Auto-sync looks up the page you are on every time you switch
+>   tabs or open a new page, as long as a brreg-snap panel is open.
+>   It needs the `tabs` permission, which the extension only asks
+>   for when you turn it on, after a short note on what is sent.
+>   Turn it off, or revoke the permission in `about:addons`, at any
+>   time.
 >
 > Source code under MIT licence at
 > [github.com/ikkeseb/brreg-snap](https://github.com/ikkeseb/brreg-snap).
@@ -178,9 +191,9 @@ permission, explaining why each is necessary.
 - **`activeTab`** — Reads the URL and title of the active tab only
   when the user clicks the toolbar icon, the sidebar icon, or a
   context-menu item. Used to extract a 9-digit Norwegian
-  organisation number, or to derive a hostname for a brreg search
-  query. The permission does not grant DOM access or background
-  tab access.
+  organisation number, or to derive the site's registrable domain
+  for a brreg search query. The permission does not grant DOM access
+  or background tab access.
 
 - **`storage`** — `storage.session` (in memory, cleared when the
   browser closes): brreg API responses and per-hostname lookup
@@ -201,16 +214,20 @@ permission, explaining why each is necessary.
   enforces this restriction at runtime.
 
 - **`optional_permissions: tabs`** — Off at install time. The
-  user must opt in by flipping the "Auto-oppdater ved fane-bytte"
-  toggle in the sidebar header, which triggers Firefox's standard
-  runtime permission prompt. When granted, and only while the
-  sidebar is open, the extension listens to `tabs.onActivated` and
-  `tabs.onUpdated` to re-resolve the organisation number as the user
-  switches tabs. It reads only `tab.url` and `tab.title` on these
-  events and sends only the hostname-derived queries described under
-  data collection below. The toggle calls `permissions.remove` when
-  switched off; the permission can also be revoked from
-  `about:addons` at any time.
+  user opts in by switching on the "Auto-oppdater ved fane-bytte"
+  toggle in the sidebar header. That first shows an inline
+  disclosure: every tab switch or new page is looked up while a
+  brreg-snap panel is open, the domain goes to data.brreg.no, and
+  nothing goes to the developer. Its «Slå på» button then calls
+  `permissions.request`, which shows Firefox's standard runtime
+  permission prompt. When granted, each open sidebar listens to
+  `tabs.onActivated` and `tabs.onUpdated` for its own window, and
+  only while it is open, to re-resolve the organisation number when
+  the user switches tabs or opens a new page. It reads only
+  `tab.url` and `tab.title` on these events and sends only the
+  queries described under data collection below. The toggle calls
+  `permissions.remove` when switched off; the permission can also be
+  revoked from `about:addons` at any time.
 
 ## Notes for reviewers
 
@@ -220,14 +237,30 @@ permission, explaining why each is necessary.
 > Register Centre.
 >
 > Data collection: to find the company behind the current site, the
-> add-on sends the site's hostname, and name words derived from it, to
-> data.brreg.no. The manifest therefore declares `browsingActivity`
-> as required data collection. Nothing goes to the developer or any
-> other party. Lookups run when the user clicks the toolbar button,
-> opens the sidebar or uses the context-menu item, and, only if the
+> add-on sends data.brreg.no an organisation number found in the page
+> address or title or, if there is none, the site's registrable
+> domain (`dnb.no` for `nettbank.dnb.no`; subdomains are not sent)
+> and a name label derived from it. Text the user types into the
+> search box is sent as a search. The manifest therefore declares
+> `data_collection_permissions` with `required: ["browsingActivity"]`,
+> which Firefox 140+ shows in the install and update prompts. IP
+> addresses and reserved local names (localhost, single-label hosts,
+> and TLDs such as .local, .lokal, .internal, .intern, .lan,
+> .home.arpa, .priv) are never sent. Nothing goes to the developer or
+> any other party.
+>
+> Lookups run when the user clicks the toolbar button, opens the
+> sidebar, uses the context-menu item or searches, and, only if the
 > user turns on "Auto-oppdater ved fane-bytte" and grants `tabs`, on
-> tab switches while the sidebar is open. IP addresses and local host
-> names are never sent.
+> every tab switch or new page while a brreg-snap sidebar is open.
+>
+> Firefox 115–139 ignore the manifest declaration. There, each click
+> lookup is a direct, immediate result of a single deliberate user
+> command on a clearly labelled control, and this listing says what
+> is sent (implicit consent under the add-on policies). Auto-sync is
+> the only lookup not tied to a click: before it asks for `tabs`, the
+> sidebar shows its own disclosure of what is sent and to whom, and
+> its «Slå på» button is the explicit consent.
 >
 > The build uses esbuild minification through Vite. Source maps are
 > excluded from the package; the complete original source is the
@@ -242,10 +275,10 @@ permission, explaining why each is necessary.
 > `PRIVACY.md` in the repository).
 >
 > The `tabs` permission is listed as `optional_permissions` and is
-> requested at runtime only when the user enables the "Auto-oppdater
-> ved fane-bytte" toggle in the sidebar. The install prompt therefore
-> shows only access to data.brreg.no and the browsing-activity data
-> collection.
+> requested at runtime only from the «Slå på» button of the
+> auto-sync disclosure in the sidebar. On Firefox 140+ the install
+> prompt therefore shows only access to data.brreg.no and the
+> browsing-activity data collection.
 
 ## Screenshots
 
