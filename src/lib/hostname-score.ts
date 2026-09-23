@@ -77,13 +77,20 @@ const PUBLIC_SUFFIXES = new Set([
 ]);
 
 // TLDs that never have a public registrant: special-use names
-// (RFC 6761/6762/7686/8375/9476) plus the de-facto intranet ones.
-// Asking brreg about jira.corp.internal or printer.local could only
-// leak internal host names into a public API's logs.
+// (RFC 6761/6762/7686/8375/9476) plus the de-facto intranet ones,
+// Norwegian spellings included (.lokal, .intern). Asking brreg about
+// jira.corp.internal or printer.local could only leak internal host
+// names into a public API's logs.
 const NON_PUBLIC_TLDS = new Set([
   'localhost', 'localdomain', 'local', 'internal', 'intranet', 'lan',
   'home', 'corp', 'arpa', 'test', 'example', 'invalid', 'onion', 'alt',
+  'lokal', 'intern', 'priv', 'private',
 ]);
+
+// Local names under a real TLD. fritz.box is the name AVM's FRITZ!Box
+// routers answer to on the home network; .box itself is a delegated
+// public TLD, so only this name is refused, not the whole TLD.
+const NON_PUBLIC_DOMAINS = new Set(['fritz.box']);
 
 // The part of a visited host a company actually registers:
 // nettbank.dnb.no → dnb.no, shop.company.co.uk → company.co.uk,
@@ -111,7 +118,8 @@ export function registrableDomain(hostname: string): string | undefined {
       return parts.slice(i - 1).join('.');
     }
   }
-  return parts.slice(-2).join('.');
+  const domain = parts.slice(-2).join('.');
+  return NON_PUBLIC_DOMAINS.has(domain) ? undefined : domain;
 }
 
 // Pull the brandable part out of a hostname for use as a search label:

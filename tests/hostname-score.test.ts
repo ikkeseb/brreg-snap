@@ -203,9 +203,22 @@ describe('registrableDomain', () => {
       'www.example',
       'x.invalid',
       'abc.onion',
+      // Intranet names on unregistered TLDs, Norwegian spellings too.
+      'fileserver.firma.lokal',
+      'sharepoint.firma.intern',
+      'server.priv',
+      'nas.private',
+      // The FRITZ!Box router's home-network name.
+      'fritz.box',
+      'nas.fritz.box',
     ]) {
       expect(registrableDomain(host), host).toBeUndefined();
+      expect(hostnameLabel(host), host).toBeUndefined();
     }
+  });
+
+  it('refuses only fritz.box on .box, a public TLD', () => {
+    expect(registrableDomain('shop.firma.box')).toBe('firma.box');
   });
 
   it('refuses hosts that are themselves a public suffix', () => {

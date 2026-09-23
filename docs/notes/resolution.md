@@ -158,11 +158,15 @@ queries it and scoring compares hjemmeside against it.
 The traps they handle:
 
 - **Hosts that never reach brreg.** IPv4/IPv6 literals, single-label
-  hosts (`localhost`, `intranet`) and special-use/intranet TLDs
-  (`.local`, `.internal`, `.lan`, `.home.arpa`, `.corp`, `.test`, …)
-  return `undefined`. `resolveInternal` then answers band `none`
-  without a request and without a cache write — internal host names
-  used to go out as `hjemmeside=`/`navn=` queries.
+  hosts (`localhost`, `intranet`), special-use/intranet TLDs
+  (`.local`, `.lokal`, `.internal`, `.intern`, `.lan`, `.home.arpa`,
+  `.priv`, `.corp`, `.test`, …) and the router name `fritz.box` (only
+  that name: `.box` is a public TLD) return `undefined`.
+  `resolveInternal` then answers band `none` without a request and
+  without a cache write — internal host names used to go out as
+  `hjemmeside=`/`navn=` queries. The list is fixed, so an intranet on
+  any other unregistered TLD is still sent; public claims name the
+  reserved TLDs rather than promise "local names" in general.
 - **Multi-part public suffixes.** A small static list (`co.uk`,
   `com.au`, `kommune.no`, … — intentionally non-exhaustive, generic
   TLD knowledge, NOT curated company data) shifts the label one part

@@ -315,6 +315,10 @@ describe('hosts that never reach brreg', () => {
     'printer.local',
     'nas.lan',
     'router.home.arpa',
+    'fileserver.firma.lokal',
+    'sharepoint.firma.intern',
+    'server.priv',
+    'fritz.box',
     'sites.google.com',
   ];
 
