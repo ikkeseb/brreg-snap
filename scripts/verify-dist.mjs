@@ -5,14 +5,12 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
+import { findCodegen } from './codegen-scan.mjs';
 import { check, referencedFiles } from './manifest-invariants.mjs';
 
 // What a package may contain at its root. .map files sit inside these
 // directories and are stripped at packaging (package:* --ignore-files).
 const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'chunks', 'icons', 'assets'];
-
-// Runtime code generation, forbidden by CLAUDE.md § Security constraints.
-const CODEGEN = [/(?<![\w$])eval\s*\(/, /(?<![\w$.])(?:new\s+)?Function\s*\(/];
 
 const failures = [];
 const fail = (where, msg) => failures.push(`${where}: ${msg}`);
@@ -50,9 +48,9 @@ for (const target of ['firefox', 'chrome']) {
   }
   for (const file of walk(dist)) {
     if (!file.endsWith('.js')) continue;
-    const code = readFileSync(file, 'utf8');
-    for (const re of CODEGEN) {
-      if (re.test(code)) fail(relative('.', file), `runtime code generation (${re.source})`);
+    // Runtime code generation, forbidden by CLAUDE.md § Security constraints.
+    for (const hit of findCodegen(readFileSync(file, 'utf8'), file)) {
+      fail(relative('.', file), `runtime code generation: ${hit}`);
     }
   }
 }
