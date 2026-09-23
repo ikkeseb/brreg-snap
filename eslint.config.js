@@ -47,6 +47,52 @@ export default defineConfig(
       ],
     },
   },
+  // Extension source: security invariants as lint rules (CLAUDE.md
+  // § Security constraints). Brreg text is written by the registrants
+  // themselves, so HTML sinks are the realistic injection surface.
+  {
+    files: ['src/**/*.ts'],
+    rules: {
+      'no-eval': 'error',
+      'no-new-func': 'error',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "AssignmentExpression > MemberExpression.left[property.name=/^(innerHTML|outerHTML)$/]",
+          message: 'No HTML sinks: build nodes with createElement/textContent/replaceChildren.',
+        },
+        {
+          selector:
+            "AssignmentExpression > MemberExpression.left[property.value=/^(innerHTML|outerHTML)$/]",
+          message: 'No HTML sinks: build nodes with createElement/textContent/replaceChildren.',
+        },
+        {
+          selector: "CallExpression > MemberExpression.callee[property.name='insertAdjacentHTML']",
+          message: 'No HTML sinks: build nodes with createElement/textContent.',
+        },
+        {
+          selector:
+            "CallExpression > MemberExpression.callee[object.name='document'][property.name=/^(write|writeln)$/]",
+          message: 'No document.write.',
+        },
+        // Zero runtime dependencies: src imports only its own files.
+        {
+          selector: "ImportDeclaration[importKind!='type'][source.value=/^(?!\\.\\.?\\/)/]",
+          message: 'Zero runtime deps: src may only import relative paths (type-only imports excepted).',
+        },
+        {
+          selector:
+            ":matches(ExportNamedDeclaration, ExportAllDeclaration)[exportKind!='type'][source.value=/^(?!\\.\\.?\\/)/]",
+          message: 'Zero runtime deps: src may only re-export relative paths.',
+        },
+        {
+          selector: 'ImportExpression[source.type!="Literal"], ImportExpression[source.value=/^(?!\\.\\.?\\/)/]',
+          message: 'Zero runtime deps: dynamic import() must be a relative literal path.',
+        },
+      ],
+    },
+  },
   // Root config files live in tsconfig.node.json, which the project
   // service can't discover (it only finds files named tsconfig.json).
   {

@@ -52,8 +52,8 @@ pnpm verify                                # the full gate (about 12 s)
 pnpm verify:fast                           # typecheck + lint + test
 pnpm typecheck                             # tsc: src, tests/, tsconfig.node.json projects
 pnpm lint                                  # ESLint on src, tests, scripts, configs; 0 warnings
-pnpm lint:ext                              # web-ext lint on dist-firefox/ (run build first)
-pnpm verify:dist                           # dist manifest invariants (run both builds first)
+pnpm lint:ext                              # web-ext lint on dist-firefox/; fails on errors + unlisted warnings
+pnpm verify:dist                           # dist manifests, file set, no eval (run both builds first)
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
 pnpm exec vitest run tests/orgnr.test.ts   # single file
@@ -164,7 +164,8 @@ PRs that relax any of the above will be rejected.
 ## Dependencies
 
 Zero runtime dependencies in the shipped bundle (everything is
-inlined TypeScript). `pnpm audit --prod` should always return 0.
-The advisories in `web-ext`'s transitive chain are dev-only and do
-not enter the extension — defer the breaking `web-ext` 10.x upgrade
-until something actually exercises a vulnerable path.
+inlined TypeScript). `pnpm verify` enforces it: ESLint bans
+non-relative imports in `src/`, and `verify:dist` fails if
+`package.json` gains a `dependencies` field. Every package is a dev
+dependency, so `pnpm audit` advisories concern the toolchain, not the
+extension.

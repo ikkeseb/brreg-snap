@@ -2,7 +2,10 @@
   // Tests run in Node under vitest: the source settings plus Node types.
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["firefox-webext-browser", "node"]
+    "types": ["firefox-webext-browser", "node"],
+    // tests import scripts/*.mjs (manifest invariants); types come from
+    // their JSDoc.
+    "allowJs": true
   },
   "include": ["./**/*", "../src/**/*"]
 }

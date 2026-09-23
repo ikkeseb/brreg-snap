@@ -146,7 +146,8 @@ dynamic-function constructor — verifiable with
 ## Dependencies
 
 - **Runtime**: zero. The shipped bundle contains no third-party
-  JavaScript. `pnpm audit --prod` returns 0.
+  JavaScript. `package.json` has no `dependencies` field; `pnpm verify`
+  fails if one appears or if `src/` imports a package.
 - **Dev-only**: TypeScript, ESLint, Vite, Vitest, web-ext, and their
   transitive dependencies. None of these ship in the `.xpi`.
 

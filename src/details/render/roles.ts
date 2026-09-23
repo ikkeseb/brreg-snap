@@ -18,7 +18,7 @@ export function renderRoles(
   roller: RollerResponse | undefined,
   onNavigate: Navigate,
 ): void {
-  rolesBody.innerHTML = '';
+  rolesBody.replaceChildren();
   if (!roller) {
     rolesBody.appendChild(emptyLine('Kunne ikke hente roller. Prøv igjen senere.'));
     return;
