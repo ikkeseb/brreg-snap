@@ -300,6 +300,37 @@ describe('scoreCandidate', () => {
     );
   });
 
+  it('does not penalise the site\'s own company when it is winding down', () => {
+    // Live shape (10thpbergen.com): the only hit for the host is its own
+    // DA, under avvikling. With the -30 it scored 18 and the site showed
+    // «Ingen bedrift identifisert» — hiding the one warning that matters.
+    const own = cand({
+      navn: '10TH PLANET BERGEN JIU JITSU - DA',
+      organisasjonsform: { kode: 'DA' },
+      hjemmeside: '10thpbergen.com',
+      registrertIForetaksregisteret: true,
+      underAvvikling: true,
+    });
+    const { score, reasons } = scoreCandidate(own, '10thpbergen', '10thpbergen.com');
+    expect(reasons).not.toContain('inactive(-30)');
+    expect(score).toBe(48); // 35 + DA 5 + top-level 12 + foretaksreg 6 - long 10
+  });
+
+  it('still penalises a winding-down company tied only by a page on the site', () => {
+    // Live shape (nrk.no, name fictitious): an Urørt artist registered
+    // a page on nrk.no. That is not the site's own company, so the
+    // penalty stays.
+    const artist = cand({
+      navn: 'EKSEMPELBAND DA',
+      organisasjonsform: { kode: 'DA' },
+      hjemmeside: 'nrk.no/urort/artist/eksempelband',
+      underAvvikling: true,
+    });
+    const { reasons } = scoreCandidate(artist, 'nrk', 'nrk.no');
+    expect(reasons).toContain('hjemmeside=page(+12)');
+    expect(reasons).toContain('inactive(-30)');
+  });
+
   it('rewards hjemmeside-exact match even without a name match', () => {
     const c = cand({
       navn: 'UNRELATED MEDIA AS',

@@ -190,6 +190,12 @@ pages (funds on `/fond`, property SPVs on `/eiendom`, NRK Urørt
 artists) than owners; scored as exact, Storebrand's SPVs pushed
 STOREBRAND ASA out of the picker.
 
+The konkurs/avvikling penalty (−30) skips an exact tie: then the
+registry says this is the site's own company, and its status is the
+warning the user needs, not noise to rank away. It still applies to
+name-only and page/subdomain matches. Search never returns deleted
+entities, so there is no slettet case.
+
 <!-- SECTION: picker-choice -->
 ## Picker choice cache
 
