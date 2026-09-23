@@ -18,8 +18,9 @@ import slettetEnhet from './fixtures/brreg/enhet-989566733-slettet.json';
 import smallEmployer from './fixtures/brreg/enhet-999999999-ansatte-1-4.json';
 import tvangEnhet from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
 
-// Fixed "today" so age math is deterministic.
-const NOW = new Date('2026-07-04T12:00:00Z');
+// Fixed "today", at local noon so the calendar math is the same in
+// every time zone.
+const NOW = new Date(2026, 6, 4, 12);
 
 function makeEnhet(overrides: Partial<Enhet> = {}): Enhet {
   return {

@@ -41,9 +41,16 @@ function roller(groups: Record<string, string>): RollerResponse {
   };
 }
 
+// The feed stamps events in UTC; local noon of `date` keeps the
+// calendar day the same in every time zone.
+function stamp(date: string): string {
+  const [y, m, d] = date.split('-').map(Number) as [number, number, number];
+  return new Date(y, m - 1, d, 12).toISOString();
+}
+
 function addressEvent(date: string, ...paths: Array<[string, string]>): EnhetOppdatering {
   return {
-    dato: `${date}T10:00:00.000Z`,
+    dato: stamp(date),
     endringstype: 'Endring',
     endringer: paths.map(([op, path]) => ({ op, path })),
   };
@@ -232,7 +239,7 @@ describe('deriveEndringer — what counts as a new address', () => {
       deriveEndringer({
         enhet: base,
         roller: undefined,
-        feed: [{ dato: `${daysBefore(3)}T10:00:00.000Z`, endringstype: 'Ny' }],
+        feed: [{ dato: stamp(daysBefore(3)), endringstype: 'Ny' }],
         now: NOW,
       }),
     ).toEqual([]);
