@@ -14,7 +14,8 @@ tab. `tabs.onActivated` fires without `tabs` permission but its
 `Tab` object is stripped of URL/title for the same reason.
 
 The permissionless paths out: (a) require a fresh gesture against
-the *toolbar/shortcut* surface (click sidebar icon, ctrl+shift+B), or
+the *toolbar/shortcut* surface (click the sidebar icon, or the
+sidebar shortcut — see § commands-and-selection), or
 (b) accept the limitation. Escalating to `tabs` as a static
 install-time permission would relax the security differentiator —
 see `CLAUDE.md` § Security constraints. Don't
@@ -73,6 +74,52 @@ Same constraint for `sidebarAction.open` from the context menu.
 That's why `background.ts` menu handler does a sync `deriveSync`
 before `setPanel + open`, and on a miss leaves the async host search
 to the panel (sidebar-sync.md § no-match-broadcast).
+
+<!-- SECTION: commands-and-selection -->
+## Selection lookup and keyboard shortcuts add no permission
+
+- **«Slå opp «%s» i brreg-snap»** is a second context-menu item
+  (`contexts: ['selection']`) under the same `menus` / `contextMenus`
+  permission as the page item. The browser hands the handler
+  `info.selectionText`; no content script, no page access. The handler
+  follows § gesture-stack: a sync `extractOrgnrFromText`, then
+  `setPanel` + `open`. A single valid orgnr opens as a manual pick
+  (`?orgnr=…&m=manual`); any other text becomes a `?q=` hint the
+  panel's search runs (panel-protocol.ts). A `?q=` hint applies only
+  while fresh, so a leftover never re-sends the text. PRIVACY.md lists
+  the selected text as sent data.
+- **`commands`** is a manifest key, not a permission; the install
+  prompt doesn't change (pinned exactly in `tests/manifest.test.ts`).
+  Both engines: `_execute_action` (popup), Alt+Shift+O, on macOS
+  MacCtrl+Shift+O. Firefox: `_execute_sidebar_action`, Alt+Shift+S /
+  MacCtrl+Shift+S, handled by the browser. Chrome has no built-in
+  side-panel command, but its sidePanel docs list «a keyboard
+  shortcut» among the user actions `sidePanel.open()` accepts, so an
+  `open-panel` command (same keys) goes through the page item's
+  handler in `background.ts`. A command also grants activeTab on
+  Chrome (activeTab docs: «Executing a keyboard shortcut from the
+  commands API»), so the tab's URL is readable there.
+- Why not Alt+Shift+B (the first suggestion): Chromium binds it to
+  «focus bookmarks bar» on Windows, Linux and ChromeOS
+  (`chrome/browser/ui/accelerator_table.cc`, `IDC_FOCUS_BOOKMARKS`).
+  Checked 2026-09-24: that table has no Alt+Shift+O/S; Firefox's
+  `browser-sets.inc.xhtml` keyset has no Alt+Shift combination at all.
+  macOS gets MacCtrl because Option+Shift+letter types characters
+  (Chromium avoids it for the same reason). Not verified: Firefox's
+  Alt+Shift content accesskeys on a page that defines `o`/`s`, and
+  ChromeOS system shortcuts (Alt+Shift+S opens quick settings there).
+  Users can rebind in `about:addons` / `chrome://extensions/shortcuts`.
+- **`action.default_area: "navbar"`** (Firefox only) puts the button
+  on the toolbar for new installs instead of the extensions menu. It
+  changes nothing for existing installs (MDN manifest.json/action).
+- **The toolbar badge** (`platform/badge.ts`, `action.setBadgeText` /
+  `setBadgeBackgroundColor` per tab) needs no permission on either
+  engine: MDN setBadgeText «No specific permission is required»;
+  Chrome's action API only needs the `action` key. A per-tab value is
+  dropped by the browser when the tab loads another document (Chromium
+  `ExtensionActionRunner::DidFinishNavigation`; MDN: «Resets when the
+  user navigates»), so a badge can't follow the user to the next site.
+  It is not dropped on a same-document (SPA) navigation.
 
 <!-- SECTION: iframe-not-a-gesture-surface -->
 ## A button *inside* the sidebar iframe does NOT grant activeTab
