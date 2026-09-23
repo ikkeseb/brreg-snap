@@ -1,3 +1,12 @@
+# LF in every checkout, whatever the machine's core.autocrlf says.
+# Vite copies the manifests and HTML entries byte for byte, so a CRLF
+# checkout on Windows produced packages that differed from the CI
+# (Linux) release build in line endings — and the AMO 1.3.0 upload was
+# such a local build. With this, any OS rebuilds the same bytes.
+* text=auto eol=lf
+*.png binary
+*.zip binary
+
 # Keep the AMO source-review zip (git archive) lean: screenshots are
 # listing assets, not build inputs — they were ~6 MB of an 8.5 MB zip.
 docs/screenshots/ export-ignore

@@ -1,97 +1,113 @@
 # Privacy Policy
 
-_Last updated: 2026-06-10_
+_Last updated: 2026-09-23. Applies to brreg-snap 1.3.1 and later._
 
-brreg-snap is a browser extension (Firefox and Chrome — this policy
-covers both) that shows information from the
-public Norwegian business registry
-([Brønnøysundregistrene](https://data.brreg.no/)) about Norwegian
-companies. This document explains exactly what data leaves your
-browser, where it goes, and how the extension uses local storage.
+brreg-snap is a browser extension for Firefox and Chrome that shows
+public information about Norwegian companies from
+[Brønnøysundregistrene](https://data.brreg.no/) (the Brønnøysund
+Register Centre). To find the company behind the site you are on, it
+sends that site's domain name to the register's public API. This page
+says exactly what is sent, when, and what is kept on your device.
 
-## TL;DR
+## Summary
 
-- The only external service the extension contacts is
-  `data.brreg.no` — Brønnøysundregistrene's public API.
-- It sends the active tab's hostname and (in some cases) the page
-  title fragment, in order to look up the matching organisation.
-- It does **not** read or transmit page content, send anything to
-  third parties, run analytics, or track you across sites.
-- Data is sent only in response to your action (clicking the
-  toolbar icon, opening the sidebar / side panel, or — if you
-  explicitly enable it — switching tabs while the panel is open).
+- The extension talks to one service only: `data.brreg.no`, the
+  public API of Brønnøysundregistrene, a Norwegian government agency.
+- It sends the domain of the site you look up (for example
+  `example.no`). It never sends the full page address, the page
+  title, page content or cookies.
+- Nothing goes to the developer or to any other party. There is no
+  developer server, no analytics, no ads and no telemetry.
+- Lookups happen when you ask for one. The optional «Auto-oppdater
+  ved fane-bytte» setting also looks up the tabs you switch to, but
+  only while the brreg-snap sidebar / side panel is open.
 
-## What data leaves your browser
+## When data is sent
 
-When you trigger a lookup, the extension calls Brønnøysundregistrene's
-public API at `data.brreg.no`. The following may be transmitted as
-part of API requests:
+The extension contacts `data.brreg.no` only when you:
 
-| Data | When | Sent to |
+1. click the brreg-snap toolbar button,
+2. open the brreg-snap sidebar (Firefox) or side panel (Chrome),
+3. choose «Vis i brreg-snap sidebar» in the right-click menu,
+4. type in the search box, or click a company, link or button inside
+   the extension, or
+5. have turned on «Auto-oppdater ved fane-bytte» and switch tabs or
+   load a new page while the sidebar / side panel is open. Closing
+   the panel stops this.
+
+IP addresses (like `192.168.1.10`) and local network names (like
+`localhost`) are never sent.
+
+## What is sent
+
+| Data | Example | Why |
 |---|---|---|
-| 9-digit organisation number | When extracted from the URL or page title, or typed/picked manually | `data.brreg.no/enhetsregisteret/api/enheter/<orgnr>` |
-| Tab hostname (e.g. `example.no`) | When the extension cannot find an organisation number in the URL and falls back to brreg's `hjemmeside` search | `data.brreg.no/enhetsregisteret/api/enheter` (query parameter) |
-| Page title fragment | Only when the hostname lookup returns no clear match and the extension queries by name | `data.brreg.no/enhetsregisteret/api/enheter` (query parameter) |
+| The site's domain name, with and without `www.` | `example.no`, `www.example.no` | Finds companies that list that domain as their website |
+| The main word of the domain, plus Norwegian spellings of it | `elkjop`, `elkjøp` | Finds companies whose name matches the domain |
+| An organisation number | `923609016` | Fetches the company's registry entry, roles, sub-units and accounts. The number comes from the page address or title (read on your device), from a search result, from a link in the extension, or from your recent lookups |
+| Text you type in the search box | `equinor` | Searches the register by company name |
 
-The extension does not transmit:
+Never sent: the full page address (path and query string), the page
+title, page content, cookies or login data, or any identifier for you
+or your browser.
 
-- Full URLs or query strings
-- Cookies, session tokens, or any authentication data
-- Page contents, DOM, or text from the page body
-- Browsing history
-- Any data to any service other than `data.brreg.no`
+As with any web request, Brønnøysundregistrene's servers see your IP
+address and standard browser request headers. Their own terms apply to
+their API.
 
-## Local storage
+## What is stored on your device
 
-The extension stores the following on your device only — nothing
-synced, nothing transmitted:
+None of this is synced or sent anywhere.
 
-- **`storage.session`** — A 24-hour cache of brreg responses keyed
-  by organisation number, so repeated lookups don't hammer the API.
-  Cleared automatically when you close the browser.
-- **`storage.session`** — A short list of recently viewed
-  organisations (up to 5), used by the popup's empty state to
-  re-open a recent lookup quickly. Cleared when the session ends.
-- **`storage.local`** — A single boolean for the "Auto-oppdater
-  ved fane-bytte" toggle in the sidebar / side-panel header.
+- **Lookup cache** (`storage.session`): register responses keyed by
+  organisation number, and the lookup result for each domain you
+  looked up, including a company you picked or rejected for that
+  domain. It makes repeat visits instant and spares the API. Entries
+  expire after 24 hours, and the whole cache is cleared when you close
+  the browser.
+- **Recent companies** (`storage.session`): the last 5 companies you
+  viewed (name, organisation number and time), shown when the popup or
+  sidebar has nothing else to show. Cleared when you close the
+  browser.
+- **One setting** (`storage.local`): on or off for «Auto-oppdater ved
+  fane-bytte». Kept until you change it.
 
-You can clear all of this at any time by removing the extension
-(`about:addons` in Firefox, `chrome://extensions` in Chrome) or via
-the browser's data clearing.
+Removing the extension deletes all of it.
 
 ## Permissions
 
-| Permission | Purpose |
+| Permission | Why |
 |---|---|
-| `activeTab` | Read URL and title of the current tab, only when you click the toolbar icon, the sidebar icon, or a context-menu item. Cannot read or modify the page. |
-| `storage` | Cache responses and remember the auto-sync toggle as described above. |
-| `menus` (Firefox) / `contextMenus` (Chrome) | Add a "Vis i brreg-snap sidebar" item to the right-click menu. |
-| `sidePanel` (Chrome only) | Show the detail view in Chrome's side panel. Grants no access to page or tab data. |
-| `host_permissions: https://data.brreg.no/*` | The only network destination the extension contacts. |
-| `optional_permissions: tabs` | **Off by default.** Required only if you enable "Auto-oppdater ved fane-bytte". Requested at runtime via the browser's standard permission prompt. When granted, allows the extension to receive tab-switch events so the sidebar / side panel can re-resolve the organisation number automatically. Revocable from the browser's extension manager (`about:addons` / `chrome://extensions`) or by flipping the toggle off (which calls `permissions.remove`). |
+| `activeTab` | Read the address and title of the current tab when you click the toolbar button, the sidebar button or the right-click menu item. No access to page content. |
+| `storage` | The cache, recent list and setting above. |
+| `menus` (Firefox) / `contextMenus` (Chrome) | The «Vis i brreg-snap sidebar» right-click item. |
+| `sidePanel` (Chrome only) | Show the details view in Chrome's side panel. |
+| `https://data.brreg.no/*` | Talk to the register's API. The only site the extension connects to. |
+| `tabs` (optional, off by default) | Requested only when you turn on «Auto-oppdater ved fane-bytte», so that while the panel is open, brreg-snap can read the address and title of the tab you switch to. Turning the setting off gives the permission back; you can also revoke it in `about:addons` (Firefox) or `chrome://extensions` (Chrome). |
 
-## Third parties
+## Store declarations
 
-None. The extension contacts only `data.brreg.no`. No analytics, no
-crash reporting, no advertising network, no remote configuration,
-no telemetry of any kind. There is no server-side component
-operated by the extension author.
+- **Firefox** lists «browsing activity» as required data collection,
+  because the domain of the site you look up is sent to
+  Brønnøysundregistrene. It goes only to that public registry, never
+  to the developer.
+- **Chrome Web Store** lists the same data as «Web history».
+  brreg-snap's use of information received from Chrome extension APIs
+  adheres to the Chrome Web Store User Data Policy, including the
+  Limited Use requirements. The data is used only to show you the
+  company behind a site. It is not sold, not used for advertising or
+  creditworthiness, and the developer never receives it.
 
-`data.brreg.no` is operated by Brønnøysundregistrene (the Norwegian
-Brønnøysund Register Centre), a Norwegian government agency. Their
-terms govern API usage; the data returned is public-record
-information about Norwegian businesses.
+## Source code
 
-## Code transparency
-
-- Open source under the MIT License at
-  [github.com/ikkeseb/brreg-snap](https://github.com/ikkeseb/brreg-snap).
-- Zero runtime dependencies in the shipped bundle.
-- No `eval`, `Function()` constructor, or remote-loaded code.
-- Strict CSP: `default-src 'self'`, no `unsafe-inline`, no remote
-  script hosts.
+Open source under the MIT License at
+[github.com/ikkeseb/brreg-snap](https://github.com/ikkeseb/brreg-snap).
+No third-party code in the extension, no remote code, and a strict
+Content Security Policy that only allows connections to
+`data.brreg.no`.
 
 ## Contact
 
-Open an issue on GitHub:
+Email [sebastian@nuez.no](mailto:sebastian@nuez.no), or open an issue
+at
 [github.com/ikkeseb/brreg-snap/issues](https://github.com/ikkeseb/brreg-snap/issues).

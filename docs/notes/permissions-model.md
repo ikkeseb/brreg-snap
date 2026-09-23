@@ -85,3 +85,30 @@ the sidebar. The `permissions.request` warning is noise; don't try
 to silence it by dropping the optional `tabs` permission or the
 runtime opt-in flow. If we ever target Android, the entire surface
 needs a re-think, not a manifest tweak.
+
+<!-- SECTION: data-collection-declaration -->
+## Firefox data collection is `browsingActivity`, required
+
+Every lookup sends the site's hostname, and name labels derived from
+it, to data.brreg.no. Mozilla counts any data "handled outside of the
+add-on or the local browser" as transmission, a public government API
+included, and its taxonomy puts domains under `browsingActivity`. So
+`browser_specific_settings.gecko.data_collection_permissions` is
+exactly `{"required": ["browsingActivity"]}`, pinned by
+`tests/manifest.test.ts` and the CI dist check. PRIVACY.md § Store
+declarations and the CWS privacy form («Web history») say the same
+thing; change all three together.
+
+- Required, not optional. Optional types are off until the user opts
+  in, so click lookups would have to stop until then. `none` plus an
+  optional type would make the install prompt say the extension
+  "doesn't require data collection" while every click sends a domain.
+- Adding a required type re-prompts existing users on Firefox 140+
+  («New required data collection»). The update waits until they
+  accept; the old version keeps running. Treat any change to the list
+  like adding a permission.
+- Firefox 115–139 ignore the key and show the user nothing. AMO's
+  linter warns about that (`KEY_FIREFOX_UNSUPPORTED_BY_MIN_VERSION`,
+  since `strict_min_version` is below 140). Expected.
+- Never set `has_previous_consent`: it would claim a consent we never
+  asked for, and AMO's linter rejects `true` anyway.
