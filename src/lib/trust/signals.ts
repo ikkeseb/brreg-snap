@@ -27,15 +27,22 @@ import type { Signal, Tone } from './types.js';
 // than a muted «Ingen».
 const REGNSKAPSPLIKT_FORMS = new Set(['AS', 'ASA', 'SE', 'ASV', 'SPA']);
 
-// Org forms that never send annual accounts to Regnskapsregisteret,
-// whatever their size (regnskapsloven § 8-2 exempts
-// enkeltpersonforetak). Nothing filed is the expected state, so the
-// cell says so instead of a «Ingen» that reads like a failure. Other
-// forms (ANS, DA, FLI, …) file only above thresholds; they keep the
-// neutral «Ingen · ikke innsendt».
-const NO_FILING_DUTY_FORMS: ReadonlyMap<string, string> = new Map([
-  ['ENK', 'enkeltpersonforetak'],
-]);
+// An enkeltpersonforetak has a filing duty only above 20 MNOK in assets
+// or 20 årsverk (regnskapsloven § 1-2 nr. 11 with § 8-2 (1)); live, 13
+// of the 100 largest ENKs have filed (2026-09-24). Below that, nothing
+// filed is the expected state, so the cell says «Ikke pliktig» instead
+// of a «Ingen» that reads like a failure. Headcount ≥ årsverk, so at
+// most 20 registered employees rules the staff test out; the assets
+// test can't be checked from the register (the limit of this rule).
+// Other forms (ANS, DA, FLI, …) keep the neutral «Ingen · ikke
+// innsendt».
+const ENK_STAFF_LIMIT = 20;
+
+function enkBelowFilingThreshold(enhet: Enhet): boolean {
+  if (formCode(enhet) !== 'ENK') return false;
+  const count = enhet.antallAnsatte;
+  return typeof count !== 'number' || count <= ENK_STAFF_LIMIT;
+}
 
 // Foreign entities registered in Norway. Their status cell says so,
 // with the home country when brreg gives one.
@@ -211,15 +218,18 @@ function regnskapSignal(
   const expected = expectedLatestFiledYear(now);
   const latestYear = latestFiledYear(enhet, regnskap);
   if (latestYear) {
-    // Older than the newest year whose deadline has passed: the company
-    // is late or has stopped filing — worth an amber.
+    // Older than the newest year whose deadline has passed: a company
+    // with an unconditional duty is late or has stopped filing — worth
+    // an amber. For the others the duty depends on size, so an old
+    // filing may just mean it shrank below the threshold: stated, not
+    // judged.
     const stale = Number(latestYear) < expected;
     return {
       key: 'regnskap',
       label: 'Regnskap',
       value: latestYear,
       detail: stale ? 'siste innsendte' : 'levert',
-      tone: stale ? 'warn' : 'ok',
+      tone: !stale ? 'ok' : REGNSKAPSPLIKT_FORMS.has(formCode(enhet)) ? 'warn' : 'neutral',
     };
   }
 
@@ -242,13 +252,12 @@ function regnskapSignal(
 
   // Nothing filed.
   const form = formCode(enhet);
-  const exempt = NO_FILING_DUTY_FORMS.get(form);
-  if (exempt) {
+  if (enkBelowFilingThreshold(enhet)) {
     return {
       key: 'regnskap',
       label: 'Regnskap',
       value: 'Ikke pliktig',
-      detail: exempt,
+      detail: 'enkeltpersonforetak',
       tone: 'neutral',
     };
   }

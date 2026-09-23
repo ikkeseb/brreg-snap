@@ -72,13 +72,18 @@ company's board changes all the time (Equinor's STYR changed
 - **Regnskap**: latest year from `Enhet.sisteInnsendteAarsregnskap` or
   the regnskap response, whichever is newer. **Deadline-aware**: annual
   accounts are due 31 July the year after, so the expected latest year
-  is `month >= August ? year − 1 : year − 2`; an older latest year is a
-  warn («2023 · siste innsendte»). Assumes a calendar accounting year.
-  With nothing filed: ENK → neutral «Ikke pliktig · enkeltpersonforetak»
-  (they never send accounts in); AS/ASA/SE/ASV/SPA → warn «Mangler»
-  once their founding year is older than the expected year (the first,
-  partial year gets the benefit of the doubt); other forms → neutral
-  «Ingen · ikke innsendt». A failed regnskap fetch with no Enhet year →
+  is `month >= August ? year − 1 : year − 2`; an older latest year is
+  «2023 · siste innsendte», a warn only for the forms with an
+  unconditional duty (AS, ASA, SE, ASV, SPA) — for the rest the duty
+  depends on size, so it stays neutral. Assumes a calendar accounting
+  year. With nothing filed: an ENK with at most 20 registered employees
+  (or none) → neutral «Ikke pliktig · enkeltpersonforetak»; an ENK files
+  only above 20 MNOK in assets or 20 årsverk (regnskapsloven § 1-2
+  nr. 11, § 8-2 (1); live, 13 of the 100 largest ENKs have filed), and
+  the assets test can't be checked from the register. AS/ASA/SE/ASV/SPA
+  → warn «Mangler» once their founding year is older than the expected
+  year (the first, partial year gets the benefit of the doubt); other
+  forms → neutral «Ingen · ikke innsendt». A failed regnskap fetch with no Enhet year →
   omitted; a 500 naming its plan → «Levert · spesialregnskap».
 - Under a danger status, the other rows lose their green (ok → neutral).
 

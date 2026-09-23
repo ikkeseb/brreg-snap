@@ -336,6 +336,29 @@ describe('deriveSignals — regnskap', () => {
     });
   });
 
+  it('does not call a big ENK «Ikke pliktig» (over 20 employees can mean a duty)', () => {
+    // Live: 13 of the 100 largest ENKs have filed accounts.
+    const big: Enhet = { ...(enkEnhet as Enhet), antallAnsatte: 21 };
+    expect(signal(big, { items: [] }, 'regnskap')).toMatchObject({
+      value: 'Ingen',
+      detail: 'ikke innsendt',
+      tone: 'neutral',
+    });
+    const small: Enhet = { ...(enkEnhet as Enhet), antallAnsatte: 20 };
+    expect(signal(small, { items: [] }, 'regnskap')?.value).toBe('Ikke pliktig');
+  });
+
+  it('shows a big ENK\'s filed year, and an old one without judging it', () => {
+    const enk: Enhet = { ...(enkEnhet as Enhet), antallAnsatte: 145 };
+    expect(
+      signal({ ...enk, sisteInnsendteAarsregnskap: '2025' }, { items: [] }, 'regnskap'),
+    ).toMatchObject({ value: '2025', detail: 'levert', tone: 'ok' });
+    // It may have shrunk below the threshold since.
+    expect(
+      signal({ ...enk, sisteInnsendteAarsregnskap: '2009' }, { items: [] }, 'regnskap'),
+    ).toMatchObject({ value: '2009', detail: 'siste innsendte', tone: 'neutral' });
+  });
+
   it('keeps an ENK omitted when the regnskap fetch failed', () => {
     expect(signal(enkEnhet as Enhet, undefined, 'regnskap')).toBeUndefined();
   });
