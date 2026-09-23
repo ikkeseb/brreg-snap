@@ -9,9 +9,25 @@ Source: `src/lib/brreg.ts`, `src/lib/hostname-search.ts`,
 `src/lib/brreg.ts` wraps every API call in `browser.storage.session`
 for 24 hours. `storage.session` is in-memory, process-local, and
 cleared when the browser shuts down — *not* `storage.local`. Cache
-writes are typed (`CacheEntry<T>` with `expiresAt`) and reads validate
-the response shape via `isEnhet` / `isUnderenhet` /
-`isRollerResponse` before returning (no blind `as Enhet` cast).
+writes are typed (`CacheEntry<T>` with `expiresAt` + `storedAt`) and
+fetchers validate the response shape via `isEnhet` / `isUnderenhet` /
+`isRollerResponse` before caching (no blind `as Enhet` cast).
+
+The module is `src/lib/session-cache.ts`. Its rules:
+
+- **Best-effort both ways.** A storage error on read is a miss; a
+  failed write is swallowed (after one sweep-and-retry). A full quota
+  must never turn a successful brreg fetch into an error.
+- **Per-entry TTL.** `cacheSet(key, value, ttlMs?)` defaults to 24h;
+  callers pass less for outcomes that shouldn't stick for a day.
+- **Sweep.** Reads evict only the key they touch, so `cacheSet` also
+  sweeps every expired entry (`get(null)`), at most once per 10 min
+  per page. The sweep only removes values shaped like a `CacheEntry`,
+  so the recents list (a bare array) is safe.
+- **Data age.** `storedAt` is the fetch time. `cacheStoredAt(keys)`
+  returns the oldest live one; `getFetchedAt(orgnr)` in `brreg.ts`
+  wraps it for one company's keys, and `invalidateCache(orgnr)` drops
+  them for a refetch.
 
 `fetchRegnskap` caches both empty results (404, normal for small AS)
 and "unsupported plan" results (500 from BANK/FORS filings) so a

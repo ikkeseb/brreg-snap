@@ -1,7 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  fetchEnhet,
   fetchRegnskap,
+  getFetchedAt,
+  invalidateCache,
   searchEnheter,
   searchEnheterWithParams,
 } from '../src/lib/brreg.js';
@@ -13,8 +16,10 @@ function installStorageMock(initial: StorageMap = {}): StorageMap {
   (globalThis as { browser?: unknown }).browser = {
     storage: {
       session: {
-        get: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
+        // null = the whole area, like the real API.
+        get: vi.fn(async (keys: string | string[] | null) => {
+          const list =
+            keys === null ? Object.keys(store) : Array.isArray(keys) ? keys : [keys];
           const out: StorageMap = {};
           for (const k of list) {
             if (k in store) out[k] = store[k];
@@ -169,5 +174,44 @@ describe('fetchRegnskap special-casing', () => {
     const result = await fetchRegnskap('123456785');
     expect(result.items).toHaveLength(1);
     expect(result.unsupportedPlan).toBeUndefined();
+  });
+});
+
+describe('cache robustness + data age', () => {
+  const ENHET = { organisasjonsnummer: '923609016', navn: 'EQUINOR ASA' };
+
+  it('a failed cache write does not turn a good fetch into an error', async () => {
+    vi.mocked(browser.storage.session.set).mockRejectedValue(
+      new Error('QUOTA_BYTES quota exceeded'),
+    );
+    fetchMock.mockResolvedValue(jsonResponse(ENHET));
+    await expect(fetchEnhet('923609016')).resolves.toEqual(ENHET);
+  });
+
+  it('getFetchedAt reports the original fetch time on a later cache hit', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date('2026-09-23T08:00:00Z'));
+      const fetchedAt = Date.now();
+      fetchMock.mockResolvedValue(jsonResponse(ENHET));
+      await fetchEnhet('923609016');
+
+      vi.setSystemTime(new Date('2026-09-23T15:00:00Z'));
+      await fetchEnhet('923609016');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(await getFetchedAt('923609016')).toBe(fetchedAt);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('invalidateCache forces the next load to refetch', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(ENHET));
+    await fetchEnhet('923609016');
+    await invalidateCache('923609016');
+    expect(await getFetchedAt('923609016')).toBeUndefined();
+    fetchMock.mockResolvedValue(jsonResponse(ENHET));
+    await fetchEnhet('923609016');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 });

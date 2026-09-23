@@ -1,4 +1,4 @@
-import { cacheGet, cacheSet } from './session-cache.js';
+import { cacheGet, cacheSet, cacheStoredAt } from './session-cache.js';
 import type {
   Enhet,
   Regnskap,
@@ -17,8 +17,8 @@ const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 // network error (no retry logic — callers decide what failure means).
 const FETCH_TIMEOUT_MS = 8000;
 
-// Cache-key prefixes used by all fetchers. invalidateCache() walks
-// these to clear everything related to a single orgnr.
+// Cache-key prefixes used by all fetchers. invalidateCache() and
+// getFetchedAt() walk these for everything related to a single orgnr.
 const CACHE_PREFIXES = ['enhet', 'roller', 'underenheter', 'regnskap'] as const;
 
 function isEnhet(value: unknown): value is Enhet {
@@ -218,11 +218,24 @@ export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
   return response;
 }
 
+function cacheKeysFor(orgnr: string): string[] {
+  return CACHE_PREFIXES.map((p) => `${p}:${orgnr}`);
+}
+
+// Drop everything cached for one orgnr so the next load refetches —
+// the backing for a "Hent på nytt" action.
 export async function invalidateCache(orgnr: string): Promise<void> {
-  const keys = CACHE_PREFIXES.map((p) => `${p}:${orgnr}`);
   try {
-    await browser.storage.session.remove(keys);
+    await browser.storage.session.remove(cacheKeysFor(orgnr));
   } catch {
     /* ignore — best-effort eviction */
   }
+}
+
+// When the data on screen for `orgnr` was fetched from brreg: the
+// oldest of its cached parts, since a cache hit can be up to a day old.
+// Call it after the fetchers have settled. undefined = nothing cached
+// (e.g. the write failed), meaning the data came straight from brreg.
+export function getFetchedAt(orgnr: string): Promise<number | undefined> {
+  return cacheStoredAt(cacheKeysFor(orgnr));
 }
