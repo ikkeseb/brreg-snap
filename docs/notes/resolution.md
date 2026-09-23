@@ -73,13 +73,13 @@ arbitrary 9-digit runs).
 run inside a user-gesture stack and can't await before the next
 browser API call (`sidebarAction.open`, `permissions.request`). The
 context menu handler is the canonical example: it sync-resolves for
-`setPanel + open`, then runs `deriveSyncAsync` in a detached promise
-for the broadcast.
+`setPanel + open`; on a miss it hands the host to the panel, which
+runs the async search itself.
 
-Everything else (popup init, sidebar `resolveFromActiveTab`,
-background tab listeners) uses the async variant. The sidebar calls
-`searchByHostnameDetailed` directly so it can branch on the resolution
-band (see § bands below) and render the picker for ambiguous hosts.
+Everything else (popup init, the panel's startup and auto-sync tab
+events) goes through `resolveTabContext`, which calls
+`searchByHostnameDetailed` so it can branch on the resolution band
+(see § bands below) and render the picker for ambiguous hosts.
 
 <!-- SECTION: bands -->
 ## Resolution bands
@@ -87,8 +87,7 @@ band (see § bands below) and render the picker for ambiguous hosts.
 `hostname-search.ts` exposes two entry points:
 
 - `searchByHostname(host)` returns `string | undefined` — only AUTO
-  matches resolve. Used by the sync cascade in `orgnr.ts` and by
-  background/popup flows that just want a confident orgnr.
+  matches resolve. Used by `resolveOrgnrAsync` in `orgnr.ts`.
 - `searchByHostnameDetailed(host)` returns `{band, candidates, choice?}`
   — used by the sidebar so it can render the picker UI for the
   `'picker'` band.

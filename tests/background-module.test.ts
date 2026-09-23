@@ -1,22 +1,24 @@
-// Regression coverage for the MV3 event-page wakeup discipline. The
-// background script must register tab and permission/storage event
-// listeners synchronously at top level — async registration leaves
-// Firefox unaware that the script should be woken for those events,
-// and auto-sync silently breaks once the script goes idle. (Caught
-// the hard way: auto-sync worked only while about:debugging Inspector
-// kept the script alive.) The tests below fail if anyone moves an
-// addListener call back inside an async helper.
+// The background hosts only the context menu. Two things matter:
+//
+//   - Its listeners register synchronously at module top level. It is a
+//     non-persistent event page / service worker, and the runtime only
+//     wakes it for events whose addListener ran during evaluation.
+//     (Caught the hard way: a listener attached after an await worked
+//     only while about:debugging's Inspector kept the script alive.)
+//   - It touches no tab events at all. Auto-sync lives in the panel, so
+//     with the panel closed nothing resolves tabs or reaches brreg —
+//     the promise PRIVACY.md makes — and the worker isn't woken on
+//     every tab switch.
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AUTO_SYNC_STORAGE_KEY } from '../src/lib/auto-sync-settings.js';
-
-// Mock the brreg client so the host-search fallback inside
-// resolveOrgnrAsync can't hit the network when we exercise the gated
-// dispatch path with a URL that doesn't carry a sync orgnr.
+// If the background ever resolved a host itself, it would go through
+// the brreg client — the menu tests assert it never does.
 vi.mock('../src/lib/brreg.js', () => ({
   searchEnheterWithParams: vi.fn(async () => []),
 }));
+
+import { searchEnheterWithParams } from '../src/lib/brreg.js';
 
 function makeListenerSpy() {
   return { addListener: vi.fn(), removeListener: vi.fn() };
@@ -37,47 +39,41 @@ function menusSpy(mock: unknown): MenusMock {
   return api;
 }
 
-interface MockTab {
-  url?: string;
-  title?: string;
-  active?: boolean;
-}
-
-// Manually-released promise so a test can hold one tabs.get in flight
-// while later events resolve — the ordering scenarios need a "slow
-// network" the mock can release on cue.
-function deferred<T>() {
-  let resolve!: (value: T) => void;
-  const promise = new Promise<T>((res) => {
-    resolve = res;
-  });
-  return { promise, resolve };
-}
-
-interface BrowserMockOptions {
-  hasTabs?: boolean;
-  autoSyncOn?: boolean;
-  activeTab?: { url?: string; title?: string; active?: boolean };
-  // Which engine the mock presents as. Firefox exposes `sidebarAction`
-  // (so isFirefox === true); Chrome exposes `sidePanel` instead. Drives
-  // the engine-specific branches in background.ts (notably the
-  // tabs.onUpdated filter, which Chrome rejects).
-  engine?: 'firefox' | 'chrome';
-}
-
-function installBrowserMock(opts: BrowserMockOptions = {}) {
-  const { hasTabs = false, autoSyncOn = false, activeTab, engine = 'firefox' } =
-    opts;
-  const localStore: Record<string, unknown> = {};
-  if (autoSyncOn) localStore[AUTO_SYNC_STORAGE_KEY] = true;
-  const sessionStore: Record<string, unknown> = {};
-
-  const mock = {
-    tabs: {
-      onActivated: makeListenerSpy(),
-      onUpdated: makeListenerSpy(),
-      get: vi.fn(async (_tabId: number): Promise<MockTab> => activeTab ?? {}),
+// Any access to browser.tabs / permissions / storage from the
+// background throws — so a module that registered tab listeners (or
+// gated on the toggle) would fail at import, not pass silently.
+function forbidden(name: string): unknown {
+  return new Proxy(
+    {},
+    {
+      get(_t, prop) {
+        throw new Error(`background touched browser.${name}.${String(prop)}`);
+      },
     },
+  );
+}
+
+type Fn = ReturnType<typeof vi.fn>;
+
+interface BrowserMock {
+  runtime: {
+    onInstalled: ReturnType<typeof makeListenerSpy>;
+    onStartup: ReturnType<typeof makeListenerSpy>;
+    sendMessage: Fn;
+  };
+  sidebarAction?: { setPanel: Fn; open: Fn };
+  menus?: MenusMock;
+  sidePanel?: { setOptions: Fn; open: Fn };
+  contextMenus?: MenusMock;
+}
+
+function installBrowserMock(
+  engine: 'firefox' | 'chrome' = 'firefox',
+): BrowserMock {
+  const mock = {
+    tabs: forbidden('tabs'),
+    permissions: forbidden('permissions'),
+    storage: forbidden('storage'),
     runtime: {
       onInstalled: makeListenerSpy(),
       onStartup: makeListenerSpy(),
@@ -85,396 +81,175 @@ function installBrowserMock(opts: BrowserMockOptions = {}) {
       getURL: vi.fn((p: string) => `moz-extension://test/${p}`),
       lastError: undefined,
     },
-    permissions: {
-      contains: vi.fn(async () => hasTabs),
-      onAdded: makeListenerSpy(),
-      onRemoved: makeListenerSpy(),
-    },
-    storage: {
-      local: {
-        get: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          const out: Record<string, unknown> = {};
-          for (const k of list) if (k in localStore) out[k] = localStore[k];
-          return out;
-        }),
-        set: vi.fn(async (entries: Record<string, unknown>) => {
-          Object.assign(localStore, entries);
-        }),
-      },
-      session: {
-        get: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          const out: Record<string, unknown> = {};
-          for (const k of list) if (k in sessionStore) out[k] = sessionStore[k];
-          return out;
-        }),
-        set: vi.fn(async (entries: Record<string, unknown>) => {
-          Object.assign(sessionStore, entries);
-        }),
-        remove: vi.fn(),
-      },
-      onChanged: makeListenerSpy(),
-    },
     // Engine marker + context-menu namespace, both engine-realistic.
     // Firefox exposes sidebarAction and, under the `menus` permission,
     // `browser.menus` — `browser.contextMenus` is UNDEFINED there.
     // Chromium exposes sidePanel and only `chrome.contextMenus` (no
-    // `menus`). Mirroring this is what makes a hardcoded
-    // `browser.contextMenus` access fail on the FF mock the way it does
-    // in real Firefox. engine.ts feature-detects on 'sidebarAction'.
+    // `menus`). engine.ts feature-detects on 'sidebarAction'.
     ...(engine === 'firefox'
       ? {
-          sidebarAction: { setPanel: vi.fn(), open: vi.fn() },
+          sidebarAction: {
+            setPanel: vi.fn(async () => undefined),
+            open: vi.fn(async () => undefined),
+          },
           menus: { create: vi.fn(), onClicked: makeListenerSpy() },
         }
       : {
-          sidePanel: { setOptions: vi.fn(), open: vi.fn() },
+          sidePanel: {
+            setOptions: vi.fn(async () => undefined),
+            open: vi.fn(async () => undefined),
+          },
           contextMenus: { create: vi.fn(), onClicked: makeListenerSpy() },
         }),
   };
   (globalThis as { browser?: unknown }).browser = mock;
-  return mock;
-}
-
-async function flushMicrotasks(): Promise<void> {
-  // The tab event handlers wrap their async work in `void (async () =>
-  // {…})()` (fire-and-forget by design), so awaiting the listener
-  // return value doesn't await the dispatch. A macrotask boundary
-  // drains every microtask the dispatch chain schedules — refresh,
-  // tabs.get, deriveSyncAsync, sendMessage — without needing to count
-  // ticks.
-  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  (globalThis as { chrome?: unknown }).chrome = mock;
+  return mock as unknown as BrowserMock;
 }
 
 async function loadBackground(): Promise<void> {
   await import('../src/background/background.js');
-  await flushMicrotasks();
 }
 
-describe('background module load — top-level listener registration', () => {
-  beforeEach(() => {
-    vi.resetModules();
+type MenuHandler = (
+  info: { menuItemId: string },
+  tab?: { id?: number; windowId?: number; url?: string; title?: string },
+) => void;
+
+function menuHandler(mock: unknown): MenuHandler {
+  const handler = menusSpy(mock).onClicked.addListener.mock.calls[0]?.[0] as
+    | MenuHandler
+    | undefined;
+  if (!handler) throw new Error('menu onClicked listener not registered');
+  return handler;
+}
+
+const NOW = 1_790_000_000_000;
+
+beforeEach(() => {
+  vi.resetModules();
+  vi.mocked(searchEnheterWithParams).mockClear();
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(NOW);
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+  delete (globalThis as { browser?: unknown }).browser;
+  delete (globalThis as { chrome?: unknown }).chrome;
+});
+
+describe('background module load', () => {
+  it.each(['firefox', 'chrome'] as const)(
+    'registers install/startup and the menu click at top level (%s)',
+    async (engine) => {
+      const mock = installBrowserMock(engine);
+      await loadBackground();
+      expect(mock.runtime.onInstalled.addListener).toHaveBeenCalledTimes(1);
+      expect(mock.runtime.onStartup.addListener).toHaveBeenCalledTimes(1);
+      expect(menusSpy(mock).onClicked.addListener).toHaveBeenCalledTimes(1);
+    },
+  );
+
+  it('uses browser.menus on Firefox (browser.contextMenus is undefined there)', async () => {
+    // A hardcoded browser.contextMenus access throws a TypeError at
+    // module top level in real Firefox and aborts the whole background
+    // script. This pins the engine-correct namespace.
+    const mock = installBrowserMock('firefox');
+    await loadBackground();
+    expect(mock.menus?.onClicked.addListener).toHaveBeenCalledTimes(1);
   });
 
-  it('registers tabs.onActivated synchronously at top level', async () => {
-    const mock = installBrowserMock();
-    await loadBackground();
-    expect(mock.tabs.onActivated.addListener).toHaveBeenCalledTimes(1);
-  });
+  it.each(['firefox', 'chrome'] as const)(
+    'touches no tabs, permissions or storage API — auto-sync is not here (%s)',
+    async (engine) => {
+      // installBrowserMock makes those namespaces throw on any access;
+      // loading cleanly is the assertion.
+      installBrowserMock(engine);
+      await expect(loadBackground()).resolves.toBeUndefined();
+    },
+  );
 
-  it('registers tabs.onUpdated with the url-properties filter at top level', async () => {
-    const mock = installBrowserMock();
+  it('registers the menu item on install', async () => {
+    const mock = installBrowserMock('firefox');
     await loadBackground();
-    expect(mock.tabs.onUpdated.addListener).toHaveBeenCalledTimes(1);
-    const call = mock.tabs.onUpdated.addListener.mock.calls[0];
-    expect(call?.[1]).toEqual({ properties: ['url'] });
-  });
-
-  it('registers tabs.onUpdated WITHOUT a filter on Chrome (filters throw there)', async () => {
-    // chrome.tabs.onUpdated.addListener(cb, {properties}) throws
-    // "This event does not support filters" and would abort the rest of
-    // module evaluation — taking the permission/storage reconciliation
-    // listeners and the seed with it. Chrome must register filter-free.
-    const mock = installBrowserMock({ engine: 'chrome' });
-    await loadBackground();
-    expect(mock.tabs.onUpdated.addListener).toHaveBeenCalledTimes(1);
-    const call = mock.tabs.onUpdated.addListener.mock.calls[0];
-    expect(call?.[1]).toBeUndefined();
-  });
-
-  it('still registers the tail listeners on Chrome (proves onUpdated did not throw)', async () => {
-    const mock = installBrowserMock({ engine: 'chrome' });
-    await loadBackground();
-    expect(mock.permissions.onAdded.addListener).toHaveBeenCalledTimes(1);
-    expect(mock.permissions.onRemoved.addListener).toHaveBeenCalledTimes(1);
-    expect(mock.storage.onChanged.addListener).toHaveBeenCalledTimes(1);
-  });
-
-  it('registers permission change listeners at top level', async () => {
-    const mock = installBrowserMock();
-    await loadBackground();
-    expect(mock.permissions.onAdded.addListener).toHaveBeenCalledTimes(1);
-    expect(mock.permissions.onRemoved.addListener).toHaveBeenCalledTimes(1);
-  });
-
-  it('registers storage.onChanged at top level so toggle flips refresh the cache', async () => {
-    const mock = installBrowserMock();
-    await loadBackground();
-    expect(mock.storage.onChanged.addListener).toHaveBeenCalledTimes(1);
-  });
-
-  it('registers runtime.onInstalled, onStartup, and the menu onClicked at top level', async () => {
-    const mock = installBrowserMock();
-    await loadBackground();
-    expect(mock.runtime.onInstalled.addListener).toHaveBeenCalled();
-    expect(mock.runtime.onStartup.addListener).toHaveBeenCalled();
-    expect(menusSpy(mock).onClicked.addListener).toHaveBeenCalledTimes(1);
-  });
-
-  it('uses browser.menus on Firefox (browser.contextMenus is undefined there) — and still registers the tail listeners', async () => {
-    // Real Firefox under the `menus` permission exposes `browser.menus`,
-    // not `browser.contextMenus`. A hardcoded `browser.contextMenus`
-    // access throws a TypeError at module top level and aborts the whole
-    // background script BEFORE the auto-sync tab listeners register — so
-    // auto-sync silently dies on Firefox while Chrome (which has
-    // contextMenus) works. This pins the engine-correct namespace.
-    const mock = installBrowserMock({ engine: 'firefox' });
-    await loadBackground();
-    expect(menusSpy(mock).onClicked.addListener).toHaveBeenCalledTimes(1);
-    expect(mock.tabs.onActivated.addListener).toHaveBeenCalledTimes(1);
-    expect(mock.tabs.onUpdated.addListener).toHaveBeenCalledTimes(1);
-    expect(mock.permissions.onAdded.addListener).toHaveBeenCalledTimes(1);
+    const onInstalled = mock.runtime.onInstalled.addListener.mock.calls[0]?.[0] as () => void;
+    onInstalled();
+    expect(menusSpy(mock).create).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'show-in-brreg-sidebar', contexts: ['page'] }),
+      expect.any(Function),
+    );
   });
 });
 
-describe('background tab event dispatch — gated on auto-sync state', () => {
-  beforeEach(() => {
-    vi.resetModules();
-  });
-
-  it('skips dispatch when tabs permission has not been granted', async () => {
-    const mock = installBrowserMock({ hasTabs: false, autoSyncOn: true });
+describe('context menu click', () => {
+  it('opens the panel on the page orgnr inside the gesture, then tells that window', async () => {
+    const mock = installBrowserMock('firefox');
     await loadBackground();
-    const handler = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    expect(handler).toBeDefined();
-    await handler({ tabId: 1, windowId: 1 });
-    await flushMicrotasks();
-    expect(mock.tabs.get).not.toHaveBeenCalled();
-    expect(mock.runtime.sendMessage).not.toHaveBeenCalled();
-  });
+    const tab = {
+      id: 7,
+      windowId: 3,
+      url: 'https://example.com/firma/984851006',
+      title: 'DNB',
+    };
 
-  it('skips dispatch when the auto-sync toggle is off even with permission granted', async () => {
-    const mock = installBrowserMock({ hasTabs: true, autoSyncOn: false });
-    await loadBackground();
-    const handler = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    expect(handler).toBeDefined();
-    await handler({ tabId: 1, windowId: 1 });
-    await flushMicrotasks();
-    expect(mock.tabs.get).not.toHaveBeenCalled();
-  });
+    menuHandler(mock)({ menuItemId: 'show-in-brreg-sidebar' }, tab);
 
-  it('proceeds with dispatch and broadcasts sync when both permission and toggle are on', async () => {
-    const mock = installBrowserMock({
-      hasTabs: true,
-      autoSyncOn: true,
-      // URL carries a valid orgnr (DNB Bank ASA) so resolveOrgnrAsync
-      // resolves synchronously without touching the mocked brreg client.
-      activeTab: {
-        url: 'https://example.com/foo/984851006',
-        title: 'DNB',
-        active: true,
-      },
+    // Synchronously, before any await: setPanel + open (gesture stack).
+    expect(mock.sidebarAction?.setPanel).toHaveBeenCalledWith({
+      panel: `moz-extension://test/details/details.html?orgnr=984851006&at=${NOW}`,
     });
-    await loadBackground();
-    const handler = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    expect(handler).toBeDefined();
-    await handler({ tabId: 7, windowId: 1 });
-    await flushMicrotasks();
-    expect(mock.tabs.get).toHaveBeenCalledWith(7);
+    expect(mock.sidebarAction?.open).toHaveBeenCalledTimes(1);
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'sync',
+      windowId: 3,
       orgnr: '984851006',
       host: 'example.com',
+      method: 'url',
     });
   });
 
-  it('dispatches on Chrome too when permission and toggle are on (no isFirefox gate)', async () => {
-    // Auto-sync is no longer Firefox-only: removing the !isFirefox
-    // short-circuit in refreshAutoSyncEnabled lets Chrome reconcile from
-    // permission + toggle like Firefox does.
-    const mock = installBrowserMock({
-      engine: 'chrome',
-      hasTabs: true,
-      autoSyncOn: true,
-      activeTab: {
-        url: 'https://example.com/foo/984851006',
-        title: 'DNB',
-        active: true,
-      },
-    });
+  it('on a page without an orgnr hands the host to the panel and looks nothing up itself', async () => {
+    const mock = installBrowserMock('chrome');
     await loadBackground();
-    const handler = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    expect(handler).toBeDefined();
-    await handler({ tabId: 7, windowId: 1 });
-    await flushMicrotasks();
-    expect(mock.tabs.get).toHaveBeenCalledWith(7);
-    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
-      type: 'sync',
-      orgnr: '984851006',
-      host: 'example.com',
-    });
-  });
 
-  it('broadcasts no-match when the active tab cannot be resolved to an orgnr', async () => {
-    const mock = installBrowserMock({
-      hasTabs: true,
-      autoSyncOn: true,
-      activeTab: {
-        url: 'https://random-unknown-blog.example/',
-        title: '',
-        active: true,
-      },
+    menuHandler(mock)(
+      { menuItemId: 'show-in-brreg-sidebar' },
+      { id: 7, windowId: 3, url: 'https://www.yara.com/about', title: 'Yara' },
+    );
+    // Let anything the handler might have kicked off asynchronously run.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(mock.sidePanel?.setOptions).toHaveBeenCalledWith({
+      path: `details/details.html?nomatch=www.yara.com&at=${NOW}`,
+      enabled: true,
     });
-    await loadBackground();
-    const handler = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    expect(handler).toBeDefined();
-    await handler({ tabId: 9, windowId: 1 });
-    await flushMicrotasks();
+    expect(mock.sidePanel?.open).toHaveBeenCalledWith({ windowId: 3 });
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'no-match',
-      host: 'random-unknown-blog.example',
+      windowId: 3,
+      host: 'www.yara.com',
     });
-  });
-});
-
-describe('background tab event ordering — stale broadcasts drop', () => {
-  beforeEach(() => {
-    vi.resetModules();
+    // The panel runs the picker-aware search; the background never does.
+    expect(searchEnheterWithParams).not.toHaveBeenCalled();
   });
 
-  it('suppresses a slow onActivated broadcast superseded by a faster one', async () => {
-    const mock = installBrowserMock({ hasTabs: true, autoSyncOn: true });
-    // Tab 1 (DNB) resolves slowly — its tabs.get hangs until we release
-    // it. Tab 2 (Equinor) resolves immediately. Both URLs carry a valid
-    // orgnr so deriveSyncAsync stays off the (mocked) brreg client.
-    const slowTab1 = deferred<MockTab>();
-    mock.tabs.get.mockImplementation((tabId: number) =>
-      tabId === 1
-        ? slowTab1.promise
-        : Promise.resolve({
-            url: 'https://equinor.com/x/923609016',
-            title: 'Equinor',
-            active: true,
-          }),
-    );
+  it('ignores other menu items', async () => {
+    const mock = installBrowserMock('firefox');
     await loadBackground();
-    const handler = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    expect(handler).toBeDefined();
-
-    // Event A (slow), then event B (fast) before A resolves.
-    handler({ tabId: 1, windowId: 1 });
-    handler({ tabId: 2, windowId: 1 });
-    await flushMicrotasks();
-    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
-      type: 'sync',
-      orgnr: '923609016',
-      host: 'equinor.com',
-    });
-    mock.runtime.sendMessage.mockClear();
-
-    // A's tabs.get finally lands — its broadcast must be dropped, not
-    // overwrite B's in the sidebar.
-    slowTab1.resolve({
-      url: 'https://dnb.no/x/984851006',
-      title: 'DNB',
-      active: true,
-    });
-    await flushMicrotasks();
+    menuHandler(mock)({ menuItemId: 'something-else' }, { windowId: 1 });
+    expect(mock.sidebarAction?.setPanel).not.toHaveBeenCalled();
     expect(mock.runtime.sendMessage).not.toHaveBeenCalled();
   });
 
-  it('lets a newer onUpdated supersede an in-flight onActivated (shared sequence)', async () => {
-    const mock = installBrowserMock({ hasTabs: true, autoSyncOn: true });
-    const slowTab1 = deferred<MockTab>();
-    mock.tabs.get.mockImplementation(() => slowTab1.promise);
+  it('still opens the panel when the click carries no tab, but sends nothing it can’t address', async () => {
+    const mock = installBrowserMock('firefox');
     await loadBackground();
-    const activated = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    const updated = mock.tabs.onUpdated.addListener.mock.calls[0]?.[0];
-    expect(activated).toBeDefined();
-    expect(updated).toBeDefined();
-
-    // Slow activation on tab 1, then a same-tab URL navigation that
-    // resolves immediately (onUpdated hands us the tab inline).
-    activated({ tabId: 1, windowId: 1 });
-    updated(
-      1,
-      { url: 'https://equinor.com/x/923609016' },
-      {
-        url: 'https://equinor.com/x/923609016',
-        title: 'Equinor',
-        active: true,
-      },
-    );
-    await flushMicrotasks();
-    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
-      type: 'sync',
-      orgnr: '923609016',
-      host: 'equinor.com',
+    menuHandler(mock)({ menuItemId: 'show-in-brreg-sidebar' });
+    expect(mock.sidebarAction?.setPanel).toHaveBeenCalledWith({
+      panel: 'moz-extension://test/details/details.html',
     });
-    mock.runtime.sendMessage.mockClear();
-
-    slowTab1.resolve({
-      url: 'https://dnb.no/x/984851006',
-      title: 'DNB',
-      active: true,
-    });
-    await flushMicrotasks();
+    expect(mock.sidebarAction?.open).toHaveBeenCalledTimes(1);
     expect(mock.runtime.sendMessage).not.toHaveBeenCalled();
-  });
-
-  it('does NOT claim a sequence slot for title-only or background-tab updates', async () => {
-    const mock = installBrowserMock({ hasTabs: true, autoSyncOn: true });
-    const slowTab1 = deferred<MockTab>();
-    mock.tabs.get.mockImplementation(() => slowTab1.promise);
-    await loadBackground();
-    const activated = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    const updated = mock.tabs.onUpdated.addListener.mock.calls[0]?.[0];
-
-    activated({ tabId: 1, windowId: 1 });
-    // Title-only churn (media playback) and a background-tab URL change
-    // must not invalidate the in-flight resolution for the active tab.
-    updated(2, { title: 'now playing' }, { title: 'now playing', active: false });
-    updated(
-      3,
-      { url: 'https://example.org/' },
-      { url: 'https://example.org/', active: false },
-    );
-    await flushMicrotasks();
-
-    slowTab1.resolve({
-      url: 'https://dnb.no/x/984851006',
-      title: 'DNB',
-      active: true,
-    });
-    await flushMicrotasks();
-    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
-      type: 'sync',
-      orgnr: '984851006',
-      host: 'dnb.no',
-    });
-  });
-});
-
-describe('background permission revoke — synchronous cache invalidation', () => {
-  beforeEach(() => {
-    vi.resetModules();
-  });
-
-  it('flips autoSyncEnabled to false synchronously on permissions.onRemoved', async () => {
-    const mock = installBrowserMock({ hasTabs: true, autoSyncOn: true });
-    await loadBackground();
-
-    // Confirm the enabled path works first.
-    const activated = mock.tabs.onActivated.addListener.mock.calls[0]?.[0];
-    expect(activated).toBeDefined();
-    await activated({ tabId: 1, windowId: 1 });
-    await flushMicrotasks();
-    expect(mock.tabs.get).toHaveBeenCalled();
-    mock.tabs.get.mockClear();
-
-    // Simulate user revoking the tabs permission. The onRemoved listener
-    // must zero the cache synchronously — *before* awaiting the refresh
-    // — so a tab event firing in the same tick can't slip through.
-    const removed = mock.permissions.onRemoved.addListener.mock.calls[0]?.[0];
-    expect(removed).toBeDefined();
-    // Also flip the contains mock so the post-refresh state is consistent.
-    mock.permissions.contains.mockResolvedValue(false);
-    removed({ permissions: ['tabs'] });
-
-    // Without awaiting microtasks, fire another tab event right away.
-    await activated({ tabId: 2, windowId: 1 });
-    await flushMicrotasks();
-    expect(mock.tabs.get).not.toHaveBeenCalled();
   });
 });

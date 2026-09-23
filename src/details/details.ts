@@ -2,7 +2,11 @@
 // before any `browser.*` access. Must stay the first import.
 import '../lib/platform/globals.js';
 import { decideToggle } from '../lib/auto-sync-controller.js';
-import { getAutoSync, setAutoSync } from '../lib/auto-sync-settings.js';
+import {
+  AUTO_SYNC_STORAGE_KEY,
+  getAutoSync,
+  setAutoSync,
+} from '../lib/auto-sync-settings.js';
 import {
   fetchEnhet,
   fetchRegnskap,
@@ -12,6 +16,19 @@ import {
 import { formatRelativeTime } from '../lib/format.js';
 import { searchByHostnameDetailed } from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
+import {
+  createLoadSequence,
+  createPanelFollower,
+  type LoadToken,
+  type PanelView,
+} from '../lib/panel-follow.js';
+import {
+  isForWindow,
+  parsePanelMessage,
+  readPanelHint,
+} from '../lib/panel-protocol.js';
+import { isFirefox } from '../lib/platform/engine.js';
+import { createTabWatcher, type TabWatcher } from '../lib/tab-sync.js';
 import { describeLoadError } from '../lib/ui/error-message.js';
 import { attachManualSearch } from '../lib/ui/manual-search.js';
 import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
@@ -19,7 +36,6 @@ import { pushRecent, renderRecentSection } from '../lib/ui/recent.js';
 import {
   resolveTabContext,
   type ResolutionMethod,
-  type TabContext,
 } from '../lib/ui/resolve-tab.js';
 import { createSourceLabel } from '../lib/ui/source-label.js';
 import type {
@@ -69,7 +85,19 @@ let currentOrgnr: string | undefined;
 let currentResolutionMethod: ResolutionMethod | undefined;
 let lastUpdatedAt: number | undefined;
 let updatedTimerId: number | undefined;
-let loadRunId = 0;
+// Every flow that ends in a paint claims a token from this one
+// sequence (the painters below claim their own; flows that await first
+// claim at entry) and drops its result once a newer flow has started.
+// See panel-follow.ts.
+const loads = createLoadSequence();
+// What the panel settled on (result / picker / empty) — undefined
+// while loading or on error. Lets a sync or tab event for what's
+// already shown keep it instead of repainting through the skeleton.
+let onScreen: PanelView | undefined;
+// The load whose result is on screen. renderParent's late name upgrade
+// checks this rather than the load token: a sync that keeps the same
+// company claims a token but leaves this load's result standing.
+let shownLoad: LoadToken | undefined;
 // Re-trigger for the "Prøv igjen" button in the full error state.
 let lastLoad: (() => void) | undefined;
 // Assigned by setupTabs; lets popstate re-activate the tab named by a
@@ -78,15 +106,25 @@ let activateTabByKey: (key: string) => void = () => {};
 
 const sourceLabel = createSourceLabel(footerSource, sourceHostEl);
 
+// The picker persists the choice before calling back. If a tab event
+// or sync repainted the panel during that write, the pick is for a
+// picker no longer on screen: keep the newer view (the choice is saved
+// and applies next time the host resolves).
+function pickerStillShown(host: string): boolean {
+  return onScreen?.kind === 'picker' && onScreen.host === host;
+}
+
 const picker = createPicker({
   appEl: app,
   listEl: pickerListEl,
   noneBtn: pickerNoneBtn,
-  onChoose: (_host, orgnr) => {
+  onChoose: (host, orgnr) => {
+    if (!pickerStillShown(host)) return;
     setHistoryOrgnr(orgnr, 'host-pick', false);
     void loadOrgnr(orgnr, 'host-pick');
   },
   onNone: (host) => {
+    if (!pickerStillShown(host)) return;
     showEmptyState(host);
   },
 });
@@ -100,11 +138,23 @@ const manualSearch = attachManualSearch({
   },
 });
 
+// «Feil bedrift?» awaits a storage write and a fresh host search
+// before it paints. getContext runs synchronously on the click, so the
+// flow claims its load token there; a tab event or sync that arrives
+// during the search then wins over this flow's late picker.
+let rejectRun: LoadToken | undefined;
 setupRejectChoice({
   buttonEl: rejectChoiceBtn,
-  getContext: () => ({ host: sourceLabel.get(), orgnr: currentOrgnr }),
-  showPicker,
-  showEmptyState,
+  getContext: () => {
+    rejectRun = loads.begin();
+    return { host: sourceLabel.get(), orgnr: currentOrgnr };
+  },
+  showPicker: (host, candidates) => {
+    if (!rejectRun?.isStale()) showPicker(host, candidates);
+  },
+  showEmptyState: (host) => {
+    if (!rejectRun?.isStale()) showEmptyState(host);
+  },
 });
 
 retryLoadBtn.addEventListener('click', () => {
@@ -115,6 +165,18 @@ retryLoadBtn.addEventListener('click', () => {
 backBtn.addEventListener('click', () => {
   window.history.back();
 });
+
+// The window this panel document lives in. Firefox sidebars and
+// Chrome side panels are one document per browser window, and
+// windows.getCurrent() called from one returns that window (MDN
+// windows.getCurrent; Chrome windows § "The current window"). Messages
+// and tab events are scoped to it.
+const panelWindowId: Promise<number | undefined> = browser.windows
+  .getCurrent()
+  .then(
+    (win) => win.id,
+    () => undefined,
+  );
 
 setupTabs();
 void setupAutoSyncToggle();
@@ -203,6 +265,9 @@ function setState(
   // can't fire the picker's onChoose on a previous host's list.
   if (state !== 'picker') picker.clear();
   app.dataset.state = state;
+  // The painters record what settled after calling this.
+  onScreen = undefined;
+  shownLoad = undefined;
   skeletonEl.hidden = state !== 'loading';
   // statusEl carries the aria-live polite announcement during loading
   // (kept off-screen, not display:none, so screen readers still read it)
@@ -220,13 +285,7 @@ function setState(
   // showError unhides this when a retry target exists.
   errorActionsEl.hidden = true;
   resultEl.hidden = state !== 'result';
-  // Only a drilled-in entity has an in-panel "back" to offer; the
-  // method is stamped in history.state, so this stays correct across
-  // Back/Forward restores and sync-broadcast replaceState overwrites.
-  backBtn.hidden =
-    state !== 'result' ||
-    !isHistoryEntry(window.history.state) ||
-    window.history.state.method !== 'drill-in';
+  updateBackButton();
   pickerEl.hidden = state !== 'picker';
   emptyStateEl.hidden = state !== 'empty';
   if (state !== 'result') {
@@ -242,6 +301,16 @@ function setState(
   }
 }
 
+function updateBackButton(): void {
+  // Only a drilled-in entity has an in-panel "back" to offer; the
+  // method is stamped in history.state, so this stays correct across
+  // Back/Forward restores and sync replaceState overwrites.
+  backBtn.hidden =
+    app.dataset.state !== 'result' ||
+    !isHistoryEntry(window.history.state) ||
+    window.history.state.method !== 'drill-in';
+}
+
 function showError(err: unknown): void {
   setState('error');
   statusEl.textContent = describeLoadError(err);
@@ -250,7 +319,10 @@ function showError(err: unknown): void {
 }
 
 function showEmptyState(host?: string, degraded = false): void {
+  // Claim the token: an in-flight load must not land on top of this.
+  loads.begin();
   setState('empty');
+  onScreen = { kind: 'empty', host, degraded };
   clearOrgnrFromUrl();
   currentOrgnr = undefined;
   sourceLabel.set(host);
@@ -274,11 +346,12 @@ function showEmptyState(host?: string, degraded = false): void {
 }
 
 function showPicker(host: string, candidates: SearchHit[]): void {
-  setState('picker');
-  sourceLabel.set(host);
-  // Bump loadRunId so any in-flight loadOrgnr from a previous tab
+  // Claim the token so an in-flight loadOrgnr from a previous tab
   // can't overwrite the picker when its fetches land.
-  ++loadRunId;
+  loads.begin();
+  setState('picker');
+  onScreen = { kind: 'picker', host, candidates };
+  sourceLabel.set(host);
   currentOrgnr = undefined;
   clearOrgnrFromUrl();
   picker.render(host, candidates);
@@ -296,10 +369,10 @@ async function loadOrgnr(
   method?: ResolutionMethod,
   opts: { focusResult?: boolean } = {},
 ): Promise<void> {
-  // Monotonic guard — if the popup pushes a second sync while the
-  // first is still in flight, the older fetches must not overwrite
-  // the newer ones when they land out of order.
-  const myRunId = ++loadRunId;
+  // If a second sync lands while this one is still in flight, the
+  // older fetches must not overwrite the newer ones when they land out
+  // of order.
+  const run = loads.begin();
   currentOrgnr = orgnr;
   if (method !== undefined) currentResolutionMethod = method;
   lastLoad = () => {
@@ -327,7 +400,7 @@ async function loadOrgnr(
         (): RegnskapResponse | undefined => undefined,
       ),
     ]);
-    if (myRunId !== loadRunId) return;
+    if (run.isStale()) return;
 
     // Stamp the recent stack now that the Enhet is confirmed — same
     // rule as the popup: never persist orgnrs that failed to fetch.
@@ -340,11 +413,18 @@ async function loadOrgnr(
     void renderParent(
       enhet.overordnetEnhet,
       navigateToRelated,
-      () => myRunId !== loadRunId,
+      () => shownLoad !== run,
     );
     renderUnderenheter(underenheter);
     renderNokkeltall(regnskap, enhet);
     setState('result');
+    shownLoad = run;
+    onScreen = {
+      kind: 'company',
+      orgnr,
+      method: currentResolutionMethod ?? 'url',
+      host: sourceLabel.get(),
+    };
     updateRejectButtonVisibility();
     markUpdated();
     // After an in-panel drill-in or Back/Forward, the <a> the user
@@ -357,7 +437,7 @@ async function loadOrgnr(
     // active page during an auto-sync tab switch.
     if (opts.focusResult && document.hasFocus()) nameEl.focus();
   } catch (err) {
-    if (myRunId !== loadRunId) return;
+    if (run.isStale()) return;
     showError(err);
   }
 }
@@ -378,6 +458,16 @@ function paintUpdatedLabel(): void {
   updatedTime.textContent = formatRelativeTime(lastUpdatedAt);
 }
 
+// --- auto-sync ------------------------------------------------------
+//
+// With «Auto-oppdater» on (toggle stored on AND the runtime `tabs`
+// grant), this panel follows the active tab of its own window: it
+// registers tabs.onActivated / onUpdated itself and resolves through
+// the same cascade as startup. The panel document exists only while
+// the sidebar / side panel is open (MDN "Sidebars": unloaded when the
+// user closes the sidebar), so closing it stops every lookup by
+// construction. See docs/notes/sidebar-sync.md § panel-hosted-auto-sync.
+
 // Cached effective state of the toggle. Kept in sync with
 // storage + permission grant so handleToggleChange can call
 // browser.permissions.request *without* an await between the
@@ -386,33 +476,63 @@ function paintUpdatedLabel(): void {
 // makes permissions.request reject with "Firefox blokkerte
 // forespørselen".
 let currentAutoSyncEnabled = false;
+// Undefined only if the panel couldn't learn its window — then it
+// can't tell its own tabs from other windows' and doesn't follow any.
+let tabWatcher: TabWatcher | undefined;
+
+function applyAutoSync(enabled: boolean): void {
+  currentAutoSyncEnabled = enabled;
+  autoSyncToggle.checked = enabled;
+  if (enabled) tabWatcher?.attach();
+  else tabWatcher?.detach();
+}
 
 async function setupAutoSyncToggle(): Promise<void> {
-  // Reconcile UI state with reality on load. The toggle is "on" only
-  // if both storage says so AND the tabs permission is currently
-  // granted (the user can revoke externally via about:addons or
-  // chrome://extensions). `tabs` is an optional (runtime opt-in)
-  // permission in both manifests, so this flow is engine-agnostic.
-  const [storedOn, hasTabs] = await Promise.all([
-    getAutoSync(),
-    browser.permissions.contains({ permissions: ['tabs'] }),
-  ]);
-  currentAutoSyncEnabled = storedOn && hasTabs;
-  autoSyncToggle.checked = currentAutoSyncEnabled;
-  if (storedOn && !hasTabs) {
-    // Storage said on but permission was revoked externally. Reset.
-    await setAutoSync(false);
+  const windowId = await panelWindowId;
+  if (windowId !== undefined) {
+    tabWatcher = createTabWatcher({
+      tabs: browser.tabs,
+      windowId,
+      supportsUpdateFilter: isFirefox,
+      onTabChange: (tabId, tab) => {
+        void follower.followTab(tabId, tab);
+      },
+    });
   }
+  await reconcileAutoSync();
 
   autoSyncToggle.addEventListener('change', () => {
     void handleToggleChange(autoSyncToggle.checked);
   });
 
-  // External revoke (about:addons) — flip the checkbox live and
-  // clear stored state so the UI doesn't lie next reload. Sync shim
-  // around the async handler so addListener gets a void-returning
-  // function (same pattern as background.ts).
+  // External revoke (about:addons / chrome://extensions) — detach and
+  // flip the checkbox live. Sync shim around the async handler so
+  // addListener gets a void-returning function.
   browser.permissions.onRemoved.addListener(onPermissionsRemoved);
+  // The toggle flipped in another window's panel: follow suit here.
+  browser.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local' || !(AUTO_SYNC_STORAGE_KEY in changes)) return;
+    void reconcileAutoSync();
+  });
+}
+
+async function reconcileAutoSync(): Promise<void> {
+  // The toggle is "on" only if storage says so AND the tabs permission
+  // is currently granted (the user can revoke externally via
+  // about:addons or chrome://extensions). `tabs` is an optional
+  // (runtime opt-in) permission in both manifests, so this flow is
+  // engine-agnostic.
+  const [storedOn, hasTabs] = await Promise.all([
+    getAutoSync(),
+    browser.permissions.contains({ permissions: ['tabs'] }),
+  ]);
+  // A click in this panel owns the state until its prompt settles.
+  if (toggleInFlight) return;
+  applyAutoSync(storedOn && hasTabs);
+  if (storedOn && !hasTabs) {
+    // Storage said on but permission was revoked externally. Reset.
+    await setAutoSync(false);
+  }
 }
 
 function onPermissionsRemoved(perms: browser.permissions.Permissions): void {
@@ -423,8 +543,8 @@ async function handlePermissionsRemoved(
   perms: browser.permissions.Permissions,
 ): Promise<void> {
   if (!perms.permissions?.includes('tabs')) return;
-  currentAutoSyncEnabled = false;
-  autoSyncToggle.checked = false;
+  // Detach before any await so no tab event slips in after the revoke.
+  applyAutoSync(false);
   await setAutoSync(false);
   showAutoSyncStatus(null);
 }
@@ -467,11 +587,15 @@ async function handleToggleChange(desired: boolean): Promise<void> {
     // Visual checkbox state always follows the decision — important
     // when the user denied the prompt and we need to revert the tick.
     autoSyncToggle.checked = decision.nextEnabled;
+    // Detach first thing on the way off, so no tab event is resolved
+    // while the storage write and permission removal are pending.
+    if (decision.detachListeners) applyAutoSync(false);
 
     if (decision.persist) {
       await setAutoSync(decision.nextEnabled);
       currentAutoSyncEnabled = decision.nextEnabled;
     }
+    if (decision.attachListeners) applyAutoSync(true);
 
     if (decision.removePermission) {
       try {
@@ -500,138 +624,113 @@ function showAutoSyncStatus(message: string | null): void {
   autoSyncStatus.textContent = message;
 }
 
-async function resolveFromActiveTab(): Promise<TabContext> {
+// --- following the tab: startup, tab events, messages ---------------
+
+// Paint a view the panel isn't showing yet. The painters claim the
+// load token themselves.
+function showView(view: PanelView): void {
+  switch (view.kind) {
+    case 'company':
+      sourceLabel.set(view.host);
+      // replaceState, not push — this tracks the active tab, not a
+      // navigation the user wants to reverse.
+      setHistoryOrgnr(view.orgnr, view.method, false);
+      void loadOrgnr(view.orgnr, view.method);
+      return;
+    case 'picker':
+      showPicker(view.host, view.candidates);
+      return;
+    case 'empty':
+      showEmptyState(view.host, view.degraded);
+      return;
+  }
+}
+
+// The view is already on screen. A company keeps its rendered result
+// (no skeleton, scroll and focus stay put); only how it was reached —
+// the footer host and the «Feil bedrift?» method — is refreshed. A
+// picker or empty state for the same host is left alone, including a
+// half-typed manual search.
+function keepView(view: PanelView): void {
+  if (view.kind !== 'company') return;
+  sourceLabel.set(view.host);
+  currentResolutionMethod = view.method;
+  setHistoryOrgnr(view.orgnr, view.method, false);
+  onScreen = view;
+  updateRejectButtonVisibility();
+  updateBackButton();
+}
+
+const follower = createPanelFollower({
+  loads,
+  ownUrlPrefix: browser.runtime.getURL(''),
   // tabs.query returns the active tab's url and title only when the
-  // extension holds activeTab on it — which Firefox grants on the
-  // user action that toggles the sidebar (clicking the sidebar
-  // icon, our toolbar action, or a keyboard shortcut). When grant
-  // is absent (e.g. tab switched after the sidebar was opened from
-  // the Firefox View menu), url and title come back empty and we
-  // silently fall back to whatever was in the URL param. The cascade
-  // itself is shared with the popup — lib/ui/resolve-tab.ts.
-  try {
+  // extension may read them: an activeTab grant (Firefox grants it on
+  // the user action that toggles the sidebar — the sidebar icon, our
+  // toolbar action, a keyboard shortcut; the context menu too) or the
+  // auto-sync `tabs` opt-in. Otherwise they come back empty and the
+  // panel falls back to its URL hint (panel-follow.ts § chooseStart).
+  // The cascade itself is shared with the popup — lib/ui/resolve-tab.ts.
+  queryActiveTab: async () => {
     const tabs = await browser.tabs.query({
       active: true,
       currentWindow: true,
     });
-    const tab = tabs[0];
-    if (!tab) return {};
-    return await resolveTabContext(tab.url ?? '', tab.title ?? '');
-  } catch {
-    return {};
+    return tabs[0];
+  },
+  getTab: (tabId) => browser.tabs.get(tabId),
+  resolveTab: resolveTabContext,
+  searchHost: searchByHostnameDetailed,
+  onScreen: () => onScreen,
+  show: showView,
+  keep: keepView,
+});
+
+function init(): Promise<void> {
+  // ?orgnr= / ?nomatch= is a hint from whoever opened the panel (popup
+  // link, context menu), stamped with the open's time. Drop the stamp
+  // from this document's URL once read, so a later reload of the panel
+  // doesn't treat it as fresh.
+  const hint = readPanelHint(window.location.search, Date.now());
+  const url = new URL(window.location.href);
+  if (url.searchParams.has('at')) {
+    url.searchParams.delete('at');
+    window.history.replaceState(window.history.state, '', url.toString());
   }
+  return follower.start(hint);
 }
 
-async function init(): Promise<void> {
-  // ?nomatch=<host> means a deliberate trigger (menu, fresh sidebar
-  // open) landed on a page with no resolvable orgnr. Re-probe via
-  // picker-aware resolver so an ambiguous host gets the picker UI
-  // instead of the bare empty state.
-  const noMatchHost = getNoMatchHostFromUrl();
-  if (noMatchHost !== undefined) {
-    await handleNoMatchBroadcast(noMatchHost);
-    return;
-  }
-
-  // Prefer the active tab over the URL param. The sidebar may have
-  // been opened with a stale orgnr (e.g. last popup-click was on
-  // DNB, user has since switched to VG and re-toggled the sidebar
-  // panel). Trust the tab when we can read it.
-  const fromTab = await resolveFromActiveTab();
-  const fromUrl = getOrgnrFromUrl();
-  const orgnr = fromTab.orgnr ?? fromUrl;
-
-  if (!orgnr) {
-    if (fromTab.pickerCandidates && fromTab.host) {
-      showPicker(fromTab.host, fromTab.pickerCandidates);
+// Messages from the popup (sync after it resolved the tab, no-match
+// after «Ingen av disse») and the context menu. sidebarAction.setPanel
+// alone does not reliably repaint an already-open sidebar in Firefox,
+// so the sender tells the panel directly. runtime messages reach every
+// extension page, so each names its window and the other windows'
+// panels ignore it.
+browser.runtime.onMessage.addListener((raw: unknown) => {
+  const msg = parsePanelMessage(raw);
+  if (!msg) return;
+  void panelWindowId.then((windowId) => {
+    if (!isForWindow(msg, windowId)) return;
+    if (msg.type === 'sync') {
+      follower.follow({
+        kind: 'company',
+        orgnr: msg.orgnr,
+        method: msg.method,
+        host: msg.host,
+      });
       return;
     }
-    // Neither the active tab nor the URL has a company. The sidebar
-    // was opened manually (Firefox View > Sidebars) on a page brreg-snap
-    // does not recognise. Show a hint, not a hard error.
-    showEmptyState(fromTab.host, fromTab.degraded);
-    return;
-  }
-
-  sourceLabel.set(fromTab.host);
-  // fromTab.orgnr was set by resolveFromActiveTab and carries a
-  // method; an orgnr inherited only from ?orgnr= in the URL has no
-  // tab-resolution context and is treated as 'url' so the override
-  // button stays hidden (we don't know if the param originated from
-  // a host-resolution). Stamp the method into the initial history
-  // entry (replace, not push) so a Back from a later drill-in restores
-  // it with the right override visibility.
-  const method: ResolutionMethod = fromTab.orgnr
-    ? fromTab.method ?? 'url'
-    : 'url';
-  setHistoryOrgnr(orgnr, method, false);
-  await loadOrgnr(orgnr, method);
-}
-
-interface SyncMessage {
-  type: 'sync';
-  orgnr: string;
-  host?: string;
-}
-
-interface NoMatchMessage {
-  type: 'no-match';
-  host?: string;
-}
-
-function isSyncMessage(msg: unknown): msg is SyncMessage {
-  if (typeof msg !== 'object' || msg === null) return false;
-  const m = msg as { type?: unknown; orgnr?: unknown; host?: unknown };
-  return (
-    m.type === 'sync' &&
-    typeof m.orgnr === 'string' &&
-    (m.host === undefined || typeof m.host === 'string')
-  );
-}
-
-function isNoMatchMessage(msg: unknown): msg is NoMatchMessage {
-  if (typeof msg !== 'object' || msg === null) return false;
-  const m = msg as { type?: unknown; host?: unknown };
-  return (
-    m.type === 'no-match' &&
-    (m.host === undefined || typeof m.host === 'string')
-  );
-}
-
-// The popup broadcasts a 'sync' message after resolving the active
-// tab's orgnr. sidebarAction.setPanel alone does not reliably repaint
-// an already-open sidebar in Firefox, so we listen here and repaint
-// ourselves. history.replaceState keeps the URL in sync without a
-// full document reload (which would flicker and reset scroll).
-// 'no-match' is the counterpart: a deliberate trigger (menu, tab
-// switch with auto-sync on) landed on a page brreg-snap can't resolve
-// — we clear the sidebar instead of leaving stale company data up.
-browser.runtime.onMessage.addListener((msg: unknown) => {
-  if (isNoMatchMessage(msg)) {
-    // Bump loadRunId so any in-flight loadOrgnr from a previous sync
-    // doesn't overwrite the picker / empty state when it lands.
-    ++loadRunId;
-    void handleNoMatchBroadcast(msg.host);
-    return;
-  }
-  if (!isSyncMessage(msg)) return;
-  if (!isValidOrgnr(msg.orgnr)) return;
-  sourceLabel.set(msg.host);
-  // Sync messages from the popup don't carry the original resolution
-  // method. Hide the override button rather than risk exposing it on a
-  // URL-derived pick the user can't actually override. replaceState
-  // (not push) — this tracks the active tab, not a reversible nav.
-  setHistoryOrgnr(msg.orgnr, 'sync-broadcast', false);
-  void loadOrgnr(msg.orgnr, 'sync-broadcast');
+    void follower.probe(msg.host);
+  });
 });
 
 // Browser Back / Forward within the panel — only reachable after an
 // in-panel drill-in pushed an entry. Restore from history.state,
 // falling back to the URL params for the initial entry (which may
-// predate state stamping). Bump loadRunId first so a slower in-flight
-// load can't paint over the restored entry when it lands.
+// predate state stamping). Each branch paints through a function that
+// claims the load token, so a slower in-flight load can't paint over
+// the restored entry when it lands.
 window.addEventListener('popstate', (ev) => {
-  ++loadRunId;
   const entry = isHistoryEntry(ev.state) ? ev.state : undefined;
   const orgnr = entry?.orgnr ?? getOrgnrFromUrl();
   if (orgnr && isValidOrgnr(orgnr)) {
@@ -648,39 +747,11 @@ window.addEventListener('popstate', (ev) => {
   }
   const host = getNoMatchHostFromUrl();
   if (host !== undefined) {
-    void handleNoMatchBroadcast(host);
+    void follower.probe(host);
     return;
   }
   showEmptyState(undefined);
 });
-
-async function handleNoMatchBroadcast(
-  host: string | undefined,
-): Promise<void> {
-  // Background broadcasts no-match when the sync cascade (and the
-  // AUTO band of hostname-search) couldn't resolve. Re-run the
-  // picker-aware resolver here — cache hits make this nearly free,
-  // and it surfaces the picker for ambiguous sites instead of the
-  // bare empty state.
-  if (!host) {
-    showEmptyState(undefined);
-    return;
-  }
-  const detailed = await searchByHostnameDetailed(host);
-  if (detailed?.band === 'picker') {
-    showPicker(host, detailed.candidates);
-    return;
-  }
-  if (detailed?.band === 'auto' && detailed.choice) {
-    sourceLabel.set(host);
-    const method: ResolutionMethod =
-      detailed.candidates.length === 0 ? 'host-pick' : 'host-auto';
-    setHistoryOrgnr(detailed.choice, method, false);
-    await loadOrgnr(detailed.choice, method);
-    return;
-  }
-  showEmptyState(host, detailed !== undefined && !detailed.complete);
-}
 
 function setupTabs(): void {
   const tabs = Array.from(

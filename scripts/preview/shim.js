@@ -83,6 +83,8 @@
         { url: tabUrl, title: tabTitle, id: 1, windowId: 1 },
       ],
     },
+    // The panel scopes messages and tab events to its own window.
+    windows: { getCurrent: async () => ({ id: 1 }) },
     storage: {
       session: sessionArea,
       local: makeArea(),

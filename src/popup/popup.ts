@@ -2,6 +2,12 @@
 // before any `browser.*` access. Must stay the first import.
 import '../lib/platform/globals.js';
 import { sidebar } from '../lib/platform/sidebar.js';
+import {
+  notifyPanel,
+  panelPath,
+  type PanelMessage,
+  type PanelTarget,
+} from '../lib/panel-protocol.js';
 import { fetchEnhet, fetchRegnskap, fetchRoller } from '../lib/brreg.js';
 import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress, formatNaering } from '../lib/format.js';
@@ -93,7 +99,7 @@ const picker = createPicker({
     void loadAndRender(orgnr, 'host-pick');
   },
   onNone: (host) => {
-    void syncSidebarNoMatch(host);
+    syncSidebarNoMatch(host);
     showEmptyState(host);
   },
 });
@@ -137,34 +143,35 @@ function setDetailsLink(): void {
   // sidebar opens on the picker/empty surface for the same host
   // instead of stale state. Only hidden when we have neither — popup
   // opened on about:blank or an unresolvable URL.
-  let relPath: string | undefined;
+  let target: PanelTarget;
   const sourceHost = sourceLabel.get();
   if (currentOrgnr) {
-    relPath = `details/details.html?orgnr=${currentOrgnr}`;
+    target = { orgnr: currentOrgnr };
   } else if (sourceHost) {
-    relPath = `details/details.html?nomatch=${encodeURIComponent(sourceHost)}`;
+    target = { nomatch: sourceHost };
   }
-  if (!relPath) {
+  if (!target) {
     detailsLink.hidden = true;
     detailsLink.removeAttribute('href');
     detailsLink.onclick = null;
     return;
   }
-  const path = relPath;
+  const panelTarget = target;
   detailsLink.hidden = false;
   // Keep href so middle-click and keyboard activation still open the
   // details page somewhere. The onclick docks it into the browser's
   // sidebar / side panel instead of stealing focus into a new tab or
   // popup window.
-  detailsLink.href = browser.runtime.getURL(path);
+  detailsLink.href = browser.runtime.getURL(panelPath(panelTarget, Date.now()));
   detailsLink.onclick = (ev) => {
     ev.preventDefault();
     // setPanel + open must both fire inside this click's gesture stack.
     // No await before open() — both engines consume the activation
     // token on the first await, and Chrome's sidePanel.open hard-
     // requires a live gesture. open() picks up the panel path setPanel
-    // just queued.
-    sidebar.setPanel(path);
+    // just queued. The path is stamped with the click's time so the
+    // panel treats it as this open's target, not a leftover.
+    sidebar.setPanel(panelPath(panelTarget, Date.now()));
     sidebar.open({ windowId: currentWindowId, tabId: currentTabId });
     window.close();
   };
@@ -215,63 +222,44 @@ async function init(): Promise<void> {
   }
 }
 
-async function syncSidebarIfOpen(orgnr: string): Promise<void> {
+async function syncOpenPanel(msg: PanelMessage): Promise<void> {
   // The popup runs with activeTab grant on the current tab — it can
-  // read the URL and resolve the orgnr. The sidebar, opened earlier
-  // on a different tab, holds stale data until something tells it
-  // to repaint.
+  // read the URL and resolve the orgnr. A panel open in this window,
+  // opened earlier on a different tab, holds stale data until
+  // something tells it to repaint: this message, which the open
+  // details page picks up and applies in place (a company it already
+  // shows is kept, not reloaded). No setPanel here — that would only
+  // leave a global panel URL behind for some later open; the panel
+  // reads the active tab itself when it next opens.
   //
-  // Two parallel mechanisms:
-  //   1. setPanel updates the sidebar's panel URL so the next open
-  //      (from the View > Sidebars menu) lands on this orgnr.
-  //   2. runtime.sendMessage broadcasts a 'sync' notification that
-  //      the open details page picks up and uses to re-render in
-  //      place — this is what actually repaints the visible sidebar.
-  //      setPanel alone is not enough; Firefox doesn't reliably
-  //      repaint an open sidebar when its panel URL changes.
-  //
-  // Fire-and-forget — popup rendering shouldn't block on this, and
-  // both calls survive the popup closing.
+  // Fire-and-forget — popup rendering shouldn't block on this.
   try {
-    if (!(await sidebar.isOpen())) return;
+    if (!(await sidebar.isOpen(msg.windowId))) return;
   } catch {
     // Sidebar API unavailable / errored — the popup itself still
     // rendered; nothing more to do.
     return;
   }
-  sidebar.setPanel(`details/details.html?orgnr=${orgnr}`);
-  try {
-    await browser.runtime.sendMessage({
-      type: 'sync',
-      orgnr,
-      host: sourceLabel.get(),
-    });
-  } catch {
-    // No listener (sidebar closed) — sendMessage rejects; expected.
-  }
+  await notifyPanel(msg);
 }
 
-async function syncSidebarNoMatch(host: string | undefined): Promise<void> {
-  // Counterpart to syncSidebarIfOpen for the "Ingen av disse" path —
-  // tells an open sidebar that this host has no current pick so it
-  // can clear stale company data instead of keeping the previous
-  // picker / result up. setPanel resets the panel URL so a fresh
-  // open lands on the empty state, not the prior orgnr.
-  try {
-    if (!(await sidebar.isOpen())) return;
-  } catch {
-    return; /* silent — popup still rendered */
-  }
-  sidebar.setPanel(
-    host
-      ? `details/details.html?nomatch=${encodeURIComponent(host)}`
-      : 'details/details.html',
-  );
-  try {
-    await browser.runtime.sendMessage({ type: 'no-match', host });
-  } catch {
-    // No listener (sidebar closed) — expected.
-  }
+function syncSidebarIfOpen(orgnr: string): void {
+  if (currentWindowId === undefined) return;
+  void syncOpenPanel({
+    type: 'sync',
+    windowId: currentWindowId,
+    orgnr,
+    host: sourceLabel.get(),
+    method: currentResolutionMethod ?? 'url',
+  });
+}
+
+function syncSidebarNoMatch(host: string | undefined): void {
+  // Counterpart for the "Ingen av disse" path — tells an open panel
+  // that this host has no current pick so it can clear stale company
+  // data instead of keeping the previous picker / result up.
+  if (currentWindowId === undefined) return;
+  void syncOpenPanel({ type: 'no-match', windowId: currentWindowId, host });
 }
 
 async function loadAndRender(
@@ -291,7 +279,7 @@ async function loadAndRender(
   statusEl.textContent = `Henter ${orgnr}…`;
   setBrregLink(orgnr);
   setDetailsLink();
-  void syncSidebarIfOpen(orgnr);
+  syncSidebarIfOpen(orgnr);
   try {
     // Roller and regnskap are extra API calls but live behind the same
     // 24h session cache, and both feed the quick glance: daglig leder

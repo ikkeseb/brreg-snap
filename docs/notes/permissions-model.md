@@ -25,33 +25,32 @@ focus events; they all need `tabs` or content scripts.
 ## Tab-sync via runtime `tabs` opt-in is the supported path
 
 The sidebar exposes an "Auto-oppdater ved fane-bytte" toggle that
-requests `tabs` at runtime. `background.ts` registers
-`tabs.onActivated`/`onUpdated` unconditionally at top level (see
-§ event-page-wakeup) and broadcasts the same
-`{type:'sync', orgnr, host}` shape the popup uses. Settings live in
-`storage.local` (survives browser restarts); the response cache stays
-on `storage.session` (in-memory).
+requests `tabs` at runtime. With it on, the panel page registers
+`tabs.onActivated`/`onUpdated` for its own window and resolves the
+new tab itself — see sidebar-sync.md § panel-hosted-auto-sync. Nothing
+outside an open panel listens to tabs, so the grant never causes a
+lookup while the panel is closed. Settings live in `storage.local`
+(survives browser restarts); the response cache stays on
+`storage.session` (in-memory).
 
 <!-- SECTION: event-page-wakeup -->
-## Tab listeners must register synchronously at top level
+## Background listeners must register synchronously at top level
 
-The background is a non-persistent event page. For Firefox to wake
-the script for a tab event, the corresponding `addListener` call has
-to run synchronously during module evaluation — not after an awaited
-permission/storage check. Async registration leaves the runtime
-unaware that this script should be dispatched the event, so events
-are silently dropped while the script is idle.
+The background is a non-persistent event page (Firefox) / service
+worker (Chrome). For the runtime to wake the script for an event, the
+corresponding `addListener` call has to run synchronously during
+module evaluation — not after an awaited permission/storage check.
+Async registration leaves the runtime unaware that this script should
+be dispatched the event, so events are silently dropped while the
+script is idle. Today that covers `runtime.onInstalled`/`onStartup`
+and the context-menu `onClicked`.
 
-We register `tabs.onActivated` and `tabs.onUpdated` unconditionally
-and gate inside the handler on an in-memory `autoSyncEnabled` cache
-(refreshed via `permissions.onAdded/onRemoved` and `storage.onChanged`,
-plus a one-time seed on module load). The cache is the hot path; the
-listener body stays a synchronous boolean check after first wake.
-
-Symptom of getting this wrong: auto-sync works only while
+Symptom of getting this wrong: the feature works only while
 about:debugging Inspector is open (the inspector keeps the script
-alive), then breaks after idle. If you see that pattern again, the
-fix is top-level addListener, not more reconciliation.
+alive), then breaks after idle. That is how the old background-hosted
+auto-sync broke once; the tab listeners have since moved into the
+panel, whose document is alive exactly while it's visible, so they
+have no wake-up problem to begin with.
 
 <!-- SECTION: gesture-stack -->
 ## Never await between a user gesture and `permissions.request`
@@ -63,8 +62,8 @@ forespørselen".
 
 Same constraint for `sidebarAction.open` from the context menu.
 That's why `background.ts` menu handler does a sync `deriveSync`
-before `setPanel + open` and only kicks the async resolver into a
-detached promise afterward.
+before `setPanel + open`, and on a miss leaves the async host search
+to the panel (sidebar-sync.md § no-match-broadcast).
 
 <!-- SECTION: iframe-not-a-gesture-surface -->
 ## A button *inside* the sidebar iframe does NOT grant activeTab
