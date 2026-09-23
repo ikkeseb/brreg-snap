@@ -1,3 +1,5 @@
+import { formatAddress } from '../../lib/format.js';
+import { isResigned } from '../../lib/roller.js';
 import type {
   Person,
   Rolle,
@@ -47,7 +49,10 @@ function renderRoleGroup(group: RolleGruppe, onNavigate: Navigate): HTMLElement 
 
 function renderRoleItem(role: Rolle, onNavigate: Navigate): HTMLLIElement {
   const li = document.createElement('li');
-  if (role.fratraadt) li.classList.add('fratraadt');
+  const resigned = isResigned(role);
+  // The class name predates brreg's switch to `avregistrert`; it is
+  // what details.css dims and strikes through.
+  if (resigned) li.classList.add('fratraadt');
 
   const roleLabel =
     role.type.beskrivelse && role.type.beskrivelse !== role.type.kode
@@ -56,21 +61,29 @@ function renderRoleItem(role: Rolle, onNavigate: Navigate): HTMLLIElement {
 
   // Split the row into a muted role label and a strong subject so the eye
   // lands on the name, not the repeated "Styremedlem:" boilerplate. The
-  // subject is either a person (plain strong text) or an enhet (possibly a
-  // drill-in link). A role with neither keeps just the bare label.
+  // subject is a person (plain strong text), an enhet (possibly a
+  // drill-in link) or a bankruptcy trustee (name + postal address, the
+  // creditor's point of contact). A role with none keeps the bare label.
   const person = personName(role.person);
+  const bostyrer = role.bostyrer?.navn?.trim();
   if (person) {
     li.append(roleLabelEl(roleLabel), subjectEl(person));
   } else if (role.enhet) {
     li.append(roleLabelEl(roleLabel), renderEnhetSubject(role.enhet, onNavigate));
+  } else if (bostyrer) {
+    li.append(roleLabelEl(roleLabel), subjectEl(bostyrer));
+    const address = formatAddress(role.bostyrer?.postadresse);
+    if (address) li.appendChild(statusBadge(address));
   } else {
     li.append(roleLabel);
   }
 
-  if (role.fratraadt) li.append(' (fratrådt)');
-  // Status of the subject itself, independent of fratrådt: a deceased
+  if (resigned) li.append(' (avregistrert)');
+  // Status of the subject itself, independent of resignation: a deceased
   // person or a deleted (dissolved) entity is still a live record here.
-  if (role.person?.erDoed) li.appendChild(statusBadge('død'));
+  if (role.person?.erDoed || role.bostyrer?.erDoed) {
+    li.appendChild(statusBadge('død'));
+  }
   if (role.enhet?.erSlettet) li.appendChild(statusBadge('slettet'));
   return li;
 }

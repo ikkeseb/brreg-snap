@@ -30,6 +30,9 @@ export function renderOverview(enhet: Enhet, roller: RollerResponse): void {
   addRow(overviewList, 'Styreleder', findRoleHolder(roller, 'LEDE'));
   addRow(overviewList, 'Revisor', findRoleHolder(roller, 'REVI'));
   addRow(overviewList, 'Regnskapsfører', findRoleHolder(roller, 'REGN'));
+  // Only registered for a company in konkurs — the one contact a
+  // creditor needs, so it's worth a row, not just the Personer tab.
+  addRow(overviewList, 'Bostyrer', findRoleHolder(roller, 'BOBE'));
 }
 
 export function renderContact(enhet: Enhet): void {

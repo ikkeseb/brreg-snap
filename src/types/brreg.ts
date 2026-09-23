@@ -62,10 +62,24 @@ export interface RolleEnhet {
   erSlettet?: boolean;
 }
 
+// The bankruptcy trustee on a BOBE role. Unlike person/enhet it is a
+// flat name string (usually "Adv. <navn>") plus the trustee's postal
+// address — the contact a creditor of a bankrupt company needs.
+export interface Bostyrer {
+  navn?: string;
+  postadresse?: Adresse;
+  erDoed?: boolean;
+}
+
 export interface Rolle {
   type: Kode;
   person?: Person;
   enhet?: RolleEnhet;
+  bostyrer?: Bostyrer;
+  // true once the holder has left the role. Added by brreg 2026-01-04;
+  // it replaced `fratraadt`, which brreg removed on 2026-06-16. Read
+  // both through isResigned() in src/lib/roller.ts.
+  avregistrert?: boolean;
   fratraadt?: boolean;
   rekkefolge?: number;
 }
