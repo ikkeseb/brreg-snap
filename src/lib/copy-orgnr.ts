@@ -31,6 +31,12 @@ export function renderOrgnrCopy(
   container.appendChild(buildOrgnrCopyButton(orgnr));
 }
 
+// One pending feedback reset per button. A second click inside the
+// 1.5 s window re-arms that timer instead of stacking another, and the
+// reset writes back `orgnr` — reading textContent then would capture
+// "Kopiert!" and leave it stuck on the button.
+const resetTimers = new WeakMap<HTMLElement, number>();
+
 async function copyOrgnr(orgnr: string, btn: HTMLElement): Promise<void> {
   // Both outcomes get visible feedback — a silent failure reads as
   // "copied" to the user, who then pastes the wrong thing elsewhere.
@@ -40,11 +46,16 @@ async function copyOrgnr(orgnr: string, btn: HTMLElement): Promise<void> {
   } catch {
     ok = false;
   }
+  window.clearTimeout(resetTimers.get(btn));
+  btn.classList.remove('copied', 'copy-failed');
   btn.classList.add(ok ? 'copied' : 'copy-failed');
-  const original = btn.textContent ?? orgnr;
   btn.textContent = ok ? 'Kopiert!' : 'Kunne ikke kopiere';
-  window.setTimeout(() => {
-    btn.textContent = original;
-    btn.classList.remove('copied', 'copy-failed');
-  }, 1500);
+  resetTimers.set(
+    btn,
+    window.setTimeout(() => {
+      resetTimers.delete(btn);
+      btn.textContent = orgnr;
+      btn.classList.remove('copied', 'copy-failed');
+    }, 1500),
+  );
 }
