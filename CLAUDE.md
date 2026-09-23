@@ -7,18 +7,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Active work is driven by `docs/plans/2026-09-23-plan.md` — read its
 Decisions and Progress first; evidence per item is in
 `docs/plans/2026-09-23-findings.md`. Release state is not restated
-here: it lives in git tags (`v*` = tagged release, `amo-submission-*`
-= what was uploaded to the stores) and GitHub Releases.
+here: it lives in git tags (`v*` = tagged release, `amo-submission-*` /
+`cws-submission-*` = what was uploaded to each store) and GitHub
+Releases.
 
 - `main` is the only long-running branch. Docs-only changes that don't
   affect the `.xpi` may land on `main` directly.
 - Support email everywhere: `sebastian@nuez.no`.
-- Store submission kit: when prepping a store submission, generate a
-  **committed** kit in `docs/submission-kit/<version>/` — one file per
-  destination (amo.md, cws.md) with the EXACT copy-paste text for every
-  store form field plus release notes, topped with a short numbered
-  upload recipe. Source the content from `docs/amo-submission.md`,
-  `docs/cws-submission.md` and `CHANGELOG.md`; those stay canonical.
+- Releasing and store publishing (`pnpm release`, the generated
+  submission kit, `release.yml`, `publish.yml`): `docs/release.md`.
 - Chrome-port history + decision log (D1–D15): `docs/chrome-port.md`
   (historical).
 
@@ -66,6 +63,8 @@ pnpm dev                                   # = dev:firefox (build + web-ext run,
 pnpm dev:chrome                            # build:chrome + web-ext run -t chromium
 pnpm package                               # = package:firefox (.xpi/.zip, maps stripped)
 pnpm package:chrome                        # dist-chrome/ -> CWS-ready .zip (manifest at root)
+pnpm release X.Y.Z [--dry-run]             # bump, date CHANGELOG, verify, render kit (docs/release.md)
+pnpm release X.Y.Z --tag                   # commit + annotated tag vX.Y.Z; prints the push
 ```
 
 `pnpm dev` is the only way to exercise the popup — there is no Vite
