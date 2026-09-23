@@ -192,7 +192,7 @@ describe('formatRelativeTime', () => {
 
 describe('formatAddress', () => {
   function addr(partial: Partial<Adresse>): Adresse {
-    return partial as Adresse;
+    return partial;
   }
 
   it('undefined input -> undefined', () => {

@@ -8,6 +8,7 @@
 // held: the user can revoke it outside the panel (about:addons).
 
 import { decideToggle } from './auto-sync-controller.js';
+import { hasPermission } from './platform/permissions.js';
 
 const TABS: browser.permissions.Permissions = { permissions: ['tabs'] };
 
@@ -152,7 +153,7 @@ export function createAutoSyncToggle(deps: AutoSyncToggleDeps): AutoSyncToggle {
     },
 
     async permissionsRemoved(perms): Promise<void> {
-      if (!perms.permissions?.includes('tabs')) return;
+      if (!hasPermission(perms, 'tabs')) return;
       // Detach before any await so no tab event slips in after the revoke.
       apply(false);
       await deps.setAutoSync(false);

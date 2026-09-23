@@ -1,0 +1,19 @@
+# pnpm settings only (single-package repo, no `packages:` list).
+# Supply-chain hardening for the dev toolchain; every key below exists in
+# pnpm 10.33 (the `packageManager` pin) — pnpm silently ignores unknown keys.
+
+# Don't resolve versions younger than 7 days (minutes). Pairs with the
+# Dependabot cooldown in .github/dependabot.yml.
+minimumReleaseAge: 10080
+
+# Fail the install when a package's trust evidence (trusted publisher /
+# provenance) is weaker than an earlier release of the same package.
+trustPolicy: no-downgrade
+
+# Only direct dependencies may come from git/tarball URLs.
+blockExoticSubdeps: true
+
+# Fail the install when any dependency ships an unreviewed build script.
+# No dependency needs one today; if one appears, decide per package with
+# an `allowBuilds: { <name>: true|false }` map here.
+strictDepBuilds: true

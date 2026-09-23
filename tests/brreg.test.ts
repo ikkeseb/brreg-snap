@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { fakeBrowser } from './helpers/fake-browser.js';
 
 import {
   fetchEnhet,
@@ -20,31 +21,7 @@ import underenheterPage from './fixtures/brreg/underenheter-984661185-page.json'
 type StorageMap = Record<string, unknown>;
 
 function installStorageMock(initial: StorageMap = {}): StorageMap {
-  const store: StorageMap = { ...initial };
-  (globalThis as { browser?: unknown }).browser = {
-    storage: {
-      session: {
-        // null = the whole area, like the real API.
-        get: vi.fn(async (keys: string | string[] | null) => {
-          const list =
-            keys === null ? Object.keys(store) : Array.isArray(keys) ? keys : [keys];
-          const out: StorageMap = {};
-          for (const k of list) {
-            if (k in store) out[k] = store[k];
-          }
-          return out;
-        }),
-        set: vi.fn(async (entries: StorageMap) => {
-          Object.assign(store, entries);
-        }),
-        remove: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          for (const k of list) delete store[k];
-        }),
-      },
-    },
-  };
-  return store;
+  return fakeBrowser({ storage: { session: initial } }).stores.session;
 }
 
 const fetchMock = vi.fn();

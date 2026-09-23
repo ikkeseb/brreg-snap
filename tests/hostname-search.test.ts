@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fakeBrowser } from './helpers/fake-browser.js';
 
 import type { SearchHit } from '../src/types/brreg.js';
 
@@ -21,29 +22,7 @@ const searchMock = vi.mocked(searchEnheterWithParams);
 type StorageMap = Record<string, unknown>;
 
 function installStorageMock(initial: StorageMap = {}): StorageMap {
-  const store: StorageMap = { ...initial };
-  (globalThis as { browser?: unknown }).browser = {
-    storage: {
-      session: {
-        get: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          const out: StorageMap = {};
-          for (const k of list) {
-            if (k in store) out[k] = store[k];
-          }
-          return out;
-        }),
-        set: vi.fn(async (entries: StorageMap) => {
-          Object.assign(store, entries);
-        }),
-        remove: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          for (const k of list) delete store[k];
-        }),
-      },
-    },
-  };
-  return store;
+  return fakeBrowser({ storage: { session: initial } }).stores.session;
 }
 
 function hit(
@@ -56,7 +35,7 @@ function hit(
     organisasjonsnummer,
     organisasjonsform: { kode: 'AS' },
     ...extra,
-  } as SearchHit;
+  };
 }
 
 describe('queryFromHostname', () => {
@@ -163,8 +142,8 @@ describe('searchByHostnameDetailed', () => {
     const result = await searchByHostnameDetailed('eksfin.no');
     const q3Call = searchMock.mock.calls.find(
       (call) =>
-        (call[0] as URLSearchParams).has('navn') &&
-        !(call[0] as URLSearchParams).has('organisasjonsform'),
+        call[0].has('navn') &&
+        !call[0].has('organisasjonsform'),
     );
     expect(q3Call).toBeDefined();
     expect(result).toBeDefined();
@@ -197,7 +176,7 @@ describe('brreg queries', () => {
   });
 
   const calls = () =>
-    searchMock.mock.calls.map((c) => Object.fromEntries(c[0] as URLSearchParams));
+    searchMock.mock.calls.map((c) => Object.fromEntries(c[0]));
 
   it('sends one hjemmeside query on the registrable domain, sorted by headcount', async () => {
     // Brreg matches hjemmeside as a substring, so the www. variant was a

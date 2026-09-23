@@ -1,20 +1,47 @@
 version: 2
 updates:
   # Dev-only dependency tree (the shipped bundle has zero runtime
-  # deps — CLAUDE.md § Dependencies). Grouped so updates arrive as one
-  # reviewable PR per week instead of a trickle.
+  # deps — CLAUDE.md § Dependencies). Minor + patch updates arrive as
+  # one weekly PR that should stay green; majors arrive per stack (or
+  # one PR per dependency), so one breaking major can't block the rest.
   - package-ecosystem: npm
     directory: '/'
     schedule:
       interval: weekly
+    # Pairs with minimumReleaseAge in pnpm-workspace.yaml.
+    cooldown:
+      default-days: 7
+      semver-major-days: 14
     groups:
-      dev-dependencies:
+      dev-minor-patch:
         patterns: ['*']
+        update-types: [minor, patch]
+      lint-stack:
+        patterns:
+          - eslint
+          - '@eslint/*'
+          - typescript-eslint
+          - '@typescript-eslint/*'
+          - typescript
+        update-types: [major]
+      vite-stack:
+        patterns:
+          - vite
+          - vitest
+          - '@vitest/*'
+        update-types: [major]
+    ignore:
+      # typescript-eslint doesn't support TypeScript 7 yet (its peer range
+      # stops below 6.1); lift this once it does.
+      - dependency-name: typescript
+        versions: ['>=7']
 
   - package-ecosystem: github-actions
     directory: '/'
     schedule:
-      interval: weekly
+      interval: monthly
+    cooldown:
+      default-days: 7
     groups:
       actions:
         patterns: ['*']

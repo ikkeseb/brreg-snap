@@ -10,7 +10,7 @@ const underenheterBody = $('underenheter-body');
 // as the registry fact "none registered".
 export function renderUnderenheter(page: UnderenheterPage | undefined): void {
   underenheterSection.hidden = false;
-  underenheterBody.innerHTML = '';
+  underenheterBody.replaceChildren();
 
   if (!page) {
     underenheterBody.appendChild(
@@ -36,7 +36,13 @@ export function renderUnderenheter(page: UnderenheterPage | undefined): void {
   const table = document.createElement('table');
   table.className = 'underenheter';
   const thead = document.createElement('thead');
-  thead.innerHTML = '<tr><th>Navn</th><th>Org.nr</th><th>Sted</th></tr>';
+  const headRow = document.createElement('tr');
+  for (const label of ['Navn', 'Org.nr', 'Sted']) {
+    const th = document.createElement('th');
+    th.textContent = label;
+    headRow.appendChild(th);
+  }
+  thead.appendChild(headRow);
   table.appendChild(thead);
 
   const tbody = document.createElement('tbody');

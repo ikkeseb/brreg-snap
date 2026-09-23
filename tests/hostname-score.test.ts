@@ -16,7 +16,7 @@ function cand(over: Partial<SearchHit> & { navn: string }): SearchHit {
     organisasjonsnummer: '999999999',
     organisasjonsform: { kode: 'AS' },
     ...over,
-  } as SearchHit;
+  };
 }
 
 describe('foldNordic', () => {

@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { fakeBrowser } from './helpers/fake-browser.js';
 import { searchByHostnameDetailed } from '../src/lib/hostname-search.js';
 
 type Fixture = Record<string, unknown>;
@@ -48,18 +49,7 @@ async function resolve(host: string) {
 
 beforeEach(() => {
   unexpected = [];
-  const store: Record<string, unknown> = {};
-  vi.stubGlobal('browser', {
-    storage: {
-      session: {
-        get: async (key: string) => (key in store ? { [key]: store[key] } : {}),
-        set: async (entries: Record<string, unknown>) => {
-          Object.assign(store, entries);
-        },
-        remove: async () => {},
-      },
-    },
-  });
+  fakeBrowser();
 });
 
 afterEach(() => {

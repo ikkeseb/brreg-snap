@@ -19,7 +19,7 @@ export async function renderParent(
     return;
   }
   parentSection.hidden = false;
-  parentBody.innerHTML = '';
+  parentBody.replaceChildren();
   // Show the orgnr immediately; upgrade to the name once it resolves.
   parentBody.appendChild(
     makeNavLink(parentOrgnr, `Org.nr ${parentOrgnr}`, onNavigate),
@@ -28,7 +28,7 @@ export async function renderParent(
   try {
     const parent = await fetchEnhet(parentOrgnr);
     if (isStale?.()) return;
-    parentBody.innerHTML = '';
+    parentBody.replaceChildren();
     parentBody.appendChild(
       makeNavLink(parentOrgnr, `${parent.navn} (${parentOrgnr})`, onNavigate),
     );

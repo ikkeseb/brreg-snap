@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { fakeBrowser } from './helpers/fake-browser.js';
 
 import {
   DeletedAvdelingError,
@@ -23,27 +24,7 @@ const REGNSKAP = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 type StorageMap = Record<string, unknown>;
 
 function installStorage(initial: StorageMap = {}): StorageMap {
-  const store: StorageMap = { ...initial };
-  (globalThis as { browser?: unknown }).browser = {
-    storage: {
-      session: {
-        get: vi.fn(async (keys: string | string[] | null) => {
-          const list =
-            keys === null ? Object.keys(store) : Array.isArray(keys) ? keys : [keys];
-          const out: StorageMap = {};
-          for (const k of list) if (k in store) out[k] = store[k];
-          return out;
-        }),
-        set: vi.fn(async (entries: StorageMap) => {
-          Object.assign(store, entries);
-        }),
-        remove: vi.fn(async (keys: string | string[]) => {
-          for (const k of Array.isArray(keys) ? keys : [keys]) delete store[k];
-        }),
-      },
-    },
-  };
-  return store;
+  return fakeBrowser({ storage: { session: initial } }).stores.session;
 }
 
 function json(body: unknown, status = 200): Response {
