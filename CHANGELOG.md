@@ -4,6 +4,80 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
+## [1.3.1] — 2026-09-23
+
+Correctness and privacy patch. brreg's open API changed after 1.3.0
+shipped, and several facts on screen had quietly become wrong.
+
+### Fixed — wrong data
+
+- Board members who have left were shown as current: brreg now marks
+  them `avregistrert` instead of `fratraadt`. They are shown as
+  resigned again and never picked as daglig leder or styreleder.
+- Accounts filed in USD or EUR (Equinor, Aker BP, Mowi …) were
+  labelled «kr». Amounts now carry the filing's currency.
+- Banks and insurers got «Prøv igjen senere» in Nøkkeltall, which could
+  never succeed — brreg's open API doesn't serve their special
+  accounts. The tab now says so, and the verdict's Regnskap cell reads
+  the latest filed year from the company record, so it is back for
+  banks too.
+- «Ansatte: Ingen» for companies with 1–4 employees (brreg only flags
+  "has employees" below five). Now «1–4».
+- «Alder» counted from the register's 1995 start date for every older
+  company; it now uses the founding date (Equinor: stiftet 1972).
+- Underenheter were cut at 100 with a wrong count; now «Viser 100 av
+  133». A failed roller/underenheter fetch said «Ingen registrerte»;
+  it now says it couldn't be fetched.
+- Konkurs, avvikling and slettet show their date where brreg has one;
+  a deleted entity no longer gets a guessed employee count; the
+  bostyrer's name shows for bankruptcies.
+- Confident wrong matches: sbanken.no → Tidsbanken, obos.no → OBOS
+  Felleskost (now OBOS BBL), medium.com / bbc.* → unrelated Norwegian
+  namesakes. An automatic match now needs the company's registered
+  website to match the site; name-only guesses go to the picker. A
+  site's own company under avvikling or konkurs is no longer hidden.
+
+### Privacy
+
+- Auto-sync (opt-in) looked up tabs even with the sidebar / side panel
+  closed. The open panel now owns the tab listeners, so a closed panel
+  looks nothing up, and each panel follows only its own window.
+- Turning auto-sync on first says what is sent and to whom, before the
+  browser asks for tab access.
+- Only the site's registrable domain is sent (dnb.no, not
+  nettbank.dnb.no). IP addresses and reserved local names (localhost,
+  .local, .lokal, .internal, .intern, .lan, .home.arpa, .priv …) are
+  never sent.
+- [firefox] The add-on now declares `browsingActivity` data collection:
+  the visited site's domain goes to data.brreg.no, never to the
+  developer. Earlier versions declared "none", which was wrong. Firefox
+  140+ asks existing users to accept this once when updating.
+- PRIVACY.md and both store listings rewritten against the code.
+
+### Added
+
+- Typing or pasting an orgnr in search (also «Org.nr. 984 851 006» or
+  «NO 984 851 006 MVA») opens the company. A branch (underenhet) orgnr
+  opens its parent with an «Avdeling» note — also when the orgnr comes
+  from the page itself.
+- The sidebar footer says when the data was fetched, with «Oppdater».
+- The popup shows «Omsetning» for the latest year.
+- Brønnøysundregistrene / NLOD 2.0 attribution in both footers.
+
+### Changed
+
+- Escape in the picker no longer records «Ingen av disse».
+- Narrow side panels stack the Oversikt rows; the underenheter table
+  scrolls inside its card instead of the whole panel.
+- The orgnr copy button can no longer get stuck on «Kopiert!».
+
+### Internal
+
+- Store uploads come from the CI release artifacts only; LF line
+  endings are enforced, and `package:source` archives the tag.
+- Session cache: best-effort writes, expiry sweep, per-entry TTL.
+- Anonymised, live-shaped fixtures for every fixed case (571 tests).
+
 ## [1.3.0] — 2026-07-05
 
 Frontend overhaul release — the first store release since 1.1.0
