@@ -10,6 +10,7 @@ import {
 import { describeLoadError } from '../src/lib/ui/error-message.js';
 import enhetDnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import enhetEquinor from './fixtures/brreg/enhet-923609016-equinor.json';
+import feedEquinor from './fixtures/brreg/oppdateringer-923609016-equinor.json';
 import regnskapDnb500 from './fixtures/brreg/regnskap-984851006-500.json';
 import regnskapEquinor from './fixtures/brreg/regnskap-923609016-usd.json';
 import rollerEquinor from './fixtures/brreg/roller-923609016-equinor.json';
@@ -189,6 +190,35 @@ describe('loadCompany', () => {
     expect(company.roller).toBeUndefined();
     expect(company.regnskap).toBeUndefined();
     expect(company.underenheter).toBeUndefined();
+  });
+
+  it('fetches the change feed only when asked, since the start of the window', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-09-24T12:00:00.000Z'));
+    const feedUrl =
+      `${API}/oppdateringer/enheter?organisasjonsnummer=923609016` +
+      '&dato=2026-03-25T12%3A00%3A00.000Z&includeChanges=true&size=100&sort=id%2CDESC';
+    const { urls } = routeBrreg({
+      [`${API}/enheter/923609016`]: () => json(enhetEquinor),
+      [feedUrl]: () => json(feedEquinor),
+    });
+    const without = await loadCompany('923609016');
+    expect(without.endringer).toBeUndefined();
+    expect(urls().some((u) => u.includes('oppdateringer'))).toBe(false);
+
+    const withFeed = await loadCompany('923609016', { endringer: true });
+    expect(urls()).toContain(feedUrl);
+    expect(withFeed.endringer).toHaveLength(8);
+  });
+
+  it('maps a failed change feed to undefined, not to «no changes»', async () => {
+    routeBrreg({
+      [`${API}/enheter/923609016`]: () => json(enhetEquinor),
+    });
+    // Unrouted: the feed URL answers 404, which the fetcher rejects.
+    const company = await loadCompany('923609016', { endringer: true });
+    expect(company.enhet.navn).toBe('EQUINOR ASA');
+    expect(company.endringer).toBeUndefined();
   });
 
   it('an underenhet orgnr loads the parent and the parent’s roller/regnskap', async () => {

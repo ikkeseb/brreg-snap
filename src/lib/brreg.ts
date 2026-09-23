@@ -9,14 +9,14 @@ import type {
   UnderenheterPage,
 } from '../types/brreg.js';
 
-const API = 'https://data.brreg.no/enhetsregisteret/api';
+export const API = 'https://data.brreg.no/enhetsregisteret/api';
 const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 // Hard cap per request so a hung connection fails fast instead of
 // leaving the UI in a spinner. AbortSignal.timeout() is supported in
 // Firefox 100+ / Chrome 103+ — well below our minimum targets. An
 // abort rejects the fetch, which counts as a failure like any other
 // network error (no retry logic — callers decide what failure means).
-const FETCH_TIMEOUT_MS = 8000;
+export const FETCH_TIMEOUT_MS = 8000;
 
 // A regnskap 500 is stable for banks and insurers, but it is also what
 // a genuine brreg outage looks like — so it is cached for hours, not a
@@ -31,6 +31,8 @@ const CACHE_PREFIXES = [
   'roller',
   'underenheter',
   'regnskap',
+  // The change feed (src/lib/brreg-endringer.ts).
+  'endringer',
 ] as const;
 
 function isEnhet(value: unknown): value is Enhet {

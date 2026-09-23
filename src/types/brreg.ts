@@ -230,3 +230,23 @@ export interface RegnskapResponse {
   // The plan code ('BANK', 'FORS', …) when the 500 body names it.
   unsupportedPlan?: string;
 }
+
+// One JSON-Patch operation from the change feed. The fetcher keeps only
+// op and path: the values (addresses, purposes, …) aren't needed to say
+// WHAT changed, and leaving them out keeps the cache small.
+export interface JsonPatchOp {
+  op: string;
+  // "/forretningsadresse/postnummer", "/navn", "/antallAnsatte", …
+  path: string;
+}
+
+// One event from /oppdateringer/enheter?includeChanges=true.
+export interface EnhetOppdatering {
+  oppdateringsid?: number;
+  // When the change was published in the API (ISO timestamp, UTC).
+  dato: string;
+  // "Endring", "Ny", "Sletting", "Fjernet", "Ukjent". Only Endring
+  // events carry `endringer`.
+  endringstype?: string;
+  endringer?: JsonPatchOp[];
+}
