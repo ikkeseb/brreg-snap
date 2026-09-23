@@ -42,7 +42,7 @@ This project uses **pnpm** (pinned via `packageManager` in
 `package-lock.json` next to `pnpm-lock.yaml` and drift the dep tree.
 
 ```bash
-pnpm typecheck                             # tsc --noEmit
+pnpm typecheck                             # tsc: src, tests/, tsconfig.node.json projects
 pnpm lint:ts                               # ESLint on src/**/*.ts
 pnpm lint:ext                              # web-ext lint on dist-firefox/ (run build first)
 pnpm test                                  # vitest run
@@ -50,8 +50,8 @@ pnpm test:watch                            # vitest interactive
 pnpm exec vitest run tests/orgnr.test.ts   # single file
 pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # single test by name
 pnpm build                                 # = build:firefox (default target)
-pnpm build:firefox                         # BROWSER=firefox -> dist-firefox/
-pnpm build:chrome                          # BROWSER=chrome   -> dist-chrome/
+pnpm build:firefox                         # vite build --mode firefox -> dist-firefox/
+pnpm build:chrome                          # vite build --mode chrome   -> dist-chrome/
 pnpm watch                                 # vite build --watch (firefox target)
 pnpm dev                                   # = dev:firefox (build + web-ext run, FF profile)
 pnpm dev:chrome                            # build:chrome + web-ext run -t chromium
@@ -66,7 +66,7 @@ parity for the side panel; load `dist-chrome/` unpacked via
 
 ### Dual-browser build (chrome-port)
 
-One source tree, two targets via `BROWSER=firefox|chrome`. Outputs go
+One source tree, two targets via `vite build --mode firefox|chrome`. Outputs go
 to `dist-firefox/` and `dist-chrome/`; the matching
 `public/manifest.<browser>.json` is copied to `manifest.json` by the
 `copy-static-assets` plugin in `vite.config.ts` (`publicDir` is
