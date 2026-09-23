@@ -56,6 +56,7 @@ pnpm lint:ext                              # web-ext lint on dist-firefox/; fail
 pnpm verify:dist                           # dist manifests, file set, no eval (run both builds first)
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
+pnpm test:live                             # live brreg canary: API contracts + resolver corpus (network; not in verify)
 pnpm exec vitest run tests/orgnr.test.ts   # single file
 pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # single test by name
 pnpm build                                 # = build:firefox (default target)
