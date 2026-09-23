@@ -321,6 +321,24 @@ describe('follower — a late result never paints over a newer one', () => {
     expect(shown).toEqual([companyView(EQUINOR)]);
   });
 
+  it('a sync that keeps the company on screen still beats an older tab event', async () => {
+    const slowResolve = deferred<TabContext>();
+    const { follower, shown, kept } = makeFollower({
+      resolveTab: vi.fn(() => slowResolve.promise),
+    });
+    follower.follow(companyView(DNB, 'www.dnb.no'));
+
+    const following = follower.followTab(1, { url: 'https://www.equinor.com/' });
+    // Nothing is painted for a kept view, so only follow()'s own claim
+    // makes the tab event above stale.
+    follower.follow(companyView(DNB, 'www.dnb.no'));
+    slowResolve.resolve({ orgnr: EQUINOR, host: 'www.equinor.com', method: 'url' });
+    await following;
+
+    expect(shown).toEqual([companyView(DNB, 'www.dnb.no')]);
+    expect(kept).toEqual([companyView(DNB, 'www.dnb.no')]);
+  });
+
   it('a tab that closed before it could be read still clears a stale load', async () => {
     const { follower, shown } = makeFollower({
       getTab: vi.fn(() => Promise.reject(new Error('No tab with id: 9'))),

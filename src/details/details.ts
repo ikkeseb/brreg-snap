@@ -144,22 +144,14 @@ const manualSearch = attachManualSearch({
 });
 
 // «Feil bedrift?» awaits a storage write and a fresh host search
-// before it paints. getContext runs synchronously on the click, so the
-// flow claims its load token there; a tab event or sync that arrives
-// during the search then wins over this flow's late picker.
-let rejectRun: LoadToken | undefined;
+// before it paints, so it claims a load token on the click: a tab
+// event or sync that arrives meanwhile wins over its late picker.
 setupRejectChoice({
   buttonEl: rejectChoiceBtn,
-  getContext: () => {
-    rejectRun = loads.begin();
-    return { host: sourceLabel.get(), orgnr: currentOrgnr };
-  },
-  showPicker: (host, candidates) => {
-    if (!rejectRun?.isStale()) showPicker(host, candidates);
-  },
-  showEmptyState: (host) => {
-    if (!rejectRun?.isStale()) showEmptyState(host);
-  },
+  getContext: () => ({ host: sourceLabel.get(), orgnr: currentOrgnr }),
+  claim: () => loads.begin(),
+  showPicker,
+  showEmptyState,
 });
 
 retryLoadBtn.addEventListener('click', () => {

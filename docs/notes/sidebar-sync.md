@@ -111,10 +111,13 @@ disse» so an open panel clears the stale company.
 `details.ts` has one `createLoadSequence()` (`panel-follow.ts`). The
 painters (`loadOrgnr`, `showPicker`, `showEmptyState`) claim a token
 themselves; flows that await before painting — startup, a tab event,
-a no-match probe, the «Feil bedrift?» reject flow — claim one when
-they start and return after any await once it's stale. Arrival order,
+a no-match probe, the «Feil bedrift?» reject flow (`claim` in
+`setupRejectChoice`) — claim one when they start and return after any
+await once it's stale. A sync message claims one even when it keeps
+the view, so an older tab event can't paint over it. Arrival order,
 not network order, decides what ends up on screen. There are no manual
-bumps to forget. A picker choice is applied only while that picker is
+bumps to forget. Races pinned in `tests/panel-follow.test.ts` and
+`tests/picker.test.ts`. A picker choice is applied only while that picker is
 still on screen. `renderParent`'s late name upgrade checks that its
 load's result is still the one shown (`shownLoad`), not the token, so
 a sync that keeps the same company doesn't cut it off.

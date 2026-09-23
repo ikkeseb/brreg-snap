@@ -18,6 +18,36 @@ vi.mock('../src/lib/hostname-search.js', () => ({
 
 const candidates: SearchHit[] = [enhetDnb, enhetEquinor];
 
+async function setupReject() {
+  installFakeDom();
+  const { setupRejectChoice } = await import('../src/lib/ui/picker.js');
+  const { createLoadSequence } = await import('../src/lib/panel-follow.js');
+  const { addRejectedChoice, searchByHostnameDetailed } = await import(
+    '../src/lib/hostname-search.js'
+  );
+  const buttonEl = new FakeElement('button');
+  const loads = createLoadSequence();
+  const showPicker = vi.fn();
+  const showEmptyState = vi.fn();
+  setupRejectChoice({
+    buttonEl: buttonEl as unknown as HTMLButtonElement,
+    getContext: () => ({ host: 'dnb.no', orgnr: enhetDnb.organisasjonsnummer }),
+    claim: () => loads.begin(),
+    showPicker,
+    showEmptyState,
+  });
+  vi.mocked(addRejectedChoice).mockReset().mockResolvedValue(undefined);
+  vi.mocked(searchByHostnameDetailed).mockReset();
+  return {
+    buttonEl,
+    loads,
+    showPicker,
+    showEmptyState,
+    addRejectedChoice: vi.mocked(addRejectedChoice),
+    search: vi.mocked(searchByHostnameDetailed),
+  };
+}
+
 async function setup() {
   const { document } = installFakeDom();
   const { createPicker } = await import('../src/lib/ui/picker.js');
@@ -81,5 +111,44 @@ describe('picker keyboard', () => {
       expect(onChoose).toHaveBeenCalledWith('dnb.no', '923609016'),
     );
     expect(setPickerChoice).toHaveBeenCalledWith('dnb.no', '923609016');
+  });
+});
+
+describe('«Feil bedrift?» reject flow', () => {
+  it('records the rejection and reopens the picker over what is left', async () => {
+    const { buttonEl, showPicker, addRejectedChoice, search } = await setupReject();
+    search.mockResolvedValue({
+      band: 'auto',
+      candidates: [enhetEquinor],
+      choice: enhetEquinor.organisasjonsnummer,
+      complete: true,
+    });
+    buttonEl.click();
+    await vi.waitFor(() =>
+      expect(showPicker).toHaveBeenCalledWith('dnb.no', [enhetEquinor]),
+    );
+    expect(addRejectedChoice).toHaveBeenCalledWith(
+      'dnb.no',
+      enhetDnb.organisasjonsnummer,
+    );
+  });
+
+  it('a flow that starts during the search wins over the late picker', async () => {
+    const { buttonEl, loads, showPicker, showEmptyState, search } =
+      await setupReject();
+    let answer!: (value: { band: 'none'; candidates: SearchHit[]; complete: boolean }) => void;
+    search.mockReturnValue(
+      new Promise((resolve) => {
+        answer = resolve;
+      }),
+    );
+    buttonEl.click();
+    await vi.waitFor(() => expect(search).toHaveBeenCalled());
+    loads.begin(); // e.g. a tab event or a sync message
+    answer({ band: 'none', candidates: [], complete: true });
+    await new Promise<void>((r) => setTimeout(r, 0));
+    expect(showPicker).not.toHaveBeenCalled();
+    expect(showEmptyState).not.toHaveBeenCalled();
+    expect(buttonEl.disabled).toBe(false);
   });
 });

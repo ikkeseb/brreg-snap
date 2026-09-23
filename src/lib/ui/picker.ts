@@ -1,8 +1,8 @@
 // Shared picker UI ("Vi fant flere mulige treff…") for the popup and
 // the sidebar: candidate list rendering, the "Ingen av disse" button,
 // the digit-shortcut keydown handler, and the "Feil bedrift?" reject
-// flow. Surface-specific side effects (URL params, loadRunId bumps,
-// sidebar broadcasts) stay in the callers via callbacks.
+// flow. Surface-specific side effects (URL params, load tokens, panel
+// messages) stay in the callers via callbacks.
 
 import {
   addRejectedChoice,
@@ -133,6 +133,11 @@ export interface RejectChoiceOptions {
   buttonEl: HTMLButtonElement;
   // Current host + orgnr at click time. Either missing → no-op.
   getContext: () => { host?: string; orgnr?: string };
+  // The panel's load token (panel-follow.ts), claimed on the click. A
+  // tab event or sync that starts during the write and the search then
+  // wins over this flow's late picker. The popup has nothing else that
+  // paints meanwhile and passes none.
+  claim?: () => { isStale(): boolean };
   showPicker: (host: string, candidates: SearchHit[]) => void;
   showEmptyState: (host: string) => void;
 }
@@ -146,10 +151,14 @@ export function setupRejectChoice(opts: RejectChoiceOptions): void {
   async function handle(): Promise<void> {
     const { host, orgnr } = opts.getContext();
     if (!host || !orgnr) return;
+    const run = opts.claim?.();
     buttonEl.disabled = true;
     try {
+      // The rejection is stored either way; only the paint is dropped.
       await addRejectedChoice(host, orgnr);
+      if (run?.isStale()) return;
       const detailed = await searchByHostnameDetailed(host);
+      if (run?.isStale()) return;
       if (detailed && detailed.candidates.length > 0) {
         // Always show picker (even if a single candidate now wins
         // band='auto') — the user just expressed doubt; let them confirm.
