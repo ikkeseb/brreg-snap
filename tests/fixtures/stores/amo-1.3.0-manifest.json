@@ -1,0 +1,61 @@
+{
+  "manifest_version": 3,
+  "name": "brreg-snap",
+  "version": "1.3.0",
+  "description": "Sl\u00e5 opp norske bedrifter i Br\u00f8nn\u00f8ysundregistrene med ett klikk.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "brreg-snap@ikkeseb.github.io",
+      "strict_min_version": "115.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "action": {
+    "default_title": "brreg-snap",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png",
+      "48": "icons/icon-48.png"
+    }
+  },
+  "sidebar_action": {
+    "default_title": "brreg-snap",
+    "default_panel": "details/details.html",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "32": "icons/icon-32.png"
+    },
+    "open_at_install": false
+  },
+  "icons": {
+    "16": "icons/icon-16.png",
+    "32": "icons/icon-32.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
+  "permissions": [
+    "activeTab",
+    "storage",
+    "menus"
+  ],
+  "optional_permissions": [
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://data.brreg.no/*"
+  ],
+  "background": {
+    "scripts": [
+      "background/background.js"
+    ],
+    "type": "module"
+  },
+  "content_security_policy": {
+    "extension_pages": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'self'; connect-src https://data.brreg.no; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  }
+}

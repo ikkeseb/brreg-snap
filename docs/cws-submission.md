@@ -4,6 +4,10 @@ Everything needed to publish the Chrome build of brreg-snap to the
 Chrome Web Store (CWS). Mirrors `docs/amo-submission.md` for Firefox.
 Listing: <https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokhakeijmbafhdmli>.
 
+<!-- SECTION: item-id -->
+CWS item id (public; `scripts/store-status.mjs` reads it from here):
+`mccggmiialopdaaokhakeijmbafhdmli`
+
 ## 0. Account
 
 - Developer account registered (one-time USD $5 fee); two-step

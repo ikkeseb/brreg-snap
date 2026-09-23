@@ -14,6 +14,7 @@ const nodeGlobals = {
   setTimeout: 'readonly',
   URLSearchParams: 'readonly',
   clearTimeout: 'readonly',
+  AbortSignal: 'readonly',
 };
 
 export default defineConfig(
