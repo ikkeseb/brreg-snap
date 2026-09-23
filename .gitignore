@@ -16,6 +16,8 @@ Thumbs.db
 .claude/
 
 coverage/
+test-results/
+playwright-report/
 .vitest-cache/
 
 .env
