@@ -1,0 +1,88 @@
+{
+  "organisasjonsnummer": "999999999",
+  "navn": "OLA NORDMANN AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+      }
+    }
+  },
+  "historiskeNavn": [],
+  "postadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "6402",
+    "poststed": "MOLDE",
+    "adresse": [
+      "Postboks 1"
+    ],
+    "kommune": "MOLDE",
+    "kommunenummer": "1506"
+  },
+  "registreringsdatoEnhetsregisteret": "1995-02-19",
+  "registrertIMvaregisteret": true,
+  "naeringskode1": {
+    "kode": "47.770",
+    "beskrivelse": "Detaljhandel med ur, klokker og smykker"
+  },
+  "harRegistrertAntallAnsatte": true,
+  "registreringsdatoMerverdiavgiftsregisteret": "1977-01-01",
+  "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1995-02-19",
+  "registreringsdatoAntallAnsatteEnhetsregisteret": "2017-02-14",
+  "registreringsdatoAntallAnsatteNAVAaregisteret": "2017-02-10",
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "6429",
+    "poststed": "MOLDE",
+    "adresse": [
+      "Eksempelveien 1"
+    ],
+    "kommune": "MOLDE",
+    "kommunenummer": "1506"
+  },
+  "stiftelsesdato": "1966-12-05",
+  "institusjonellSektorkode": {
+    "kode": "2100",
+    "beskrivelse": "Private aksjeselskaper mv."
+  },
+  "registrertIForetaksregisteret": true,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2025",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "maalform": "Bokmål",
+  "vedtektsdato": "2005-11-25",
+  "vedtektsfestetFormaal": [
+    "Gullsmed- og handelsvirksomhet og annen virksomhet",
+    "som naturlig hører inn under dette."
+  ],
+  "aktivitet": [
+    "Gullsmed- og handelsvirksomhet og annen virksomhet",
+    "som naturlig hører inn under dette."
+  ],
+  "registreringsdatoForetaksregisteret": "1990-03-13",
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "fravalgRevisjonDato": "2018-01-08",
+  "fravalgRevisjonBeslutningsDato": "2017-12-18",
+  "erIKonsern": false,
+  "kapital": {
+    "belop": 500000,
+    "antallAksjer": 200,
+    "type": "Aksjekapital",
+    "valuta": "NOK",
+    "innfortDato": "2006-01-07"
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/999999999"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

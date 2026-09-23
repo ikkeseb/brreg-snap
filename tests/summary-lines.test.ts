@@ -1,7 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { avdelingNote, revenueLine } from '../src/lib/ui/summary-lines.js';
-import type { Regnskap, RegnskapResponse } from '../src/types/brreg.js';
+import {
+  ansatteLine,
+  avdelingNote,
+  revenueLine,
+} from '../src/lib/ui/summary-lines.js';
+import type { Enhet, Regnskap, RegnskapResponse } from '../src/types/brreg.js';
+import equinorEnhet from './fixtures/brreg/enhet-923609016-equinor.json';
+import konkursEnhet from './fixtures/brreg/enhet-915330193-konkurs.json';
+import slettetEnhet from './fixtures/brreg/enhet-989566733-slettet.json';
+import smallEmployer from './fixtures/brreg/enhet-999999999-ansatte-1-4.json';
 import regnskapEquinor from './fixtures/brreg/regnskap-923609016-usd.json';
 import regnskapMowi from './fixtures/brreg/regnskap-964118191-eur.json';
 import underenhetAlta from './fixtures/brreg/underenhet-973160834.json';
@@ -46,6 +54,30 @@ describe('revenueLine (popup «Omsetning»)', () => {
     const [filing] = items(regnskapEquinor);
     const bare: Regnskap = { ...filing!, resultatregnskapResultat: {} };
     expect(revenueLine({ items: [bare] })).toBeUndefined();
+  });
+});
+
+describe('ansatteLine (verdict cell and Oversikt «Antall ansatte»)', () => {
+  it('formats a registered count', () => {
+    expect(ansatteLine(equinorEnhet as Enhet)).toBe(
+      equinorEnhet.antallAnsatte.toLocaleString('nb-NO'),
+    );
+  });
+
+  it('reads a flagged employer without a count as 1–4, not none', () => {
+    expect(ansatteLine(smallEmployer as Enhet)).toBe('1–4');
+  });
+
+  it('says «Ingen» only when the register does', () => {
+    expect(ansatteLine(konkursEnhet as Enhet)).toBe('Ingen'); // flag false
+    const zero: Enhet = { organisasjonsnummer: '923609016', navn: 'X', antallAnsatte: 0 };
+    expect(ansatteLine(zero)).toBe('Ingen');
+  });
+
+  it('is omitted when the payload says nothing (deleted entity)', () => {
+    expect(ansatteLine(slettetEnhet as Enhet)).toBeUndefined();
+    const silent: Enhet = { organisasjonsnummer: '923609016', navn: 'X' };
+    expect(ansatteLine(silent)).toBeUndefined();
   });
 });
 

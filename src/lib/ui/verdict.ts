@@ -5,7 +5,7 @@
 //   STATUS    primary status (Aktiv / Konkurs / Slettet / …), with its
 //             date or reason when brreg has one
 //   ALDER     years since founding (stiftelsesdato), else registration
-//   ANSATTE   registered employee count
+//   ANSATTE   registered employee count (brreg gives «1–4» as a flag)
 //   REGNSKAP  latest filed year (Enhet.sisteInnsendteAarsregnskap,
 //             topped up by the regnskap response)
 //
@@ -14,9 +14,10 @@
 // never guessed — a failed regnskap fetch must not render as "not
 // filed".
 
-import { formatCount, formatDateNumeric, parseIsoDate } from '../format.js';
+import { formatDateNumeric, parseIsoDate } from '../format.js';
 import { sortRegnskapDesc } from '../regnskap.js';
 import { primaryStatusFlag, type FlagSpec } from './flags.js';
+import { ansatteLine } from './summary-lines.js';
 import type { Enhet, RegnskapResponse } from '../../types/brreg.js';
 
 export type VerdictTone = 'ok' | 'warn' | 'danger' | 'neutral';
@@ -126,31 +127,20 @@ function alderSignal(enhet: Enhet, now: Date): VerdictSignal | undefined {
   };
 }
 
+// Size is stated, never judged: no employees is normal for holdings and
+// dormant entities. «Ingen» and «1–4» carry «registrert» because they
+// come from the register's yes/no flag, not from a count.
 function ansatteSignal(enhet: Enhet): VerdictSignal | undefined {
-  const count = enhet.antallAnsatte;
-  if (typeof count !== 'number' || count <= 0) {
-    // A SlettetEnhet carries no employee data at all, so "Ingen" would
-    // be a guess — omit. Only say "Ingen" when the register does.
-    if (enhet.slettedato) return undefined;
-    if (count === undefined && enhet.harRegistrertAntallAnsatte === undefined) {
-      return undefined;
-    }
-    // Zero employees is normal for holdings and dormant entities —
-    // stated, not judged.
-    return {
-      key: 'ansatte',
-      label: 'Ansatte',
-      value: 'Ingen',
-      detail: 'registrert',
-      tone: 'neutral',
-    };
-  }
-  return {
+  const value = ansatteLine(enhet);
+  if (!value) return undefined;
+  const signal: VerdictSignal = {
     key: 'ansatte',
     label: 'Ansatte',
-    value: formatCount(count)!,
+    value,
     tone: 'neutral',
   };
+  if (value === 'Ingen' || value === '1–4') signal.detail = 'registrert';
+  return signal;
 }
 
 const YEAR = /^\d{4}$/;

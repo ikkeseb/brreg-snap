@@ -1,11 +1,7 @@
-import {
-  formatAddress,
-  formatCount,
-  formatDateNo,
-  formatNaering,
-} from '../../lib/format.js';
+import { formatAddress, formatDateNo, formatNaering } from '../../lib/format.js';
 import { findRoleHolder } from '../../lib/roller.js';
 import { deriveStatusFlags } from '../../lib/ui/flags.js';
+import { ansatteLine } from '../../lib/ui/summary-lines.js';
 import type { Enhet, RollerResponse } from '../../types/brreg.js';
 import { $, addLink, addRow } from './dom.js';
 
@@ -34,7 +30,7 @@ export function renderOverview(
     formatDateNo(enhet.registreringsdatoEnhetsregisteret),
   );
   addRow(overviewList, 'Næring', formatNaering(enhet.naeringskode1));
-  addRow(overviewList, 'Antall ansatte', formatCount(enhet.antallAnsatte));
+  addRow(overviewList, 'Antall ansatte', ansatteLine(enhet));
   // A failed roller fetch needs its own row: the role rows below only
   // appear when there's a holder, so silently dropping them would read
   // as "none registered".

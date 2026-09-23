@@ -6,6 +6,7 @@ import dnbEnhet from './fixtures/brreg/enhet-984851006-dnb.json';
 import equinorEnhet from './fixtures/brreg/enhet-923609016-equinor.json';
 import konkursEnhet from './fixtures/brreg/enhet-915330193-konkurs.json';
 import slettetEnhet from './fixtures/brreg/enhet-989566733-slettet.json';
+import smallEmployer from './fixtures/brreg/enhet-999999999-ansatte-1-4.json';
 import tvangEnhet from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
 
 // Fixed "today" so age math is deterministic.
@@ -192,6 +193,20 @@ describe('deriveVerdict — ansatte', () => {
       const s = signal(enhet, undefined, 'ansatte');
       expect(s).toMatchObject({ value: 'Ingen', tone: 'neutral' });
     }
+  });
+
+  it('says «1–4» when the register flags employees but gives no count', () => {
+    // Live shape: brreg drops antallAnsatte below five employees and
+    // keeps harRegistrertAntallAnsatte true. This used to read «Ingen».
+    const s = signal(smallEmployer as Enhet, undefined, 'ansatte');
+    expect(smallEmployer).not.toHaveProperty('antallAnsatte');
+    expect(s).toEqual({
+      key: 'ansatte',
+      label: 'Ansatte',
+      value: '1–4',
+      detail: 'registrert',
+      tone: 'neutral',
+    });
   });
 
   it('is omitted for a deleted entity, which carries no employee data', () => {

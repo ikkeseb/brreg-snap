@@ -37,9 +37,12 @@ export interface Enhet {
   registrertIStiftelsesregisteret?: boolean;
   registrertIFrivillighetsregisteret?: boolean;
   naeringskode1?: Kode;
+  // Left out below five employees (brreg API docs), so a missing count
+  // is not zero: read it with harRegistrertAntallAnsatte.
   antallAnsatte?: number;
-  // Present on every live Enhet (false = no employees registered);
-  // absent on a SlettetEnhet, which carries no employee data at all.
+  // Present on every live Enhet: false = no employees registered, true
+  // with no antallAnsatte = 1–4. Absent on a SlettetEnhet, which
+  // carries no employee data at all.
   harRegistrertAntallAnsatte?: boolean;
   forretningsadresse?: Adresse;
   postadresse?: Adresse;
