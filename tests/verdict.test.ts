@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { deriveVerdict, yearsSince } from '../src/lib/ui/verdict.js';
 import type { Enhet, RegnskapResponse } from '../src/types/brreg.js';
+import dnbEnhet from './fixtures/brreg/enhet-984851006-dnb.json';
 
 // Fixed "today" so age math is deterministic.
 const NOW = new Date('2026-07-04T12:00:00Z');
@@ -146,13 +147,61 @@ describe('deriveVerdict — regnskap', () => {
     });
   });
 
-  it('treats an unsupported oppstillingsplan as a positive filing', () => {
+  it('treats a 500 that names the plan as a positive filing', () => {
     const s = signal(
       makeEnhet(),
-      { items: [], unsupportedPlan: 'BANK' },
+      { items: [], unavailable: true, unsupportedPlan: 'BANK' },
       'regnskap',
     );
     expect(s).toMatchObject({ value: 'Levert', tone: 'ok' });
+  });
+
+  it('takes the year from the Enhet when the regnskap endpoint 500s (DNB)', () => {
+    // Live shapes: DNB's enhet says 2025, its regnskap call answers 500.
+    const dnb: Enhet = dnbEnhet;
+    const s = signal(dnb, { items: [], unavailable: true }, 'regnskap');
+    expect(s).toMatchObject({ value: '2025', detail: 'levert', tone: 'ok' });
+  });
+
+  it('keeps the Enhet year when the regnskap fetch failed outright', () => {
+    const s = signal(
+      makeEnhet({ sisteInnsendteAarsregnskap: '2025' }),
+      undefined,
+      'regnskap',
+    );
+    expect(s).toMatchObject({ value: '2025', tone: 'ok' });
+  });
+
+  it('prefers the newer of the Enhet year and the regnskap filing', () => {
+    // KOMPLETT ASA: enhet 2025, regnskap API still on 2024.
+    expect(
+      signal(
+        makeEnhet({ sisteInnsendteAarsregnskap: '2025' }),
+        regnskapWithYear('2024'),
+        'regnskap',
+      )?.value,
+    ).toBe('2025');
+    expect(
+      signal(
+        makeEnhet({ sisteInnsendteAarsregnskap: '2023' }),
+        regnskapWithYear('2024'),
+        'regnskap',
+      )?.value,
+    ).toBe('2024');
+  });
+
+  it('ignores a malformed Enhet year', () => {
+    const s = signal(
+      makeEnhet({ sisteInnsendteAarsregnskap: 'ukjent' }),
+      undefined,
+      'regnskap',
+    );
+    expect(s).toBeUndefined();
+  });
+
+  it('omits the signal for a bare 500 with nothing else to go on', () => {
+    const s = signal(makeEnhet(), { items: [], unavailable: true }, 'regnskap');
+    expect(s).toBeUndefined();
   });
 
   it('warns when an old AS has nothing filed', () => {

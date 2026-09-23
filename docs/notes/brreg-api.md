@@ -37,23 +37,39 @@ above long assumed brreg returns one entry *per year*) or remove it is
 an open decision.
 
 <!-- SECTION: regnskap-500-unsupported-plan -->
-## 500 from regnskap = unsupported oppstillingsplan, not a bug
+## 500 from regnskap = "not in the open API", not a network failure
 
-500 is its own category: banks, insurance and similar regulated
-sectors file under specialised oppstillingsplaner (`BANK`, `FORS`)
-that the public endpoint refuses to serialise — DNB BANK ASA
-(984851006) hits this. The body is JSON with
-`"message": "Regnskapet inneholder en oppstillingsplan som ikke er
-stottet (BANK)"` and a stack trace.
+500 is its own outcome: banks, insurers and similar regulated sectors
+file under specialised oppstillingsplaner (`BANK`, `FORS`) that the
+open endpoint can't serialise, and it answers 500 for them every time.
+Live 2026-09-23: DNB BANK ASA 984851006, SpareBank 1 SMN 937901003,
+Storebrand Liv 958995369, Gjensidige 995568217 (NACE 64.190 / 64.190 /
+65.110 / 65.120).
 
-`fetchRegnskap` returns
-`RegnskapResponse = { items: Regnskap[]; unsupportedPlan?: string }`;
-`parseUnsupportedPlan` extracts the `(BANK)` / `(FORS)` code from the
-500 body via `/\(([A-Z]+)\)/` and stores it. The UI renders a
-distinct "Filer som bankregnskap (BANK) — ikke tilgjengelig i
-offentlig API." line instead of pretending the company didn't file.
-Both empty results and unsupported-plan results are cached so refresh
-doesn't re-hit.
+The body used to name the plan (`"message": "Regnskapet inneholder en
+oppstillingsplan som ikke er stottet (BANK)"`, documented 2026-06-22).
+By 2026-09-23 it is generic: `"message": "An error occurred while
+processing the request."` (fixture:
+`tests/fixtures/brreg/regnskap-984851006-500.json`). When it changed
+is unknown. Don't depend on the body.
+
+`fetchRegnskap` therefore maps the answers explicitly
+(`RegnskapResponse` in `src/types/brreg.ts`):
+
+- 2xx → `items`; 404 → `items: []` (nothing filed), cached 24h.
+- 500 → `{ items: [], unavailable: true }`, plus `unsupportedPlan` if
+  the body still names one. Cached **6h**: stable for banks, but also
+  what a real outage looks like.
+- network failure / other status → rejects; callers map it to
+  `undefined` ("couldn't ask").
+
+The UI never says "prøv igjen senere" for a 500. Nøkkeltall explains
+the gap via `regnskapGap()` (`src/lib/regnskap.ts`): NACE 64.1x / 65.x
+(or a named plan) → banks and insurers file special accounts the open
+API doesn't show; anything else → "brreg sitt åpne API ga feil". It
+also shows `Enhet.sisteInnsendteAarsregnskap` and links the company's
+brreg page. The verdict strip reads the filing year from that Enhet
+field, so it doesn't depend on this endpoint at all.
 
 <!-- SECTION: error-contract -->
 ## Error contract: search throws, [] means a real empty result
@@ -68,7 +84,7 @@ as "no hits" gets pinned as a day-long "no match" (see
 
 The detail fetchers (`fetchEnhet`, `fetchRoller`, `fetchUnderenheter`,
 `fetchRegnskap`) keep their documented special cases — roller 404 →
-empty, regnskap 404 → empty, regnskap 500 → unsupported plan (above) —
+empty, regnskap 404 → empty, regnskap 500 → unavailable (above) —
 and throw on everything else.
 
 Every fetch in `brreg.ts` carries `AbortSignal.timeout(8000)`

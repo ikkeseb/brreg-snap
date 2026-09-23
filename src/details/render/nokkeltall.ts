@@ -7,11 +7,12 @@ import {
   egenkapitalandelTone,
   isConsecutiveYear,
   keyFigures,
+  regnskapGap,
   sortRegnskapDesc,
   yoyDelta,
 } from '../../lib/regnskap.js';
 import type { KeyFigures, YoyDelta, YoyDirection } from '../../lib/regnskap.js';
-import type { RegnskapResponse } from '../../types/brreg.js';
+import type { Enhet, RegnskapResponse } from '../../types/brreg.js';
 import { $, addRow, emptyLine, emptyState } from './dom.js';
 
 const nokkeltallBody = $('nokkeltall-body');
@@ -21,27 +22,22 @@ const TREND_YEARS = 3;
 
 export function renderNokkeltall(
   response: RegnskapResponse | undefined,
+  enhet: Enhet,
 ): void {
   nokkeltallBody.replaceChildren();
   if (!response) {
-    // The regnskap fetch failed (network/5xx). Say so — an empty-state
-    // "Ingen regnskap registrert" here would be a false claim about
-    // the registry.
+    // The regnskap fetch failed (network/timeout). Say so — an empty-
+    // state "Ingen regnskap registrert" here would be a false claim
+    // about the registry.
     nokkeltallBody.appendChild(
       emptyLine('Kunne ikke hente regnskapsdata. Prøv igjen senere.'),
     );
     return;
   }
-  if (response.unsupportedPlan) {
-    // brreg's public regnskap-API only serialises the default
-    // oppstillingsplan; BANK / FORS filings exist but come back as
-    // 500. Surface that explicitly so we don't look like we missed
-    // the data.
-    nokkeltallBody.appendChild(
-      emptyLine(
-        `Filer som ${unsupportedPlanLabel(response.unsupportedPlan)} — ikke tilgjengelig i offentlig API.`,
-      ),
-    );
+  if (response.unavailable) {
+    // brreg answered 500. Retrying won't help, so never "prøv igjen";
+    // explain the gap and point at brreg instead.
+    nokkeltallBody.appendChild(renderUnavailable(response, enhet));
     return;
   }
 
@@ -247,13 +243,30 @@ function makeGrid(): HTMLDListElement {
   return dl;
 }
 
-function unsupportedPlanLabel(code: string): string {
-  switch (code.toUpperCase()) {
-    case 'BANK':
-      return 'bankregnskap (BANK)';
-    case 'FORS':
-      return 'forsikringsregnskap (FORS)';
-    default:
-      return `oppstillingsplan ${code}`;
+const GAP_TEXT = {
+  'special-accounts':
+    'Banker og forsikringsselskaper leverer særskilte årsregnskap som brreg sitt åpne API ikke viser.',
+  'api-error': 'Brreg sitt åpne API ga feil for dette regnskapet.',
+} as const;
+
+function renderUnavailable(response: RegnskapResponse, enhet: Enhet): HTMLElement {
+  const wrap = document.createElement('div');
+  const gap = regnskapGap(enhet.naeringskode1?.kode, response.unsupportedPlan);
+  wrap.appendChild(emptyLine(GAP_TEXT[gap]));
+  // The filing year comes with the enhet, so the user still learns
+  // whether the company files — which is what the gap would hide.
+  if (enhet.sisteInnsendteAarsregnskap) {
+    wrap.appendChild(
+      emptyLine(`Siste innsendte årsregnskap: ${enhet.sisteInnsendteAarsregnskap}.`),
+    );
   }
+  const p = document.createElement('p');
+  const a = document.createElement('a');
+  a.href = `https://virksomhet.brreg.no/nb/oppslag/enheter/${enhet.organisasjonsnummer}`;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+  a.textContent = 'Åpne virksomheten på brreg.no ↗';
+  p.appendChild(a);
+  wrap.appendChild(p);
+  return wrap;
 }

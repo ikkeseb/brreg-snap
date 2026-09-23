@@ -341,7 +341,7 @@ async function loadOrgnr(
       () => myRunId !== loadRunId,
     );
     renderUnderenheter(underenheter);
-    renderNokkeltall(regnskap);
+    renderNokkeltall(regnskap, enhet);
     setState('result');
     updateRejectButtonVisibility();
     markUpdated();

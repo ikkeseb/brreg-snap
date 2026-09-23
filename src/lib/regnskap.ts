@@ -101,6 +101,24 @@ export function egenkapitalandelTone(
   return pct >= 0 && pct < EGENKAPITALANDEL_WARN_BELOW ? 'warn' : undefined;
 }
 
+// Why the open API has no figures for a company whose regnskap call
+// answered 500. Banks (NACE 64.1x) and insurers/pension funds (65.x)
+// file under their own oppstillingsplaner, which the endpoint can't
+// serve — a known gap. For anyone else the honest statement is only
+// that brreg's API failed; we don't know more.
+export type RegnskapGap = 'special-accounts' | 'api-error';
+
+export function regnskapGap(
+  naeringskode: string | undefined,
+  unsupportedPlan?: string,
+): RegnskapGap {
+  if (unsupportedPlan) return 'special-accounts';
+  const kode = naeringskode?.trim() ?? '';
+  return /^64\.1/.test(kode) || /^65\./.test(kode)
+    ? 'special-accounts'
+    : 'api-error';
+}
+
 export function keyFigures(r: Regnskap): KeyFigures {
   const res = r.resultatregnskapResultat;
   const eg = r.egenkapitalGjeld;

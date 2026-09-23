@@ -8,6 +8,7 @@ import {
   searchEnheter,
   searchEnheterWithParams,
 } from '../src/lib/brreg.js';
+import regnskap500 from './fixtures/brreg/regnskap-984851006-500.json';
 
 type StorageMap = Record<string, unknown>;
 
@@ -135,7 +136,36 @@ describe('fetchRegnskap special-casing', () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('500 with unsupported-plan body → unsupportedPlan extracted and cached', async () => {
+  it('500 with the live generic body (DNB) → unavailable, not a failure', async () => {
+    // The body brreg sends for banks/insurers since 2026: no plan code.
+    fetchMock.mockResolvedValue(jsonResponse(regnskap500, 500));
+    expect(await fetchRegnskap('984851006')).toEqual({
+      items: [],
+      unavailable: true,
+    });
+  });
+
+  it('500 is cached for hours, not a day', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date('2026-09-23T08:00:00Z'));
+      fetchMock.mockResolvedValue(jsonResponse(regnskap500, 500));
+      await fetchRegnskap('984851006');
+
+      vi.setSystemTime(new Date('2026-09-23T13:59:00Z'));
+      await fetchRegnskap('984851006');
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      vi.setSystemTime(new Date('2026-09-23T14:01:00Z'));
+      fetchMock.mockResolvedValue(jsonResponse(regnskap500, 500));
+      await fetchRegnskap('984851006');
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('500 naming the plan (the pre-2026 body) → plan code kept', async () => {
     fetchMock.mockResolvedValue(
       jsonResponse(
         {
@@ -147,19 +177,22 @@ describe('fetchRegnskap special-casing', () => {
     );
     expect(await fetchRegnskap('984851006')).toEqual({
       items: [],
+      unavailable: true,
       unsupportedPlan: 'BANK',
     });
-
-    expect(await fetchRegnskap('984851006')).toEqual({
-      items: [],
-      unsupportedPlan: 'BANK',
-    });
-    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
-  it('500 without a parseable plan code → throws (generic failure)', async () => {
-    fetchMock.mockResolvedValue(jsonResponse({ message: 'boom' }, 500));
-    await expect(fetchRegnskap('123456785')).rejects.toThrow(/500/);
+  it('500 with a non-JSON body → still unavailable', async () => {
+    fetchMock.mockResolvedValue(new Response('<html>oops</html>', { status: 500 }));
+    expect(await fetchRegnskap('123456785')).toEqual({
+      items: [],
+      unavailable: true,
+    });
+  });
+
+  it('a network failure rejects, so callers can tell "couldn\'t ask"', async () => {
+    fetchMock.mockRejectedValue(new TypeError('NetworkError'));
+    await expect(fetchRegnskap('123456785')).rejects.toThrow();
   });
 
   it('throws on other non-2xx (e.g. 503)', async () => {
@@ -173,7 +206,7 @@ describe('fetchRegnskap special-casing', () => {
     );
     const result = await fetchRegnskap('123456785');
     expect(result.items).toHaveLength(1);
-    expect(result.unsupportedPlan).toBeUndefined();
+    expect(result.unavailable).toBeUndefined();
   });
 });
 

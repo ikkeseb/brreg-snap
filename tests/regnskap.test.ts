@@ -5,6 +5,7 @@ import {
   egenkapitalandelTone,
   isConsecutiveYear,
   keyFigures,
+  regnskapGap,
   sortRegnskapDesc,
   yoyDelta,
 } from '../src/lib/regnskap.js';
@@ -176,6 +177,25 @@ describe('egenkapitalandelTone', () => {
   it('declines missing or non-finite input', () => {
     expect(egenkapitalandelTone(undefined)).toBeUndefined();
     expect(egenkapitalandelTone(Number.NaN)).toBeUndefined();
+  });
+});
+
+describe('regnskapGap', () => {
+  it('explains banks (NACE 64.1x) and insurers (65.x) as special accounts', () => {
+    // Live NACE codes of DNB, SpareBank 1 SMN, Storebrand Liv, Gjensidige.
+    for (const kode of ['64.190', '64.110', '65.110', '65.120', '65.300']) {
+      expect(regnskapGap(kode)).toBe('special-accounts');
+    }
+  });
+
+  it('calls anything else a plain API error', () => {
+    expect(regnskapGap('64.210')).toBe('api-error'); // holding, not a bank
+    expect(regnskapGap('06.100')).toBe('api-error');
+    expect(regnskapGap(undefined)).toBe('api-error');
+  });
+
+  it('trusts a plan code from the 500 body over the NACE code', () => {
+    expect(regnskapGap('06.100', 'BANK')).toBe('special-accounts');
   });
 });
 

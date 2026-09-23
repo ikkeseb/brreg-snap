@@ -17,6 +17,11 @@ const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 // network error (no retry logic — callers decide what failure means).
 const FETCH_TIMEOUT_MS = 8000;
 
+// A regnskap 500 is stable for banks and insurers, but it is also what
+// a genuine brreg outage looks like — so it is cached for hours, not a
+// day, and a real outage heals on its own.
+const REGNSKAP_UNAVAILABLE_TTL_MS = 6 * 60 * 60 * 1000;
+
 // Cache-key prefixes used by all fetchers. invalidateCache() and
 // getFetchedAt() walk these for everything related to a single orgnr.
 const CACHE_PREFIXES = ['enhet', 'roller', 'underenheter', 'regnskap'] as const;
@@ -167,12 +172,11 @@ function isRegnskap(value: unknown): value is Regnskap {
 }
 
 async function parseUnsupportedPlan(res: Response): Promise<string | undefined> {
-  // Banks (BANK) and insurance (FORS) file regnskap under specialised
-  // oppstillingsplaner that the public API refuses to serialise. The
-  // 500 body is JSON: `{"message": "Regnskapet inneholder en
-  // oppstillingsplan som ikke er stottet (BANK)", ...}`. Pull the
-  // plan code out so the UI can show "filer som bankregnskap" rather
-  // than pretending the company didn't file.
+  // The 500 body used to name the plan: `{"message": "Regnskapet
+  // inneholder en oppstillingsplan som ikke er stottet (BANK)"}`. By
+  // 2026-09 it is a generic "An error occurred while processing the
+  // request." for the same companies. Still parsed in case brreg
+  // restores it; nothing depends on it being there.
   try {
     const body = (await res.json()) as { message?: unknown };
     const msg = typeof body?.message === 'string' ? body.message : '';
@@ -200,13 +204,14 @@ export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
     return empty;
   }
   if (res.status === 500) {
+    // Not "couldn't ask": brreg answered, and retrying won't change the
+    // answer for a bank. See docs/notes/brreg-api.md
+    // § regnskap-500-unsupported-plan.
     const plan = await parseUnsupportedPlan(res);
-    if (plan) {
-      const response: RegnskapResponse = { items: [], unsupportedPlan: plan };
-      await cacheSet(key, response);
-      return response;
-    }
-    // Other 500s fall through to the generic error below.
+    const response: RegnskapResponse = { items: [], unavailable: true };
+    if (plan) response.unsupportedPlan = plan;
+    await cacheSet(key, response, REGNSKAP_UNAVAILABLE_TTL_MS);
+    return response;
   }
   if (!res.ok) {
     throw new Error(`brreg regnskap API returned ${res.status}.`);

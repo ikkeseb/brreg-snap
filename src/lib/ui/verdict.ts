@@ -5,7 +5,8 @@
 //   STATUS    primary status (Aktiv / Konkurs / Slettet / …)
 //   ALDER     years since Enhetsregisteret registration
 //   ANSATTE   registered employee count
-//   REGNSKAP  latest filed year in Regnskapsregisteret
+//   REGNSKAP  latest filed year (Enhet.sisteInnsendteAarsregnskap,
+//             topped up by the regnskap response)
 //
 // Derivation is pure (unit-tested); renderVerdict is the thin DOM
 // writer. Signals whose underlying data is unavailable are OMITTED,
@@ -109,28 +110,31 @@ function ansatteSignal(enhet: Enhet): VerdictSignal {
   };
 }
 
+const YEAR = /^\d{4}$/;
+
+// Latest filed year from both sources. The Enhet carries it directly,
+// so the cell doesn't hinge on the regnskap endpoint, which answers 500
+// for every bank and insurer. The regnskap response can still be newer
+// or be the only source; the later year wins.
+function latestFiledYear(
+  enhet: Enhet,
+  regnskap: RegnskapResponse | undefined,
+): string | undefined {
+  const fromEnhet = enhet.sisteInnsendteAarsregnskap?.trim();
+  const fromRegnskap = sortRegnskapDesc(regnskap?.items ?? [])[0]
+    ?.regnskapsperiode?.tilDato?.slice(0, 4);
+  const years = [fromEnhet, fromRegnskap].filter(
+    (y): y is string => y !== undefined && YEAR.test(y),
+  );
+  return years.sort().at(-1);
+}
+
 function regnskapSignal(
   enhet: Enhet,
   regnskap: RegnskapResponse | undefined,
   now: Date,
 ): VerdictSignal | undefined {
-  // Fetch failed → we don't know → no signal, never a false "Ingen".
-  if (!regnskap) return undefined;
-
-  if (regnskap.unsupportedPlan) {
-    // Banks/insurance DID file; the public API just can't serialise the
-    // specialised oppstillingsplan. That's a positive filing signal.
-    return {
-      key: 'regnskap',
-      label: 'Regnskap',
-      value: 'Levert',
-      detail: 'spesialregnskap',
-      tone: 'ok',
-    };
-  }
-
-  const sorted = sortRegnskapDesc(regnskap.items);
-  const latestYear = sorted[0]?.regnskapsperiode?.tilDato?.slice(0, 4);
+  const latestYear = latestFiledYear(enhet, regnskap);
   if (latestYear) {
     // A filing older than two calendar years suggests the company has
     // stopped filing — worth an amber.
@@ -141,6 +145,23 @@ function regnskapSignal(
       value: latestYear,
       detail: stale ? 'siste innsendte' : 'levert',
       tone: stale ? 'warn' : 'ok',
+    };
+  }
+
+  // No year anywhere. Fetch failed → we don't know → no signal, never
+  // a false "Ingen".
+  if (!regnskap) return undefined;
+
+  if (regnskap.unavailable) {
+    // brreg's open API answered 500. A named plan (BANK/FORS) proves a
+    // filing exists; a bare 500 proves nothing either way.
+    if (!regnskap.unsupportedPlan) return undefined;
+    return {
+      key: 'regnskap',
+      label: 'Regnskap',
+      value: 'Levert',
+      detail: 'spesialregnskap',
+      tone: 'ok',
     };
   }
 

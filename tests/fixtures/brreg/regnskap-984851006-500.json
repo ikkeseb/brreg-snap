@@ -1,0 +1,8 @@
+{
+  "timestamp": "2026-09-23T18:35:36.992+0000",
+  "status": "500",
+  "error": "Internal Server Error",
+  "message": "An error occurred while processing the request.",
+  "path": "/regnskapsregisteret/regnskap/984851006",
+  "trace": "f3a46243-f834-4383-9d9a-54df6da9f059"
+}

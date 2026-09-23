@@ -29,11 +29,12 @@ The module is `src/lib/session-cache.ts`. Its rules:
   wraps it for one company's keys, and `invalidateCache(orgnr)` drops
   them for a refetch.
 
-`fetchRegnskap` caches both empty results (404, normal for small AS)
-and "unsupported plan" results (500 from BANK/FORS filings) so a
-refresh doesn't re-hit.
+`fetchRegnskap` caches empty results (404, normal for small AS) for
+24h and "unavailable" results (500, banks/insurers) for 6h, so a
+refresh doesn't re-hit (see `docs/notes/brreg-api.md`
+§ regnskap-500-unsupported-plan).
 
-`hostname-search.ts` caches under two keys:
+`hostname-search.ts` caches under three keys:
 
 - `hostname:<host>` → `HostnameResult` = `{band: 'auto' | 'picker' |
   'none', candidates: SearchHit[]}` (orgnr is included on the auto

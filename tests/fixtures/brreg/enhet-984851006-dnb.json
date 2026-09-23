@@ -1,0 +1,106 @@
+{
+  "organisasjonsnummer": "984851006",
+  "navn": "DNB BANK ASA",
+  "organisasjonsform": {
+    "kode": "ASA",
+    "beskrivelse": "Allmennaksjeselskap",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/ASA"
+      }
+    }
+  },
+  "historiskeNavn": [
+    {
+      "navn": "GJENSIDIGE NOR SPAREBANK ASA",
+      "fraDato": "2002-09-12 16:22:48",
+      "tilDato": "2004-01-19 09:15:52"
+    },
+    {
+      "navn": "DNB NOR BANK ASA",
+      "fraDato": "2004-01-19 09:15:52",
+      "tilDato": "2011-11-11 08:45:34"
+    }
+  ],
+  "hjemmeside": "www.dnb.no",
+  "postadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "0021",
+    "poststed": "OSLO",
+    "adresse": [
+      "Postboks 1600 Sentrum"
+    ],
+    "kommune": "OSLO",
+    "kommunenummer": "0301"
+  },
+  "registreringsdatoEnhetsregisteret": "2002-09-12",
+  "registrertIMvaregisteret": true,
+  "frivilligMvaRegistrertBeskrivelser": [
+    "Utleier av bygg eller anlegg"
+  ],
+  "naeringskode1": {
+    "kode": "64.190",
+    "beskrivelse": "Banker og kredittforetak"
+  },
+  "antallAnsatte": 7353,
+  "harRegistrertAntallAnsatte": true,
+  "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2014-01-27",
+  "registreringsdatoMerverdiavgiftsregisteret": "2002-09-01",
+  "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2006-10-23",
+  "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+  "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+  "mobil": "91504800",
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "0191",
+    "poststed": "OSLO",
+    "adresse": [
+      "Dronning Eufemias gate 30"
+    ],
+    "kommune": "OSLO",
+    "kommunenummer": "0301"
+  },
+  "stiftelsesdato": "2002-09-10",
+  "institusjonellSektorkode": {
+    "kode": "3200",
+    "beskrivelse": "Banker"
+  },
+  "registrertIForetaksregisteret": true,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2025",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "maalform": "Bokmål",
+  "vedtektsdato": "2026-04-21",
+  "vedtektsfestetFormaal": [
+    "Å drive bank-, finansierings- og investeringstjenestevirksomhet, samt",
+    "virksomhet som har en naturlig tilknytning til dette, og å inneha",
+    "eierinteresser eller være deltaker i andre foretak innenfor rammen av",
+    "den til enhver tid gjeldende lovgivning."
+  ],
+  "aktivitet": [
+    "Alle forretninger og tjenester som det er vanlig eller naturlig at en",
+    "bank utfører."
+  ],
+  "registreringsdatoForetaksregisteret": "2002-09-12",
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "erIKonsern": true,
+  "kapital": {
+    "belop": 18008310800,
+    "antallAksjer": 1440664864,
+    "type": "Aksjekapital",
+    "valuta": "NOK",
+    "innfortDato": "2026-06-17"
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/984851006"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

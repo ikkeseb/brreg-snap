@@ -39,6 +39,10 @@ export interface Enhet {
   konkurs?: boolean;
   underAvvikling?: boolean;
   underTvangsavviklingEllerTvangsopplosning?: boolean;
+  // Year (YYYY string) of the latest annual accounts filed with
+  // Regnskapsregisteret. Present even when the regnskap endpoint itself
+  // can't serve the filing (banks, insurers).
+  sisteInnsendteAarsregnskap?: string;
 }
 
 export type SearchHit = Pick<Enhet, 'organisasjonsnummer' | 'navn'> &
@@ -128,13 +132,18 @@ export interface Regnskap {
   };
 }
 
-// The regnskapsregisteret endpoint returns an array of filed regnskap,
-// but order is not guaranteed — callers must sort by tilDato.
-// `unsupportedPlan` is populated when brreg refuses to serialise the
-// filing because it uses a specialised oppstillingsplan (e.g. 'BANK'
-// or 'FORS' — banks/insurance). items[] is empty in that case, and
-// the UI should explain the gap rather than imply nothing is filed.
+// What brreg answered for an orgnr's regnskap (see fetchRegnskap):
+//   2xx → items: the filings (order not guaranteed — sort by tilDato)
+//   404 → items: [] — nothing filed
+//   500 → items: [], unavailable: true — the open API can't serve this
+//         filing. Banks and insurers hit this every time (specialised
+//         oppstillingsplaner), so it is an outcome, not an outage; the
+//         UI explains the gap instead of implying nothing was filed.
+// A network failure or any other status rejects instead, which callers
+// map to `undefined` ("couldn't ask").
 export interface RegnskapResponse {
   items: Regnskap[];
+  unavailable?: boolean;
+  // The plan code ('BANK', 'FORS', …) when the 500 body names it.
   unsupportedPlan?: string;
 }
