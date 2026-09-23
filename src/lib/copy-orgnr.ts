@@ -37,15 +37,23 @@ export function renderOrgnrCopy(
 // "Kopiert!" and leave it stuck on the button.
 const resetTimers = new WeakMap<HTMLElement, number>();
 
-async function copyOrgnr(orgnr: string, btn: HTMLElement): Promise<void> {
-  // Both outcomes get visible feedback — a silent failure reads as
-  // "copied" to the user, who then pastes the wrong thing elsewhere.
-  let ok = true;
+// Write `text` to the clipboard; false when the browser refused. Call
+// it from inside a click handler, before any other await — that
+// gesture is what lets the write through without the `clipboardWrite`
+// permission. Every copy action (orgnr, summary, invoice block) goes
+// through here and shows the outcome: a silent failure reads as
+// "copied" to the user, who then pastes the wrong thing elsewhere.
+export async function writeClipboard(text: string): Promise<boolean> {
   try {
-    await navigator.clipboard.writeText(orgnr);
+    await navigator.clipboard.writeText(text);
+    return true;
   } catch {
-    ok = false;
+    return false;
   }
+}
+
+async function copyOrgnr(orgnr: string, btn: HTMLElement): Promise<void> {
+  const ok = await writeClipboard(orgnr);
   window.clearTimeout(resetTimers.get(btn));
   btn.classList.remove('copied', 'copy-failed');
   btn.classList.add(ok ? 'copied' : 'copy-failed');

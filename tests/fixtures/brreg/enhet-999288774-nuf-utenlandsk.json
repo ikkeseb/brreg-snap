@@ -1,0 +1,72 @@
+{
+  "organisasjonsnummer": "999288774",
+  "navn": "WIOSS WITRON ON SITE SERVICES GMBH NUF",
+  "organisasjonsform": {
+    "kode": "NUF",
+    "beskrivelse": "Norskregistrert utenlandsk foretak",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/NUF"
+      }
+    }
+  },
+  "historiskeNavn": [],
+  "postadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "0125",
+    "poststed": "OSLO",
+    "adresse": [
+      "c/o EconPartner AS",
+      "Postboks 2006 Vika"
+    ],
+    "kommune": "OSLO",
+    "kommunenummer": "0301"
+  },
+  "registreringsdatoEnhetsregisteret": "2013-02-18",
+  "registrertIMvaregisteret": true,
+  "naeringskode1": {
+    "kode": "62.200",
+    "beskrivelse": "Konsulentvirksomhet tilknyttet informasjonsteknologi og forvaltning og drift av it-systemer"
+  },
+  "antallAnsatte": 152,
+  "harRegistrertAntallAnsatte": true,
+  "registreringsdatoMerverdiavgiftsregisteret": "2013-01-01",
+  "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2013-05-15",
+  "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+  "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+  "forretningsadresse": {
+    "land": "Tyskland",
+    "landkode": "DE",
+    "poststed": "DE-92711 Parkstein",
+    "adresse": [
+      "Neustädter 17"
+    ]
+  },
+  "institusjonellSektorkode": {
+    "kode": "2100",
+    "beskrivelse": "Private aksjeselskaper mv."
+  },
+  "registrertIForetaksregisteret": true,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2025",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "maalform": "Bokmål",
+  "aktivitet": [
+    "Servicetjenester innenfor logistikk og informatikksystemer,",
+    "produksjonsanlegg, høylagringsanlegg og lignende."
+  ],
+  "registreringsdatoForetaksregisteret": "2013-02-18",
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "erIKonsern": false,
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/999288774"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

@@ -9,6 +9,7 @@ import {
   formatMoney,
   formatMoneyCompact,
   formatNaering,
+  formatOrgnr,
   formatPercent,
   formatRelativeTime,
   parseIsoDate,
@@ -404,5 +405,16 @@ describe('formatPercent', () => {
     expect(formatPercent(undefined)).toBeUndefined();
     expect(formatPercent(null as unknown as number)).toBeUndefined();
     expect(formatPercent(Number.NaN)).toBeUndefined();
+  });
+});
+
+describe('formatOrgnr', () => {
+  it('groups nine digits in threes with plain spaces', () => {
+    expect(formatOrgnr('923609016')).toBe('923 609 016');
+  });
+
+  it('leaves anything else alone', () => {
+    expect(formatOrgnr('92360901')).toBe('92360901');
+    expect(formatOrgnr('923 609 016')).toBe('923 609 016');
   });
 });
