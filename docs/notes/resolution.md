@@ -21,13 +21,14 @@ Mixed separators and groups embedded in longer digit sequences
 and share the same candidate set as contiguous runs, so the same
 orgnr in both formats counts once.
 
-`resolveOrgnrAsync` runs the same sync cascade then falls back to a
-hostname-based brreg search (`searchByHostname` in
-`hostname-search.ts`). There is no static domain → orgnr table —
-every resolution decision is a live brreg API call. Hosts brreg's
-data can't disambiguate (e.g. `finn.no`, whose legal name "FINN.no"
-loses its period in the search index) simply don't resolve, and the
-sidebar falls back to inline manual search.
+When the sync cascade misses, `resolveTabContext`
+(`src/lib/ui/resolve-tab.ts`) falls back to the hostname-based brreg
+search (`searchByHostnameDetailed` in `hostname-search.ts`). There is
+no static domain → orgnr table — every resolution decision is a live
+brreg API call. Hosts brreg's data can't disambiguate (e.g. `finn.no`,
+whose legal name "FINN.no" loses its period in the search index)
+simply don't resolve, and the sidebar falls back to inline manual
+search.
 
 **Ambiguity → abstain (anti-shadowing).** `extractOrgnrFromText`
 trusts a 9-digit run ONLY when it is the *single* distinct mod-11-valid
@@ -63,9 +64,10 @@ brreg's `navn=` search can't find a company by its number (0 hits for
 `923609016`, unrelated names for `923 609 016`). `parseOrgnrQuery`
 accepts the digits with spaces, dots, U+00A0, the invoice form
 `NO 923 609 016 MVA`, and the label a site footer prints in front
-(`Org.nr.`, `Org nr:`, `Orgnr`, any case). A valid orgnr is looked up directly and shown as
-the one hit. An underenhet row reads «<navn> — avdeling av <parent>»,
-and selecting it loads the branch orgnr through the fallback above.
+(`Org.nr.`, `Org nr:`, `Orgnr`, any case). A valid orgnr is looked up
+directly and shown as the one hit. An underenhet row reads «<navn> —
+avdeling av <parent>», and selecting it loads the branch orgnr
+through the fallback above.
 Nine digits that fail mod-11 get «… er ikke et gyldig
 organisasjonsnummer.» without a request. Pinned in
 `tests/company-load.test.ts` and `tests/manual-search.test.ts`.
@@ -111,13 +113,10 @@ events) goes through `resolveTabContext`, which calls
 <!-- SECTION: bands -->
 ## Resolution bands
 
-`hostname-search.ts` exposes two entry points:
-
-- `searchByHostname(host)` returns `string | undefined` — only AUTO
-  matches resolve. Used by `resolveOrgnrAsync` in `orgnr.ts`.
-- `searchByHostnameDetailed(host)` returns `{band, candidates, choice?}`
-  — used by the sidebar so it can render the picker UI for the
-  `'picker'` band.
+`searchByHostnameDetailed(host)` in `hostname-search.ts` is the one
+entry point. It returns `{band, candidates, choice?, complete}`, so
+both surfaces can render the picker for the `'picker'` band and
+tell a failed search (`complete: false`) from a real miss.
 
 Bands are decided in `hostname-score.ts:decideBand`:
 
@@ -143,10 +142,10 @@ answer is then the picker's first row.
 
 The picker row count is `MAX_PICKER_CANDIDATES` exported from
 `hostname-search.ts` — currently 4. The constant is tied to the
-keyboard shortcuts (1-4 select the corresponding row, 0/Esc triggers
-"Ingen av disse") both popup and sidebar register at module load.
+keyboard shortcuts (1-4 select the corresponding row, 0 triggers
+«Ingen av disse»; Escape is not a shortcut, § picker-choice).
 Bumping the constant requires extending the digit-key handler in
-`popup.ts` and `details.ts`.
+`src/lib/ui/picker.ts`, which both surfaces share.
 
 <!-- SECTION: label-extraction -->
 ## Registrable domain and label (suffixes, platforms, punycode)
@@ -240,9 +239,9 @@ entities, so there is no slettet case.
 <!-- SECTION: picker-choice -->
 ## Picker choice cache
 
-When the user picks from the sidebar's "Mente du…?" list,
-`setPickerChoice(host, orgnr)` writes a 24h entry under
-`picker-choice:<host>`. The next visit short-circuits both bands and
+When the user picks from the picker list («Vi fant flere mulige
+treff på denne siden»), `setPickerChoice(host, orgnr)` writes a 24h
+entry under `picker-choice:<host>`. The next visit short-circuits both bands and
 the network — `searchByHostnameDetailed` returns `{band:'auto',
 candidates:[], choice}`. `setPickerChoice(host, null)` ("Ingen av
 disse") caches a negative choice that returns `{band:'none'}` on the
@@ -255,11 +254,10 @@ the UI, so the picker leaves Escape to the browser and persists
 nothing (`src/lib/ui/picker.ts`, pinned in `tests/picker.test.ts`).
 
 <!-- SECTION: reject-override -->
-## Reject override (`Feil bedrift?` / `Feil treff?`)
+## Reject override (`Feil bedrift?`)
 
-Both popup ("Feil treff? Vis alternativer") and sidebar ("Feil
-bedrift? Vis alternativer") expose this link on the result panel
-whenever the current orgnr was resolved by hostname search
+Both popup and sidebar show «Feil bedrift? Vis alternativer» under the
+result whenever the current orgnr was resolved by hostname search
 (`host-auto` or `host-pick` resolution method). Clicking it calls
 `addRejectedChoice(host, orgnr)` which:
 

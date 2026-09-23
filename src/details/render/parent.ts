@@ -7,9 +7,9 @@ const parentBody = $('parent-body');
 export async function renderParent(
   parentOrgnr: string | undefined,
   onNavigate: (orgnr: string) => void,
-  // True once a newer load has superseded this one. This renderer is
-  // the only one that does its own post-render async fetch, so it
-  // escapes loadOrgnr's myRunId guard and must re-check it itself —
+  // True once this load's result is no longer the one on screen. This
+  // renderer is the only one that does its own post-render async fetch,
+  // so loadOrgnr's load token can't guard it and it re-checks itself —
   // otherwise a slow parent fetch from a previous company clobbers the
   // current company's Morselskap card after an in-panel drill-in.
   isStale?: () => boolean,

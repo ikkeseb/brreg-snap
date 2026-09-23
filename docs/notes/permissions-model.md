@@ -17,7 +17,7 @@ The permissionless paths out: (a) require a fresh gesture against
 the *toolbar/shortcut* surface (click sidebar icon, ctrl+shift+B), or
 (b) accept the limitation. Escalating to `tabs` as a static
 install-time permission would relax the security differentiator —
-see `security.md` (or `CLAUDE.md § Security constraints`). Don't
+see `CLAUDE.md` § Security constraints. Don't
 burn cycles re-investigating `webNavigation`, `tabs.onUpdated`, or
 focus events; they all need `tabs` or content scripts.
 

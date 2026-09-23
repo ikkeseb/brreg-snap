@@ -6,12 +6,16 @@ Source: `src/lib/brreg.ts`, `src/lib/hostname-search.ts`,
 <!-- SECTION: 24h-session -->
 ## 24h session cache
 
-`src/lib/brreg.ts` wraps every API call in `browser.storage.session`
-for 24 hours. `storage.session` is in-memory, process-local, and
-cleared when the browser shuts down — *not* `storage.local`. Cache
-writes are typed (`CacheEntry<T>` with `expiresAt` + `storedAt`) and
-fetchers validate the response shape via `isEnhet` / `isUnderenhet` /
-`isRollerResponse` before caching (no blind `as Enhet` cast).
+`src/lib/brreg.ts` caches every detail fetch (enhet, underenhet,
+roller, underenheter, regnskap) in `browser.storage.session`, 24h by
+default (per-entry TTL below). The search calls (`searchEnheter`,
+`searchEnheterWithParams`) are not cached there; the hostname
+pipeline caches its own outcome (below). `storage.session` is
+in-memory, process-local, and cleared when the browser shuts down —
+*not* `storage.local`. Cache writes are typed (`CacheEntry<T>` with
+`expiresAt` + `storedAt`) and fetchers validate the response shape
+via `isEnhet` / `isUnderenhet` / `isRollerResponse` before caching
+(no blind `as Enhet` cast).
 
 The module is `src/lib/session-cache.ts`. Its rules:
 
@@ -44,10 +48,10 @@ refresh doesn't re-hit (see `docs/notes/brreg-api.md`
   'none', candidates: SearchHit[]}` (orgnr is included on the auto
   variant). Replaces the older `string | null` shape.
 - `picker-choice:<host>` → `string | null` (null = "Ingen av disse").
-  Set by the sidebar when the user resolves a picker prompt. Wins
-  over the band cache: if a choice is cached, both
-  `searchByHostname` and `searchByHostnameDetailed` short-circuit
-  before running the pipeline.
+  Set by the picker (either surface) when the user resolves it. Wins
+  over the band cache: if a choice is cached,
+  `searchByHostnameDetailed` short-circuits before running the
+  pipeline.
 - `rejected:<host>` → `string[]`. Orgnrs the user said "Feil bedrift?"
   on for this host. The pipeline filters these out before scoring,
   and the band cache key folds the sorted set in
@@ -81,11 +85,12 @@ constituent query individually (`Promise.allSettled` via
 
 In both failure cases the next visit re-runs the pipeline instead of
 serving a 24h "no match" — an offline or throttled moment must never
-pin `{band: 'none'}` for a day. The no-label early exit (hostname has
-no usable brand label) still caches `'none'`: that's a deterministic
-property of the hostname, not a network outcome. Picker-choice and
-rejected caches are written only on explicit user action and are
-unaffected by query failures.
+pin `{band: 'none'}` for a day. IP literals, intranet names and hosts
+with no usable brand label are decided locally: never sent and never
+cached, since internal host names have no business in storage (see
+resolution.md § label-extraction). Picker-choice and rejected caches
+are written only on explicit user action and are unaffected by query
+failures.
 
 All brreg fetches carry `AbortSignal.timeout(8000)`; a timeout rejects
 the fetch and counts as a failure like any other (no retries).

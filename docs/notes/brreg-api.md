@@ -32,9 +32,8 @@ Egenkapitalandel rows and red loss/negative-equity flagging). The
 trend/YoY code is correct — unit tests and the preview harness exercise
 it with synthetic multi-year data — but dormant against the live API.
 This is NOT a bug to "fix" by probing harder; the data is simply not
-exposed. Whether to keep the dormant code as future-proofing (the note
-above long assumed brreg returns one entry *per year*) or remove it is
-an open decision.
+exposed. Decided 2026-06-22: keep the dormant code as future-proofing
+(the note above long assumed brreg returns one entry *per year*).
 
 <!-- SECTION: regnskap-500-unsupported-plan -->
 ## 500 from regnskap = "not in the open API", not a network failure
@@ -69,7 +68,11 @@ the gap via `regnskapGap()` (`src/lib/regnskap.ts`): NACE 64.1x / 65.x
 API doesn't show; anything else → "brreg sitt åpne API ga feil". It
 also shows `Enhet.sisteInnsendteAarsregnskap` and links the company's
 brreg page. The verdict strip reads the filing year from that Enhet
-field, so it doesn't depend on this endpoint at all.
+field first, so a 500 no longer blanks the cell. Only when the Enhet
+has no year does the regnskap response decide it: no response or a
+bare 500 omits the cell, a 500 naming its plan gives «Levert ·
+spesialregnskap», nothing filed gives «Mangler» or «Ingen»
+(`regnskapSignal` in `src/lib/ui/verdict.ts`).
 
 <!-- SECTION: error-contract -->
 ## Error contract: search throws, [] means a real empty result
@@ -110,7 +113,7 @@ The brreg open API does not expose signaturrett/prokura on
 The data lives only behind paid Foretaksregisteret endpoints. The
 project used to carry a `SignaturResponse` type and a hidden
 `#signatur` card in `details.html` as scaffolding; both were deleted
-in `db2f24e` since they were dead code. Don't reintroduce them — and
+in `4ec8d12` since they were dead code. Don't reintroduce them — and
 don't waste a session trying to re-discover the gap.
 
 <!-- SECTION: search-drops-dots -->
@@ -122,7 +125,7 @@ both fail because the API drops the dot internally. Hostnames whose
 legal name contains punctuation (FINN.no is the canonical case)
 therefore don't resolve via brreg; the sidebar's manual search box
 is the fallback. The extension does not carry a curated override
-table to paper over this — see CLAUDE.md § "No curated domain table".
+table to paper over this — see CLAUDE.md § "No curated data".
 
 <!-- SECTION: docs-links -->
 ## Check the docs before curling

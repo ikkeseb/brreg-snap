@@ -14,10 +14,11 @@ Vite's automatic public/ copy doesn't drag BOTH source manifests into
 the output — the plugin copies exactly the right one plus the icons
 (filtering out `icons/*.md`). Scripts: `build:{firefox,chrome}`,
 `package:{firefox,chrome}`; the bare `build`/`dev`/`package` alias the
-Firefox target. The Firefox `manifest.json` stays byte-identical to
-the AMO submission — verify with `diff` against
-`git show amo-submission-1.0.0:public/manifest.json` after any
-`vite.config.ts` change.
+Firefox target. The built `manifest.json` is the source manifest
+byte for byte apart from the stamped `version` (string replace, not
+JSON re-serialisation). AMO re-serialises the manifest when it signs,
+so the signed `.xpi` never matches the repo; compare the unsigned
+package instead, as BUILD.md tells reviewers.
 
 <!-- SECTION: vite-popup-html -->
 ## Vite popup.html path quirk

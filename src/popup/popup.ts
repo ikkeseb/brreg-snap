@@ -78,13 +78,15 @@ let currentResolutionMethod: ResolutionMethod | undefined;
 // Active tab/window ids captured during resolution so the "open in
 // side panel" click can pass them to sidebar.open() synchronously —
 // Chrome's sidePanel.open needs a windowId/tabId and can't await a
-// tabs.query inside the gesture. Unused by the Firefox adapter.
+// tabs.query inside the gesture. Firefox's open() ignores them; the
+// window still goes into the panel path and the sync messages.
 let currentWindowId: number | undefined;
 let currentTabId: number | undefined;
 // Monotonic guard for loadAndRender — from the empty state the user
 // can click a manual result then a recent entry in quick succession;
 // without this the last-to-RESOLVE fetch chain paints, which can be
-// the stale one. Same pattern as the sidebar's loadRunId.
+// the stale one. The panel uses one load sequence for every flow
+// instead (panel-follow.ts); the popup has only this one.
 let loadRunId = 0;
 // Re-trigger for the "Prøv igjen" button in the full error state.
 let lastLoad: (() => void) | undefined;
@@ -193,7 +195,7 @@ function updateRejectButtonVisibility(): void {
 }
 
 async function resolveFromActiveTab(): Promise<TabContext> {
-  // Same band-aware cascade as the sidebar's resolveFromActiveTab —
+  // Same band-aware cascade the panel runs on its active tab —
   // shared in lib/ui/resolve-tab.ts. Only the tabs.query (and the
   // window/tab-id capture for the gesture-bound side-panel open)
   // lives here.

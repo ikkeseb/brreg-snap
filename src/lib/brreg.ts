@@ -276,7 +276,7 @@ function cacheKeysFor(orgnr: string): string[] {
 }
 
 // Drop everything cached for one orgnr so the next load refetches —
-// the backing for a "Hent på nytt" action.
+// the backing for the panel's «Oppdater» button.
 export async function invalidateCache(orgnr: string): Promise<void> {
   try {
     await browser.storage.session.remove(cacheKeysFor(orgnr));

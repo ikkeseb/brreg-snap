@@ -80,8 +80,10 @@ export default defineConfig({
         // Copy the manifest, stamping `"version"` from package.json —
         // the single source of truth for the version. The replacement
         // is string-level on purpose: JSON.parse/stringify would
-        // reformat the file, and the built Firefox manifest must stay
-        // byte-identical to the AMO submission when the versions match.
+        // reformat the file, and the built manifest must stay the
+        // source manifest byte for byte apart from the version. (AMO
+        // re-serialises it when signing, so the signed .xpi never
+        // matches.)
         const manifestSrc = readFileSync(
           resolve(__dirname, `public/manifest.${target}.json`),
           'utf8',
