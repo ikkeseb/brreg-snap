@@ -100,7 +100,7 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 > **Smart oppslag**: Utvidelsen finner organisasjonsnummeret enten
 > direkte i adressen eller sidetittelen, eller ved å søke i brreg på
 > domenet til nettstedet. Hvis flere bedrifter er kandidater, viser
-> utvidelsen en "Mente du …?"-velger framfor å gjette. Hvis
+> utvidelsen en «Vi fant flere mulige treff»-velger framfor å gjette. Hvis
 > ingenting matcher, kan du søke manuelt.
 >
 > **Sikkerhet og personvern**:

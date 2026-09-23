@@ -99,7 +99,7 @@ the fetch and counts as a failure like any other (no retries).
 ## Search debounce + race guard
 
 `src/lib/ui/manual-search.ts` (shared by popup and sidebar) uses a
-monotonic `searchRunId` token to drop stale `runSearch` results when
+monotonic `runId` token to drop stale `runSearch` results when
 the user keeps typing — the network can land calls out of order
 otherwise. Don't simplify it away.
 
@@ -107,7 +107,7 @@ otherwise. Don't simplify it away.
 ## Load-run-id guards
 
 Both surfaces guard their loads with a monotonic token (same pattern
-as `searchRunId`): `src/details/details.ts` with the one load sequence
+as manual search's `runId`): `src/details/details.ts` with the one load sequence
 from `src/lib/panel-follow.ts` (every flow that paints claims it — see
 sidebar-sync.md § load-race-guards), so a sync or tab event that lands
 while an older load is still fetching can't be overwritten by the

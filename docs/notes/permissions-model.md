@@ -98,8 +98,8 @@ needs a re-think, not a manifest tweak.
 <!-- SECTION: data-collection-declaration -->
 ## Firefox data collection is `browsingActivity`, required
 
-Every lookup sends the site's hostname, and name labels derived from
-it, to data.brreg.no. Mozilla counts any data "handled outside of the
+Every lookup sends the site's registrable domain, and a name label
+derived from it, to data.brreg.no. Mozilla counts any data "handled outside of the
 add-on or the local browser" as transmission, a public government API
 included, and its taxonomy puts domains under `browsingActivity`. So
 `browser_specific_settings.gecko.data_collection_permissions` is

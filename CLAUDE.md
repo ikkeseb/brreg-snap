@@ -48,7 +48,7 @@ pnpm lint:ext                              # web-ext lint on dist-firefox/ (run 
 pnpm test                                  # vitest run
 pnpm test:watch                            # vitest interactive
 pnpm exec vitest run tests/orgnr.test.ts   # single file
-pnpm exec vitest run -t "rejects cd=10"    # single test by name
+pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # single test by name
 pnpm build                                 # = build:firefox (default target)
 pnpm build:firefox                         # BROWSER=firefox -> dist-firefox/
 pnpm build:chrome                          # BROWSER=chrome   -> dist-chrome/

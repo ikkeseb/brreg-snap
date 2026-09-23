@@ -109,7 +109,7 @@ When you click the toolbar icon:
      Sends only the registrable domain (`nettbank.dnb.no` → `dnb.no`)
      and its main label to brreg, never the full URL or the title.
      Auto-resolves only when one candidate is clearly ahead; popup
-     and sidebar show a "Mente du …?" picker when several plausible
+     and sidebar show a «Vi fant flere mulige treff» picker when several plausible
      companies tie, and refuse rather than guess wrong.
    - **Free-text search fallback** — if nothing else matches, popup
      and sidebar show a search box that hits brreg's search endpoint.

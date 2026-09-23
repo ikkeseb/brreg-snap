@@ -54,7 +54,7 @@ brreg-snap henter bedriftsinfo fra Brønnøysundregistrene rett i nettleseren. K
 
 Sidepanelet gir samme informasjon med dypere oppslag. Slå på «Auto-oppdater ved fane-bytte» for å la panelet slå opp siden du ser på hver gang du bytter fane eller åpner en ny side, så lenge det er åpent.
 
-Smart oppslag: Utvidelsen finner organisasjonsnummeret enten direkte i adressen eller sidetittelen, eller ved å søke i brreg på domenet til nettstedet. Hvis flere bedrifter er kandidater, viser utvidelsen en «Mente du …?»-velger framfor å gjette. Hvis ingenting matcher, kan du søke manuelt.
+Smart oppslag: Utvidelsen finner organisasjonsnummeret enten direkte i adressen eller sidetittelen, eller ved å søke i brreg på domenet til nettstedet. Hvis flere bedrifter er kandidater, viser utvidelsen en «Vi fant flere mulige treff»-velger framfor å gjette. Hvis ingenting matcher, kan du søke manuelt.
 
 Sikkerhet og personvern:
 
@@ -81,7 +81,7 @@ brreg-snap shows Norwegian company information from the Brønnøysund Register C
 
 The side panel shows the same data in more depth. Turn on "Auto-oppdater ved fane-bytte" to have the panel look up the page you are on every time you switch tabs or open a new page, while it is open.
 
-Smart lookup: the extension finds the organisation number in the page address or title, or by searching the register for the site's domain. When several companies are plausible, it shows a "Mente du …?" picker instead of guessing. When nothing matches, you can search by hand.
+Smart lookup: the extension finds the organisation number in the page address or title, or by searching the register for the site's domain. When several companies are plausible, it shows a picker of likely matches instead of guessing. When nothing matches, you can search by hand.
 
 Security and privacy:
 
