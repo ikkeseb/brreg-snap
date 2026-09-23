@@ -17,6 +17,8 @@ import { describe, expect, it } from 'vitest';
 
 interface Manifest {
   version: string;
+  action?: { default_area?: string };
+  commands?: unknown;
   permissions?: string[];
   optional_permissions?: string[];
   host_permissions?: string[];
@@ -104,5 +106,50 @@ describe('data collection declaration', () => {
 
   it('Chrome ships no gecko block (the CWS privacy form declares it)', () => {
     expect(manifests.chrome).not.toHaveProperty('browser_specific_settings');
+  });
+});
+
+// Keyboard entry points. `commands` is a manifest key, not a
+// permission: the install prompt is unchanged. Pinned exactly so a
+// shortcut change is deliberate — the suggestions were checked against
+// both browsers' default shortcuts (docs/notes/permissions-model.md
+// § commands-and-selection). Chrome has no built-in side-panel command,
+// so it gets `open-panel`, handled in background.ts.
+const EXECUTE_ACTION = {
+  suggested_key: { default: 'Alt+Shift+O', mac: 'MacCtrl+Shift+O' },
+  description: 'Slå opp bedriften bak siden',
+};
+const OPEN_PANEL_KEYS = { default: 'Alt+Shift+S', mac: 'MacCtrl+Shift+S' };
+const EXPECTED_COMMANDS = {
+  firefox: {
+    _execute_action: EXECUTE_ACTION,
+    _execute_sidebar_action: {
+      suggested_key: OPEN_PANEL_KEYS,
+      description: 'Åpne brreg-snap i sidepanelet',
+    },
+  },
+  chrome: {
+    _execute_action: EXECUTE_ACTION,
+    'open-panel': {
+      suggested_key: OPEN_PANEL_KEYS,
+      description: 'Åpne brreg-snap i sidepanelet',
+    },
+  },
+};
+
+describe('entry points', () => {
+  it.each(['firefox', 'chrome'] as const)(
+    '%s commands are exactly the reviewed shortcuts',
+    (target) => {
+      expect(manifests[target].commands).toEqual(EXPECTED_COMMANDS[target]);
+    },
+  );
+
+  it('Firefox puts the toolbar button in the navbar on install (not the extensions menu)', () => {
+    expect(manifests.firefox.action?.default_area).toBe('navbar');
+  });
+
+  it('Chrome carries no default_area (Firefox-only key)', () => {
+    expect(manifests.chrome.action).not.toHaveProperty('default_area');
   });
 });
