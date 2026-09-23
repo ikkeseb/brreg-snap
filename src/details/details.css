@@ -222,6 +222,20 @@ dd {
   color: var(--fg);
 }
 
+/* A narrow panel stacks each label over its value: beside a
+ * max-content «Forretningsadresse» the value column shrinks until
+ * ordinary words split mid-word («Allmennaksjesels|kap»). */
+@media (max-width: 380px) {
+  dl {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  dd + dt {
+    margin-top: 8px;
+  }
+}
+
 dd a {
   color: var(--accent);
   text-decoration: none;
@@ -304,6 +318,13 @@ dd a:hover {
 
 /* --- underenheter ----------------------------------------------------- */
 
+/* Long unbreakable names and places (KONTOR/PROSESSANLEGG, KJØRSVIKBUGEN)
+ * can make the table wider than a narrow panel's card. It then scrolls
+ * inside the card instead of pushing the whole page sideways. */
+#underenheter-body {
+  overflow-x: auto;
+}
+
 table.underenheter {
   width: 100%;
   border-collapse: collapse;
@@ -315,6 +336,13 @@ table.underenheter td {
   text-align: left;
   padding: 7px 8px;
   border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 380px) {
+  table.underenheter th,
+  table.underenheter td {
+    padding: 6px 4px;
+  }
 }
 
 table.underenheter th {
