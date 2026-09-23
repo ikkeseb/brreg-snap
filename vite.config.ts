@@ -27,18 +27,15 @@ export default defineConfig({
     outDir,
     emptyOutDir: true,
     target: target === 'chrome' ? 'chrome116' : 'firefox115',
-    // esbuild minify is fast and produces correct output for our DOM
-    // code (no eval, no Function constructor, no name-sensitive
-    // reflection). Source maps are emitted into dist-*/ for local
-    // debugging only — packaging excludes them (D12); AMO review uses
-    // the full-TS source zip instead.
-    minify: 'esbuild',
+    // Vite's default minifier (Oxc since Vite 8). Source maps are
+    // emitted into dist-*/ for local debugging only — packaging excludes
+    // them (D12); AMO review uses the full-TS source zip instead.
     sourcemap: true,
     rollupOptions: {
       input: {
-        popup: resolve(__dirname, 'src/popup/popup.html'),
-        details: resolve(__dirname, 'src/details/details.html'),
-        background: resolve(__dirname, 'src/background/background.ts'),
+        popup: resolve(import.meta.dirname, 'src/popup/popup.html'),
+        details: resolve(import.meta.dirname, 'src/details/details.html'),
+        background: resolve(import.meta.dirname, 'src/background/background.ts'),
       },
       output: {
         entryFileNames: (chunk) => {
@@ -64,7 +61,7 @@ export default defineConfig({
     {
       name: 'copy-static-assets',
       closeBundle() {
-        const dist = resolve(__dirname, outDir);
+        const dist = resolve(import.meta.dirname, outDir);
         if (!existsSync(dist)) mkdirSync(dist, { recursive: true });
 
         // Vite emits HTML entries under dist/src/<dir>/<file>.html
@@ -85,11 +82,11 @@ export default defineConfig({
         // re-serialises it when signing, so the signed .xpi never
         // matches.)
         const manifestSrc = readFileSync(
-          resolve(__dirname, `public/manifest.${target}.json`),
+          resolve(import.meta.dirname, `public/manifest.${target}.json`),
           'utf8',
         );
         const pkg = JSON.parse(
-          readFileSync(resolve(__dirname, 'package.json'), 'utf8'),
+          readFileSync(resolve(import.meta.dirname, 'package.json'), 'utf8'),
         ) as { version: string };
         const versionField = /("version"\s*:\s*")[^"]*(")/g;
         const matches = manifestSrc.match(versionField);
@@ -103,9 +100,9 @@ export default defineConfig({
           resolve(dist, 'manifest.json'),
           manifestSrc.replace(versionField, `$1${pkg.version}$2`),
         );
-        if (existsSync(resolve(__dirname, 'public/icons'))) {
+        if (existsSync(resolve(import.meta.dirname, 'public/icons'))) {
           cpSync(
-            resolve(__dirname, 'public/icons'),
+            resolve(import.meta.dirname, 'public/icons'),
             resolve(dist, 'icons'),
             // Skip docs (e.g. icons/README.md) — only ship the PNGs.
             { recursive: true, filter: (src) => !src.endsWith('.md') },

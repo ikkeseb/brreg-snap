@@ -1,4 +1,7 @@
 {
+  // Extension source only. Tests (tests/tsconfig.json) and the Node-side
+  // config files (tsconfig.node.json) have their own projects, so Node's
+  // globals never leak into code that runs in the browser.
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
@@ -12,10 +15,8 @@
     "isolatedModules": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "types": ["firefox-webext-browser", "vitest/globals"],
-    "outDir": "dist",
-    "rootDir": "."
+    "noEmit": true,
+    "types": ["firefox-webext-browser"]
   },
-  "include": ["src/**/*", "tests/**/*"],
-  "exclude": ["node_modules", "dist", "web-ext-artifacts"]
+  "include": ["src/**/*"]
 }

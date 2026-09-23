@@ -1,0 +1,8 @@
+{
+  // Tests run in Node under vitest: the source settings plus Node types.
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["firefox-webext-browser", "node"]
+  },
+  "include": ["./**/*", "../src/**/*"]
+}
