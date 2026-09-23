@@ -15,8 +15,50 @@ const REGNSKAP_API = 'https://data.brreg.no/regnskapsregisteret/regnskap';
 // leaving the UI in a spinner. AbortSignal.timeout() is supported in
 // Firefox 100+ / Chrome 103+ — well below our minimum targets. An
 // abort rejects the fetch, which counts as a failure like any other
-// network error (no retry logic — callers decide what failure means).
+// network error — callers decide what failure means.
 const FETCH_TIMEOUT_MS = 8000;
+
+// The longest Retry-After a 429 may ask for and still get its one
+// retry. Longer than this the user is better served by «prøv igjen»
+// than by a spinner.
+export const MAX_RETRY_AFTER_MS = 5000;
+
+// Retry-After is either delay-seconds or an HTTP-date (RFC 9110
+// § 10.2.3). Returns the wait in ms, or undefined when the header is
+// missing or unparsable. A date in the past is "now" (0).
+export function parseRetryAfter(
+  value: string | null,
+  now: number = Date.now(),
+): number | undefined {
+  if (value === null) return undefined;
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) return Number(trimmed) * 1000;
+  // An HTTP-date always names its weekday and month; without letters
+  // Date.parse would read "-1" as the year -1.
+  if (!/[a-z]/i.test(trimmed)) return undefined;
+  const at = Date.parse(trimmed);
+  if (Number.isNaN(at)) return undefined;
+  return Math.max(0, at - now);
+}
+
+// Every brreg request goes through here: JSON accept header, the
+// timeout, and at most ONE retry on 429 when Retry-After asks for no
+// more than MAX_RETRY_AFTER_MS. Otherwise the 429 response is handed
+// back as is, and the caller's `!res.ok` branch turns it into the
+// usual transient «returned 429» error (docs/notes/brreg-api.md
+// § rate-limit).
+async function brregFetch(url: string | URL): Promise<Response> {
+  const init = (): RequestInit => ({
+    headers: { Accept: 'application/json' },
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  const res = await fetch(url, init());
+  if (res.status !== 429) return res;
+  const wait = parseRetryAfter(res.headers.get('Retry-After'));
+  if (wait === undefined || wait > MAX_RETRY_AFTER_MS) return res;
+  await new Promise<void>((resolve) => setTimeout(resolve, wait));
+  return fetch(url, init());
+}
 
 // A regnskap 500 is stable for banks and insurers, but it is also what
 // a genuine brreg outage looks like — so it is cached for hours, not a
@@ -48,10 +90,7 @@ export async function fetchEnhet(orgnr: string): Promise<Enhet> {
   const cached = await cacheGet<Enhet>(key);
   if (cached) return cached;
 
-  const res = await fetch(`${API}/enheter/${orgnr}`, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
+  const res = await brregFetch(`${API}/enheter/${orgnr}`);
   if (res.status === 404) {
     throw new Error(`No entity found for orgnr ${orgnr}.`);
   }
@@ -73,10 +112,7 @@ export async function searchEnheter(
   const url = new URL(`${API}/enheter`);
   url.searchParams.set('navn', query);
   url.searchParams.set('size', String(size));
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
+  const res = await brregFetch(url);
   if (!res.ok) throw new Error(`brreg search returned ${res.status}.`);
   const data = (await res.json()) as {
     _embedded?: { enheter?: SearchHit[] };
@@ -97,10 +133,7 @@ export async function searchEnheterWithParams(
 ): Promise<SearchHit[]> {
   const url = new URL(`${API}/enheter`);
   for (const [k, v] of params) url.searchParams.set(k, v);
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
+  const res = await brregFetch(url);
   if (!res.ok) throw new Error(`brreg search returned ${res.status}.`);
   const data = (await res.json()) as {
     _embedded?: { enheter?: SearchHit[] };
@@ -119,10 +152,7 @@ export async function fetchRoller(orgnr: string): Promise<RollerResponse> {
   const cached = await cacheGet<RollerResponse>(key);
   if (cached) return cached;
 
-  const res = await fetch(`${API}/enheter/${orgnr}/roller`, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
+  const res = await brregFetch(`${API}/enheter/${orgnr}/roller`);
   if (res.status === 404) {
     // No roles registered — treat as empty rather than a hard error.
     const empty: RollerResponse = { rollegrupper: [] };
@@ -163,10 +193,7 @@ export async function fetchUnderenhet(
   const cached = await cacheGet<Underenhet>(key);
   if (cached) return cached;
 
-  const res = await fetch(`${API}/underenheter/${orgnr}`, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
+  const res = await brregFetch(`${API}/underenheter/${orgnr}`);
   if (res.status === 404) return undefined;
   if (!res.ok) {
     throw new Error(`brreg underenhet API returned ${res.status}.`);
@@ -192,10 +219,7 @@ export async function fetchUnderenheter(
   const url = new URL(`${API}/underenheter`);
   url.searchParams.set('overordnetEnhet', orgnr);
   url.searchParams.set('size', '100');
-  const res = await fetch(url, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
+  const res = await brregFetch(url);
   if (!res.ok) {
     throw new Error(`brreg underenheter API returned ${res.status}.`);
   }
@@ -240,10 +264,7 @@ export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
   const cached = await cacheGet<RegnskapResponse>(key);
   if (cached) return cached;
 
-  const res = await fetch(`${REGNSKAP_API}/${orgnr}`, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
+  const res = await brregFetch(`${REGNSKAP_API}/${orgnr}`);
   if (res.status === 404) {
     // Many small entities have no submitted regnskap. Cache the empty
     // result so we don't re-fetch on every refresh.

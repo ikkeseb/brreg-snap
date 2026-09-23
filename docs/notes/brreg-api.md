@@ -101,9 +101,25 @@ rows, with `total` from `page.totalElements` (Posten Bring 984661185:
 133). A parent with none has no `_embedded` at all, only
 `page.totalElements: 0`.
 
-Every fetch in `brreg.ts` carries `AbortSignal.timeout(8000)`
-(Firefox 100+ / Chrome 103+). A timeout aborts the fetch with a
-rejection, which counts as a failure like any other. No retry logic.
+Every fetch in `brreg.ts` goes through `brregFetch` and carries
+`AbortSignal.timeout(8000)` (Firefox 100+ / Chrome 103+). A timeout
+aborts the fetch with a rejection, which counts as a failure like any
+other. The only retry is the one below.
+
+<!-- SECTION: rate-limit -->
+## 429: one retry when Retry-After allows it
+
+`brregFetch` retries a 429 exactly once, after the wait its
+`Retry-After` asks for (delay-seconds or an HTTP-date,
+`parseRetryAfter`), but only when that wait is at most 5 s
+(`MAX_RETRY_AFTER_MS`). No header, an unparsable one, a longer wait or
+a second 429 hands the 429 back, and the caller throws its usual
+`… returned 429.` — a transient failure: never cached, «Prøv igjen»
+offered (`describeLoadError`). Whether brreg actually sends
+Retry-After is unknown: its API docs don't mention rate limits, and no
+429 was provoked live. Per-host coalescing in the hostname pipeline
+(`docs/notes/resolution.md` § coalescing) keeps the fan-out from
+multiplying in the first place.
 
 <!-- SECTION: no-signatur -->
 ## No `fetchSignatur` — endpoint doesn't exist publicly
