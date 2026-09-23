@@ -97,13 +97,23 @@ Bands are decided in `hostname-score.ts:decideBand`:
 
 | Band | Condition | Outcome |
 |---|---|---|
-| `auto` | top ≥ 75 AND top − runner-up ≥ 10 | resolve to top candidate |
+| `auto` | top ≥ 75 AND top − runner-up ≥ 10 AND top has a hjemmeside tie | resolve to top candidate |
 | `picker` | top ≥ 45 | popup + sidebar show top-N + "Ingen av disse" |
 | `none` | otherwise | sidebar shows empty state |
 
 The AUTO margin requirement is what prevents kjedebutikker (ELKJØP
 LEKNES vs ELKJØP SVOLVÆR, both 111 via hjemmeside-exact) from
 auto-resolving.
+
+**AUTO needs a hjemmeside tie.** The top candidate's registered
+hjemmeside must be the visited site, a page on it or a subdomain of
+it (`ScoreResult.hjemmesideTie`, see § hjemmeside-normalization). A
+name match alone is a guess: medium.com and bbc.co.uk scored 81 on
+unrelated Norwegian namesakes, and the UI renders an AUTO result like
+a verified one. So name-only winners go to the picker, even well-known
+ones whose registered site is elsewhere (orkla.com: no hjemmeside;
+equinor.no: equinor.com; komplett.no: komplettgroup.com) — the right
+answer is then the picker's first row.
 
 The picker row count is `MAX_PICKER_CANDIDATES` exported from
 `hostname-search.ts` — currently 4. The constant is tied to the
@@ -188,7 +198,8 @@ compared on domain-label boundaries only:
 exact because a big site has far more satellites registered on its
 pages (funds on `/fond`, property SPVs on `/eiendom`, NRK Urørt
 artists) than owners; scored as exact, Storebrand's SPVs pushed
-STOREBRAND ASA out of the picker.
+STOREBRAND ASA out of the picker. Any of the three relations counts as
+the hjemmeside tie AUTO needs (§ bands).
 
 The konkurs/avvikling penalty (−30) skips an exact tie: then the
 registry says this is the site's own company, and its status is the

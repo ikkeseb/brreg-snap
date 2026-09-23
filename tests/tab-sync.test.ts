@@ -93,8 +93,13 @@ describe('deriveSyncAsync', () => {
   });
 
   it('falls back to hostname search when sync misses, populating host', async () => {
+    // The registered hjemmeside (live value) ties the hit to the host;
+    // AUTO needs that tie, a name match alone lands in the picker.
     searchMock.mockResolvedValue([
-      hit('YARA INTERNATIONAL ASA', '986228608', 'ASA'),
+      {
+        ...hit('YARA INTERNATIONAL ASA', '986228608', 'ASA'),
+        hjemmeside: 'www.yara.com',
+      },
     ]);
     const result = await deriveSyncAsync(
       'https://www.yara.com/about',

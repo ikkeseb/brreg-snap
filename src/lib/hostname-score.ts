@@ -170,6 +170,10 @@ const ORG_FORM_WEIGHTS: Record<string, number> = {
 export interface ScoreResult {
   score: number;
   reasons: string[];
+  // True when the candidate's registered hjemmeside is the visited
+  // site, a page on it or a subdomain of it — the registry itself ties
+  // the two. decideBand requires it for AUTO.
+  hjemmesideTie: boolean;
 }
 
 // Brreg's hjemmeside field is free text — "http://www.equinor.com",
@@ -285,12 +289,13 @@ export function scoreCandidate(
     }
   }
   if (hjemReason) reasons.push(hjemReason);
+  const hjemmesideTie = hjemScore > 0;
 
   // Hard gate: no name AND no hjemmeside relation → drop. Kills
   // unrelated candidates that happen to share org form / employee
   // count (norden.org → NORDAN AS).
   if (nameScore === 0 && hjemScore === 0) {
-    return { score: 0, reasons: ['no-relation'] };
+    return { score: 0, reasons: ['no-relation'], hjemmesideTie };
   }
 
   let score = nameScore + hjemScore;
@@ -372,7 +377,7 @@ export function scoreCandidate(
     reasons.push('inactive(-30)');
   }
 
-  return { score, reasons };
+  return { score, reasons, hjemmesideTie };
 }
 
 // Thresholds — tuned against scripts/benchmark-hostname.mjs.
@@ -381,6 +386,12 @@ export function scoreCandidate(
 // clearly ahead of the runner-up (+10) so kjedebutikker (ELKJØP
 // LEKNES vs ELKJØP SVOLVÆR, both 111 via hjemmeside-exact) don't
 // auto-resolve.
+//
+// AUTO also needs a hjemmeside tie on the top candidate (see
+// ScoreResult.hjemmesideTie). Without one the match rests on the name
+// alone — medium.com and bbc.co.uk "matched" unrelated Norwegian
+// namesakes with 81 — and the UI can't tell a guess from a verified
+// match, so a guess goes through the picker for the user to confirm.
 //
 // PICKER: top must be plausible (45) but not confident — surface
 // the top 4 with "Ingen av disse" instead of guessing.
@@ -393,10 +404,15 @@ export type ResolutionBand = 'auto' | 'picker' | 'none';
 export function decideBand(
   topScore: number,
   runnerUpScore: number | undefined,
+  topHasHjemmesideTie: boolean,
 ): ResolutionBand {
   if (topScore <= 0) return 'none';
   const runner = runnerUpScore ?? 0;
-  if (topScore >= AUTO_THRESHOLD && topScore - runner >= AUTO_MARGIN) {
+  if (
+    topHasHjemmesideTie &&
+    topScore >= AUTO_THRESHOLD &&
+    topScore - runner >= AUTO_MARGIN
+  ) {
     return 'auto';
   }
   if (topScore >= PICKER_THRESHOLD) return 'picker';

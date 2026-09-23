@@ -232,7 +232,11 @@ async function runPipeline(
 
   const top = scored[0];
   const runnerUp = scored[1];
-  const band = decideBand(top?.score ?? 0, runnerUp?.score);
+  const band = decideBand(
+    top?.score ?? 0,
+    runnerUp?.score,
+    top?.hjemmesideTie ?? false,
+  );
 
   if (band === 'auto' && top) {
     return {

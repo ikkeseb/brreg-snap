@@ -373,8 +373,9 @@ describe('scoreCandidate', () => {
 
   it('keeps the +12 band for a hjemmeside on a subdomain of the site', () => {
     const c = cand({ navn: 'UNRELATED AS', hjemmeside: 'shop.elkjop.no' });
-    const { reasons } = scoreCandidate(c, 'unrelated', 'elkjop.no');
+    const { reasons, hjemmesideTie } = scoreCandidate(c, 'unrelated', 'elkjop.no');
     expect(reasons).toContain('hjemmeside=subdomain(+12)');
+    expect(hjemmesideTie).toBe(true);
   });
 
   it('scores a hjemmeside pointing at a page on the site as a page tie', () => {
@@ -385,8 +386,9 @@ describe('scoreCandidate', () => {
       navn: 'STOREBRAND TILLERTORGET AS',
       hjemmeside: 'www.storebrand.no/eiendom',
     });
-    const { reasons } = scoreCandidate(spv, 'storebrand', 'storebrand.no');
+    const { reasons, hjemmesideTie } = scoreCandidate(spv, 'storebrand', 'storebrand.no');
     expect(reasons).toContain('hjemmeside=page(+12)');
+    expect(hjemmesideTie).toBe(true);
     const tine = cand({ navn: 'UNRELATED AS', hjemmeside: 'tine.no/om' });
     expect(scoreCandidate(tine, 'unrelated', 'tine.no').reasons).toContain(
       'hjemmeside=page(+12)',
@@ -419,15 +421,16 @@ describe('scoreCandidate', () => {
     ] as const;
     for (const [hjemmeside, host] of cases) {
       const c = cand({ navn: 'UNRELATED AS', hjemmeside });
-      const { score, reasons } = scoreCandidate(c, 'nomatch', host);
+      const { score, reasons, hjemmesideTie } = scoreCandidate(c, 'nomatch', host);
       expect(reasons, `${hjemmeside} vs ${host}`).toEqual(['no-relation']);
       expect(score).toBe(0);
+      expect(hjemmesideTie).toBe(false);
     }
   });
 
   it('gives TIDSBANKEN AS no hjemmeside credit for sbanken.no', () => {
     // Live shape. The name still carries a substring hit, so it can
-    // sit in the picker — but no longer reaches the AUTO threshold.
+    // sit in the picker — but with no tie it can never be AUTO.
     const tidsbanken = cand({
       navn: 'TIDSBANKEN AS',
       organisasjonsnummer: '999582214',
@@ -435,12 +438,13 @@ describe('scoreCandidate', () => {
       antallAnsatte: 54,
       registrertIForetaksregisteret: true,
     });
-    const { score, reasons } = scoreCandidate(
+    const { score, reasons, hjemmesideTie } = scoreCandidate(
       tidsbanken,
       'sbanken',
       'sbanken.no',
     );
     expect(reasons.some((r) => r.startsWith('hjemmeside='))).toBe(false);
+    expect(hjemmesideTie).toBe(false);
     expect(score).toBe(63); // was 75 with hjemmeside=substr(+12) → AUTO
   });
 
@@ -456,6 +460,17 @@ describe('scoreCandidate', () => {
       'hjemmeside=exact(+35)',
     );
     expect(scoreCandidate(c, 'nomatch', 'firma.dk').score).toBe(0);
+  });
+
+  it('flags a name-only candidate as having no hjemmeside tie', () => {
+    // Live shape (medium.com): MEDIUM AS, no hjemmeside, no employees.
+    const medium = cand({
+      navn: 'MEDIUM AS',
+      registrertIForetaksregisteret: true,
+    });
+    const { score, hjemmesideTie } = scoreCandidate(medium, 'medium', 'medium.com');
+    expect(score).toBe(81);
+    expect(hjemmesideTie).toBe(false);
   });
 
   it('gives no hjemmeside credit to unrelated hosts', () => {
@@ -507,30 +522,38 @@ describe('scoreCandidate', () => {
 
 describe('decideBand', () => {
   it('returns auto when top score >= 75 and margin >= 10', () => {
-    expect(decideBand(80, 60)).toBe('auto');
-    expect(decideBand(75, 65)).toBe('auto');
+    expect(decideBand(80, 60, true)).toBe('auto');
+    expect(decideBand(75, 65, true)).toBe('auto');
   });
 
   it('returns picker when top score >= 75 but margin < 10', () => {
-    expect(decideBand(80, 75)).toBe('picker');
+    expect(decideBand(80, 75, true)).toBe('picker');
+  });
+
+  it('never returns auto without a hjemmeside tie on the top candidate', () => {
+    // medium.com / bbc.co.uk: 81 on the name alone, clear margin — a
+    // guess the user has to confirm, not a verified match.
+    expect(decideBand(81, 68, false)).toBe('picker');
+    expect(decideBand(150, undefined, false)).toBe('picker');
   });
 
   it('returns picker when top score is in [45, 75)', () => {
-    expect(decideBand(50, 30)).toBe('picker');
-    expect(decideBand(74, 0)).toBe('picker');
+    expect(decideBand(50, 30, true)).toBe('picker');
+    expect(decideBand(74, 0, true)).toBe('picker');
   });
 
   it('returns none when top score < 45', () => {
-    expect(decideBand(40, 0)).toBe('none');
+    expect(decideBand(40, 0, true)).toBe('none');
+    expect(decideBand(40, 0, false)).toBe('none');
   });
 
   it('returns none when top score is 0 or negative', () => {
-    expect(decideBand(0, 0)).toBe('none');
-    expect(decideBand(-5, -10)).toBe('none');
+    expect(decideBand(0, 0, true)).toBe('none');
+    expect(decideBand(-5, -10, true)).toBe('none');
   });
 
   it('treats missing runner-up as score 0 for the margin check', () => {
-    expect(decideBand(80, undefined)).toBe('auto');
-    expect(decideBand(70, undefined)).toBe('picker');
+    expect(decideBand(80, undefined, true)).toBe('auto');
+    expect(decideBand(70, undefined, true)).toBe('picker');
   });
 });
