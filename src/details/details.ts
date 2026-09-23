@@ -344,6 +344,7 @@ function showEmptyState(host?: string, degraded = false): void {
   onScreen = { kind: 'empty', host, degraded };
   clearOrgnrFromUrl();
   currentOrgnr = undefined;
+  setBrregLink();
   sourceLabel.set(host);
   // degraded = the hostname search itself failed (offline, brreg down)
   // — "we couldn't check" must not read as a confirmed "no match".
@@ -372,6 +373,7 @@ function showPicker(host: string, candidates: SearchHit[]): void {
   onScreen = { kind: 'picker', host, candidates };
   sourceLabel.set(host);
   currentOrgnr = undefined;
+  setBrregLink();
   clearOrgnrFromUrl();
   picker.render(host, candidates);
 }
