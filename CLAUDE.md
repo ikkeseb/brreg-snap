@@ -2,27 +2,25 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Release state + active work
+## Active work + release rules
 
-**`v1.3.0` is tagged on `main`** (frontend overhaul: verdict strip,
-light theme, honest degraded states — 2026-07-05) with a GitHub
-Release carrying all three artifacts. **Store uploads are Seb's
-manual step**: follow `docs/submission-kit/1.3.0/` (amo.md, cws.md —
-includes a listing-text fix removing the false «signaturrett» claim).
-Until review passes, **stores run `v1.1.0`**; `amo-submission-1.1.0`
-marks what AMO last reviewed (v1.2.0 was tagged but never submitted —
-its changes ship in 1.3.0). After submitting, tag
-`amo-submission-1.3.0`. `main` is the only long-running branch.
-Docs-only changes that don't affect the `.xpi` may land on `main`
-directly.
+Active work is driven by `docs/plans/2026-09-23-plan.md` — read its
+Decisions and Progress first; evidence per item is in
+`docs/plans/2026-09-23-findings.md`. Release state is not restated
+here: it lives in git tags (`v*` = tagged release, `amo-submission-*`
+= what was uploaded to the stores) and GitHub Releases.
 
-Active work is driven by `docs/plans/2026-07-04-fresh-eyes-audit.md`
-(six phases; see its Progress block — Phases 1–3 done). Support email
-everywhere: `sebastian@nuez.no`. When prepping a store submission,
-generate a committed copy-paste kit in `docs/submission-kit/<version>/`
-(recipe in the plan's Progress block).
-Chrome-port history + decision log (D1–D15): `docs/chrome-port.md`
-(historical).
+- `main` is the only long-running branch. Docs-only changes that don't
+  affect the `.xpi` may land on `main` directly.
+- Support email everywhere: `sebastian@nuez.no`.
+- Store submission kit: when prepping a store submission, generate a
+  **committed** kit in `docs/submission-kit/<version>/` — one file per
+  destination (amo.md, cws.md) with the EXACT copy-paste text for every
+  store form field plus release notes, topped with a short numbered
+  upload recipe. Source the content from `docs/amo-submission.md`,
+  `docs/cws-submission.md` and `CHANGELOG.md`; those stay canonical.
+- Chrome-port history + decision log (D1–D15): `docs/chrome-port.md`
+  (historical).
 
 Standing gotchas that survive releases:
 
@@ -119,10 +117,10 @@ grep -n 'SECTION: regnskap-500-unsupported-plan' docs/notes/brreg-api.md
 Every orgnr resolves via the live brreg API only — no static
 hostname → orgnr table, even for hard cases (FINN.no, regulated
 subsidiaries). Hosts brreg can't disambiguate fall through to the
-inline manual search in both popup and sidebar empty states. The
-popup empty state also surfaces a `storage.session`-scoped recents
-list (`src/popup/recent.ts`, max 5) so the user can re-open a
-recently viewed orgnr without re-typing.
+inline manual search in both popup and sidebar empty states. Both
+empty states also surface a `storage.session`-scoped recents list
+(`src/lib/ui/recent.ts`, max 5) so the user can re-open a recently
+viewed orgnr without re-typing.
 
 ## Security constraints (non-negotiable)
 
