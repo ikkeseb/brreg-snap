@@ -26,8 +26,8 @@ export default defineConfig(
       'node_modules/',
       'coverage/',
       '.claude/',
-      // Preview harness (browser shim + dev server): not linted yet.
-      'scripts/preview/',
+      // Preview harness browser shim (browser globals): not linted yet.
+      'scripts/preview/shim.js',
     ],
   },
   {
