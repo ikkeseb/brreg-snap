@@ -1,7 +1,7 @@
 # Resolution cascade
 
 Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`,
-`src/lib/hostname-search.ts`.
+`src/lib/hostname-search.ts`, `src/lib/company-load.ts`.
 
 <!-- SECTION: cascade -->
 ## Cascade order
@@ -42,6 +42,32 @@ param wins amid other digits (abstaining if two named values disagree).
 Abstaining drops through to the hostname pipeline / picker: better no
 answer than a confidently wrong one. The named-param + ambiguity cases
 are pinned in `tests/orgnr.test.ts`.
+
+<!-- SECTION: orgnr-lookup -->
+## An orgnr in hand: enhet, else underenhet → parent
+
+Every company view on both surfaces loads its orgnr through
+`loadCompany` in `src/lib/company-load.ts`, wherever the orgnr came
+from: URL, title, panel hint, sync message, recents, drill-in, and
+the manual search box (which calls `lookupOrgnr` directly).
+`/enheter/{orgnr}` 404s for an underenhet (a branch: the number on a
+receipt or a branch page, e.g. 973160834 DNB BANK ASA AVD ALTA), so a
+404 retries `/underenheter/{orgnr}` and shows its `overordnetEnhet`,
+with an «Avdeling: <navn> (<orgnr>)» line above the verdict on both
+surfaces. A deleted underenhet (`SlettetUnderEnhet`, no parent) and an
+orgnr that is neither are permanent answers: the error state offers no
+«Prøv igjen».
+
+The manual search box takes the same route for orgnr-shaped input:
+brreg's `navn=` search can't find a company by its number (0 hits for
+`923609016`, unrelated names for `923 609 016`). `parseOrgnrQuery`
+accepts the digits with spaces, dots, U+00A0 and the invoice form
+`NO 923 609 016 MVA`. A valid orgnr is looked up directly and shown as
+the one hit. An underenhet row reads «<navn> — avdeling av <parent>»,
+and selecting it loads the branch orgnr through the fallback above.
+Nine digits that fail mod-11 get «… er ikke et gyldig
+organisasjonsnummer.» without a request. Pinned in
+`tests/company-load.test.ts` and `tests/manual-search.test.ts`.
 
 <!-- SECTION: mod11-module -->
 ## Why `mod11.ts` is its own module

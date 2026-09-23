@@ -9,6 +9,10 @@ export interface HitSummaryOptions {
   // Picker rows append ", N ansatte" to the orgnr meta line as an
   // extra disambiguation signal; manual-search rows keep it short.
   includeAnsatte?: boolean;
+  // The hit is an underenhet: its parent's name, shown as
+  // «<navn> — avdeling av <parent>» so the user knows which company
+  // selecting it opens.
+  avdelingAv?: string;
 }
 
 export function appendHitSummary(
@@ -19,6 +23,12 @@ export function appendHitSummary(
   const name = document.createElement('span');
   name.className = 'picker-item-name';
   name.textContent = hit.navn;
+  if (opts.avdelingAv) {
+    const parent = document.createElement('span');
+    parent.className = 'hit-avdeling';
+    parent.textContent = ` — avdeling av ${opts.avdelingAv}`;
+    name.appendChild(parent);
+  }
   container.appendChild(name);
 
   // Næring disambiguates rows that share a name root — "VG CONSULT",

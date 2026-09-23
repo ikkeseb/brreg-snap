@@ -7,12 +7,7 @@ import {
   getAutoSync,
   setAutoSync,
 } from '../lib/auto-sync-settings.js';
-import {
-  fetchEnhet,
-  fetchRegnskap,
-  fetchRoller,
-  fetchUnderenheter,
-} from '../lib/brreg.js';
+import { isPermanentLoadError, loadCompany } from '../lib/company-load.js';
 import { formatRelativeTime } from '../lib/format.js';
 import { searchByHostnameDetailed } from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
@@ -38,12 +33,8 @@ import {
   type ResolutionMethod,
 } from '../lib/ui/resolve-tab.js';
 import { createSourceLabel } from '../lib/ui/source-label.js';
-import type {
-  RegnskapResponse,
-  RollerResponse,
-  SearchHit,
-  UnderenheterPage,
-} from '../types/brreg.js';
+import { avdelingNote } from '../lib/ui/summary-lines.js';
+import type { SearchHit } from '../types/brreg.js';
 import { $ } from './render/dom.js';
 import { renderHeader } from './render/header.js';
 import { renderNokkeltall } from './render/nokkeltall.js';
@@ -61,6 +52,7 @@ const retryLoadBtn = $('retry-load') as HTMLButtonElement;
 const skeletonEl = $('skeleton');
 const resultEl = $('result');
 const nameEl = $('name');
+const avdelingNoteEl = $('avdeling-note');
 const brregLink = $('brreg-link') as HTMLAnchorElement;
 const footerUpdated = $('footer-updated');
 const updatedTime = $('updated-time') as HTMLTimeElement;
@@ -81,6 +73,10 @@ const resolutionActionsEl = $('resolution-actions');
 const rejectChoiceBtn = $('reject-choice') as HTMLButtonElement;
 const backBtn = $('back-link') as HTMLButtonElement;
 
+const BRREG_LINK_FALLBACK = 'https://virksomhet.brreg.no/nb/oppslag/enheter';
+
+// The orgnr asked for (URL, sync, search). For an underenhet that is
+// not the company on screen, which is its parent.
 let currentOrgnr: string | undefined;
 let currentResolutionMethod: ResolutionMethod | undefined;
 let lastUpdatedAt: number | undefined;
@@ -311,11 +307,18 @@ function updateBackButton(): void {
     window.history.state.method !== 'drill-in';
 }
 
+function setBrregLink(orgnr?: string): void {
+  brregLink.href = orgnr
+    ? `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`
+    : BRREG_LINK_FALLBACK;
+}
+
 function showError(err: unknown): void {
   setState('error');
   statusEl.textContent = describeLoadError(err);
-  // "Prøv igjen" only makes sense when there is a load to re-trigger.
-  errorActionsEl.hidden = lastLoad === undefined;
+  // "Prøv igjen" only makes sense when there is a load to re-trigger
+  // and asking again could change the answer — a not-found can't.
+  errorActionsEl.hidden = lastLoad === undefined || isPermanentLoadError(err);
 }
 
 function showEmptyState(host?: string, degraded = false): void {
@@ -379,34 +382,29 @@ async function loadOrgnr(
     void loadOrgnr(orgnr, method);
   };
 
-  brregLink.href = `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`;
+  setBrregLink(orgnr);
 
   setState('loading');
   statusEl.textContent = `Henter ${orgnr}…`;
 
   try {
-    // Run in parallel — none of these depend on each other and the
-    // user is waiting on the slowest of four. The three soft
-    // dependencies map a failure to undefined = "couldn't ask", distinct
-    // from "asked, none registered": each renderer says it couldn't
-    // fetch instead of claiming an empty registry.
-    const [enhet, roller, underenheter, regnskap] = await Promise.all([
-      fetchEnhet(orgnr),
-      fetchRoller(orgnr).catch((): RollerResponse | undefined => undefined),
-      fetchUnderenheter(orgnr).catch(
-        (): UnderenheterPage | undefined => undefined,
-      ),
-      fetchRegnskap(orgnr).catch(
-        (): RegnskapResponse | undefined => undefined,
-      ),
-    ]);
+    // The fetch-and-failure policy is shared with the popup: roller,
+    // underenheter and regnskap come back undefined when their fetch
+    // failed ("couldn't ask"), and each renderer says so instead of
+    // claiming an empty registry. An underenhet orgnr loads its parent.
+    const company = await loadCompany(orgnr, { underenheter: true });
     if (run.isStale()) return;
+    const { enhet, avdeling, roller, underenheter, regnskap } = company;
 
     // Stamp the recent stack now that the Enhet is confirmed — same
     // rule as the popup: never persist orgnrs that failed to fetch.
     void pushRecent(enhet.organisasjonsnummer, enhet.navn);
+    // For an underenhet that is the parent — the company on screen.
+    setBrregLink(enhet.organisasjonsnummer);
 
     renderHeader(enhet, regnskap);
+    avdelingNoteEl.hidden = !avdeling;
+    avdelingNoteEl.textContent = avdeling ? avdelingNote(avdeling) : '';
     renderOverview(enhet, roller);
     renderContact(enhet);
     renderRoles(roller, navigateToRelated);

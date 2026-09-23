@@ -87,8 +87,11 @@ The detail fetchers (`fetchEnhet`, `fetchUnderenhet`, `fetchRoller`,
 cases — roller 404 → empty, regnskap 404 → empty, regnskap 500 →
 unavailable (above), underenhet 404 → `undefined` (so an orgnr lookup
 can fall back without try/catch) — and throw on everything else.
-Callers turn a soft dependency's rejection into `undefined` and render
-"Kunne ikke hente …", never the empty state.
+`loadCompany` in `src/lib/company-load.ts` is the one place that
+turns a soft dependency's rejection into `undefined`; the renderers
+then say "Kunne ikke hente …", never the empty state. It also owns the
+enhet 404 → underenhet → parent fallback (`docs/notes/resolution.md`
+§ orgnr-lookup).
 
 `fetchUnderenheter` returns `{ items, total }`: one request, first 100
 rows, with `total` from `page.totalElements` (Posten Bring 984661185:

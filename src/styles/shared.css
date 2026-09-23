@@ -221,6 +221,20 @@ body {
   white-space: nowrap;
 }
 
+/* "Avdeling: <navn> (<orgnr>)" above the verdict: the orgnr looked up
+ * was a branch, and the view shows its parent. */
+.avdeling-note {
+  margin: 8px 0 0;
+  padding: 5px 9px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--fg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-wrap: anywhere;
+}
+
 /* orgnr + click-to-copy */
 
 .orgnr {
@@ -364,6 +378,12 @@ body {
   font-weight: 500;
   color: var(--fg-strong);
   font-size: 13px;
+}
+
+/* " — avdeling av <parent>" after an underenhet's name in search. */
+.hit-avdeling {
+  font-weight: 400;
+  color: var(--muted);
 }
 
 .picker-item-naering {

@@ -5,9 +5,18 @@
 // helps. Keyed on error name + the stable message strings thrown by
 // src/lib/brreg.ts (same repo, covered by tests).
 
+import { DeletedAvdelingError } from '../company-load.js';
+import { formatDateNumeric } from '../format.js';
+
 export function describeLoadError(err: unknown): string {
   const name = err instanceof Error ? err.name : '';
   const message = err instanceof Error ? err.message : String(err);
+
+  if (err instanceof DeletedAvdelingError) {
+    const { navn, organisasjonsnummer, slettedato } = err.avdeling;
+    const when = formatDateNumeric(slettedato);
+    return `${organisasjonsnummer} er underenheten ${navn}, som er slettet${when ? ` ${when}` : ''}.`;
+  }
 
   // AbortSignal.timeout() rejects with TimeoutError (spec) — some
   // engines have shipped AbortError for it, so accept both.

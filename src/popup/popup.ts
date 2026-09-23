@@ -8,7 +8,11 @@ import {
   type PanelMessage,
   type PanelTarget,
 } from '../lib/panel-protocol.js';
-import { fetchEnhet, fetchRegnskap, fetchRoller } from '../lib/brreg.js';
+import {
+  isPermanentLoadError,
+  loadCompany,
+  type CompanyData,
+} from '../lib/company-load.js';
 import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
 import { formatAddress, formatNaering } from '../lib/format.js';
 import { findRoleHolder } from '../lib/roller.js';
@@ -24,13 +28,9 @@ import {
   type TabContext,
 } from '../lib/ui/resolve-tab.js';
 import { createSourceLabel } from '../lib/ui/source-label.js';
+import { avdelingNote } from '../lib/ui/summary-lines.js';
 import { deriveVerdict, renderVerdict } from '../lib/ui/verdict.js';
-import type {
-  Enhet,
-  RegnskapResponse,
-  RollerResponse,
-  SearchHit,
-} from '../types/brreg.js';
+import type { SearchHit } from '../types/brreg.js';
 
 const app = document.getElementById('app') as HTMLElement;
 const brandMark = document.getElementById('brand-mark') as HTMLImageElement;
@@ -283,32 +283,23 @@ async function loadAndRender(
   try {
     // Roller and regnskap are extra API calls but live behind the same
     // 24h session cache, and both feed the quick glance: daglig leder
-    // in the rows, "leverer regnskap?" in the verdict strip. They are
-    // soft dependencies — a failure maps to undefined ("couldn't ask"):
-    // the verdict omits what it can't back, and the Daglig leder row
-    // says it couldn't fetch rather than "—" (none registered).
-    const [enhet, roller, regnskap] = await Promise.all([
-      fetchEnhet(orgnr),
-      fetchRoller(orgnr).catch(
-        (): RollerResponse | undefined => undefined,
-      ),
-      fetchRegnskap(orgnr).catch(
-        (): RegnskapResponse | undefined => undefined,
-      ),
-    ]);
+    // in the rows, "leverer regnskap?" in the verdict strip.
+    // They are soft dependencies — a failure maps to undefined
+    // ("couldn't ask"): the verdict omits what it can't back, and the
+    // Daglig leder row says it couldn't fetch rather than "—" (none
+    // registered). An underenhet orgnr loads its parent (company-load).
+    const company = await loadCompany(orgnr);
     if (myRunId !== loadRunId) return;
-    renderEnhet(enhet, roller, regnskap);
+    // For an underenhet that is the parent — the company on screen.
+    setBrregLink(company.enhet.organisasjonsnummer);
+    renderEnhet(company);
   } catch (err) {
     if (myRunId !== loadRunId) return;
     showError(err);
   }
 }
 
-function renderEnhet(
-  enhet: Enhet,
-  roller: RollerResponse | undefined,
-  regnskap: RegnskapResponse | undefined,
-): void {
+function renderEnhet({ enhet, avdeling, roller, regnskap }: CompanyData): void {
   setState('result');
   resultEl.replaceChildren();
 
@@ -325,6 +316,13 @@ function renderEnhet(
   orgnrEl.className = 'orgnr';
   renderOrgnrCopy(orgnrEl, enhet.organisasjonsnummer);
   resultEl.appendChild(orgnrEl);
+
+  if (avdeling) {
+    const note = document.createElement('p');
+    note.className = 'avdeling-note';
+    note.textContent = avdelingNote(avdeling);
+    resultEl.appendChild(note);
+  }
 
   // The verdict strip answers the user's actual question ("kan jeg
   // stole på dette firmaet?") before the detail rows: status, age,
@@ -408,8 +406,9 @@ function showError(err: unknown): void {
   setDetailsLink();
   statusEl.textContent = describeLoadError(err);
   // "Prøv igjen" only makes sense when there is a load to re-trigger —
-  // an init-time resolution failure has nothing to retry.
-  errorActionsEl.hidden = lastLoad === undefined;
+  // an init-time resolution failure has nothing to retry — and when
+  // asking again could change the answer: a not-found can't.
+  errorActionsEl.hidden = lastLoad === undefined || isPermanentLoadError(err);
 }
 
 function setState(
