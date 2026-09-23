@@ -6,6 +6,7 @@ import {
   generateNordicVariants,
   hostnameLabel,
   normalizeHjemmeside,
+  registrableDomain,
   scoreCandidate,
 } from '../src/lib/hostname-score.js';
 import type { SearchHit } from '../src/types/brreg.js';
@@ -129,6 +130,92 @@ describe('hostnameLabel', () => {
     // raw ACE string (which can never match a registered name).
     expect(hostnameLabel('xn--.no')).toBeUndefined(); // empty payload
     expect(hostnameLabel('xn--a-b.no')).toBeUndefined(); // truncated
+  });
+
+  it('uses the tenant, not the platform, on hosting-platform subdomains', () => {
+    // Before: 'pages' / 'github' / 'myshopify' — queries that could only
+    // surface unrelated companies (firma.pages.dev → PRISMATIC PAGES AS).
+    expect(hostnameLabel('firma.pages.dev')).toBe('firma');
+    expect(hostnameLabel('nrkbeta.github.io')).toBe('nrkbeta');
+    expect(hostnameLabel('butikk.myshopify.com')).toBe('butikk');
+    expect(hostnameLabel('www.firma.netlify.app')).toBe('firma');
+  });
+
+  it('abstains on IP literals and intranet hosts', () => {
+    // Before: 192.168.10.20 → '10', jira.corp.internal → 'corp' —
+    // both sent to brreg.
+    expect(hostnameLabel('192.168.10.20')).toBeUndefined();
+    expect(hostnameLabel('172.16.254.100')).toBeUndefined();
+    expect(hostnameLabel('jira.corp.internal')).toBeUndefined();
+    expect(hostnameLabel('intranet.company.local')).toBeUndefined();
+    expect(hostnameLabel('router.home.arpa')).toBeUndefined();
+    expect(hostnameLabel('sites.google.com')).toBeUndefined();
+  });
+});
+
+describe('registrableDomain', () => {
+  it('reduces subdomains to the registrable domain', () => {
+    expect(registrableDomain('nettbank.dnb.no')).toBe('dnb.no');
+    expect(registrableDomain('www.dnb.no')).toBe('dnb.no');
+    expect(registrableDomain('dnb.no')).toBe('dnb.no');
+    expect(registrableDomain('a.b.c.yara.com')).toBe('yara.com');
+  });
+
+  it('keeps one label left of a multi-part public suffix', () => {
+    expect(registrableDomain('www.bbc.co.uk')).toBe('bbc.co.uk');
+    expect(registrableDomain('shop.company.co.uk')).toBe('company.co.uk');
+    expect(registrableDomain('bydel.oslo.kommune.no')).toBe('oslo.kommune.no');
+  });
+
+  it('keeps the tenant on hosting platforms', () => {
+    expect(registrableDomain('firma.github.io')).toBe('firma.github.io');
+    expect(registrableDomain('blogg.firma.github.io')).toBe('firma.github.io');
+    expect(registrableDomain('firma.pages.dev')).toBe('firma.pages.dev');
+    expect(registrableDomain('firma.wixsite.com')).toBe('firma.wixsite.com');
+  });
+
+  it('normalizes case and a trailing dot', () => {
+    expect(registrableDomain('WWW.DNB.NO.')).toBe('dnb.no');
+  });
+
+  it('refuses IPv4 and IPv6 literals', () => {
+    // `new URL().hostname` shapes: IPv6 stays bracketed, and every IPv4
+    // spelling (0x7f.1, 3232235777) is normalized to dotted decimal.
+    expect(registrableDomain('192.168.10.20')).toBeUndefined();
+    expect(registrableDomain('10.0.0.12')).toBeUndefined();
+    expect(registrableDomain('127.0.0.1')).toBeUndefined();
+    expect(registrableDomain('[::1]')).toBeUndefined();
+    expect(registrableDomain('[2001:db8::1]')).toBeUndefined();
+    expect(registrableDomain(new URL('http://3232235777/').hostname)).toBeUndefined();
+  });
+
+  it('refuses single-label and intranet/special-use hosts', () => {
+    for (const host of [
+      'localhost',
+      'intranet',
+      'printer.local',
+      'jira.corp.internal',
+      'nas.lan',
+      'router.home.arpa',
+      'files.home',
+      'app.localhost',
+      'site.test',
+      'www.example',
+      'x.invalid',
+      'abc.onion',
+    ]) {
+      expect(registrableDomain(host), host).toBeUndefined();
+    }
+  });
+
+  it('refuses hosts that are themselves a public suffix', () => {
+    expect(registrableDomain('co.uk')).toBeUndefined();
+    expect(registrableDomain('kommune.no')).toBeUndefined();
+    expect(registrableDomain('github.io')).toBeUndefined();
+    expect(registrableDomain('www.github.io')).toBeUndefined();
+    // Path-tenant platform: the tenant is in the URL path, never in the
+    // host, so the host abstains instead of matching GOOGLE NORWAY AS.
+    expect(registrableDomain('sites.google.com')).toBeUndefined();
   });
 });
 

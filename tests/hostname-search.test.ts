@@ -225,6 +225,64 @@ describe('searchByHostnameDetailed', () => {
   });
 });
 
+describe('brreg queries', () => {
+  beforeEach(() => {
+    installStorageMock();
+    searchMock.mockReset();
+    searchMock.mockResolvedValue([]);
+  });
+
+  const calls = () =>
+    searchMock.mock.calls.map((c) => Object.fromEntries(c[0] as URLSearchParams));
+
+  it('queries the tenant on hosting-platform subdomains', async () => {
+    await searchByHostnameDetailed('firma.pages.dev');
+    const params = calls();
+    expect(params).toContainEqual(
+      expect.objectContaining({ hjemmeside: 'firma.pages.dev' }),
+    );
+    const navn = params.filter((p) => 'navn' in p).map((p) => p.navn);
+    expect(navn).toContain('firma');
+    expect(navn.some((n) => n?.includes('pages'))).toBe(false);
+  });
+});
+
+describe('hosts that never reach brreg', () => {
+  let store: StorageMap;
+
+  beforeEach(() => {
+    store = installStorageMock();
+    searchMock.mockReset();
+  });
+
+  // Intranet names and IP literals used to go out as hjemmeside=/navn=
+  // queries (192.168.10.20 → navn=10, jira.corp.internal → navn=corp).
+  const hosts = [
+    '192.168.10.20',
+    '10.0.0.12',
+    '[::1]',
+    '[fe80::1]',
+    'localhost',
+    'intranet',
+    'jira.corp.internal',
+    'printer.local',
+    'nas.lan',
+    'router.home.arpa',
+    'sites.google.com',
+  ];
+
+  it.each(hosts)('%s resolves to none locally, sends nothing, stores nothing', async (host) => {
+    expect(await searchByHostnameDetailed(host)).toEqual({
+      band: 'none',
+      candidates: [],
+      complete: true,
+    });
+    expect(await searchByHostname(host)).toBeUndefined();
+    expect(searchMock).not.toHaveBeenCalled();
+    expect(Object.keys(store)).toEqual([]);
+  });
+});
+
 describe('pipeline failure handling (network errors)', () => {
   let store: StorageMap;
 

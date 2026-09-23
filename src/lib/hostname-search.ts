@@ -22,6 +22,7 @@ import {
   decideBand,
   generateNordicVariants,
   hostnameLabel,
+  registrableDomain,
   scoreCandidate,
   type ResolutionBand,
 } from './hostname-score.js';
@@ -262,13 +263,14 @@ async function resolveInternal(
   hostname: string,
   rejected: string[] = [],
 ): Promise<PipelineOutcome> {
+  const domain = registrableDomain(hostname);
   const label = queryFromHostname(hostname);
-  if (!label) {
-    // No usable label is a deterministic property of the hostname, not
-    // a network outcome — safe to cache.
-    const empty: HostnameResult = { band: 'none', candidates: [] };
-    await cacheSet(bandCacheKey(hostname, rejected), empty);
-    return { result: empty, complete: true };
+  if (!domain || !label) {
+    // IP literals, intranet hosts and hosts with nothing brandable are
+    // decided locally and never sent to brreg. Not cached either: the
+    // check is cheap and deterministic, and internal host names have
+    // no business sitting in storage.
+    return { result: { band: 'none', candidates: [] }, complete: true };
   }
 
   const cacheKey = bandCacheKey(hostname, rejected);

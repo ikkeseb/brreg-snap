@@ -47,38 +47,89 @@ export function generateNordicVariants(label: string): string[] {
 // weight. When the host ends in one of these, the registrable label
 // sits one part further left (company.co.uk → "company",
 // oslo.kommune.no → "oslo" — not "co" / "kommune").
-const MULTI_PART_SUFFIXES = new Set([
+const MULTI_PART_SUFFIXES = [
   'co.uk', 'org.uk', 'ac.uk', 'gov.uk',
   'com.au', 'net.au', 'org.au',
   'co.nz', 'co.za', 'co.jp', 'co.kr',
   'com.br', 'com.mx', 'com.cn', 'com.tr', 'com.pl', 'com.sg',
   'kommune.no', 'fylkeskommune.no',
+];
+
+// Hosting platforms that give each customer a subdomain
+// (firma.netlify.app, butikk.myshopify.com). The tenant label is the
+// brand; the platform label ("netlify", "pages") could only ever match
+// an unrelated company. Same kind of generic suffix knowledge as above,
+// not curated company data, and just as deliberately short.
+// sites.google.com is here so the bare host counts as a suffix: its
+// tenant lives in the URL path, which the pipeline never sees, so the
+// host abstains instead of resolving to GOOGLE NORWAY AS.
+const HOSTING_PLATFORM_SUFFIXES = [
+  'github.io', 'gitlab.io', 'pages.dev', 'workers.dev', 'netlify.app',
+  'vercel.app', 'web.app', 'firebaseapp.com', 'herokuapp.com',
+  'onrender.com', 'azurewebsites.net', 'blogspot.com', 'wordpress.com',
+  'wixsite.com', 'squarespace.com', 'myshopify.com', 'webflow.io',
+  'framer.website', 'notion.site', 'sites.google.com',
+];
+
+const PUBLIC_SUFFIXES = new Set([
+  ...MULTI_PART_SUFFIXES,
+  ...HOSTING_PLATFORM_SUFFIXES,
 ]);
 
-// Pull the brandable part out of a hostname for use as a search label.
-// `www.yara.com` → `yara`, `shop.mestergruppen.no` → `mestergruppen`,
-// `nrk.no` → `nrk`. Strips `www.` and the public suffix (single- or
-// multi-part), then takes the rightmost remaining label. IDN labels
-// arrive punycoded from `new URL().hostname` and are decoded back to
-// human text (xn--blbr-roah.no → "blåbær") so name search can match
-// æ/ø/å brands. Returns undefined — the pipeline's abstain signal,
-// `resolveInternal` short-circuits to band 'none' / manual search —
-// when nothing brandable remains: single-label hosts, bare public
-// suffixes, labels shorter than 2 chars, or xn-- labels that fail to
-// decode (better manual search than querying a raw ACE string that
-// can never match a registered name).
-export function hostnameLabel(hostname: string): string | undefined {
-  const stripped = hostname.replace(/^www\./i, '').toLowerCase();
-  const parts = stripped.split('.');
-  if (parts.length < 2) return undefined;
+// TLDs that never have a public registrant: special-use names
+// (RFC 6761/6762/7686/8375/9476) plus the de-facto intranet ones.
+// Asking brreg about jira.corp.internal or printer.local could only
+// leak internal host names into a public API's logs.
+const NON_PUBLIC_TLDS = new Set([
+  'localhost', 'localdomain', 'local', 'internal', 'intranet', 'lan',
+  'home', 'corp', 'arpa', 'test', 'example', 'invalid', 'onion', 'alt',
+]);
 
-  let idx = parts.length - 2;
-  if (MULTI_PART_SUFFIXES.has(parts.slice(-2).join('.'))) {
-    if (parts.length < 3) return undefined; // host IS a public suffix
-    idx = parts.length - 3;
+// The part of a visited host a company actually registers:
+// nettbank.dnb.no → dnb.no, shop.company.co.uk → company.co.uk,
+// firma.github.io → firma.github.io. Returns undefined — "never ask
+// brreg about this host" — for IP literals, single-label and
+// intranet/special-use hosts, and hosts that ARE a public suffix.
+export function registrableDomain(hostname: string): string | undefined {
+  const host = hostname
+    .toLowerCase()
+    .replace(/\.+$/, '')
+    .replace(/^www\./, '');
+  // IPv6 literals arrive bracketed ("[::1]"); single-label hosts
+  // (localhost, intranet, extension ids) have no dot.
+  if (host.includes(':') || !host.includes('.')) return undefined;
+  const parts = host.split('.');
+  const tld = parts[parts.length - 1] ?? '';
+  // No real TLD is all-numeric, so a numeric one means an IPv4 literal
+  // (the URL parser normalises every IPv4 spelling to dotted decimal).
+  if (/^\d+$/.test(tld) || NON_PUBLIC_TLDS.has(tld)) return undefined;
+  if (PUBLIC_SUFFIXES.has(host)) return undefined;
+  // Longest listed suffix first; the registrable part is one label
+  // to its left. Unlisted hosts fall back to the last two labels.
+  for (let i = 1; i < parts.length - 1; i++) {
+    if (PUBLIC_SUFFIXES.has(parts.slice(i).join('.'))) {
+      return parts.slice(i - 1).join('.');
+    }
   }
+  return parts.slice(-2).join('.');
+}
 
-  let base = parts[idx];
+// Pull the brandable part out of a hostname for use as a search label:
+// the leftmost label of its registrable domain. `www.yara.com` →
+// `yara`, `shop.mestergruppen.no` → `mestergruppen`, `firma.pages.dev`
+// → `firma`. IDN labels arrive punycoded from `new URL().hostname` and
+// are decoded back to human text (xn--blbr-roah.no → "blåbær") so name
+// search can match æ/ø/å brands. Returns undefined — the pipeline's
+// abstain signal, `resolveInternal` short-circuits to band 'none' /
+// manual search without a request — when nothing brandable remains:
+// hosts registrableDomain refuses, labels shorter than 2 chars, or
+// xn-- labels that fail to decode (better manual search than querying
+// a raw ACE string that can never match a registered name).
+export function hostnameLabel(hostname: string): string | undefined {
+  const domain = registrableDomain(hostname);
+  if (!domain) return undefined;
+
+  let base = domain.split('.')[0];
   if (base?.startsWith('xn--')) {
     const decoded = decodePunycode(base.slice(4));
     // Bogus decodes (control chars, punctuation) would just be junk

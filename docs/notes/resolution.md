@@ -1,6 +1,6 @@
 # Resolution cascade
 
-Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`,
+Source: `src/lib/orgnr.ts`, `src/lib/mod11.ts`, `src/lib/hostname-score.ts`,
 `src/lib/hostname-search.ts`.
 
 <!-- SECTION: cascade -->
@@ -113,16 +113,29 @@ Bumping the constant requires extending the digit-key handler in
 `popup.ts` and `details.ts`.
 
 <!-- SECTION: label-extraction -->
-## Label extraction (multi-part TLDs, punycode)
+## Registrable domain and label (suffixes, platforms, punycode)
 
-`hostnameLabel` in `hostname-score.ts` picks the registrable label
-that seeds the name search. Two traps it handles:
+`registrableDomain` in `hostname-score.ts` reduces the visited host
+to the part a company registers (`nettbank.dnb.no` → `dnb.no`).
+`hostnameLabel` takes its leftmost label to seed the name search.
+The traps they handle:
 
+- **Hosts that never reach brreg.** IPv4/IPv6 literals, single-label
+  hosts (`localhost`, `intranet`) and special-use/intranet TLDs
+  (`.local`, `.internal`, `.lan`, `.home.arpa`, `.corp`, `.test`, …)
+  return `undefined`. `resolveInternal` then answers band `none`
+  without a request and without a cache write — internal host names
+  used to go out as `hjemmeside=`/`navn=` queries.
 - **Multi-part public suffixes.** A small static list (`co.uk`,
   `com.au`, `kommune.no`, … — intentionally non-exhaustive, generic
   TLD knowledge, NOT curated company data) shifts the label one part
   left so `company.co.uk` → "company" and `oslo.kommune.no` → "oslo"
   instead of "co"/"kommune".
+- **Hosting platforms.** A second short list (`github.io`,
+  `pages.dev`, `netlify.app`, `myshopify.com`, `wixsite.com`, …)
+  treats the platform as a suffix, so the tenant is the brand
+  (`firma.pages.dev` → "firma", not "pages"). `sites.google.com` is
+  on it so the bare host abstains: its tenant lives in the path.
 - **Punycode.** `new URL().hostname` returns IDN labels in ACE form
   (`blåbær.no` → `xn--blbr-roah.no`). A minimal RFC 3492 decoder
   (`src/lib/punycode.ts`, decode only) restores the human label so
