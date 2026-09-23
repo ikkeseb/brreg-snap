@@ -116,7 +116,8 @@ Bumping the constant requires extending the digit-key handler in
 ## Registrable domain and label (suffixes, platforms, punycode)
 
 `registrableDomain` in `hostname-score.ts` reduces the visited host
-to the part a company registers (`nettbank.dnb.no` → `dnb.no`).
+to the part a company registers (`nettbank.dnb.no` → `dnb.no`);
+scoring compares hjemmeside against it.
 `hostnameLabel` takes its leftmost label to seed the name search.
 The traps they handle:
 
@@ -146,15 +147,28 @@ The traps they handle:
   `xn--` string that can never match.
 
 <!-- SECTION: hjemmeside-normalization -->
-## Hjemmeside normalization
+## Hjemmeside matching
 
 Brreg's `hjemmeside` field is free text ("http://www.equinor.com",
-"https://orkla.com/", "tine.no/om"). `normalizeHjemmeside` in
-`hostname-score.ts` reduces it to a bare lowercase host (strip
-scheme, `www.`, path/port/query/fragment, trailing dots) before the
-exact/prefix/substring comparison, so an exact-host field earns the
-full +35 instead of leaking down to substring (+12). Scoring bands
-and thresholds are unchanged by normalization.
+"https://orkla.com/", "www.storebrand.no/eiendom"). Each entry (the
+field is split on commas, semicolons and whitespace first) is
+reduced by `normalizeHjemmeside` to a bare lowercase host (strip
+scheme, `www.`, path/port/query/fragment, trailing dots), then
+compared on domain-label boundaries only:
+
+| Relation | Example (visiting `storebrand.no`) | Points |
+|---|---|---|
+| exact — the site itself, no path | `https://www.storebrand.no/` | +35 |
+| page — a path on the site | `www.storebrand.no/eiendom` | +12 |
+| subdomain of the registrable domain | `kunde.storebrand.no` | +12 |
+| none — plain substring | `www.tidsbanken.no` for `sbanken.no` | 0 |
+
+"The site" is the visited host or its registrable domain, so
+`nettbank.dnb.no` ties to `www.dnb.no`. Page ties are weaker than
+exact because a big site has far more satellites registered on its
+pages (funds on `/fond`, property SPVs on `/eiendom`, NRK Urørt
+artists) than owners; scored as exact, Storebrand's SPVs pushed
+STOREBRAND ASA out of the picker.
 
 <!-- SECTION: picker-choice -->
 ## Picker choice cache

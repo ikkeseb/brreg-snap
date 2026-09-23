@@ -312,15 +312,18 @@ describe('scoreCandidate', () => {
 
   it('scores messy-but-exact hjemmeside values as exact, not substring', () => {
     // Brreg's hjemmeside is free text. Every shape below names exactly
-    // the visited host, so each must earn the full +35 — before
-    // normalization they fell through to substr(+12) or prefix(+22)
-    // and confident matches landed in the picker.
+    // the visited site, so each must earn the full +35 — before
+    // normalization they fell through to a weaker band and confident
+    // matches landed in the picker.
     const shapes = [
       ['http://www.equinor.com', 'equinor.com'],
       ['https://orkla.com/', 'orkla.com'],
-      ['tine.no/om', 'tine.no'],
+      ['www.telenor.no/', 'telenor.no'],
       ['HTTPS://TINE.NO', 'tine.no'],
       ['tine.no.', 'tine.no'],
+      ['tine.no:8080', 'tine.no'],
+      ['tine.no?lang=no', 'tine.no'],
+      ['Askertannlegene.no', 'askertannlegene.no'],
     ] as const;
     for (const [hjemmeside, host] of shapes) {
       const c = cand({ navn: 'UNRELATED AS', hjemmeside });
@@ -337,10 +340,91 @@ describe('scoreCandidate', () => {
     expect(reasons).toContain('hjemmeside=exact(+35)');
   });
 
-  it('keeps the substring band for deeper hjemmeside hosts', () => {
+  it('keeps the +12 band for a hjemmeside on a subdomain of the site', () => {
     const c = cand({ navn: 'UNRELATED AS', hjemmeside: 'shop.elkjop.no' });
     const { reasons } = scoreCandidate(c, 'unrelated', 'elkjop.no');
-    expect(reasons).toContain('hjemmeside=substr(+12)');
+    expect(reasons).toContain('hjemmeside=subdomain(+12)');
+  });
+
+  it('scores a hjemmeside pointing at a page on the site as a page tie', () => {
+    // Live shape (storebrand.no): property SPVs and funds register
+    // www.storebrand.no/eiendom or /fond. Scored exact, they outranked
+    // STOREBRAND ASA and pushed it out of the picker.
+    const spv = cand({
+      navn: 'STOREBRAND TILLERTORGET AS',
+      hjemmeside: 'www.storebrand.no/eiendom',
+    });
+    const { reasons } = scoreCandidate(spv, 'storebrand', 'storebrand.no');
+    expect(reasons).toContain('hjemmeside=page(+12)');
+    const tine = cand({ navn: 'UNRELATED AS', hjemmeside: 'tine.no/om' });
+    expect(scoreCandidate(tine, 'unrelated', 'tine.no').reasons).toContain(
+      'hjemmeside=page(+12)',
+    );
+  });
+
+  it('ties a subdomain visit to the registrable domain\'s hjemmeside', () => {
+    // Before, nettbank.dnb.no was compared as a whole host and lost
+    // the +35 that dnb.no gets (101 vs 136).
+    const dnb = cand({
+      navn: 'DNB BANK ASA',
+      organisasjonsform: { kode: 'ASA' },
+      hjemmeside: 'www.dnb.no',
+    });
+    const { reasons } = scoreCandidate(dnb, 'dnb', 'nettbank.dnb.no');
+    expect(reasons).toContain('hjemmeside=exact(+35)');
+  });
+
+  it('matches hjemmeside only on domain-label boundaries', () => {
+    // Live hjemmeside values that contain the visited host as a plain
+    // substring. None of them is the site: sbanken.no auto-resolved to
+    // TIDSBANKEN AS through 'tidsbanken.no'.includes('sbanken.no').
+    const cases = [
+      ['www.tidsbanken.no', 'sbanken.no'],
+      ['www.bovg.no', 'vg.no'],
+      ['vg.nordland.no', 'vg.no'],
+      ['aaulie.no', 'aulie.no'],
+      ['www.lorenskogif.no', 'if.no'],
+      ['olapsychicmedium.com', 'medium.com'], // ENK, name fictitious
+    ] as const;
+    for (const [hjemmeside, host] of cases) {
+      const c = cand({ navn: 'UNRELATED AS', hjemmeside });
+      const { score, reasons } = scoreCandidate(c, 'nomatch', host);
+      expect(reasons, `${hjemmeside} vs ${host}`).toEqual(['no-relation']);
+      expect(score).toBe(0);
+    }
+  });
+
+  it('gives TIDSBANKEN AS no hjemmeside credit for sbanken.no', () => {
+    // Live shape. The name still carries a substring hit, so it can
+    // sit in the picker — but no longer reaches the AUTO threshold.
+    const tidsbanken = cand({
+      navn: 'TIDSBANKEN AS',
+      organisasjonsnummer: '999582214',
+      hjemmeside: 'www.tidsbanken.no',
+      antallAnsatte: 54,
+      registrertIForetaksregisteret: true,
+    });
+    const { score, reasons } = scoreCandidate(
+      tidsbanken,
+      'sbanken',
+      'sbanken.no',
+    );
+    expect(reasons.some((r) => r.startsWith('hjemmeside='))).toBe(false);
+    expect(score).toBe(63); // was 75 with hjemmeside=substr(+12) → AUTO
+  });
+
+  it('reads every entry of a list-shaped hjemmeside', () => {
+    const c = cand({
+      navn: 'UNRELATED AS',
+      hjemmeside: 'www.firma-group.com, www.firma.no; firma.se',
+    });
+    expect(scoreCandidate(c, 'nomatch', 'firma.no').reasons).toContain(
+      'hjemmeside=exact(+35)',
+    );
+    expect(scoreCandidate(c, 'nomatch', 'firma.se').reasons).toContain(
+      'hjemmeside=exact(+35)',
+    );
+    expect(scoreCandidate(c, 'nomatch', 'firma.dk').score).toBe(0);
   });
 
   it('gives no hjemmeside credit to unrelated hosts', () => {

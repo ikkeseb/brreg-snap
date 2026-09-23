@@ -176,8 +176,8 @@ export interface ScoreResult {
 // "https://orkla.com/", "tine.no/om", trailing dots, mixed case.
 // Reduce it to a bare lowercase host so it compares against the
 // visited host like-for-like. Without this, an exact-host hjemmeside
-// wrapped in scheme/path scored as substring (+12) instead of exact
-// (+35) and confident matches landed in the picker.
+// wrapped in scheme/www/port fell through to a weaker band and
+// confident matches landed in the picker.
 export function normalizeHjemmeside(raw: string): string {
   return raw
     .trim()
@@ -186,6 +186,30 @@ export function normalizeHjemmeside(raw: string): string {
     .replace(/^www\./, '')
     .replace(/[/:?#].*$/, '') // drop path, port, query, fragment
     .replace(/\.+$/, ''); // drop trailing dot(s)
+}
+
+interface HjemmesideEntry {
+  host: string;
+  // False when the entry points at a page on the site rather than the
+  // site itself ("www.storebrand.no/eiendom", "nrk.no/urort/artist/…").
+  root: boolean;
+}
+
+// A free-text field can name more than one site ("a.no, b.no"), so
+// split before normalizing — otherwise the second entry survives as
+// junk glued onto the first host.
+function hjemmesideEntries(raw: string): HjemmesideEntry[] {
+  return raw
+    .split(/[\s,;]+/)
+    .map((entry) => {
+      const path = entry
+        .trim()
+        .replace(/^https?:\/\//i, '')
+        .replace(/^[^/?#]+/, '') // host and port
+        .replace(/[?#].*$/, '');
+      return { host: normalizeHjemmeside(entry), root: path.length <= 1 };
+    })
+    .filter((e) => e.host);
 }
 
 export function scoreCandidate(
@@ -225,26 +249,42 @@ export function scoreCandidate(
   // Hjemmeside-felt match. Weighted lower than name match — small
   // associations populate this field more often than parent companies
   // (SHELL VETERANENE for shell.no, drift companies for lieoverflate).
-  // The field is normalized to a bare host first (see
+  // Each entry is normalized to a bare host first (see
   // normalizeHjemmeside) so "http://www.equinor.com" scores exact
-  // against equinor.com, not substring. Bands/weights unchanged:
-  // exact > prefix (host plus trailing junk) > substring (visited
-  // host buried in a deeper hjemmeside host, e.g. shop.elkjop.no).
-  const hjem = normalizeHjemmeside(cand.hjemmeside ?? '');
-  const bareHost = host.replace(/^www\./, '').toLowerCase();
+  // against equinor.com. Matching is on domain-label boundaries only;
+  // plain substrings are not a relation (tidsbanken.no contains
+  // sbanken.no, vg.nordland.no starts with vg.no):
+  //   exact (+35)     — the site itself: the visited host or its
+  //                     registrable domain (nettbank.dnb.no still ties
+  //                     to www.dnb.no), with no path
+  //   page (+12)      — a page on the site: funds, property SPVs and
+  //                     artist pages register www.storebrand.no/fond
+  //                     or nrk.no/urort/…, and a site has far more of
+  //                     those than owners
+  //   subdomain (+12) — shop.elkjop.no for elkjop.no
+  const bareHost = host
+    .toLowerCase()
+    .replace(/\.+$/, '')
+    .replace(/^www\./, '');
+  const domain = registrableDomain(host) ?? bareHost;
   let hjemScore = 0;
-  if (hjem) {
-    if (hjem === bareHost) {
+  let hjemReason = '';
+  for (const entry of hjemmesideEntries(cand.hjemmeside ?? '')) {
+    const sameSite = entry.host === bareHost || entry.host === domain;
+    if (sameSite && entry.root) {
       hjemScore = 35;
-      reasons.push('hjemmeside=exact(+35)');
-    } else if (hjem.startsWith(bareHost)) {
-      hjemScore = 22;
-      reasons.push('hjemmeside=prefix(+22)');
-    } else if (hjem.includes(bareHost)) {
+      hjemReason = 'hjemmeside=exact(+35)';
+      break;
+    }
+    if (sameSite) {
       hjemScore = 12;
-      reasons.push('hjemmeside=substr(+12)');
+      hjemReason = 'hjemmeside=page(+12)';
+    } else if (!hjemScore && entry.host.endsWith('.' + domain)) {
+      hjemScore = 12;
+      hjemReason = 'hjemmeside=subdomain(+12)';
     }
   }
+  if (hjemReason) reasons.push(hjemReason);
 
   // Hard gate: no name AND no hjemmeside relation → drop. Kills
   // unrelated candidates that happen to share org form / employee
