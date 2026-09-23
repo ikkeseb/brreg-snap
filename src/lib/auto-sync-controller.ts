@@ -18,8 +18,10 @@ export interface DecideOutput {
   uiMessage: string | null;
 }
 
-const DENY_MESSAGE =
-  'Firefox blokkerte forespørselen. Klikk igjen for å prøve på nytt.';
+// Both engines, and both ways a request ends without the grant: the
+// user declined the prompt, or the browser refused to show it.
+export const DENY_MESSAGE =
+  'Tilgang til fanene ble ikke gitt. Slå på igjen for å prøve på nytt.';
 
 export function decideToggle(input: DecideInput): DecideOutput {
   const { desired, currentlyEnabled, grantOutcome, externalRevoke } = input;

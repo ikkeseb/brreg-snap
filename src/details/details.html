@@ -16,7 +16,7 @@
           <label
             class="toggle"
             for="auto-sync-toggle"
-            title="Oppdaterer automatisk når du bytter fane"
+            title="Oppdaterer automatisk når du bytter fane eller åpner en ny side"
           >
             <input type="checkbox" id="auto-sync-toggle" />
             <span class="toggle-track" aria-hidden="true"></span>
@@ -33,10 +33,11 @@
           hidden
         >
           <p id="auto-sync-consent-text">
-            Auto-oppdater slår opp hver fane du bytter til: domenet sendes
-            til Brønnøysundregistrene (data.brreg.no), bare mens dette
-            panelet er åpent. Ingenting sendes til utvikleren. Nettleseren
-            spør deretter om tilgang til fanene.
+            Auto-oppdater slår opp siden du ser på hver gang du bytter fane
+            eller åpner en ny side, så lenge et brreg-snap-panel er åpent:
+            domenet sendes til Brønnøysundregistrene (data.brreg.no).
+            Ingenting sendes til utvikleren. Nettleseren spør deretter om
+            tilgang til fanene.
           </p>
           <div class="auto-sync-consent-actions">
             <button type="button" id="auto-sync-consent-accept" class="retry-button">

@@ -31,7 +31,7 @@ describe('decideToggle', () => {
       detachListeners: false,
       removePermission: false,
       uiMessage:
-        'Firefox blokkerte forespørselen. Klikk igjen for å prøve på nytt.',
+        'Tilgang til fanene ble ikke gitt. Slå på igjen for å prøve på nytt.',
     });
   });
 
@@ -97,7 +97,7 @@ describe('decideToggle', () => {
       detachListeners: false,
       removePermission: false,
       uiMessage:
-        'Firefox blokkerte forespørselen. Klikk igjen for å prøve på nytt.',
+        'Tilgang til fanene ble ikke gitt. Slå på igjen for å prøve på nytt.',
     });
   });
 
