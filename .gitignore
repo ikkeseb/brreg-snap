@@ -29,3 +29,6 @@ playwright-report/
 docs/superpowers/
 docs/brand-b.png
 docs/concept.png
+
+# Maintainer-only local rules (AGENTS.md points here)
+MAINTAINER.md

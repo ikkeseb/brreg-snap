@@ -16,8 +16,8 @@ The whole flow: `docs/release.md`.
    and `brreg-snap-source-{{version}}.zip` to AMO with the release notes
    and the reviewer notes below, then tags `amo-submission-{{version}}`.
 3. By hand, and only if this release changed them: the listing text and
-   the privacy policy on the AMO edit page (sections below). Show Seb
-   one line first: version, store, what changes.
+   the privacy policy on the AMO edit page (sections below), per
+   `docs/release.md` § What stays manual.
 
 ## Release notes
 

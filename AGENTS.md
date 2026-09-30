@@ -1,7 +1,9 @@
 # AGENTS.md
 
 Guidance for coding agents in this repository. `CLAUDE.md` only imports
-this file; edit this one.
+this file; edit this one. Machine- and account-specific rules for the
+maintainer's own sessions live in a local, gitignored `MAINTAINER.md`
+at the repo root: read it when it exists.
 
 ## Active work + release rules
 
@@ -19,13 +21,13 @@ packages with the Release).
   enforces it); a branch + PR is for when you want CI's browser smoke
   before `main`, not a requirement. CI still runs smoke on every push to
   `main`: a red smoke there is fixed forward first.
-- Support email everywhere: `sebastian@nuez.no`.
+- The one public contact, everywhere: `sebastian@nuez.no`.
 - Releasing and store publishing (`pnpm release`, the generated
   submission kit, `release.yml`, `publish.yml`): `docs/release.md`.
 
 ## Definition of done
 
-Say which rung you reached; "done" without one means rung 1 only.
+The verification rungs, lowest first:
 
 1. **`pnpm verify` is green.** It is the gate CI, the release workflow
    and the pre-push hook all run.
@@ -33,19 +35,16 @@ Say which rung you reached; "done" without one means rung 1 only.
    in `scripts/preview/` (both themes, popup and the 320 px panel), and
    `pnpm smoke` for the recorded state matrix. Synthetic fixtures and
    the preview harness have both passed while the live data shape broke
-   a feature, so fixtures alone never count. When the network blocks
-   `data.brreg.no` (cloud sessions), report the live check as not run.
+   a feature, so fixtures alone never count. Cloud sessions may block
+   `data.brreg.no`.
 3. **Real extension load:** `pnpm dev` (Firefox) or `dist-chrome/`
    loaded unpacked.
-4. **Seb only:** permission prompts, the gesture-gated side panel open,
-   store credentials, and approving each `publish.yml` run. Store
-   listing edits happen in his logged-in browser on the Mac
-   (`docs/release.md` § What stays manual).
+4. **Maintainer only:** real permission prompts, the gesture-gated side
+   panel open, store credentials and listings, approving each
+   `publish.yml` run.
 
 ## Commands
 
-pnpm only (pinned via `packageManager`): `npm install` would recreate
-`package-lock.json` beside `pnpm-lock.yaml` and drift the dep tree.
 `package.json` lists every script; these are the ones with a catch.
 `pnpm install` points git at the committed pre-push hook (it runs
 `pnpm verify`); `git push --no-verify` is the conscious bypass.
@@ -101,14 +100,13 @@ failed is omitted, never rendered as "not filed".
 
 ### Docs conventions
 
-- A note owns its topic; other docs point at it instead of restating
-  it. Cross-doc references read `path` § `slug`, where the slug is a
+- Cross-doc references read `path` § `slug`, where the slug is a
   `<!-- SECTION: slug -->` anchor in the target; `pnpm check:docs`
   (in `pnpm verify`) fails when a backticked repo path or an anchor
   doesn't resolve.
 - Cite files, symbols or tags, never short commit hashes.
-- Living docs hold decisions and invariants; history belongs to git and
-  `CHANGELOG.md`.
+- Tracked docs are public: name the maintainer's role, not their
+  machines, profiles or accounts (those go in `MAINTAINER.md`).
 
 ## No curated data
 
@@ -120,9 +118,9 @@ inline manual search in both popup and sidebar empty states.
 ## Security constraints
 
 These are the product differentiator, not preferences (`README.md`
-§ Security model says it to users). Relaxing one is a product decision
-for Seb: it needs his explicit OK and an edited invariant, never a
-workaround.
+§ Security model says it to users). Relaxing one is the maintainer's
+product decision: it needs their explicit OK and an edited invariant,
+never a workaround.
 
 | Rule | Enforced by |
 | --- | --- |

@@ -96,10 +96,10 @@ git push origin amo-submission-X.Y.Z cws-submission-X.Y.Z
 
 ## What stays manual
 
-Store APIs submit packages, not listings. These stay edits in Seb's
-logged-in browser, from the kit, and only when the release changed
-them (before each change, one line to Seb: version, store, what
-changes):
+Store APIs submit packages, not listings. These stay edits in the
+maintainer's logged-in store accounts, from the kit, and only when the
+release changed them. Before each store change, the maintainer sees
+one line first: version, store, what changes.
 
 - **AMO:** summary and description (nb-NO, en-US), and the privacy
   policy field, which gets the reflowed `PRIVACY.md` from the kit
@@ -108,7 +108,7 @@ changes):
 - **CWS:** store listing description, privacy practices tab,
   screenshots. The privacy policy URL serves `PRIVACY.md` on `main`.
 
-## One-time setup (Seb)
+## One-time setup (maintainer)
 
 Agents never create, see or store these keys. Everything lives in one
 GitHub environment, so only an approved `publish.yml` run can read it.

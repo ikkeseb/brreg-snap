@@ -15,8 +15,8 @@ there, not here. The whole flow: `docs/release.md`. Listing:
    notes field.
 2. By hand, and only if this release changed them: the store listing
    description and the privacy practices tab in the Developer
-   Dashboard (sections below). Show Seb one line first: version,
-   store, what changes. The privacy policy URL serves `PRIVACY.md` on
+   Dashboard (sections below), per `docs/release.md` § What stays
+   manual. The privacy policy URL serves `PRIVACY.md` on
    `main`, so it updates when `main` does.
 
 ## What changed (CHANGELOG § [{{version}}])
