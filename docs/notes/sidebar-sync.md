@@ -22,8 +22,9 @@ worker isn't woken on every tab switch either.
 The toggle, an external revoke (`permissions.onRemoved`) and a flip in
 another window's panel (`storage.onChanged`) attach / detach the
 listeners live. `onUpdated` follows only URL changes of the active tab
-in this window: Firefox gets a `{properties:['url'], windowId}` filter;
-Chrome throws on any filter, so `followsUpdate` is the gate there.
+in this window: `followsUpdate` is the gate on both engines, and only
+Firefox also gets a registration filter (Chrome throws on one; see
+`docs/notes/platform.md` § onupdated-filter).
 
 <!-- SECTION: sendmessage-not-setpanel -->
 ## Messages repaint an open panel; each names its window

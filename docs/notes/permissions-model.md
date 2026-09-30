@@ -1,6 +1,7 @@
 # Permissions model
 
-Source: `manifest.json`, `src/background/background.ts`,
+Source: `public/manifest.firefox.json`, `public/manifest.chrome.json`,
+`src/background/background.ts`,
 `src/details/{auto-sync-ui,auto-sync-switch}.ts`, `src/lib/auto-sync-*.ts`,
 `src/welcome/welcome.ts`.
 
@@ -8,8 +9,8 @@ Source: `manifest.json`, `src/background/background.ts`,
 ## Auto-sync on tab switch is blocked by activeTab — by design
 
 `activeTab` grants extension UI access to *one* tab on user gesture
-(popup click, sidebar toggle, shortcut). When the sidebar is open
-and the user switches tabs in Firefox, no new gesture fires against
+(popup click, sidebar toggle, shortcut). When the sidebar / side
+panel is open and the user switches tabs, no new gesture fires against
 the extension, so `tabs.query` returns empty URL/title for the new
 tab. `tabs.onActivated` fires without `tabs` permission but its
 `Tab` object is stripped of URL/title for the same reason.
@@ -19,7 +20,7 @@ the *toolbar/shortcut* surface (click the sidebar icon, or the
 sidebar shortcut — see § commands-and-selection), or
 (b) accept the limitation. Escalating to `tabs` as a static
 install-time permission would relax the security differentiator —
-see `CLAUDE.md` § Security constraints. Don't
+see `AGENTS.md` § Security constraints. Don't
 burn cycles re-investigating `webNavigation`, `tabs.onUpdated`, or
 focus events; they all need `tabs` or content scripts.
 
@@ -46,7 +47,8 @@ lookup while the panel is closed. Settings live in `storage.local`
 ## Background listeners must register synchronously at top level
 
 The background is a non-persistent event page (Firefox) / service
-worker (Chrome). For the runtime to wake the script for an event, the
+worker (Chrome); see `docs/notes/platform.md` § background-lifecycle.
+For the runtime to wake the script for an event, the
 corresponding `addListener` call has to run synchronously during
 module evaluation — not after an awaited permission/storage check.
 Async registration leaves the runtime unaware that this script should
@@ -71,7 +73,9 @@ only be called from a user input handler»), and the panel can only
 report «Tilgang til fanene ble ikke gitt». `tests/auto-sync-toggle.test.ts`
 pins that «Slå på» reaches the request synchronously.
 
-Same constraint for `sidebarAction.open` from the context menu.
+Same constraint for opening the panel from the context menu
+(`sidebarAction.open`; Chrome's `sidePanel.open` is stricter, see
+`docs/notes/platform.md` § sidepanel-open-needs-live-gesture).
 That's why `background.ts` menu handler does a sync `deriveSync`
 before `setPanel + open`, and on a miss leaves the async host search
 to the panel (sidebar-sync.md § no-match-broadcast).
@@ -150,15 +154,15 @@ already-loaded panel. A sync button existed in the sidebar header
 for this — it was removed because the hypothesis was wrong. Don't
 re-add it.
 
-<!-- SECTION: android-lint-warning -->
-## `pnpm lint:ext` will warn `ANDROID_INCOMPATIBLE_API` — expected
+<!-- SECTION: desktop-only -->
+## Desktop only: no Firefox for Android target
 
 The extension is desktop-only by design: `sidebar_action` isn't
 implemented on Firefox for Android, and the whole UX is built around
-the sidebar. The `permissions.request` warning is noise; don't try
-to silence it by dropping the optional `tabs` permission or the
-runtime opt-in flow. If we ever target Android, the entire surface
-needs a re-think, not a manifest tweak.
+the sidebar. If an Android lint warning ever shows up, don't silence
+it by dropping the optional `tabs` permission or the runtime opt-in
+flow. If we ever target Android, the entire surface needs a re-think,
+not a manifest tweak.
 
 <!-- SECTION: data-collection-declaration -->
 ## Firefox data collection is `browsingActivity`, required

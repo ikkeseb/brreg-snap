@@ -63,7 +63,7 @@ export function buildGraphGuard({ root, srcDir }) {
       if (bad.length) {
         this.error(
           `build-graph-guard: the bundle may only contain src/ files of type ` +
-            `${ALLOWED_EXTENSIONS.join(' ')} (zero runtime deps, CLAUDE.md § Dependencies):\n  ` +
+            `${ALLOWED_EXTENSIONS.join(' ')} (zero runtime deps, AGENTS.md § Dependencies):\n  ` +
             bad.join('\n  '),
         );
       }

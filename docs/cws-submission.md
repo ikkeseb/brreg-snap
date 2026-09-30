@@ -10,22 +10,14 @@ CWS item id (public; `scripts/store-status.mjs` reads it from here):
 
 ## 0. Account
 
-- Developer account registered (one-time USD $5 fee); two-step
-  verification on the Google account is required to publish.
-- **Contact email** (Account page; shown on the listing):
-  `sebastian@nuez.no`. The account's login email can't be changed,
-  but the contact email can: Account → Add email → open the
-  verification link.
+**Contact email** (Account page; shown on the listing):
+`sebastian@nuez.no`.
 
 ## 1. Package
 
 The publish workflow uploads `brreg-snap-chrome-<version>.zip` from the
-GitHub Release for tag `v<version>`, which CI builds from the tagged
-tree, submits it for review, and tags `cws-submission-<version>` with
-its sha256. Never a local build. The package has `manifest.json` at
-the archive root and no `.map` files (`pnpm package:chrome` is what CI
-runs; `scripts/verify-package.mjs` checks it). The flow and the manual
-fallback: `docs/release.md`.
+GitHub Release for tag `v<version>` and submits it for review; never a
+local build. The flow and the manual fallback: `docs/release.md`.
 
 Each upload must carry a strictly higher `version` than the previous
 one. Manifest metadata (name etc.) effectively can't be edited in the
@@ -136,22 +128,12 @@ Source code under the MIT licence: https://github.com/ikkeseb/brreg-snap
    | host `https://data.brreg.no/*` | The extension's sole network endpoint: all company data is fetched read-only from the official Brønnøysund open-data API. No other hosts are contacted; there are no content scripts. |
    | `tabs` *(optional)* | Requested at runtime only when the user turns on "Auto-oppdater" in the side panel, so an open panel can look up the page in front every time the user switches tabs or opens a new page. Turning it on first shows an in-panel disclosure: pages are looked up while a brreg-snap panel is open, the domain goes to data.brreg.no, nothing goes to the developer. Its "Slå på" button calls permissions.request; turning the setting off calls permissions.remove. Used only while a side panel is open. Not requested at install time. |
 
-## 4. Common rejection pitfalls (pre-checked here)
+## 4. Consistency
 
-- ✅ Manifest at zip root — handled by `package:chrome`.
-- ✅ No Firefox-only keys leak (`background.scripts`, `sidebar_action`,
-  `menus`, `browser_specific_settings`) — the Chrome manifest is a
-  separate file, and `tests/manifest.test.ts` pins it.
-- ✅ Permission set is minimal and all justifiable.
-- ✅ Host permission is narrow (single host) — state explicitly in the
-  justification that it's the only endpoint and there are no content
-  scripts.
-- ⚠️ The privacy tab, `PRIVACY.md` and the Firefox manifest must tell
-  the same story: the site's domain goes to data.brreg.no (Web
-  history / `browsingActivity`), nowhere else.
-
-## 5. Submit
-
-Upload the zip, check the listing and privacy tabs against this file,
-submit for review. Review usually takes a few days but can take
-weeks.
+The package shape and the Chrome manifest are gated
+(`scripts/verify-package.mjs`, `tests/manifest.test.ts`). What no gate
+checks: the privacy tab, `PRIVACY.md` and the Firefox manifest must
+tell the same story, that the site's domain goes to data.brreg.no (Web
+history / `browsingActivity`) and nowhere else. Check the listing and
+privacy tabs against this file whenever they change. Review usually
+takes a few days but can take weeks.

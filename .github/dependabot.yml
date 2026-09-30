@@ -1,7 +1,7 @@
 version: 2
 updates:
   # Dev-only dependency tree (the shipped bundle has zero runtime
-  # deps — CLAUDE.md § Dependencies). Minor + patch updates arrive as
+  # deps — AGENTS.md § Dependencies). Minor + patch updates arrive as
   # one weekly PR that should stay green; majors arrive per stack (or
   # one PR per dependency), so one breaking major can't block the rest.
   - package-ecosystem: npm

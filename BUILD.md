@@ -55,7 +55,8 @@ pnpm package                        # builds Firefox + produces the package
 also builds a Chrome target (`pnpm package:chrome`). Both come from
 the same `src/` and ship the same JavaScript and HTML; only
 `manifest.json` differs (`public/manifest.<browser>.json`). Engine
-differences are runtime feature checks in `src/lib/platform/`.
+differences are runtime feature checks in `src/lib/platform/`
+(`docs/notes/platform.md`).
 
 The Firefox package's `manifest.json` is `public/manifest.firefox.json`
 byte for byte, apart from the stamped `version` (see Versioning). AMO

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { findCodegen } from '../scripts/codegen-scan.mjs';
 
 // verify:dist's check for runtime code generation in the built bundles
-// (CLAUDE.md § Security constraints). It reads the AST, so a mention in
+// (AGENTS.md § Security constraints). It reads the AST, so a mention in
 // a string is fine and a minifier's spelling doesn't matter.
 
 describe('dist codegen scan', () => {

@@ -44,7 +44,7 @@ for (const target of ['firefox', 'chrome']) {
   }
   for (const file of walk(dist)) {
     if (!file.endsWith('.js')) continue;
-    // Runtime code generation, forbidden by CLAUDE.md § Security constraints.
+    // Runtime code generation, forbidden by AGENTS.md § Security constraints.
     for (const hit of findCodegen(readFileSync(file, 'utf8'), file)) {
       fail(relative('.', file), `runtime code generation: ${hit}`);
     }
@@ -55,7 +55,7 @@ if (failures.length) {
   for (const f of failures) console.error(`FAIL ${f}`);
   console.error(
     '\nDist invariants violated. These are the security non-negotiables from' +
-      '\nCLAUDE.md: exact manifest keys and permissions, tabs as runtime opt-in,' +
+      '\nAGENTS.md: exact manifest keys and permissions, tabs as runtime opt-in,' +
       '\ndata.brreg.no as the only host, the exact CSP, an honest Firefox' +
       '\ndata-collection declaration, every manifest-referenced file present,' +
       '\nno eval, zero runtime dependencies.',

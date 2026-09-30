@@ -4,10 +4,10 @@ Source: `vite.config.ts`, `package.json`,
 `public/manifest.<browser>.json`, `src/lib/copy-orgnr.ts`.
 
 <!-- SECTION: dual-browser-build -->
-## Dual-browser build (`BROWSER=firefox|chrome`)
+## Dual-browser build (`--mode firefox|chrome`)
 
-`vite.config.ts` reads `process.env.BROWSER` (default `firefox`),
-builds to `dist-${browser}/`, and the `copy-static-assets`
+`vite.config.ts` reads Vite's mode (`chrome`; any other mode builds
+Firefox), builds to `dist-${browser}/`, and the `copy-static-assets`
 `closeBundle` plugin copies `public/manifest.${browser}.json` to
 `dist-${browser}/manifest.json`. `publicDir` is set to `false` so
 Vite's automatic public/ copy doesn't drag BOTH source manifests into
@@ -30,20 +30,17 @@ The manifest expects `popup/popup.html`. `vite.config.ts`
 Removing this hook breaks the packaged extension silently.
 
 <!-- SECTION: minify -->
-## esbuild minify is on by default
+## Default minifier; source maps never ship
 
-`vite.config.ts` sets `build.minify: 'esbuild'` (target `firefox115`
-or `chrome116`). Source maps are emitted to `dist-<browser>/` for
-local debugging but are **stripped from the packaged artifact** via
-the `--ignore-files "**/*.map"` flag on the `web-ext build` step (the
-old `web-ext-config.cjs` that tried to do this was never loaded —
-web-ext doesn't auto-discover `.cjs` config, only the `package.json`
-default; that file has been removed). AMO source review reads the
-full TS in the source zip, not the `.xpi` maps. Don't switch to
-terser unless you have a reason — esbuild minify is fast enough that
-watch-mode stays responsive, and the codebase has no name-sensitive
-reflection (no `eval`, no `Function`, no string dispatch on
-identifier names) for terser to do anything extra with.
+`vite.config.ts` sets no minifier, so the build uses Vite's default
+(Oxc since Vite 8), with `build.target` `firefox115` or `chrome116`.
+Source maps are emitted to `dist-<browser>/` for local debugging but
+are **stripped from the packaged artifact** via the
+`--ignore-files "**/*.map"` flag on the `web-ext build` step, and
+`scripts/verify-package.mjs` fails a package that carries one. AMO
+source review reads the full TS in the source zip, not the maps. The
+codebase has no name-sensitive reflection (no `eval`, no `Function`,
+no string dispatch on identifier names), so minification is safe.
 
 <!-- SECTION: clipboard-no-permission -->
 ## Click-to-copy without `clipboardWrite`

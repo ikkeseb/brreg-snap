@@ -127,14 +127,14 @@ const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
   },
 
   'regnskap-single-year-only': async () => {
-    // TRIPWIRE. Two or more filings means brreg now serves history and
-    // the dormant Nøkkeltall trend table (renderNokkeltall's
-    // figures.length >= 2 branch) goes live — check it against this
-    // data before anything else. CLAUDE.md § standing gotchas.
+    // TRIPWIRE. Two or more filings means brreg now serves history:
+    // the Økonomi tab shows the latest year only by design
+    // (docs/notes/brreg-api.md § regnskap-single-year-only), so revisit
+    // that decision against this data.
     const r = await equinorRegnskap();
     expect(
       r.items.length,
-      'Equinor regnskap returned more than one year: the dormant trend table would render',
+      'Equinor regnskap returned more than one year: a trend view is now possible',
     ).toBe(1);
     const [latest] = r.items;
     expect((latest as { regnskapstype?: string }).regnskapstype).toBe('SELSKAP');

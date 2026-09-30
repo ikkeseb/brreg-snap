@@ -1,4 +1,4 @@
-// Runtime code generation in built JavaScript (CLAUDE.md § Security
+// Runtime code generation in built JavaScript (AGENTS.md § Security
 // constraints), found on the AST rather than the raw text: a mention
 // inside a string is fine, and the minifier's spelling (`(0,eval)`,
 // `Reflect.construct(Function,…)`, `x["eval"]`) doesn't matter. Used by
