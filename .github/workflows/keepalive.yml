@@ -1,0 +1,58 @@
+name: Keepalive
+
+# Reusable: keeps scheduled workflows from being auto-disabled.
+#
+# GitHub docs: "In a public repository, scheduled workflows are
+# automatically disabled when no repository activity has occurred in 60
+# days." Scheduled runs themselves don't count, and this repo can idle
+# that long. Countermeasure without commits: every scheduled run calls
+# the REST "enable a workflow" endpoint
+# (PUT /repos/{owner}/{repo}/actions/workflows/{file}/enable) for each
+# scheduled workflow, with a GITHUB_TOKEN holding `actions: write`.
+# That the call also resets the 60-day clock is community-reported
+# (keepalive-workflow's API mode), not stated in GitHub's docs.
+#
+# Use from any scheduled workflow, listing every scheduled workflow file
+# so each one keeps the others alive:
+#
+#   keepalive:
+#     permissions:
+#       actions: write
+#     uses: ./.github/workflows/keepalive.yml
+#     with:
+#       workflows: canary.yml store-status.yml
+
+on:
+  workflow_call:
+    inputs:
+      workflows:
+        description: Space-separated workflow file names to keep enabled.
+        required: true
+        type: string
+
+permissions: {}
+
+jobs:
+  enable:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Enable each scheduled workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOWS: ${{ inputs.workflows }}
+        run: |
+          status=0
+          for wf in $WORKFLOWS; do
+            if out=$(gh api -X PUT "repos/${GITHUB_REPOSITORY}/actions/workflows/${wf}/enable" 2>&1); then
+              echo "enabled: ${wf}"
+            elif printf '%s' "$out" | grep -q 'HTTP 404'; then
+              # Not on the default branch (yet): nothing to keep alive.
+              echo "::warning::keepalive: ${wf} not found, skipped"
+            else
+              echo "::error::keepalive: ${wf}: ${out}"
+              status=1
+            fi
+          done
+          exit "$status"

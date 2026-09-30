@@ -1,0 +1,195 @@
+{
+  "request": "/enhetsregisteret/api/oppdateringer/enheter?organisasjonsnummer=923609016&dato=*&includeChanges=true&size=100&sort=id%2CDESC",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "oppdaterteEnheter": [
+        {
+          "dato": "2026-09-14T22:03:45.964Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-09-14"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 21272
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-09-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25205460,
+          "organisasjonsnummer": "923609016"
+        },
+        {
+          "dato": "2026-08-18T18:00:17.195Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/sisteInnsendteAarsregnskap",
+              "value": "2025"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25107591,
+          "organisasjonsnummer": "923609016"
+        },
+        {
+          "dato": "2026-08-12T22:01:52.644Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-08-12"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 21239
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-08-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25067148,
+          "organisasjonsnummer": "923609016"
+        },
+        {
+          "dato": "2026-07-15T22:04:17.728Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-07-15"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 21393
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-07-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24866490,
+          "organisasjonsnummer": "923609016"
+        },
+        {
+          "dato": "2026-07-02T22:00:22.145Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/vedtektsdato",
+              "value": "2026-05-12"
+            },
+            {
+              "op": "replace",
+              "path": "/kapital/antallAksjer",
+              "value": 2390749040
+            },
+            {
+              "op": "replace",
+              "path": "/kapital/innfortDato",
+              "value": "2026-07-02"
+            },
+            {
+              "op": "replace",
+              "path": "/kapital/belop",
+              "value": 5976872600
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24767418,
+          "organisasjonsnummer": "923609016"
+        },
+        {
+          "dato": "2026-06-13T15:02:49.718Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-06-13"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 21467
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-06-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24610298,
+          "organisasjonsnummer": "923609016"
+        },
+        {
+          "dato": "2026-05-12T22:01:47.722Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-05-12"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 21327
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-05-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24407437,
+          "organisasjonsnummer": "923609016"
+        },
+        {
+          "dato": "2026-04-14T22:05:38.327Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-04-14"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 21376
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-04-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24146813,
+          "organisasjonsnummer": "923609016"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 8,
+      "totalPages": 1
+    }
+  }
+}

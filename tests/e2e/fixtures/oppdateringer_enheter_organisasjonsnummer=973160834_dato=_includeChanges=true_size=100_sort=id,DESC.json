@@ -1,0 +1,12 @@
+{
+  "request": "/enhetsregisteret/api/oppdateringer/enheter?organisasjonsnummer=973160834&dato=*&includeChanges=true&size=100&sort=id%2CDESC",
+  "status": 200,
+  "body": {
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 0,
+      "totalPages": 0
+    }
+  }
+}

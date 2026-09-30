@@ -1,0 +1,310 @@
+{
+  "request": "/enhetsregisteret/api/underenheter?overordnetEnhet=984851006&size=100",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "underenheter": [
+        {
+          "antallAnsatte": 16,
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "ALTA",
+            "kommunenummer": "5601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "9510",
+            "poststed": "ALTA"
+          },
+          "datoEierskifte": "2004-01-19",
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-23 04:14:00",
+              "navn": "DEN NORSKE BANK AS",
+              "tilDato": "1998-05-27 19:08:40"
+            },
+            {
+              "fraDato": "1999-04-17 10:40:10",
+              "navn": "DEN NORSKE BANK ASA ALTA",
+              "tilDato": "2004-02-18 20:37:57"
+            },
+            {
+              "fraDato": "2004-02-18 20:37:57",
+              "navn": "DNB NOR BANK ASA DEN NORSKE BANK ALTA",
+              "tilDato": "2006-08-08 20:34:00"
+            },
+            {
+              "fraDato": "2006-08-08 20:34:00",
+              "navn": "DNB NOR BANK ASA AVD ALTA",
+              "tilDato": "2011-11-15 21:19:49"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Banker og kredittforetak",
+            "kode": "64.190"
+          },
+          "navn": "DNB BANK ASA AVD ALTA",
+          "oppstartsdato": "1975-01-01",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "973160834",
+          "overordnetEnhet": "984851006",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-02-23",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet",
+          "telefon": "00000000"
+        },
+        {
+          "antallAnsatte": 9,
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "ARENDAL",
+            "kommunenummer": "4203",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "4836",
+            "poststed": "ARENDAL"
+          },
+          "datoEierskifte": "2004-01-19",
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-23 00:21:00",
+              "navn": "DEN NORSKE BANK AS",
+              "tilDato": "1998-05-27 19:08:31"
+            },
+            {
+              "fraDato": "1999-04-17 10:40:58",
+              "navn": "DEN NORSKE BANK ASA ARENDAL",
+              "tilDato": "2004-02-18 20:17:00"
+            },
+            {
+              "fraDato": "2004-02-18 20:17:00",
+              "navn": "DNB NOR BANK ASA DEN NORSKE BANK ARENDAL",
+              "tilDato": "2006-08-08 20:35:22"
+            },
+            {
+              "fraDato": "2006-08-08 20:35:22",
+              "navn": "DNB NOR BANK ASA AVD ARENDAL",
+              "tilDato": "2011-11-15 21:20:23"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Banker og kredittforetak",
+            "kode": "64.190"
+          },
+          "navn": "DNB BANK ASA AVD ARENDAL",
+          "oppstartsdato": "1988-04-01",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "973160680",
+          "overordnetEnhet": "984851006",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-02-23",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet",
+          "telefon": "00000000"
+        },
+        {
+          "antallAnsatte": 14,
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "ASKER",
+            "kommunenummer": "3203",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "1383",
+            "poststed": "ASKER"
+          },
+          "datoEierskifte": "2002-09-10",
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1999-04-17 10:45:07",
+              "navn": "SPAREBANKEN NOR AVD ASKER",
+              "tilDato": "2001-11-07 21:20:56"
+            },
+            {
+              "fraDato": "2001-11-07 21:20:56",
+              "navn": "GJENSIDIGE NOR SPAREBANK AVD ASKER",
+              "tilDato": "2005-07-25 20:21:54"
+            },
+            {
+              "fraDato": "2009-08-15 14:58:11",
+              "navn": "DNB NOR BANK ASA AVD STRØKET",
+              "tilDato": "2011-11-15 21:19:40"
+            },
+            {
+              "fraDato": "2011-11-15 21:19:40",
+              "navn": "DNB BANK ASA AVD STRØKET",
+              "tilDato": "2022-11-23 21:32:42"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Banker og kredittforetak",
+            "kode": "64.190"
+          },
+          "navn": "DNB BANK ASA AVD ASKER",
+          "oppstartsdato": "1965-12-31",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "974072270",
+          "overordnetEnhet": "984851006",
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "ASKER",
+            "kommunenummer": "3203",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "1371",
+            "poststed": "ASKER"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-02-22",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet",
+          "telefon": "00000000"
+        },
+        {
+          "antallAnsatte": 5,
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "INDRE ØSTFOLD",
+            "kommunenummer": "3118",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "1830",
+            "poststed": "ASKIM"
+          },
+          "datoEierskifte": "2002-09-10",
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1999-04-17 10:46:33",
+              "navn": "SPAREBANKEN NOR AVD ASKIM",
+              "tilDato": "2001-11-07 21:20:46"
+            },
+            {
+              "fraDato": "2001-11-07 21:20:46",
+              "navn": "GJENSIDIGE NOR SPAREBANK AVD ASKIM",
+              "tilDato": "2005-08-01 20:23:47"
+            },
+            {
+              "fraDato": "2005-08-01 20:23:47",
+              "navn": "DNB NOR BANK ASA AVD ASKIM",
+              "tilDato": "2011-11-15 21:18:58"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Banker og kredittforetak",
+            "kode": "64.190"
+          },
+          "navn": "DNB BANK ASA AVD ASKIM",
+          "oppstartsdato": "1995-09-01",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "975901408",
+          "overordnetEnhet": "984851006",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2024-09-11",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2024-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-11-27",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet"
+        },
+        {
+          "antallAnsatte": 402,
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "TRONDHEIM",
+            "kommunenummer": "5001",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "7042",
+            "poststed": "TRONDHEIM"
+          },
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "2004-04-29 20:34:53",
+              "navn": "GJENSIDIGE NOR SPAREBANK AVD BEDDINGEN 16",
+              "tilDato": "2005-08-01 20:23:51"
+            },
+            {
+              "fraDato": "2005-08-01 20:23:51",
+              "navn": "DNB NOR BANK ASA AVD BEDDINGEN 16",
+              "tilDato": "2005-12-14 20:36:09"
+            },
+            {
+              "fraDato": "2005-12-14 20:36:09",
+              "navn": "DNB NOR BANK ASA AVD LÅNEUTBETALING TRONDHEIM",
+              "tilDato": "2006-07-11 21:38:12"
+            },
+            {
+              "fraDato": "2009-08-15 14:58:31",
+              "navn": "DNB NOR BANK ASA AVD BMB BEDDINGEN",
+              "tilDato": "2011-11-14 13:35:04"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Banker og kredittforetak",
+            "kode": "64.190"
+          },
+          "navn": "DNB BANK ASA AVD BEDDINGEN",
+          "oppstartsdato": "2004-04-01",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "986839100",
+          "overordnetEnhet": "984851006",
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "TRONDHEIM",
+            "kommunenummer": "5001",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "7469",
+            "poststed": "TRONDHEIM"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "2004-04-29",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 59,
+      "totalPages": 1
+    }
+  }
+}

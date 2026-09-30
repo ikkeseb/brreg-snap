@@ -1,0 +1,91 @@
+{
+  "request": "/enhetsregisteret/api/oppdateringer/enheter?organisasjonsnummer=935864879&dato=*&includeChanges=true&size=100&sort=id%2CDESC",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "oppdaterteEnheter": [
+        {
+          "dato": "2026-09-01T22:00:13.920Z",
+          "endringer": [
+            {
+              "op": "add",
+              "path": "/paategninger/-",
+              "value": {
+                "infotype": "FADR",
+                "tekst": "Foretaksregisteret har grunn til å anta at forretningsadressen er feil. Foretaket har fått pålegg om å melde endring.",
+                "innfoertDato": "2026-09-01"
+              }
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25153491,
+          "organisasjonsnummer": "935864879"
+        },
+        {
+          "dato": "2026-09-01T06:30:11.867Z",
+          "endringer": [
+            {
+              "op": "add",
+              "path": "/postadresse",
+              "value": {
+                "land": "Norge",
+                "landkode": "NO",
+                "postnummer": "1271",
+                "poststed": "OSLO",
+                "adresse": [
+                  "Eksempelveien 1"
+                ],
+                "kommune": "OSLO",
+                "kommunenummer": "0301"
+              }
+            },
+            {
+              "op": "remove",
+              "path": "/forretningsadresse/adresse/0"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25151121,
+          "organisasjonsnummer": "935864879"
+        },
+        {
+          "dato": "2026-07-15T22:05:57.082Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-07-15"
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-07-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24874697,
+          "organisasjonsnummer": "935864879"
+        },
+        {
+          "dato": "2026-04-28T18:03:24.639Z",
+          "endringer": [
+            {
+              "op": "add",
+              "path": "/sisteInnsendteAarsregnskap",
+              "value": "2025"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24236904,
+          "organisasjonsnummer": "935864879"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 4,
+      "totalPages": 1
+    }
+  }
+}

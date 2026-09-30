@@ -1,0 +1,126 @@
+{
+  "request": "/enhetsregisteret/api/oppdateringer/enheter?organisasjonsnummer=915330193&dato=*&includeChanges=true&size=100&sort=id%2CDESC",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "oppdaterteEnheter": [
+        {
+          "dato": "2026-09-12T15:02:30.680Z",
+          "endringer": [
+            {
+              "op": "remove",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
+            },
+            {
+              "op": "remove",
+              "path": "/antallAnsatte"
+            },
+            {
+              "op": "remove",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
+            },
+            {
+              "op": "replace",
+              "path": "/harRegistrertAntallAnsatte",
+              "value": false
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25188492,
+          "organisasjonsnummer": "915330193"
+        },
+        {
+          "dato": "2026-08-29T15:00:53.113Z",
+          "endringer": [
+            {
+              "op": "remove",
+              "path": "/registreringsdatoMerverdiavgiftsregisteret"
+            },
+            {
+              "op": "remove",
+              "path": "/registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret"
+            },
+            {
+              "op": "replace",
+              "path": "/registrertIMvaregisteret",
+              "value": false
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25145564,
+          "organisasjonsnummer": "915330193"
+        },
+        {
+          "dato": "2026-08-26T22:01:04.015Z",
+          "endringer": [
+            {
+              "op": "add",
+              "path": "/konkursdato",
+              "value": "2026-08-26"
+            },
+            {
+              "op": "replace",
+              "path": "/konkurs",
+              "value": true
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25138932,
+          "organisasjonsnummer": "915330193"
+        },
+        {
+          "dato": "2026-06-11T22:04:14.069Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-06-11"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 8
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-06-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24585640,
+          "organisasjonsnummer": "915330193"
+        },
+        {
+          "dato": "2026-04-14T22:05:20.554Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-04-14"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 9
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-04-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24145236,
+          "organisasjonsnummer": "915330193"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 5,
+      "totalPages": 1
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "organisasjonsnummer": "997808533",
+  "navn": "SKANSKA SK",
+  "organisasjonsform": {
+    "kode": "NUF",
+    "beskrivelse": "Norskregistrert utenlandsk foretak",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/NUF"
+      }
+    }
+  },
+  "historiskeNavn": [],
+  "postadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "0405",
+    "poststed": "OSLO",
+    "adresse": [
+      "c/o Athene Registerservice AS",
+      "Postboks 4691",
+      "Nydalen"
+    ],
+    "kommune": "OSLO",
+    "kommunenummer": "0301"
+  },
+  "registreringsdatoEnhetsregisteret": "2012-01-10",
+  "registrertIMvaregisteret": true,
+  "naeringskode1": {
+    "kode": "42.130",
+    "beskrivelse": "Bygging av broer og tunneler"
+  },
+  "antallAnsatte": 56,
+  "harRegistrertAntallAnsatte": true,
+  "registreringsdatoMerverdiavgiftsregisteret": "2021-07-01",
+  "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2021-08-17",
+  "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+  "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+  "forretningsadresse": {
+    "land": "Slovakia",
+    "landkode": "SK",
+    "poststed": "821 09 BRATISLAVA",
+    "adresse": [
+      "Krajna 29"
+    ]
+  },
+  "registrertIForetaksregisteret": false,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2025",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "maalform": "Bokmål",
+  "aktivitet": [
+    "Bygging av bruer og tunneler. Bygging av veier og motorveier.",
+    "Byggearbeid, oppføring av bygningerog utleie av arbeidskraft."
+  ],
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "erIKonsern": false,
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/997808533"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

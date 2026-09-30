@@ -1,6 +1,6 @@
 # Sidebar sync
 
-Source: `src/details/details.ts`, `src/lib/panel-follow.ts`,
+Source: `src/details/{controller,main,painter}.ts`, `src/lib/panel-follow.ts`,
 `src/lib/panel-protocol.ts`, `src/lib/tab-sync.ts`,
 `src/popup/popup.ts`, `src/background/background.ts`.
 
@@ -36,7 +36,9 @@ reloads its open sidebar. That need not be the sender's window. So the
 popup (after resolving the tab, and on «Ingen av disse») and the
 context menu send a `runtime.sendMessage` the open panel applies in
 place. The shape lives in `panel-protocol.ts`: `{type:'sync', windowId,
-orgnr, host, method}` or `{type:'no-match', windowId, host}`. Don't
+orgnr, host, method}`, `{type:'no-match', windowId, host}`, or
+`{type:'search', windowId, query}` (the selection lookup's text, see
+permissions-model.md § commands-and-selection). Don't
 switch to a per-window `setPanel({windowId})`: against the one shared
 `this.panel`, every tab switch in the other window would then count as
 a URL change and reload that window's open sidebar.
@@ -57,9 +59,10 @@ for that (it only left a global panel URL behind for a later open).
 
 `sidebar.setPanel` sets the GLOBAL panel URL on both engines, and it
 outlives the open it was set for. Only gestures that also open the
-panel set it (popup link, context menu), via
-`panelPath(target, now, windowId)`: `details.html?orgnr=…&at=<ms>&w=<id>`
-or `?nomatch=<host>&at=<ms>&w=<id>`.
+panel set it (popup link, context menu, Chrome's open-panel command),
+via `panelPath(target, now, windowId)`:
+`details.html?orgnr=…&at=<ms>&w=<id>`, `?nomatch=<host>&at=…&w=…`, or
+from the selection lookup `?orgnr=…&m=manual&at=…&w=…` / `?q=<text>&at=…&w=…`.
 
 `w` is the window the open was for. The same global URL can load in
 another window: a later open there, or the Firefox reload above, which
@@ -89,6 +92,11 @@ On load (`chooseStart` in `panel-follow.ts`, tested there):
    opt-in) does a leftover hint apply. A hint orgnr is shown without a
    host label: it didn't come from this tab.
 
+Selection-lookup hints bend two of these: a `?q=` query applies only
+while fresh (a leftover never re-sends the selected text, even with an
+unreadable tab), and an orgnr carrying `m=manual` is never "explained"
+by the tab — it stays the user's pick, with no host label.
+
 The tab is readable when `tabs.query` returns a URL — Firefox grants
 `activeTab` on the user action that toggles the sidebar (sidebar icon,
 toolbar action, shortcut) and on the context-menu click. The panel's
@@ -108,7 +116,7 @@ disse» so an open panel clears the stale company.
 <!-- SECTION: load-race-guards -->
 ## One load token; every flow that paints checks it
 
-`details.ts` has one `createLoadSequence()` (`panel-follow.ts`). The
+`controller.ts` has one `createLoadSequence()` (`panel-follow.ts`). The
 painters (`loadOrgnr`, `showPicker`, `showEmptyState`) claim a token
 themselves; flows that await before painting — startup, a tab event,
 a no-match probe, the «Feil bedrift?» reject flow (`claim` in
@@ -130,7 +138,9 @@ runs return silently after every await — including the error path.
 ## A sync or tab event for what's on screen keeps it
 
 `sameView` compares the incoming view with the settled one (company by
-orgnr, picker / empty state by host). A match keeps the rendered
+orgnr, picker / empty state by host; an empty state that carries a
+search query never matches, since the user asked for that search). A
+match keeps the rendered
 content — no skeleton, scroll, focus, open tab and «Data hentet» stamp
 stay put, a half-typed manual search survives — and only refreshes the
 footer host, method and history entry. Auto-sync fires on every URL
@@ -140,7 +150,7 @@ change of the active tab, most of which stay on the same company.
 ## Background repaints must not steal focus or lie in the footer
 
 With auto-sync on, the panel repaints on tab switches while the user
-is working in the page. The rules, in `details.ts` unless noted:
+is working in the page. The rules, in `controller.ts` and `painter.ts` unless noted:
 
 - `showEmptyState` focuses the manual-search input only when
   `document.hasFocus()` — an unconditional `focus()` yanked the
@@ -158,14 +168,21 @@ is working in the page. The rules, in `details.ts` unless noted:
   no host with a manual pick (`syncSidebarIfOpen` in `popup.ts`).
 
 <!-- SECTION: shared-ui-modules -->
-## Popup and sidebar share their resolution UX via `src/lib/ui/`
+## Popup and sidebar share their resolution UX via `src/lib/ui/` and `src/lib/view/`
 
-The picker (incl. digit shortcuts + "Ingen av disse" +
-"Feil bedrift?" reject flow), the debounced manual search (incl.
-inline error + "Prøv igjen" retry — manual-search failures never flip
-the panel to the full error state), the active-tab resolution cascade
-(`resolveTabContext`, `TabContext`, `ResolutionMethod`) and the
-source-host footer label live in `src/lib/ui/{picker,manual-search,
-resolve-tab,source-label,hit-row,flags}.ts`. The surfaces keep only
-their side effects (URL params, load tokens, panel messages, the
-popup's recents list) in callbacks. Fixes to that UX land there, once.
+The "Feil bedrift?" reject flow (`rejectChoice`), the debounced manual
+search (incl. inline error + "Prøv igjen" retry — manual-search
+failures never flip the panel to the full error state), the recents
+stack and the active-tab resolution cascade (`resolveTabContext`,
+`TabContext`, `ResolutionMethod`) live in `src/lib/ui/{picker,
+manual-search,recent,resolve-tab,flags}.ts`. The markup — picker rows
+with digit shortcuts and «Ingen av disse», search rows, the identity,
+answer and ledger — is the pure components in
+`src/lib/view/components/`. The surfaces keep only their side effects
+(URL params, load tokens, panel messages) in callbacks. Fixes to that
+UX land there, once.
+
+The panel's masthead field is its manual search from every state:
+typing keeps the current view aside as live DOM and shows the search
+view; Escape or the back bar puts it back without a refetch. Any paint
+from the controller (a sync, a tab event, a pick) discards the aside.

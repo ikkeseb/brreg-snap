@@ -128,7 +128,7 @@ describe('resolveOrgnr', () => {
       url: 'https://example.com/about/982463718',
       title: 'Telenor',
     });
-    expect(result).toBe('982463718');
+    expect(result).toEqual({ orgnr: '982463718', method: 'url-path' });
   });
 
   it('returns undefined when neither URL nor title carry an orgnr', () => {
@@ -160,19 +160,19 @@ describe('resolveOrgnr — key-awareness and ambiguity (anti-shadowing)', () => 
         url: 'https://shop.example/?aff=923609016&orgnr=982463718',
         title: '',
       }),
-    ).toBe('982463718');
+    ).toEqual({ orgnr: '982463718', method: 'url-param' });
   });
 
   it('resolves a single valid orgnr in the path (e.g. brreg /enheter/<orgnr>)', () => {
     expect(
       resolveOrgnr({ url: 'https://x.example/enheter/982463718', title: '' }),
-    ).toBe('982463718');
+    ).toEqual({ orgnr: '982463718', method: 'url-path' });
   });
 
   it('still resolves a single valid orgnr in a query value', () => {
     expect(
       resolveOrgnr({ url: 'https://x.example/p?id=982463718', title: '' }),
-    ).toBe('982463718');
+    ).toEqual({ orgnr: '982463718', method: 'url-path' });
   });
 
   it('abstains when two unnamed valid candidates collide — never a silent wrong company', () => {
@@ -217,12 +217,42 @@ describe('resolveOrgnr — key-awareness and ambiguity (anti-shadowing)', () => 
         url: 'https://x.example/enheter/982463718?orgnr=123456789',
         title: '',
       }),
-    ).toBe('982463718');
+    ).toEqual({ orgnr: '982463718', method: 'url-path' });
   });
 
   it('falls through to the title when the URL is malformed (never throws)', () => {
     expect(
       resolveOrgnr({ url: 'ht!tp://[bad', title: 'Telenor 982463718' }),
-    ).toBe('982463718');
+    ).toEqual({ orgnr: '982463718', method: 'title' });
+  });
+});
+
+describe('resolveOrgnr — provenance: which tier matched', () => {
+  it('a named param is url-param', () => {
+    expect(
+      resolveOrgnr({ url: 'https://x.no/?orgnummer=923609016', title: 'Equinor' }),
+    ).toEqual({ orgnr: '923609016', method: 'url-param' });
+  });
+
+  it('an orgnr path segment is url-path', () => {
+    expect(
+      resolveOrgnr({ url: 'https://x.no/firma/923609016/', title: '' }),
+    ).toEqual({ orgnr: '923609016', method: 'url-path' });
+  });
+
+  it('an orgnr only in the title is title — the spoof case', () => {
+    // A throwaway shop pasting Equinor's orgnr into its <title>.
+    expect(
+      resolveOrgnr({
+        url: 'https://trygg-handel-billig.shop/',
+        title: 'Trygg Handel | Org.nr 923 609 016 | Fri frakt',
+      }),
+    ).toEqual({ orgnr: '923609016', method: 'title' });
+  });
+
+  it('the URL wins over the title', () => {
+    expect(
+      resolveOrgnr({ url: 'https://x.no/f/982463718', title: 'Org.nr 923609016' }),
+    ).toEqual({ orgnr: '982463718', method: 'url-path' });
   });
 });

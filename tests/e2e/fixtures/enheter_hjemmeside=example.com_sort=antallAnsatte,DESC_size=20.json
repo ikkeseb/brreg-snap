@@ -1,0 +1,12 @@
+{
+  "request": "/enhetsregisteret/api/enheter?hjemmeside=example.com&sort=antallAnsatte%2CDESC&size=20",
+  "status": 200,
+  "body": {
+    "page": {
+      "number": 0,
+      "size": 20,
+      "totalElements": 0,
+      "totalPages": 0
+    }
+  }
+}

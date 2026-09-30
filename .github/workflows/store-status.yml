@@ -1,0 +1,110 @@
+name: Store status
+
+# Weekly store-truth probe (docs/notes/stores.md): what AMO and the Chrome
+# Web Store serve right now vs the latest v* tag, and --deep compares the
+# served packages file by file with the GitHub Release zips. Any failure
+# opens (or comments on) the one open issue labelled `store-status`.
+# Public, unauthenticated store endpoints only; no store secrets.
+
+on:
+  schedule:
+    - cron: '17 6 * * 1' # Mondays 06:17 UTC
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: store-status
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      report: ${{ steps.probe.outputs.report }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history + tags: `git describe` walks back to the latest
+          # v* tag, and the submission tags carry the review start date.
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Reads the pnpm version from the `packageManager` pin in package.json.
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+
+      # Zero-dependency script: no `pnpm install`, so no dependency code
+      # runs in this job.
+      - id: probe
+        name: pnpm store-status --deep --strict
+        run: |
+          set +e
+          pnpm --silent store-status --deep --strict > report.txt 2>&1
+          code=$?
+          set -e
+          cat report.txt
+          {
+            echo '```'
+            cat report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          # Random delimiter: the report quotes store responses.
+          delim="EOF_$(openssl rand -hex 16)"
+          {
+            echo "report<<$delim"
+            cat report.txt
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+          exit "$code"
+
+  issue:
+    needs: probe
+    if: always() && needs.probe.result == 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the store-status issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          REPORT: ${{ needs.probe.outputs.report }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo "Store-status probe failed: $RUN_URL"
+            echo
+            echo '```'
+            if [ -n "$REPORT" ]; then echo "$REPORT"; else echo '(no report: the probe failed before it ran, see the run log)'; fi
+            echo '```'
+            echo
+            echo 'Reproduce locally with: pnpm store-status --deep (rules: docs/notes/stores.md).'
+          } > body.md
+          gh label create store-status --color d93f0b \
+            --description 'Scheduled store-status probe failed' --force
+          # Search by label first: one open issue, updated with a comment
+          # per failing run, instead of a new issue every week.
+          existing="$(gh issue list --label store-status --state open --limit 1 --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body-file body.md
+          else
+            gh issue create --title 'Store status: stores and tags disagree' \
+              --label store-status --body-file body.md
+          fi
+
+  # Keeps every scheduled workflow enabled (GitHub disables them after
+  # 60 idle days in a public repo): .github/workflows/keepalive.yml.
+  # Scheduled runs only; runs regardless of the probe's result.
+  keepalive:
+    if: github.event_name == 'schedule'
+    permissions:
+      actions: write
+    uses: ./.github/workflows/keepalive.yml
+    with:
+      workflows: canary.yml store-status.yml

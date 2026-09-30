@@ -14,16 +14,41 @@ export interface Kode {
 }
 
 // A registry annotation (påtegning) on the entity, e.g. on its name or
-// business address. Typed for completeness; not rendered.
+// business address: «Foretaksregisteret har grunn til å anta at
+// forretningsadressen er feil. …». Quoted by src/lib/trust/merknader.ts.
 export interface Paategning {
   infotype?: string;
   tekst?: string;
   innfoertDato?: string;
 }
 
+// A former name. Both dates are local date-times with a space, not ISO
+// dates: "2026-09-01 12:29:08". Added by brreg 2026-06-16.
+export interface HistoriskNavn {
+  navn?: string;
+  fraDato?: string;
+  tilDato?: string;
+}
+
+// Share capital, as registered (brreg 2025-11-13).
+export interface Kapital {
+  belop?: number;
+  antallAksjer?: number;
+  // «Aksjekapital», …
+  type?: string;
+  bundet?: number;
+  valuta?: string;
+  innbetalt?: number;
+  fulltInnbetalt?: boolean;
+  innfortDato?: string;
+}
+
 export interface Enhet {
   organisasjonsnummer: string;
   navn: string;
+  // Former names, oldest first as brreg lists them (not guaranteed:
+  // read by date).
+  historiskeNavn?: HistoriskNavn[];
   organisasjonsform?: Kode;
   // 'Enhet', or 'SlettetEnhet' for the minimal body of a deleted entity.
   respons_klasse?: string;
@@ -61,6 +86,9 @@ export interface Enhet {
   underAvvikling?: boolean;
   underAvviklingDato?: string;
   underTvangsavviklingEllerTvangsopplosning?: boolean;
+  // Set (ISO date) while the company is under rekonstruksjonsforhandling.
+  // A date only: brreg has no boolean for this status.
+  underRekonstruksjonsforhandlingDato?: string;
   // Forced dissolution: brreg sets one ISO date per reason, so which
   // field is present says WHY (missing accounts, missing daglig leder…).
   tvangsopplostPgaManglendeRegnskapDato?: string;
@@ -72,10 +100,21 @@ export interface Enhet {
   vedtektsfestetFormaal?: string[];
   aktivitet?: string[];
   paategninger?: Paategning[];
+  // Date of the articles of association in force.
+  vedtektsdato?: string;
+  kapital?: Kapital;
+  // The country whose law governs a foreign entity. Present on UTLA
+  // entities; live NUF samples (2026-09-24) carry none, so a NUF's
+  // country comes from its forretningsadresse.
+  underlagtLovgivningLandKode?: string;
+  underlagtLovgivningLand?: string;
   // Year (YYYY string) of the latest annual accounts filed with
   // Regnskapsregisteret. Present even when the regnskap endpoint itself
   // can't serve the filing (banks, insurers).
   sisteInnsendteAarsregnskap?: string;
+  // true when brreg has the entity in a konsern (group); present on
+  // every live Enhet. Gates the /konsernstruktur fetch.
+  erIKonsern?: boolean;
 }
 
 export type SearchHit = Pick<Enhet, 'organisasjonsnummer' | 'navn'> &
@@ -155,6 +194,33 @@ export interface UnderenheterPage {
   total: number;
 }
 
+// One node of GET /enhetsregisteret/api/konsernstruktur/{orgnr}. The
+// response is the WHOLE group rooted at its top parent, whichever
+// member was asked for. The root carries only organisasjonsnummer,
+// navn, organisasjonsform and children; every other node also has the
+// link to its parent. A company owned through several parents appears
+// once under each (see docs/notes/brreg-api.md § konsernstruktur).
+export interface KonsernNode {
+  organisasjonsnummer: string;
+  navn: string;
+  organisasjonsform?: Kode;
+  // KDAT «Konsern datter», KMOR «Konsern mor» (a mid-level parent),
+  // KGRL «Konsern grunnlag» (a partial stake that counts towards
+  // control together with other links).
+  knytningsform?: Kode;
+  // Ownership basis as brreg writes it: «100%», «100 %», «99,99%»,
+  // «95,0%» — or text («Indirekte mor»).
+  grunnlag?: string;
+  // Level as brreg numbers it. Does not always match the depth in the
+  // tree (51 of ~990 live nodes disagreed); derive depth from the tree.
+  nivaa?: number;
+  parentOrganisasjonsnummer?: string;
+  parentNavn?: string;
+  // ISO date of the link.
+  dato?: string;
+  // Absent (never []) on a leaf.
+  children?: KonsernNode[];
+}
 
 export interface Regnskap {
   id?: number;
@@ -191,4 +257,24 @@ export interface RegnskapResponse {
   unavailable?: boolean;
   // The plan code ('BANK', 'FORS', …) when the 500 body names it.
   unsupportedPlan?: string;
+}
+
+// One JSON-Patch operation from the change feed. The fetcher keeps only
+// op and path: the values (addresses, purposes, …) aren't needed to say
+// WHAT changed, and leaving them out keeps the cache small.
+export interface JsonPatchOp {
+  op: string;
+  // "/forretningsadresse/postnummer", "/navn", "/antallAnsatte", …
+  path: string;
+}
+
+// One event from /oppdateringer/enheter?includeChanges=true.
+export interface EnhetOppdatering {
+  oppdateringsid?: number;
+  // When the change was published in the API (ISO timestamp, UTC).
+  dato: string;
+  // "Endring", "Ny", "Sletting", "Fjernet", "Ukjent". Only Endring
+  // events carry `endringer`.
+  endringstype?: string;
+  endringer?: JsonPatchOp[];
 }

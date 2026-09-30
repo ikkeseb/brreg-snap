@@ -1,0 +1,12 @@
+{
+  "request": "/enhetsregisteret/api/underenheter?overordnetEnhet=973160834&size=100",
+  "status": 200,
+  "body": {
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 0,
+      "totalPages": 0
+    }
+  }
+}

@@ -15,6 +15,7 @@
   "action": {
     "default_title": "brreg-snap",
     "default_popup": "popup/popup.html",
+    "default_area": "navbar",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
@@ -29,6 +30,22 @@
       "32": "icons/icon-32.png"
     },
     "open_at_install": false
+  },
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+O",
+        "mac": "MacCtrl+Shift+O"
+      },
+      "description": "Slå opp bedriften bak siden"
+    },
+    "_execute_sidebar_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "mac": "MacCtrl+Shift+S"
+      },
+      "description": "Åpne brreg-snap i sidepanelet"
+    }
   },
   "icons": {
     "16": "icons/icon-16.png",

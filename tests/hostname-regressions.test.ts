@@ -8,6 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { fakeBrowser } from './helpers/fake-browser.js';
 import { searchByHostnameDetailed } from '../src/lib/hostname-search.js';
 
 type Fixture = Record<string, unknown>;
@@ -38,9 +39,9 @@ function replay(fixture: Fixture): void {
   );
 }
 
-async function resolve(host: string) {
-  replay(loadFixture(host));
-  const result = await searchByHostnameDetailed(host);
+async function resolve(host: string, title?: string, fixture = host) {
+  replay(loadFixture(fixture));
+  const result = await searchByHostnameDetailed(host, title);
   expect(unexpected).toEqual([]);
   expect(result?.complete).toBe(true);
   return result;
@@ -48,18 +49,7 @@ async function resolve(host: string) {
 
 beforeEach(() => {
   unexpected = [];
-  const store: Record<string, unknown> = {};
-  vi.stubGlobal('browser', {
-    storage: {
-      session: {
-        get: async (key: string) => (key in store ? { [key]: store[key] } : {}),
-        set: async (entries: Record<string, unknown>) => {
-          Object.assign(store, entries);
-        },
-        remove: async () => {},
-      },
-    },
-  });
+  fakeBrowser();
 });
 
 afterEach(() => {
@@ -109,5 +99,52 @@ describe('resolver regressions against recorded live responses', () => {
     const result = await resolve('storebrand.no');
     expect(result?.band).toBe('picker');
     expect(result?.candidates[0]?.organisasjonsnummer).toBe('916300484');
+  });
+
+  // Title as a word-boundary hint (recorded 2026-09-24). The label
+  // alone finds no name; the title's spacing does, and only the label's
+  // own letters go out (an unrecorded query would fail the replay).
+  it('rema1000.no puts REMA 1000 NORGE AS first, above the franchisees', async () => {
+    // Plain label: a picker of two franchise stores registered on
+    // www.rema1000.no. The live title spells «REMA 1000» (captured from
+    // www.rema.no; rema1000.no itself timed out for curl).
+    const result = await resolve('rema1000.no', 'Forside | REMA 1000 | Alltid lave priser');
+    expect(result?.band).toBe('picker');
+    expect(result?.candidates.map((c) => [c.organisasjonsnummer, c.evidence])).toEqual([
+      ['982254604', 'navn'],
+      ['999999999', 'hjemmeside'],
+      ['999999998', 'hjemmeside'],
+      ['883409442', 'navn'],
+    ]);
+  });
+
+  it('detnorsketeatret.no offers LL DET NORSKE TEATRET', async () => {
+    // Plain label: nothing (the only hit is a vennelag, scored out).
+    const result = await resolve(
+      'www.detnorsketeatret.no',
+      'Framsida | Det Norske Teatret',
+      'detnorsketeatret.no',
+    );
+    expect(result?.band).toBe('picker');
+    expect(result?.candidates.map((c) => c.organisasjonsnummer)).toEqual(['921196164']);
+  });
+
+  it('theguardian.com stays unresolved: the spaced name has no Norwegian namesake', async () => {
+    const result = await resolve(
+      'www.theguardian.com',
+      'Latest news, sport and opinion from the Guardian | The Guardian',
+      'theguardian.com',
+    );
+    expect(result?.band).toBe('none');
+  });
+
+  it('without a title the same sites keep the plain answer', async () => {
+    const rema = await resolve('rema1000.no');
+    expect(rema?.candidates.map((c) => c.organisasjonsnummer)).toEqual([
+      '999999999',
+      '999999998',
+    ]);
+    const teatret = await resolve('www.detnorsketeatret.no', undefined, 'detnorsketeatret.no');
+    expect(teatret?.band).toBe('none');
   });
 });

@@ -1,0 +1,186 @@
+{
+  "organisasjonsnummer": "914778271",
+  "navn": "Norsk Hydro ASA",
+  "organisasjonsform": {
+    "kode": "ASA",
+    "beskrivelse": "Allmennaksjeselskap"
+  },
+  "children": [
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "HYDRO ENERGI AS",
+      "organisasjonsnummer": "930187240",
+      "parentNavn": "Norsk Hydro ASA",
+      "parentOrganisasjonsnummer": "914778271",
+      "grunnlag": "100%",
+      "dato": "2022-11-28",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "SVELGFOS AS",
+          "organisasjonsnummer": "930173487",
+          "parentNavn": "HYDRO ENERGI AS",
+          "parentOrganisasjonsnummer": "930187240",
+          "grunnlag": "100%",
+          "dato": "2024-10-25",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        }
+      ]
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "INDUSTRIFORSIKRING AS",
+      "organisasjonsnummer": "812966022",
+      "parentNavn": "Norsk Hydro ASA",
+      "parentOrganisasjonsnummer": "914778271",
+      "grunnlag": "100%",
+      "dato": "2022-11-28",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KMOR",
+        "beskrivelse": "Konsern mor"
+      },
+      "navn": "HYDRO ALUMINIUM AS",
+      "organisasjonsnummer": "917537534",
+      "parentNavn": "Norsk Hydro ASA",
+      "parentOrganisasjonsnummer": "914778271",
+      "grunnlag": "100 %",
+      "dato": "1997-05-07",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "HYCAST AS",
+          "organisasjonsnummer": "957007821",
+          "parentNavn": "HYDRO ALUMINIUM AS",
+          "parentOrganisasjonsnummer": "917537534",
+          "grunnlag": "100%",
+          "dato": "2021-10-01",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "HYDRO EXTRUDED SOLUTIONS AS",
+          "organisasjonsnummer": "899286952",
+          "parentNavn": "HYDRO ALUMINIUM AS",
+          "parentOrganisasjonsnummer": "917537534",
+          "grunnlag": "100%",
+          "dato": "2021-10-01",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "children": [
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "SAPA ALUMINIUM BRASIL S.A.",
+              "organisasjonsnummer": "914087899",
+              "parentNavn": "HYDRO EXTRUDED SOLUTIONS AS",
+              "parentOrganisasjonsnummer": "899286952",
+              "grunnlag": "99,99%",
+              "dato": "2015-03-03",
+              "organisasjonsform": {
+                "kode": "UTLA",
+                "beskrivelse": "Utenlandsk enhet"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "SAPA EXTRUSION EXPA S.A.",
+              "organisasjonsnummer": "913850629",
+              "parentNavn": "HYDRO EXTRUDED SOLUTIONS AS",
+              "parentOrganisasjonsnummer": "899286952",
+              "grunnlag": "99,99%",
+              "dato": "2015-03-03",
+              "organisasjonsform": {
+                "kode": "UTLA",
+                "beskrivelse": "Utenlandsk enhet"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "SAPA ALUMINIUM ARGENTINA S.A.",
+              "organisasjonsnummer": "913850602",
+              "parentNavn": "HYDRO EXTRUDED SOLUTIONS AS",
+              "parentOrganisasjonsnummer": "899286952",
+              "grunnlag": "95,0%",
+              "dato": "2015-03-03",
+              "organisasjonsform": {
+                "kode": "UTLA",
+                "beskrivelse": "Utenlandsk enhet"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "SAPA EXTRUSION RAEREN S.A.",
+              "organisasjonsnummer": "814087522",
+              "parentNavn": "HYDRO EXTRUDED SOLUTIONS AS",
+              "parentOrganisasjonsnummer": "899286952",
+              "grunnlag": "100%",
+              "dato": "2015-03-03",
+              "organisasjonsform": {
+                "kode": "UTLA",
+                "beskrivelse": "Utenlandsk enhet"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

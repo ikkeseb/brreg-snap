@@ -4,6 +4,80 @@ All notable changes to brreg-snap are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/) (loosely).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
+## [Unreleased]
+
+### Changed — the 1.4 design («Dossier, stamped») on both surfaces
+
+- Loudness follows severity. When nothing is wrong the popup and the
+  panel are a calm registry extract: paper, ink, hairlines, one quiet
+  green band («Ingen varsler i registeret»). A warning gets a firmer
+  band with the way out inside it («Feil bedrift? Velg en annen»). A
+  bankruptcy, a deletion or a site claiming a company it isn't
+  registered for is stamped: KONKURS, SLETTET, TVANGSAVVIKLING, IKKE
+  KOBLET.
+- The popup: form · city over the name, the org.nr as a copy button
+  with «brreg.no ↗» beside it, daglig leder and styreleder on one
+  line, then the answer, the ledger (Kobling · Status · Alder ·
+  Ansatte · Regnskap with the latest omsetning and resultat), the
+  konsern row, and «Åpne i sidepanel» + «Kopier sammendrag». Every
+  state fits Firefox's 600 px popup cap. When the org.nr came from the
+  page's address or title, an eyebrow says so («Org.nr funnet i
+  sidetittelen»). On a spoofed site the company's facts sit under «Om
+  selskapet — sier ingenting om dette nettstedet».
+- The panel is rebuilt on the same view model and components: identity
+  with the registry flags and «Kopier sammendrag», the answer, the
+  ledger, the konsern row, merknader and «Endret nylig» after the
+  ledger, then Oversikt · Personer · Økonomi · Enheter as a real
+  tablist with counts.
+- Oversikt gains Stiftet, Registrert, Aktivitet, Formål and Tidligere
+  navn; Formål is shown only when it says something Aktivitet doesn't,
+  and long texts fold to four lines with «Vis mer». Økonomi shows the
+  latest filing with its currency, the equity share as a proportion
+  bar, the «Årsregnskap (PDF)» years and «Kunngjøringer»; Enheter opens
+  on the Konsern section (path to the top, direct subsidiaries, each a
+  drill-in with «Tilbake til <selskap>») and lists the underenheter
+  with copyable org.nr. Names that repeat the parent's («EQUINOR ASA
+  AVD FORUS», «EQUINOR ALGERIA AS») show the shared part quieter.
+- Place names read like names: «4035 Stavanger», «Mo i Rana», in the
+  identity line, every address and the copied summary.
+- The panel's masthead field is the search from every state: typing
+  shows the hits (or «Nylig sett» while it is empty), Escape or
+  «Tilbake» puts the previous view back without a new lookup — the
+  open tab, the scroll position and the picker's digit keys included.
+  The popup has the same search behind the magnifier.
+- A compact head (seal · name · org.nr) sticks to the top of the panel
+  once the identity is scrolled past; opening a tab from a link (the
+  popup's konsern row) lands the tabs right under it. «Auto-oppdater»
+  is a switch in the masthead with its consent as a band under it.
+- The picker names its evidence per row: «hjemmeside» (the site is the
+  company's registered website), «underside» (a page on it) or
+  «navnetreff» (the name alone), with a digit key on each row and «0»
+  for «Ingen av disse».
+- Merknader from the registry (påtegninger) are quoted verbatim with
+  their date, under the ledger; the answer counts them («1 merknad i
+  registeret») instead of repeating the text.
+- The toolbar button of the tab shows «!» or «✕» when the company
+  behind the site has a warning or a stamp — from the popup and now
+  from the side panel too, for the tab it follows. Cleared for
+  everything else.
+- Copying (the org.nr, «Kopier sammendrag») confirms on the button
+  itself — the icon becomes a check, the text reads «Kopiert» — and is
+  read out to screen readers; no floating toast.
+- Light and dark follow the system; both measure ≥ 4.5:1 on every
+  text, the stamp included. One focus ring everywhere.
+- Fixed in both surfaces: a wrapped ledger action («Feil bedrift?») no
+  longer starts its line indented, and «brreg.no ↗» never lands alone
+  on a line under a provenance eyebrow.
+
+### Added — a welcome page
+
+- Installing brreg-snap opens one page, once: what it does, a calm and
+  a stamped example (fictional companies, marked as such), the three
+  ways to look a site up — the toolbar button (with the pin step on
+  Chrome), the keyboard shortcuts as they are actually bound, the
+  right-click menu — and the privacy line. It makes no request and
+  stores nothing.
+
 ## [1.3.1] — 2026-09-23
 
 Correctness and privacy patch. brreg's open API changed after 1.3.0
@@ -31,6 +105,29 @@ shipped, and several facts on screen had quietly become wrong.
 - Konkurs, avvikling and slettet show their date where brreg has one;
   a deleted entity no longer gets a guessed employee count; the
   bostyrer's name shows for bankruptcies.
+- A part that couldn't be fetched is never shown as absent: the
+  popup's ok and warn bands say «Noe kunne ikke hentes: roller,
+  regnskapstall, konsern»; the panel's Konsern section says the tree
+  couldn't be fetched (retry via «Oppdater») and «Endret nylig» says
+  when the change feed failed.
+- «Feil bedrift?» on a page that carries an underenhet's org.nr now
+  rejects that org.nr, not only the parent shown, so the site is not
+  matched to the same company again. It is also offered under a
+  KONKURS / SLETTET stamp when the site isn't the company's registered
+  website.
+- The panel stamps a bankrupt company's status into «Nylig sett» like
+  the popup does, so the mark no longer disappears after a panel visit.
+- Races: a company picked from the popup's search while «Tilbake til
+  treffet» or a picker choice was still resolving is no longer replaced
+  by the late answer; the search view opened over a load is not torn
+  down by it; a closed search can't announce its late result; a picker
+  row clicked while the previous choice was being stored is ignored
+  (the company stored is the company loaded). Opening and closing the
+  popup's search keeps the tab's badge.
+- Keyboard focus survives the panel's background rebuilds: the 30 s
+  «Hentet for …» tick updates the text in place, and a same-company
+  sync puts focus back on the equivalent control. The panel's search
+  view opened during a load is operable (main is no longer inert).
 - Confident wrong matches: sbanken.no → Tidsbanken, obos.no → OBOS
   Felleskost (now OBOS BBL), medium.com / bbc.* → unrelated Norwegian
   namesakes. An automatic match now needs the company's registered

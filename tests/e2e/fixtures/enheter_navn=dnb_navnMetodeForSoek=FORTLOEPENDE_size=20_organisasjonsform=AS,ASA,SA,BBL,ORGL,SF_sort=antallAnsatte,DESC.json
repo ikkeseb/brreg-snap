@@ -1,0 +1,1865 @@
+{
+  "request": "/enhetsregisteret/api/enheter?navn=dnb&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&sort=antallAnsatte%2CDESC",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "enheter": [
+        {
+          "aktivitet": [
+            "Alle forretninger og tjenester som det er vanlig eller naturlig at en",
+            "bank utfører."
+          ],
+          "antallAnsatte": 7353,
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "2002-09-12 16:22:48",
+              "navn": "GJENSIDIGE NOR SPAREBANK ASA",
+              "tilDato": "2004-01-19 09:15:52"
+            },
+            {
+              "fraDato": "2004-01-19 09:15:52",
+              "navn": "DNB NOR BANK ASA",
+              "tilDato": "2011-11-11 08:45:34"
+            }
+          ],
+          "hjemmeside": "www.dnb.no",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Banker",
+            "kode": "3200"
+          },
+          "kapital": {
+            "antallAksjer": 1440664864,
+            "belop": 18008310800,
+            "innfortDato": "2026-06-17",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Banker og kredittforetak",
+            "kode": "64.190"
+          },
+          "navn": "DNB BANK ASA",
+          "organisasjonsform": {
+            "beskrivelse": "Allmennaksjeselskap",
+            "kode": "ASA"
+          },
+          "organisasjonsnummer": "984851006",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "2002-09-12",
+          "registreringsdatoForetaksregisteret": "2002-09-12",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2014-01-27",
+          "registreringsdatoMerverdiavgiftsregisteret": "2002-09-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2006-10-23",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2002-09-10",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2026-04-21",
+          "vedtektsfestetFormaal": [
+            "Å drive bank-, finansierings- og investeringstjenestevirksomhet, samt",
+            "virksomhet som har en naturlig tilknytning til dette, og å inneha",
+            "eierinteresser eller være deltaker i andre foretak innenfor rammen av",
+            "den til enhver tid gjeldende lovgivning."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Eiendomsmegling, samt hva dermed står i",
+            "forbindelse og delta i andre selskaper med",
+            "lignende virksomhet."
+          ],
+          "antallAnsatte": 863,
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-19 17:51:00",
+              "navn": "DNB EIENDOMSMEGLING AS",
+              "tilDato": "2004-09-06 20:22:58"
+            },
+            {
+              "fraDato": "2004-09-06 20:22:58",
+              "navn": "DNB NOR EIENDOM AS",
+              "tilDato": "2011-07-06 20:28:03"
+            },
+            {
+              "fraDato": "2011-07-06 20:28:03",
+              "navn": "DNB EIENDOM AS",
+              "tilDato": "2011-08-27 14:41:53"
+            },
+            {
+              "fraDato": "2011-08-27 14:41:53",
+              "navn": "DNB NOR EIENDOM AS",
+              "tilDato": "2011-11-17 20:32:02"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 100033,
+            "belop": 12003960,
+            "innfortDato": "2023-05-31",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Eiendomsmegling og andre formidlingstjenester for eiendom",
+            "kode": "68.310"
+          },
+          "navn": "DNB EIENDOM AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "910968955",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+          "registreringsdatoEnhetsregisteret": "1995-02-19",
+          "registreringsdatoForetaksregisteret": "1989-04-24",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1953-01-03",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2023-02-17",
+          "vedtektsfestetFormaal": [
+            "Eiendomsmeglervirksomhet og virksomhet som har naturlig sammenheng med",
+            "eiendomsmegling, innenfor det som til enhver tid er tillatt iht.",
+            "eiendomsmeglingsloven med tilhørende forskrifter."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Drive livsforsikring, annen personforsikring og",
+            "virksomhet som lovlig kan knyttes til forsikring."
+          ],
+          "antallAnsatte": 296,
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1996-01-22 21:03:00",
+              "navn": "VITAL FORSIKRING ASA",
+              "tilDato": "2011-11-11 08:42:14"
+            },
+            {
+              "fraDato": "2011-11-11 08:42:14",
+              "navn": "DNB LIVSFORSIKRING ASA",
+              "tilDato": "2014-07-04 14:51:14"
+            }
+          ],
+          "hjemmeside": "www.dnb.no",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Livsforsikringsselskaper og pensjonskasser",
+            "kode": "5500"
+          },
+          "kapital": {
+            "antallAksjer": 64827288,
+            "belop": 1641465828.53,
+            "innfortDato": "2020-01-27",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Livsforsikring",
+            "kode": "65.110"
+          },
+          "navn": "DNB LIVSFORSIKRING AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "914782007",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+          "registreringsdatoEnhetsregisteret": "1995-03-12",
+          "registreringsdatoForetaksregisteret": "1988-10-17",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2014-01-21",
+          "registreringsdatoMerverdiavgiftsregisteret": "1991-01-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1995-03-12",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1938-05-11",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2022-10-26",
+          "vedtektsfestetFormaal": [
+            "Drive pensjonsforsikring, livsforsikring og annen personforsikring,",
+            "samt virksomhet som har naturlig tilknytning til dette."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Leasingvirksomhet og annen finansieringsvirksomhet."
+          ],
+          "antallAnsatte": 266,
+          "epostadresse": "post@example.no",
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-03-12 15:49:00",
+              "navn": "AS EKSPORTFINANS Norske bankers finansierings- og eksportkredittinstitutt.",
+              "tilDato": "1996-02-08 18:59:38"
+            },
+            {
+              "fraDato": "1996-06-06 19:26:50",
+              "navn": "EKSPORTFINANS ASA",
+              "tilDato": "2025-05-16 08:34:54"
+            },
+            {
+              "fraDato": "2025-05-16 08:34:54",
+              "navn": "EKSPORTFINANS AS",
+              "tilDato": "2026-01-29 06:07:11"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/om-oss/organisasjonen-styret-og-ledelsen/dnb-finans",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Kredittforetak",
+            "kode": "3500"
+          },
+          "kapital": {
+            "antallAksjer": 263914,
+            "belop": 2999910438,
+            "innfortDato": "2026-04-13",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Banker og kredittforetak",
+            "kode": "64.190"
+          },
+          "navn": "DNB FINANS AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "816521432",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-03-12",
+          "registreringsdatoForetaksregisteret": "1989-02-25",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-15",
+          "registreringsdatoMerverdiavgiftsregisteret": "2025-11-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-15",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1962-03-02",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2026-02-13",
+          "vedtektsfestetFormaal": [
+            "Drive leasingvirksomhet og annen finansieringsvirksomhet, samt",
+            "virksomhet som har en naturlig tilknytning til dette, og å inneha",
+            "eierinteresser eller være deltaker i andre foretak innenfor rammen av",
+            "den til enhver tid gjeldende lovgivning."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Investeringstjeneste og tilknyttede tjenester."
+          ],
+          "antallAnsatte": 149,
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1998-09-14 20:54:55",
+              "navn": "VITAL KAPITALFORVALTNING ASA",
+              "tilDato": "2000-01-10 13:41:13"
+            },
+            {
+              "fraDato": "2000-01-10 13:41:13",
+              "navn": "DNB KAPITALFORVALTNING ASA",
+              "tilDato": "2002-06-06 20:11:47"
+            },
+            {
+              "fraDato": "2002-06-06 20:11:47",
+              "navn": "DNB ASSET MANAGEMENT ASA",
+              "tilDato": "2003-12-31 20:15:06"
+            },
+            {
+              "fraDato": "2003-12-31 20:15:06",
+              "navn": "DNB NOR KAPITALFORVALTNING ASA",
+              "tilDato": "2007-09-18 20:30:37"
+            },
+            {
+              "fraDato": "2007-09-18 20:30:37",
+              "navn": "DNB NOR KAPITALFORVALTNING AS",
+              "tilDato": "2011-11-11 08:24:25"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Øvrige finansielle foretak unntatt forsikring",
+            "kode": "4900"
+          },
+          "kapital": {
+            "antallAksjer": 548402,
+            "belop": 109680400,
+            "innfortDato": "2004-06-03",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Fondsforvaltningsvirksomhet",
+            "kode": "66.300"
+          },
+          "navn": "DNB ASSET MANAGEMENT AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "880109162",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1998-09-14",
+          "registreringsdatoForetaksregisteret": "1998-09-14",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1998-08-25",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2011-04-14",
+          "vedtektsfestetFormaal": [
+            "Forvaltning av verdipapirfond herunder tegning og innløsning av",
+            "andeler og kjøp og salg av verdipapirer for de fond selskapet",
+            "forvalter samt aktiv forvaltning av investors portefølje av",
+            "finansielle instrumenter på individuellbasis og etter investors",
+            "fullmakt, rådgivning i forbindelse med finansielle instrumenter og",
+            "oppbevaring og forvaltning av fondsandeler."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Forvaltning av eiendom og eiendomsporteføljer, herunder forvaltning av",
+            "alternative investeringsfond, samt annen virksomhet knyttet til denne",
+            "forvaltningen."
+          ],
+          "antallAnsatte": 49,
+          "epostadresse": "post@example.no",
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-03-12 16:38:00",
+              "navn": "VITAL EIENDOMSFORVALTNING AS",
+              "tilDato": "1997-05-16 18:10:12"
+            },
+            {
+              "fraDato": "1997-05-16 18:10:12",
+              "navn": "VITAL DNB EIENDOM AS",
+              "tilDato": "1997-08-14 20:15:12"
+            },
+            {
+              "fraDato": "1997-08-14 20:15:12",
+              "navn": "VITAL EIENDOMSFORVALTNING AS",
+              "tilDato": "2004-02-25 11:05:07"
+            },
+            {
+              "fraDato": "2004-02-25 11:05:07",
+              "navn": "VITAL EIENDOM AS",
+              "tilDato": "2011-11-30 20:36:10"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Øvrige finansielle foretak unntatt forsikring",
+            "kode": "4900"
+          },
+          "kapital": {
+            "antallAksjer": 20000,
+            "belop": 1020000,
+            "innfortDato": "2016-07-14",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Fondsforvaltningsvirksomhet",
+            "kode": "66.300"
+          },
+          "navn": "DNB NÆRINGSEIENDOM AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "936237592",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-03-12",
+          "registreringsdatoForetaksregisteret": "1988-11-12",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-03-03",
+          "registreringsdatoMerverdiavgiftsregisteret": "1995-01-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1995-03-12",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1984-07-31",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2016-06-17",
+          "vedtektsfestetFormaal": [
+            "Forvaltning av eiendom og eiendomsporteføljer, herunder forvaltning av",
+            "alternative investeringsfond, samt annen virksomhet knyttet til denne",
+            "forvaltningen."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Er å drive eiendomsmegling av forretningseiendommer og det som",
+            "naturlig måtte stå i forbindelse med dette."
+          ],
+          "antallAnsatte": 14,
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-09-14 23:04:00",
+              "navn": "DNB NÆRINGSMEGLING AS",
+              "tilDato": "2004-04-29 20:46:30"
+            },
+            {
+              "fraDato": "2004-04-29 20:46:30",
+              "navn": "DNB NOR NÆRINGSMEGLING AS",
+              "tilDato": "2011-11-26 14:44:27"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "belop": 1000000,
+            "innfortDato": "1996-01-16",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Eiendomsmegling og andre formidlingstjenester for eiendom",
+            "kode": "68.310"
+          },
+          "navn": "DNB NÆRINGSMEGLING AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "975265145",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+          "registreringsdatoEnhetsregisteret": "1995-08-31",
+          "registreringsdatoForetaksregisteret": "1995-09-14",
+          "registreringsdatoMerverdiavgiftsregisteret": "2001-07-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2002-01-24",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1995-08-16",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2011-11-18",
+          "vedtektsfestetFormaal": [
+            "Eiendomsmegling av forretningseiendommer og det",
+            "som naturlig måtte stå i forbindelse med dette."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Drive forretningsførervirksomhet og eiendomsforvaltning, herunder",
+            "føring av regnskap for andre, med dertil hørende virksomhet og",
+            "investeringer."
+          ],
+          "antallAnsatte": 9,
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "2017-11-30 14:36:45",
+              "navn": "WR START UP 218 AS",
+              "tilDato": "2018-03-28 13:10:01"
+            },
+            {
+              "fraDato": "2018-03-28 13:10:01",
+              "navn": "CARNEGIE BUSINESS MANAGEMENT AS",
+              "tilDato": "2025-04-09 15:17:59"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 1000,
+            "belop": 300000,
+            "innfortDato": "2018-06-07",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Regnskapsføring og bokføring",
+            "kode": "69.202"
+          },
+          "navn": "DNB CARNEGIE BUSINESS MANAGEMENT AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "819999732",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "2017-11-30",
+          "registreringsdatoForetaksregisteret": "2017-11-30",
+          "registreringsdatoMerverdiavgiftsregisteret": "2018-05-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2018-07-09",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2017-11-09",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2025-03-31",
+          "vedtektsfestetFormaal": [
+            "Drive forretningsførervirksomhet og eiendomsforvaltning, herunder",
+            "føring av regnskap for andre, med dertil hørende virksomhet og",
+            "investeringer."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Å utvikle boligfinansieringsløsninger for norske kunder av",
+            "DnB-konsernet."
+          ],
+          "epostadresse": "post@example.no",
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "2003-06-14 14:41:07",
+              "navn": "DNB BOLIGKREDITT AS",
+              "tilDato": "2004-08-02 20:23:27"
+            },
+            {
+              "fraDato": "2004-08-02 20:23:27",
+              "navn": "DNB NOR BOLIGKREDITT AS",
+              "tilDato": "2011-11-11 08:34:09"
+            }
+          ],
+          "hjemmeside": "www.dnb.no",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Kredittforetak",
+            "kode": "3500"
+          },
+          "kapital": {
+            "antallAksjer": 1,
+            "belop": 4527000000,
+            "innfortDato": "2021-08-31",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Banker og kredittforetak",
+            "kode": "64.190"
+          },
+          "navn": "DNB BOLIGKREDITT AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "985621551",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2024-11-16",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2024-11-10",
+          "registreringsdatoEnhetsregisteret": "2003-06-14",
+          "registreringsdatoForetaksregisteret": "2003-06-14",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2003-03-21",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2025-04-24",
+          "vedtektsfestetFormaal": [
+            "Yte og erverve bolighypoteklån, lån med pant i fritidseiendommer og",
+            "fellessfinansiering av borettslag, som hovedsakelig finansieres ved",
+            "opptak av obligasjonslån ved utstedelse av obligasjoner med",
+            "fortrinnsrett."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Eie selskap som driver kapitalforvaltningsvirksomhet (finansiell",
+            "tjenesteyting)."
+          ],
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-19 17:07:00",
+              "navn": "AS LI-SHIP",
+              "tilDato": "2002-07-09 20:27:10"
+            },
+            {
+              "fraDato": "2002-07-09 20:27:10",
+              "navn": "DNB ASSET MANAGEMENT HOLDING AS",
+              "tilDato": "2004-02-11 20:45:38"
+            },
+            {
+              "fraDato": "2004-02-11 20:45:38",
+              "navn": "DNB NOR KAPITALFORVALTNING HOLDING AS",
+              "tilDato": "2011-11-11 08:27:31"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Øvrige finansielle foretak unntatt forsikring",
+            "kode": "4900"
+          },
+          "kapital": {
+            "antallAksjer": 220050,
+            "belop": 274842450,
+            "innfortDato": "2013-12-09",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Egeninvesteringsselskaper i finansielle konsern og for offentlig forvaltning",
+            "kode": "64.322"
+          },
+          "navn": "DNB ASSET MANAGEMENT HOLDING AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "835615472",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-02-19",
+          "registreringsdatoForetaksregisteret": "1989-01-22",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1984-08-31",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2013-08-19",
+          "vedtektsfestetFormaal": [
+            "Eie foretak som driver og/eller eier kapitalforvaltningsvirksomhet,",
+            "herunder eie foretak som driver og/eller eier virksomhet som har",
+            "naturlig sammenheng med slik kapitalforvaltningsvirksomhet."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Forestå kjøp, salg, drift, forvaltning og utvikling av eiendommer,",
+            "eiendomsselskaper og andeler i eiendomsselskaper, og alt som står i",
+            "forbindelse med dette. Selskapet skal også kunne delta i andre",
+            "selskaper eller næringsforetak med samme eller liknende formål."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Alternative investeringsfond (AIF) unntatt verdipapirfond",
+            "kode": "4500"
+          },
+          "kapital": {
+            "antallAksjer": 315315695,
+            "belop": 3153156.95,
+            "innfortDato": "2026-08-22",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Alternative investeringsfond (aif) som ikke er verdipapirfond",
+            "kode": "64.312"
+          },
+          "navn": "DNB ECP INVEST AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "929633954",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoEnhetsregisteret": "2022-08-12",
+          "registreringsdatoForetaksregisteret": "2022-08-12",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2022-07-01",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2026-05-26",
+          "vedtektsfestetFormaal": [
+            "Investere i og eie aksjer i DNB Eiendomsfond Core Plus AS."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Investere i og eie eiendom ved investering i eiendom, aksjer eller",
+            "andeler i eiendomsselskap, eiendomsfond mv. og annen virksomhet som",
+            "står i naturlig forbindelse med dette."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "2020-09-03 14:14:01",
+              "navn": "DNB PRIVATE BANKING EIENDOMSFOND AS",
+              "tilDato": "2021-03-09 15:08:26"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Alternative investeringsfond (AIF) unntatt verdipapirfond",
+            "kode": "4500"
+          },
+          "kapital": {
+            "antallAksjer": 14301239,
+            "belop": 143012390,
+            "innfortDato": "2026-09-22",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Alternative investeringsfond (aif) som ikke er verdipapirfond",
+            "kode": "64.312"
+          },
+          "navn": "DNB EIENDOMSFOND CORE PLUS AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "925529559",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoEnhetsregisteret": "2020-09-03",
+          "registreringsdatoForetaksregisteret": "2020-09-03",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2020-07-06",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2026-08-26",
+          "vedtektsfestetFormaal": [
+            "Investere i og eie eiendom ved investering i eiendom, aksjer eller",
+            "andeler i eiendomsselskap, eiendomsfond mv. og annen virksomhet som",
+            "står i naturlig forbindelse med dette."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Kjøp og leie av eiendommer for utbygging/utvikling",
+            "av kjøpesenteret \"Torgkvartalet\", utleie og drift",
+            "av kjøpesenteret, samt annen virksomhet som",
+            "naturlig faller inn under dette, herunder",
+            "deltakelse i andre selskaper så langt dette anses",
+            "nødvendig for drift av senteret."
+          ],
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-20 00:48:00",
+              "navn": "TORGKVARTALET AS",
+              "tilDato": "2000-01-13 18:53:22"
+            },
+            {
+              "fraDato": "2000-01-13 18:53:22",
+              "navn": "GJENSIDIGE NOR SPARING AS",
+              "tilDato": "2004-08-06 10:07:26"
+            },
+            {
+              "fraDato": "2004-08-06 10:07:26",
+              "navn": "VITAL EIENDOMSFOND AS",
+              "tilDato": "2007-11-20 20:51:15"
+            },
+            {
+              "fraDato": "2007-11-20 20:51:15",
+              "navn": "VITAL EIENDOMSANDELER AS",
+              "tilDato": "2009-12-15 20:26:37"
+            },
+            {
+              "fraDato": "2009-12-15 20:26:37",
+              "navn": "VITAL EIENDOMSFORVALTNING AS",
+              "tilDato": "2011-11-14 20:18:57"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 100,
+            "belop": 3000000,
+            "innfortDato": "2024-01-30",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Eiendomsforvaltning på oppdrag",
+            "kode": "68.320"
+          },
+          "navn": "DNB EIENDOMSFORVALTNING AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "961842948",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-02-20",
+          "registreringsdatoForetaksregisteret": "1991-12-11",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1991-09-23",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2023-12-31",
+          "vedtektsfestetFormaal": [
+            "Selskapets virksomhet er knyttet til fast eiendom og det som naturlig",
+            "hører til slik virksomhet, dog innenfor rammen av DnB NOR-gruppens",
+            "virksomhet."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Kjøp, salg, drift,",
+            "forvaltning og utvikling av eiendommer, eiendomsselskaper og andeler i",
+            "eiendomsselskaper, og alt som står i forbindelse med dette. Selskapet",
+            "skal også kunne delta i andre selskaper eller næringsforetak med samme",
+            "eller liknende formål."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "2017-04-25 12:06:58",
+              "navn": "DNB SPV 2 HOLDING AS",
+              "tilDato": "2019-07-24 16:13:31"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 1,
+            "belop": 1250000,
+            "innfortDato": "2023-01-25",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Utvikling og salg av byggeprosjekter",
+            "kode": "68.120"
+          },
+          "navn": "DNB EIENDOMSINVEST 2 AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "818900422",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoEnhetsregisteret": "2017-04-25",
+          "registreringsdatoForetaksregisteret": "2017-04-25",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2019-09-19",
+          "registreringsdatoMerverdiavgiftsregisteret": "2017-03-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2017-05-15",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2017-03-27",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2023-01-05",
+          "vedtektsfestetFormaal": [
+            "Kjøp, salg, drift,",
+            "forvaltning og utvikling av eiendommer, eiendomsselskaper og andeler i",
+            "eiendomsselskaper, og alt som står i forbindelse med dette. Selskapet",
+            "skal også kunne delta i andre selskaper eller næringsforetak med samme",
+            "eller liknende formål."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Investeringer i fast eiendom, herunder deltakelse som komplementar i",
+            "komandittselskap, og annet som står i sammenheng med dette."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "2007-05-19 14:42:40",
+              "navn": "VITAL EIENDOMSKOMPLEMENTAR AS",
+              "tilDato": "2011-11-21 10:36:59"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 34,
+            "belop": 51264836.3,
+            "innfortDato": "2020-07-17",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Utleie av egen eller leid fast eiendom",
+            "kode": "68.200"
+          },
+          "navn": "DNB EIENDOMSKOMPLEMENTAR AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "991252878",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoEnhetsregisteret": "2007-05-19",
+          "registreringsdatoForetaksregisteret": "2007-05-19",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2007-05-07",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2020-07-08",
+          "vedtektsfestetFormaal": [
+            "Investeringer i fast eiendom, herunder ved deltakelse som komplementar",
+            "i komandittselskap, og annet som står i sammenheng med dette."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Kjøp og salg av fast eiendom, herunder også",
+            "andeler i andre selskaper, drift av fast eiendom,",
+            "byggeadministrasjon og prosjektutvikling, samt",
+            "tilknyttet næringsvirksomhet."
+          ],
+          "epostadresse": "post@example.no",
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-03-12 16:22:00",
+              "navn": "BRUDEVOLD EIENDOM AS",
+              "tilDato": "1996-11-18 19:21:20"
+            },
+            {
+              "fraDato": "1996-11-18 19:21:20",
+              "navn": "KJØRBO EIENDOM AS",
+              "tilDato": "2004-11-24 20:26:26"
+            },
+            {
+              "fraDato": "2004-11-30 20:22:50",
+              "navn": "DNBNOR EIENDOMSUTVIKLING AS",
+              "tilDato": "2004-12-08 20:16:24"
+            },
+            {
+              "fraDato": "2004-12-08 20:16:24",
+              "navn": "DNB NOR EIENDOMSUTVIKLING AS",
+              "tilDato": "2011-12-13 21:15:51"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 91200000,
+            "belop": 91200000,
+            "innfortDato": "2018-03-14",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Utvikling og salg av byggeprosjekter",
+            "kode": "68.120"
+          },
+          "navn": "DNB EIENDOMSUTVIKLING AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "921286791",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-03-12",
+          "registreringsdatoForetaksregisteret": "1989-02-23",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1984-12-28",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2018-03-08",
+          "vedtektsfestetFormaal": [
+            "Kjøp og salg av fast eiendom, herunder også andeler i andre selskaper,",
+            "drift av fast eiendom, byggadministrasjon og prosjektutvikling,",
+            "forvaltning av eiendom og andeler i selskaper samt tilknyttet",
+            "næringsvirksomhet."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Investering i og drift av fast eiendom, herunder eie av aksjer og",
+            "andeler, samt øvrig virksomhet som måtte stå i forbindelse med dette."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "2008-01-04 13:47:26",
+              "navn": "VITAL HANDELSPARKER AS",
+              "tilDato": "2011-11-30 20:35:58"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 862500,
+            "belop": 86250000,
+            "innfortDato": "2014-05-08",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Utleie av egen eller leid fast eiendom",
+            "kode": "68.200"
+          },
+          "navn": "DNB HANDELSPARKER AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "992108800",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoEnhetsregisteret": "2008-01-04",
+          "registreringsdatoForetaksregisteret": "2008-01-04",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-03-08",
+          "registreringsdatoMerverdiavgiftsregisteret": "2008-09-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2008-11-27",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2007-12-19",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2016-06-02",
+          "vedtektsfestetFormaal": [
+            "Investering i og drift av fast eiendom, herunder eie av aksjer og",
+            "andeler, samt øvrig virksomhet som måtte stå i forbindelse med dette."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Kjøp og salg av aksjer og alt som måtte stå i",
+            "forbindelse med dette."
+          ],
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-19 23:18:00",
+              "navn": "DNB INVEST HOLDING AS",
+              "tilDato": "2004-12-07 11:19:00"
+            },
+            {
+              "fraDato": "2004-12-07 11:19:00",
+              "navn": "DNB NOR INVEST HOLDING AS",
+              "tilDato": "2011-11-25 10:04:33"
+            },
+            {
+              "fraDato": "2011-11-25 10:04:33",
+              "navn": "DNB INVEST HOLDING AS",
+              "tilDato": "2023-04-25 13:45:35"
+            },
+            {
+              "fraDato": "2023-04-25 13:45:35",
+              "navn": "S FRA DNB AS",
+              "tilDato": "2024-03-21 15:43:19"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Øvrige finansielle foretak unntatt forsikring",
+            "kode": "4900"
+          },
+          "kapital": {
+            "antallAksjer": 200000,
+            "belop": 1000000,
+            "innfortDato": "2019-11-20",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Egeninvesteringsselskaper i finansielle konsern og for offentlig forvaltning",
+            "kode": "64.322"
+          },
+          "navn": "DNB INVEST HOLDING AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "956238455",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-02-19",
+          "registreringsdatoForetaksregisteret": "1990-04-06",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1989-12-29",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2024-03-05",
+          "vedtektsfestetFormaal": [
+            "Kjøp og salg av aksjer og alt som måtte stå i forbindelse med dette."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Være hovedmann i DNB PE Direct I IS og utøve alminnelig virksomhet",
+            "knyttet til dette, herunder investere i selskaper, og for øvrig utføre",
+            "slike oppgaver og handlinger som er pålagt som hovedmann etter",
+            "selskapsloven."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0160",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "2019-10-02 16:09:06",
+              "navn": "NFH 190908 AS",
+              "tilDato": "2019-11-22 15:49:15"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Alternative investeringsfond (AIF) unntatt verdipapirfond",
+            "kode": "4500"
+          },
+          "kapital": {
+            "antallAksjer": 81229,
+            "belop": 81229,
+            "innfortDato": "2022-10-12",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Alternative investeringsfond (aif) som ikke er verdipapirfond",
+            "kode": "64.312"
+          },
+          "navn": "DNB PE DIRECT I (IS) AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "923535497",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2019-10-02",
+          "registreringsdatoForetaksregisteret": "2019-10-02",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2019-09-01",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2022-07-01",
+          "vedtektsfestetFormaal": [
+            "Å være Hovedmann i DNB PE Direct I IS og utøve alminnelig virksomhet",
+            "knyttet til dette, herunder investere i selskaper, og for øvrig utføre",
+            "slike oppgaver og handlinger som er pålagt som Hovedmann etter",
+            "selskapsloven."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Å være Hovedmann i DNB PE Direct II IS og utøve alminnelig virksomhet",
+            "knyttet til dette, herunder investere i selskaper, og for øvrig utføre",
+            "slike oppgaver og handlinger som er pålagt som Hovedmann etter",
+            "selskapsloven."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0160",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "2022-07-05 16:39:04",
+              "navn": "NFH 220677 AS",
+              "tilDato": "2022-09-15 17:44:31"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Alternative investeringsfond (AIF) unntatt verdipapirfond",
+            "kode": "4500"
+          },
+          "kapital": {
+            "antallAksjer": 103582,
+            "belop": 207164,
+            "innfortDato": "2025-09-12",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Alternative investeringsfond (aif) som ikke er verdipapirfond",
+            "kode": "64.312"
+          },
+          "navn": "DNB PE DIRECT II (IS) AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "929456041",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2022-07-05",
+          "registreringsdatoForetaksregisteret": "2022-07-05",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2022-06-01",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2025-06-27",
+          "vedtektsfestetFormaal": [
+            "Å være Hovedmann i DNB PE Direct II IS og utøve alminnelig virksomhet",
+            "knyttet til dette, herunder investere i selskaper, og for øvrig utføre",
+            "slike oppgaver og handlinger som er pålagt som Hovedmann etter",
+            "selskapsloven."
+          ]
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 20,
+      "totalElements": 48,
+      "totalPages": 3
+    }
+  }
+}

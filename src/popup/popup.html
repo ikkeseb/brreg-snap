@@ -4,96 +4,82 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>brreg-snap</title>
+    <link
+      rel="preload"
+      href="/fonts/schibsted-grotesk-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="stylesheet" href="popup.css" />
   </head>
-  <body>
-    <main id="app" data-state="loading">
-      <header>
-        <h1><img id="brand-mark" class="brand-mark" alt="" />brreg-snap</h1>
-      </header>
-      <section id="status" aria-live="polite">Slår opp bedrift…</section>
-      <div id="error-actions" class="error-actions" hidden>
-        <button type="button" id="retry-load" class="retry-button">
-          Prøv igjen
-        </button>
-      </div>
-      <section id="skeleton" aria-hidden="true" hidden>
-        <div class="skel skel-name"></div>
-        <div class="skel skel-orgnr"></div>
-        <div class="skel-verdict">
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-        </div>
-        <div class="skel-rows">
-          <div class="skel skel-row"></div>
-          <div class="skel skel-row"></div>
-          <div class="skel skel-row"></div>
-        </div>
-      </section>
-      <section id="result" hidden></section>
-      <div id="resolution-actions" class="resolution-actions" hidden>
-        <button type="button" id="reject-choice" class="ghost-link">
-          Feil bedrift? Vis alternativer
-        </button>
-      </div>
-      <section id="picker" hidden>
-        <p class="picker-intro">Vi fant flere mulige treff på denne siden:</p>
-        <ul id="picker-list" class="picker-list"></ul>
-        <button
-          type="button"
-          id="picker-none"
-          class="picker-none"
-          aria-keyshortcuts="0"
-        >
-          Ingen av disse
-          <kbd class="picker-key" aria-hidden="true">0</kbd>
-        </button>
-      </section>
-      <section id="empty-state" hidden>
-        <p id="empty-message" class="empty-message"></p>
-        <div class="manual-search">
-          <label for="manual-query" class="manual-search-label"
-            >Søk i Brønnøysundregistrene</label
-          >
-          <input
-            id="manual-query"
-            type="search"
-            autocomplete="off"
-            placeholder="Bedriftsnavn eller 9-sifret orgnr"
-            spellcheck="false"
+  <!--
+    body is the surface root (.app, SPEC): data-answer carries the tone
+    of what is on screen (ok|warn|danger|pick|empty|loading) for the
+    stylesheet. main#app[data-state] (loading|result|picker|empty|error)
+    is the stable state hook the smoke and the tests key on.
+  -->
+  <body class="app app--popup" data-answer="loading">
+    <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+      <!-- brreg-snap 1.4 icon sprite (design: icons.svg). Hand-drawn on a
+           16 px grid, stroke-only; stroke width, colour and size come from
+           .glyph / .icon in brreg.css. Referenced with
+           <svg class="icon"><use href="#i-copy"/></svg>. -->
+      <defs>
+        <symbol id="g-ok" viewBox="0 0 16 16"><path d="M3.2 8.6 6.4 11.8 12.8 4.4" /></symbol>
+        <symbol id="g-warn" viewBox="0 0 16 16">
+          <path d="M8 2.8v6.6" />
+          <path d="M8 13.1v.1" stroke-width="2.6" />
+        </symbol>
+        <symbol id="g-danger" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" /></symbol>
+        <symbol id="g-dot" viewBox="0 0 16 16">
+          <circle cx="8" cy="8.2" r="1.6" fill="currentColor" stroke="none" />
+        </symbol>
+        <symbol id="i-search" viewBox="0 0 16 16">
+          <circle cx="7" cy="7" r="4.6" />
+          <path d="M10.4 10.4 14 14" />
+        </symbol>
+        <symbol id="i-copy" viewBox="0 0 16 16">
+          <rect x="5.5" y="5.5" width="8" height="8" rx="1" />
+          <path d="M3 10.5V3.5a1 1 0 0 1 1-1h6.5" />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 16 16"><path d="M3.2 8.6 6.4 11.8 12.8 4.4" /></symbol>
+        <symbol id="i-summary" viewBox="0 0 16 16"><path d="M3 4h10M3 8h10M3 12h6" /></symbol>
+        <symbol id="i-panel" viewBox="0 0 16 16">
+          <rect x="2" y="2.5" width="12" height="11" rx="1" />
+          <path d="M9.5 2.5v11" />
+        </symbol>
+        <symbol id="i-chev" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5" /></symbol>
+        <symbol id="i-back" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8 10 12.5" /></symbol>
+        <symbol id="i-tree" viewBox="0 0 16 16">
+          <rect x="5.5" y="1.8" width="5" height="3.6" rx=".6" />
+          <rect x="1.5" y="10.6" width="4.4" height="3.6" rx=".6" />
+          <rect x="10.1" y="10.6" width="4.4" height="3.6" rx=".6" />
+          <path d="M8 5.4v2.6M3.7 10.6V8h8.6v2.6" />
+        </symbol>
+        <symbol id="i-refresh" viewBox="0 0 16 16">
+          <path d="M13 8a5 5 0 1 1-1.6-3.7" />
+          <path d="M11.8 1.8v2.8H9" />
+        </symbol>
+        <symbol id="i-link" viewBox="0 0 16 16">
+          <path d="M6.8 9.2a2.6 2.6 0 0 0 3.7 0l2.2-2.2a2.6 2.6 0 0 0-3.7-3.7l-.7.7" />
+          <path d="M9.2 6.8a2.6 2.6 0 0 0-3.7 0L3.3 9a2.6 2.6 0 0 0 3.7 3.7l.7-.7" />
+        </symbol>
+        <symbol id="mark" viewBox="0 0 30 50">
+          <path
+            d="M3 2.5v45L27 36.5 13.5 25 27 13.5Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linejoin="miter"
           />
-          <ul id="manual-results" class="manual-results"></ul>
-        </div>
-        <section id="recent-section" class="recent-section" hidden>
-          <h3 class="recent-title">Nylig sett</h3>
-          <ul id="recent-list" class="recent-list"></ul>
-        </section>
-      </section>
-      <footer>
-        <a
-          id="brreg-link"
-          href="https://virksomhet.brreg.no/nb/oppslag/enheter"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Åpne på brreg.no ↗</a
-        >
-        <a id="details-link" href="#" hidden>Vis i sidebar ↗</a>
-        <span id="footer-source" hidden
-          >kilde: <span id="source-host"></span
-        ></span>
-        <p class="attribution">
-          Data fra Brønnøysundregistrene (<a
-            href="https://data.norge.no/nlod/no/2.0"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Norsk lisens for offentlige data"
-            >NLOD 2.0</a
-          >)
-        </p>
-      </footer>
-    </main>
+        </symbol>
+      </defs>
+    </svg>
+    <p id="live" class="sr-only" aria-live="polite"></p>
+    <header id="mast" class="mast"></header>
+    <main id="app" data-state="loading" aria-busy="true"></main>
+    <footer id="foot" class="foot"></footer>
     <script type="module" src="popup.ts"></script>
   </body>
 </html>

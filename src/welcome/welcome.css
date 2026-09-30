@@ -1,0 +1,248 @@
+/* Welcome page — layout and the page-only pieces. Tokens and every
+ * component (masthead mark, answer, ledger, kbd, evidence tag, honest
+ * line, footer) live in ../styles/brreg.css; this file composes them on
+ * a full tab and adds the few things a one-screen page needs that the
+ * 380 px surfaces never did: a display size for the headline and a
+ * lead size under it. */
+@import '../styles/brreg.css';
+
+html {
+  background: var(--paper);
+}
+
+.app--welcome {
+  /* the page gutter; the cards set their own --gut for the components */
+  --page-gut: clamp(20px, 4vw, 48px);
+  --t-display: 800 38px/1 var(--font);
+  --t-lead-lg: 400 16px/1.45 var(--font);
+  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/* ---------- masthead: mark + brand ------------------------------------- */
+.app--welcome .mast {
+  height: 48px;
+  padding: 0 var(--page-gut);
+}
+.mast__brand {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* ---------- main column -------------------------------------------------- */
+.welcome {
+  width: min(1040px, 100% - 2 * var(--page-gut));
+  margin: 0 auto;
+  padding: 20px 0 16px;
+  /* a tall window: the column sits in the middle of the room, not at the top */
+  align-self: center;
+}
+
+.hero__head {
+  font: var(--t-display);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.hero__lead {
+  max-width: 58ch;
+  margin-top: 6px;
+  font: var(--t-lead-lg);
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+
+/* ---------- the two examples ------------------------------------------------
+   Real components on fictional data. The figure's caption is the only
+   thing a screen reader gets; the card is aria-hidden. */
+.examples {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+/* both cards share one height; their content is balanced (welcome.ts:
+   the calm card carries the leaders line and a fourth row, the loud one
+   the stamp), so neither ends in a blank */
+.example {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.example__card {
+  flex: 1;
+}
+.example__cap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font: var(--t-lead);
+  letter-spacing: -0.008em;
+}
+.example[data-answer='ok'] .example__cap { --tone: var(--ok); }
+.example[data-answer='danger'] .example__cap { --tone: var(--danger-fill); }
+.example__cap .answer__seal { width: 18px; height: 18px; }
+.example__cap .answer__seal .glyph { width: 11px; height: 11px; }
+
+.example__card {
+  --gut: 16px;
+  padding-bottom: 2px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 4px;
+  background: var(--paper);
+  overflow: hidden;
+}
+.example__site {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 var(--gut);
+  border-bottom: 1px solid var(--rule);
+}
+.example__site .mast__site { flex: 0 1 auto; }
+.example__site .evidence { margin-left: auto; white-space: nowrap; }
+.example__card .ident { padding-top: 10px; }
+.example__card .ident__name { font-size: 22px; letter-spacing: -0.018em; }
+.example__card .ident__line { margin-top: 4px; }
+.example__card .ident__line b { color: var(--ink); }
+.example__card .answer { margin-top: 12px; }
+.example__card .ledger { margin-top: 10px; }
+.example__card .ledger-row:last-child { border-bottom: 0; }
+/* under a danger answer nothing reads as reassurance (brreg.css keys this
+   on the surface root; the card is its own root here) */
+.example[data-answer='danger'] .ledger [data-tone='ok'] { --tone: var(--ink-3); }
+
+/* ---------- the three ways --------------------------------------------------- */
+.ways {
+  margin-top: 20px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ink);
+}
+.ways__head {
+  font: var(--t-cap);
+  letter-spacing: var(--track-cap);
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.ways__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 32px;
+  margin-top: 12px;
+}
+.way {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 0 10px;
+  align-content: start;
+}
+.way__n { margin-top: 1px; }
+.way__head {
+  font: var(--t-lead);
+  font-size: 15px;
+  letter-spacing: -0.008em;
+}
+.way__text,
+.way__note,
+.way .keys,
+.way__edit {
+  grid-column: 2;
+}
+.way__text {
+  margin-top: 4px;
+  color: var(--ink-2);
+  text-wrap: pretty;
+}
+.way__note {
+  margin-top: 6px;
+  color: var(--ink-3);
+}
+.way__edit {
+  margin-top: 6px;
+  justify-self: start;
+}
+
+/* shortcut rows: label · keys */
+.keys {
+  margin-top: 4px;
+}
+.keys__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  min-height: 24px;
+}
+.keys dt {
+  flex: 0 0 116px;
+  color: var(--ink-2);
+}
+.keys__val {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.key {
+  display: inline-grid;
+  place-items: center;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r);
+  background: var(--paper-2);
+  font: var(--t-cap);
+  font-weight: 600;
+  color: var(--ink);
+}
+.keys__plus,
+.keys__unset {
+  color: var(--ink-3);
+}
+
+/* ---------- privacy + footer ------------------------------------------------------ */
+.privacy {
+  margin-top: 16px;
+  padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  text-wrap: pretty;
+}
+.privacy .glyph { color: var(--ink-3); }
+
+.app--welcome .foot {
+  margin: 0;
+  padding: 10px var(--page-gut) 12px;
+}
+.foot__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 16px;
+}
+
+/* ---------- narrow, short and tall ------------------------------------------------ */
+@media (min-height: 860px) and (min-width: 700px) {
+  .app--welcome { --t-display: 800 44px/1 var(--font); --t-lead-lg: 400 17px/1.45 var(--font); }
+  .hero__lead { margin-top: 10px; }
+  .examples { margin-top: 28px; }
+  .ways { margin-top: 32px; padding-top: 16px; }
+  .ways__list { margin-top: 16px; }
+  .privacy { margin-top: 28px; padding-top: 14px; }
+}
+@media (max-height: 760px) {
+  .app--welcome { --t-display: 800 34px/1 var(--font); }
+  .welcome { padding-top: 16px; }
+  .examples { margin-top: 16px; }
+  .example__card { --stamp-size: 26px; }
+  .ways { margin-top: 16px; }
+  .privacy { margin-top: 12px; }
+}
+@media (max-width: 860px) {
+  .ways__list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 700px) {
+  .app--welcome { --t-display: 800 30px/1.06 var(--font); }
+  .examples { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .ways__list { grid-template-columns: minmax(0, 1fr); }
+}

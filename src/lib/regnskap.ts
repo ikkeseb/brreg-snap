@@ -1,5 +1,5 @@
 // Pure extraction + derivation over the regnskapsregisteret response.
-// Kept DOM-free so it is unit-testable; src/details/render/nokkeltall.ts
+// Kept DOM-free so it is unit-testable; src/lib/view/dossier-view.ts
 // is the thin renderer on top.
 
 import type { Regnskap } from '../types/brreg.js';
@@ -17,6 +17,8 @@ export interface KeyFigures {
   resultatFoerSkatt?: number;
   aarsresultat?: number;
   egenkapital?: number;
+  // Total assets: sumEgenkapitalGjeld (the balance sheet balances).
+  sumEiendeler?: number;
   // sumEgenkapitalGjeld − sumEgenkapital (total liabilities). Undefined
   // unless both inputs are present.
   gjeld?: number;
@@ -149,6 +151,7 @@ export function keyFigures(r: Regnskap): KeyFigures {
     resultatFoerSkatt: res?.ordinaertResultatFoerSkattekostnad,
     aarsresultat: res?.aarsresultat,
     egenkapital,
+    sumEiendeler: sumEKG,
     gjeld,
     egenkapitalandel,
   };

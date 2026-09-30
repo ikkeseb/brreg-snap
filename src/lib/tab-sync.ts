@@ -1,8 +1,10 @@
-import { resolveOrgnr } from './orgnr.js';
+import { resolveOrgnr, type SyncTier } from './orgnr.js';
 
 export interface TabSync {
   orgnr: string;
   host: string | undefined;
+  // Which URL/title tier found it — travels in the sync message.
+  method: SyncTier;
 }
 
 function hostFrom(tabUrl: string): string | undefined {
@@ -22,9 +24,9 @@ export function deriveSync(
   tabTitle: string | undefined,
 ): TabSync | null {
   if (!tabUrl) return null;
-  const orgnr = resolveOrgnr({ url: tabUrl, title: tabTitle ?? '' });
-  if (!orgnr) return null;
-  return { orgnr, host: hostFrom(tabUrl) };
+  const match = resolveOrgnr({ url: tabUrl, title: tabTitle ?? '' });
+  if (!match) return null;
+  return { orgnr: match.orgnr, host: hostFrom(tabUrl), method: match.method };
 }
 
 // --- auto-sync tab listeners (hosted by the panel) ------------------

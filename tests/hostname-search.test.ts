@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fakeBrowser } from './helpers/fake-browser.js';
 
 import type { SearchHit } from '../src/types/brreg.js';
 
@@ -9,11 +10,14 @@ vi.mock('../src/lib/brreg.js', () => ({
 import { searchEnheterWithParams } from '../src/lib/brreg.js';
 import {
   addRejectedChoice,
+  forgetHost,
   getPickerChoice,
   getRejectedChoices,
+  getRememberedChoice,
   queryFromHostname,
   searchByHostnameDetailed,
   setPickerChoice,
+  siteKey,
 } from '../src/lib/hostname-search.js';
 
 const searchMock = vi.mocked(searchEnheterWithParams);
@@ -21,29 +25,7 @@ const searchMock = vi.mocked(searchEnheterWithParams);
 type StorageMap = Record<string, unknown>;
 
 function installStorageMock(initial: StorageMap = {}): StorageMap {
-  const store: StorageMap = { ...initial };
-  (globalThis as { browser?: unknown }).browser = {
-    storage: {
-      session: {
-        get: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          const out: StorageMap = {};
-          for (const k of list) {
-            if (k in store) out[k] = store[k];
-          }
-          return out;
-        }),
-        set: vi.fn(async (entries: StorageMap) => {
-          Object.assign(store, entries);
-        }),
-        remove: vi.fn(async (keys: string | string[]) => {
-          const list = Array.isArray(keys) ? keys : [keys];
-          for (const k of list) delete store[k];
-        }),
-      },
-    },
-  };
-  return store;
+  return fakeBrowser({ storage: { session: initial } }).stores.session;
 }
 
 function hit(
@@ -56,7 +38,7 @@ function hit(
     organisasjonsnummer,
     organisasjonsform: { kode: 'AS' },
     ...extra,
-  } as SearchHit;
+  };
 }
 
 describe('queryFromHostname', () => {
@@ -163,8 +145,8 @@ describe('searchByHostnameDetailed', () => {
     const result = await searchByHostnameDetailed('eksfin.no');
     const q3Call = searchMock.mock.calls.find(
       (call) =>
-        (call[0] as URLSearchParams).has('navn') &&
-        !(call[0] as URLSearchParams).has('organisasjonsform'),
+        call[0].has('navn') &&
+        !call[0].has('organisasjonsform'),
     );
     expect(q3Call).toBeDefined();
     expect(result).toBeDefined();
@@ -197,7 +179,7 @@ describe('brreg queries', () => {
   });
 
   const calls = () =>
-    searchMock.mock.calls.map((c) => Object.fromEntries(c[0] as URLSearchParams));
+    searchMock.mock.calls.map((c) => Object.fromEntries(c[0]));
 
   it('sends one hjemmeside query on the registrable domain, sorted by headcount', async () => {
     // Brreg matches hjemmeside as a substring, so the www. variant was a
@@ -464,5 +446,337 @@ describe('addRejectedChoice + pipeline filtering', () => {
     await addRejectedChoice('yara.com', '986228608');
     await searchByHostnameDetailed('yara.com');
     expect(searchMock.mock.calls.length).toBeGreaterThan(callsAfterFirst);
+  });
+});
+
+describe('one site, one key: www., apex and subdomains share entries', () => {
+  let store: StorageMap;
+
+  beforeEach(() => {
+    store = installStorageMock();
+    searchMock.mockReset();
+  });
+
+  it('siteKey is the registrable domain, else the bare host', () => {
+    expect(siteKey('www.dnb.no')).toBe('dnb.no');
+    expect(siteKey('nettbank.dnb.no')).toBe('dnb.no');
+    expect(siteKey('DNB.no.')).toBe('dnb.no');
+    expect(siteKey('shop.firma.co.uk')).toBe('firma.co.uk');
+    expect(siteKey('firma.netlify.app')).toBe('firma.netlify.app');
+    expect(siteKey('192.168.1.10')).toBe('192.168.1.10');
+    expect(siteKey('www.intranet')).toBe('intranet');
+  });
+
+  it('a pick on www.dnb.no answers for dnb.no and nettbank.dnb.no', async () => {
+    await setPickerChoice('www.dnb.no', '984851006');
+    for (const host of ['dnb.no', 'nettbank.dnb.no', 'www.dnb.no']) {
+      expect(await searchByHostnameDetailed(host)).toMatchObject({
+        band: 'auto',
+        choice: '984851006',
+      });
+    }
+    expect(Object.keys(store)).toEqual(['picker-choice:dnb.no']);
+    expect(searchMock).not.toHaveBeenCalled();
+  });
+
+  it('a rejection on one subdomain applies to the whole site', async () => {
+    await addRejectedChoice('nettbank.dnb.no', '111111118');
+    expect(await getRejectedChoices('www.dnb.no')).toEqual(['111111118']);
+  });
+
+  it('the band cache is shared: the second host of the site sends nothing', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) =>
+      params.has('hjemmeside')
+        ? [
+            hit('DNB BANK ASA', '984851006', {
+              organisasjonsform: { kode: 'ASA' },
+              hjemmeside: 'www.dnb.no',
+              antallAnsatte: 9000,
+            }),
+          ]
+        : [],
+    );
+    const first = await searchByHostnameDetailed('www.dnb.no');
+    const calls = searchMock.mock.calls.length;
+    const second = await searchByHostnameDetailed('nettbank.dnb.no');
+    expect(searchMock.mock.calls.length).toBe(calls);
+    expect(second).toEqual(first);
+    expect(Object.keys(store)).toEqual(['hostname:dnb.no']);
+  });
+});
+
+describe('getRememberedChoice + forgetHost (undo)', () => {
+  let store: StorageMap;
+
+  beforeEach(() => {
+    store = installStorageMock();
+    searchMock.mockReset();
+  });
+
+  it('reports nothing for a site the user never answered', async () => {
+    expect(await getRememberedChoice('dnb.no')).toBeUndefined();
+  });
+
+  it('reports a pick, a «Ingen av disse» and a rejection list', async () => {
+    await setPickerChoice('www.dnb.no', '984851006');
+    expect(await getRememberedChoice('dnb.no')).toEqual({
+      kind: 'choice',
+      orgnr: '984851006',
+    });
+    await setPickerChoice('shell.no', null);
+    expect(await getRememberedChoice('www.shell.no')).toEqual({ kind: 'none' });
+    await addRejectedChoice('foo.no', '111111118');
+    expect(await getRememberedChoice('foo.no')).toEqual({
+      kind: 'rejected',
+      orgnrs: ['111111118'],
+    });
+  });
+
+  it('a choice wins over a rejection list: it is what decides the site', async () => {
+    await addRejectedChoice('foo.no', '111111118');
+    await setPickerChoice('foo.no', '222222226');
+    expect(await getRememberedChoice('foo.no')).toEqual({
+      kind: 'choice',
+      orgnr: '222222226',
+    });
+  });
+
+  it('forgetHost clears choice, rejections and every cached band for the site', async () => {
+    const entry = (value: unknown) => ({
+      value,
+      expiresAt: Date.now() + 60_000,
+      storedAt: Date.now(),
+    });
+    Object.assign(store, {
+      'picker-choice:dnb.no': entry('984851006'),
+      'rejected:dnb.no': entry(['111111118']),
+      'hostname:dnb.no': entry({ band: 'none', candidates: [] }),
+      'hostname:dnb.no:rej:111111118': entry({ band: 'none', candidates: [] }),
+      'hostname:dnb.no:seg:d nb': entry({ band: 'none', candidates: [] }),
+      // 1.3.1 keyed by the full hostname.
+      'picker-choice:www.dnb.no': entry(null),
+      'rejected:nettbank.dnb.no': entry(['222222226']),
+      'hostname:www.dnb.no:rej:222222226': entry({ band: 'none', candidates: [] }),
+      // Other sites and other caches stay.
+      'picker-choice:dnbx.no': entry('999999999'),
+      'hostname:tidsbanken.no': entry({ band: 'none', candidates: [] }),
+      'enhet:984851006': entry({ navn: 'DNB BANK ASA' }),
+      recent: [{ orgnr: '984851006' }],
+    });
+    await forgetHost('nettbank.dnb.no');
+    expect(Object.keys(store).sort()).toEqual([
+      'enhet:984851006',
+      'hostname:tidsbanken.no',
+      'picker-choice:dnbx.no',
+      'recent',
+    ]);
+    expect(await getRememberedChoice('dnb.no')).toBeUndefined();
+  });
+
+  it('after forgetHost the site resolves from scratch', async () => {
+    await setPickerChoice('shell.no', null);
+    await forgetHost('www.shell.no');
+    searchMock.mockResolvedValue([]);
+    await searchByHostnameDetailed('shell.no');
+    expect(searchMock).toHaveBeenCalled();
+  });
+
+  it('never throws when storage fails', async () => {
+    (globalThis as { browser?: unknown }).browser = {
+      storage: {
+        session: {
+          get: vi.fn(async () => {
+            throw new Error('no storage');
+          }),
+          remove: vi.fn(async () => {
+            throw new Error('no storage');
+          }),
+        },
+      },
+    };
+    await expect(forgetHost('dnb.no')).resolves.toBeUndefined();
+  });
+});
+
+describe('coalescing: concurrent lookups of one site share one run', () => {
+  beforeEach(() => {
+    installStorageMock();
+    searchMock.mockReset();
+  });
+
+  it('two concurrent calls send each query once and get the same answer', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => {
+      release = r;
+    });
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      await gate;
+      return params.has('hjemmeside')
+        ? [
+            hit('YARA INTERNATIONAL ASA', '986228608', {
+              organisasjonsform: { kode: 'ASA' },
+              hjemmeside: 'www.yara.com',
+              antallAnsatte: 50,
+            }),
+          ]
+        : [];
+    });
+    const a = searchByHostnameDetailed('www.yara.com');
+    const b = searchByHostnameDetailed('yara.com');
+    await new Promise<void>((r) => setTimeout(r, 0));
+    release();
+    const [ra, rb] = await Promise.all([a, b]);
+    expect(ra).toEqual(rb);
+    expect(ra?.choice).toBe('986228608');
+    const hjemmesideCalls = searchMock.mock.calls.filter((c) =>
+      (c[0]).has('hjemmeside'),
+    );
+    expect(hjemmesideCalls).toHaveLength(1);
+  });
+
+  it('a failed run is not remembered: the next call asks again', async () => {
+    searchMock.mockRejectedValueOnce(new Error('offline'));
+    searchMock.mockResolvedValue([]);
+    await searchByHostnameDetailed('yara.com');
+    const calls = searchMock.mock.calls.length;
+    await searchByHostnameDetailed('yara.com');
+    expect(searchMock.mock.calls.length).toBeGreaterThan(calls);
+  });
+});
+
+describe('candidate evidence for per-row labels', () => {
+  beforeEach(() => {
+    installStorageMock();
+    searchMock.mockReset();
+  });
+
+  it('marks the site itself «hjemmeside», a page on it «side» and name-only rows «navn»', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) =>
+      params.has('hjemmeside')
+        ? [
+            hit('ELKJØP LEKNES AS', '111111118', { hjemmeside: 'www.elkjop.no/leknes' }),
+            hit('ELKJØP SVOLVÆR AS', '222222226', { hjemmeside: 'elkjop.no/svolvaer' }),
+          ]
+        : [hit('ELKJØP NORGE AS', '333333334', { antallAnsatte: 2000 })],
+    );
+    const result = await searchByHostnameDetailed('elkjop.no');
+    expect(result?.band).toBe('picker');
+    const evidence = Object.fromEntries(
+      (result?.candidates ?? []).map((c) => [c.organisasjonsnummer, c.evidence]),
+    );
+    expect(evidence).toEqual({
+      '111111118': 'side',
+      '222222226': 'side',
+      '333333334': 'navn',
+    });
+  });
+
+  it('keeps «hjemmeside» for the site itself and «side» for an artist page on it (nrk.no)', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) =>
+      params.has('hjemmeside')
+        ? [
+            hit('EKSEMPEL MEDIA AS', '444444440', { hjemmeside: 'https://www.nrk.no/' }),
+            hit('LÍNT DA', '555555556', { hjemmeside: 'nrk.no/urort/artist/lint' }),
+          ]
+        : [],
+    );
+    const result = await searchByHostnameDetailed('www.nrk.no');
+    const evidence = Object.fromEntries(
+      (result?.candidates ?? []).map((c) => [c.organisasjonsnummer, c.evidence]),
+    );
+    expect(evidence['444444440']).toBe('hjemmeside');
+    expect(evidence['555555556']).toBe('side');
+  });
+
+  it('treats a cached band from an older build (no evidence) as a miss', async () => {
+    const store = installStorageMock({
+      'hostname:yara.com': {
+        value: { band: 'picker', candidates: [hit('YARA AS', '986228608')] },
+        expiresAt: Date.now() + 60_000,
+      },
+    });
+    searchMock.mockResolvedValue([]);
+    const result = await searchByHostnameDetailed('yara.com');
+    expect(searchMock).toHaveBeenCalled();
+    expect(result?.band).toBe('none');
+    expect(store['hostname:yara.com']).toMatchObject({
+      value: { band: 'none', candidates: [] },
+    });
+  });
+});
+
+describe('title as a word-boundary hint (run-together labels)', () => {
+  beforeEach(() => {
+    installStorageMock();
+    searchMock.mockReset();
+  });
+
+  const navnQueries = () =>
+    searchMock.mock.calls
+      .map((c) => (c[0]).get('navn'))
+      .filter((n): n is string => n !== null);
+
+  it('re-spaces the label from the title and finds the spaced name', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.get('navn') === 'det norske teatret') {
+        return [hit('LL DET NORSKE TEATRET', '921196164', { antallAnsatte: 306 })];
+      }
+      return [];
+    });
+    const result = await searchByHostnameDetailed(
+      'www.detnorsketeatret.no',
+      'Det Norske Teatret – Forestillinger og billetter',
+    );
+    expect(result?.band).toBe('picker');
+    expect(result?.candidates[0]).toMatchObject({
+      organisasjonsnummer: '921196164',
+      evidence: 'navn',
+    });
+    // Nothing but the label's own letters, re-spaced, is sent.
+    const spaced = navnQueries().filter((q) => q.includes(' '));
+    expect([...new Set(spaced)]).toEqual(['det norske teatret']);
+    expect(navnQueries().some((q) => q.includes('forestilling'))).toBe(false);
+  });
+
+  it('never runs without a title, or when the label already matched a name', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) =>
+      params.get('navn') === 'obos'
+        ? [hit('OBOS BBL', '937052766', { organisasjonsform: { kode: 'BBL' } })]
+        : [],
+    );
+    await searchByHostnameDetailed('obos.no', 'OBOS – Obos Boligbyggelag');
+    expect(navnQueries().every((q) => !q.includes(' '))).toBe(true);
+    searchMock.mockClear();
+    await searchByHostnameDetailed('rema1000.no');
+    expect(navnQueries().every((q) => !q.includes(' '))).toBe(true);
+  });
+
+  it('a title with nothing matching the label sends no extra query', async () => {
+    searchMock.mockResolvedValue([]);
+    const result = await searchByHostnameDetailed('rema1000.no', 'Handle mat på nett');
+    expect(result?.band).toBe('none');
+    expect(navnQueries().every((q) => !q.includes(' '))).toBe(true);
+  });
+
+  it('keeps the plain result when the spaced query finds nothing', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) =>
+      params.has('hjemmeside')
+        ? [hit('STEIN LYSTHAUG AS', '985814430', { hjemmeside: 'www.rema1000.no', antallAnsatte: 18 })]
+        : [],
+    );
+    const result = await searchByHostnameDetailed('rema1000.no', 'REMA 1000');
+    expect(navnQueries()).toContain('rema 1000');
+    expect(result?.candidates.map((c) => c.organisasjonsnummer)).toEqual(['985814430']);
+  });
+
+  it('a failed spaced query leaves the result uncached', async () => {
+    const store = installStorageMock();
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.get('navn') === 'rema 1000') throw new Error('offline');
+      return [];
+    });
+    const result = await searchByHostnameDetailed('rema1000.no', 'REMA 1000');
+    expect(result?.complete).toBe(false);
+    expect(Object.keys(store).filter((k) => k.includes(':seg:'))).toEqual([]);
   });
 });

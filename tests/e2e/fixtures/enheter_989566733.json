@@ -1,0 +1,21 @@
+{
+  "request": "/enhetsregisteret/api/enheter/989566733",
+  "status": 200,
+  "body": {
+    "historiskeNavn": [
+      {
+        "fraDato": "2006-03-13 20:19:35",
+        "navn": "FJAS AS",
+        "tilDato": "2019-11-20 12:44:57"
+      }
+    ],
+    "navn": "ROLS AS",
+    "organisasjonsform": {
+      "beskrivelse": "Aksjeselskap",
+      "kode": "AS"
+    },
+    "organisasjonsnummer": "989566733",
+    "respons_klasse": "SlettetEnhet",
+    "slettedato": "2026-09-15"
+  }
+}

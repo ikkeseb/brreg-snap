@@ -1,0 +1,67 @@
+{
+  "request": "/enhetsregisteret/api/enheter/915330193",
+  "status": 200,
+  "body": {
+    "aktivitet": [
+      "Reinhaldstenester og det som naturleg høyrer til dette. Selskapet kan",
+      "også investere i andre selskap."
+    ],
+    "erIKonsern": false,
+    "forretningsadresse": {
+      "adresse": [
+        "Eksempelveien 1"
+      ],
+      "kommune": "LÆRDAL",
+      "kommunenummer": "4642",
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6887",
+      "poststed": "LÆRDAL"
+    },
+    "fravalgRevisjonDato": "2015-05-04",
+    "harRegistrertAntallAnsatte": false,
+    "historiskeNavn": [],
+    "institusjonellSektorkode": {
+      "beskrivelse": "Private aksjeselskaper mv.",
+      "kode": "2100"
+    },
+    "kapital": {
+      "antallAksjer": 30,
+      "belop": 30000,
+      "innfortDato": "2015-05-04",
+      "type": "Aksjekapital",
+      "valuta": "NOK"
+    },
+    "konkurs": true,
+    "konkursdato": "2026-08-26",
+    "maalform": "Nynorsk",
+    "naeringskode1": {
+      "beskrivelse": "Rengjøring av bygninger",
+      "kode": "81.210"
+    },
+    "navn": "1VASK AS",
+    "organisasjonsform": {
+      "beskrivelse": "Aksjeselskap",
+      "kode": "AS"
+    },
+    "organisasjonsnummer": "915330193",
+    "paategninger": [],
+    "registreringsdatoEnhetsregisteret": "2015-05-04",
+    "registreringsdatoForetaksregisteret": "2015-05-04",
+    "registrertIForetaksregisteret": true,
+    "registrertIFrivillighetsregisteret": false,
+    "registrertIMvaregisteret": false,
+    "registrertIPartiregisteret": false,
+    "registrertIStiftelsesregisteret": false,
+    "respons_klasse": "Enhet",
+    "sisteInnsendteAarsregnskap": "2024",
+    "stiftelsesdato": "2015-04-17",
+    "underAvvikling": false,
+    "underTvangsavviklingEllerTvangsopplosning": false,
+    "vedtektsdato": "2015-04-17",
+    "vedtektsfestetFormaal": [
+      "Reinhaldstenester og det som naturleg høyrer til det. Selskapet kan",
+      "også investere i andre verksemder."
+    ]
+  }
+}

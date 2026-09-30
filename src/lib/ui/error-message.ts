@@ -51,3 +51,38 @@ export function describeLoadError(err: unknown): string {
 
   return 'Noe gikk galt under oppslaget. Prøv igjen.';
 }
+
+// The error state's answer band (always warn, never the danger stamp:
+// a failed lookup says nothing about the company). `head` is the
+// headline, `support` the sentence under it, `retry` whether asking
+// again can change the answer.
+export interface LoadFailure {
+  head: string;
+  support: string;
+  retry: boolean;
+}
+
+export const NO_ANSWER_HEAD = 'Fikk ikke svar fra Brønnøysundregistrene';
+
+export function describeLoadFailure(err: unknown): LoadFailure {
+  const text = describeLoadError(err);
+  if (err instanceof DeletedAvdelingError) {
+    return { head: 'Underenheten er slettet', support: text, retry: false };
+  }
+  const message = err instanceof Error ? err.message : '';
+  if (/^No entity found for orgnr \d{9}\./.test(message)) {
+    return {
+      head: 'Fant ingen bedrift med dette org.nr',
+      support: text,
+      retry: false,
+    };
+  }
+  if (/returned 429\./.test(message)) {
+    return { head: 'For mange oppslag på kort tid', support: text, retry: true };
+  }
+  return {
+    head: NO_ANSWER_HEAD,
+    support: `${text} Det sier ingenting om selskapet.`,
+    retry: true,
+  };
+}

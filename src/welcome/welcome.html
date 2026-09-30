@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="nb">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Velkommen til brreg-snap</title>
+    <link
+      rel="preload"
+      href="/fonts/schibsted-grotesk-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="welcome.css" />
+  </head>
+  <!--
+    The first-run page, opened once by the install hook in
+    background.ts. One screen, no network: the two examples are built
+    from fictional view data with the shared components, and the only
+    browser API read is commands.getAll() for the shortcut keys.
+    welcome.ts fills main#app; the roots are here so the page has its
+    shell before the script runs.
+  -->
+  <body class="app app--welcome">
+    <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+      <!-- brreg-snap 1.4 icon sprite (design: icons.svg). Hand-drawn on a
+           16 px grid, stroke-only; stroke width, colour and size come from
+           .glyph / .icon in brreg.css. Referenced with
+           <svg class="icon"><use href="#i-copy"/></svg>. -->
+      <defs>
+        <symbol id="g-ok" viewBox="0 0 16 16"><path d="M3.2 8.6 6.4 11.8 12.8 4.4" /></symbol>
+        <symbol id="g-warn" viewBox="0 0 16 16">
+          <path d="M8 2.8v6.6" />
+          <path d="M8 13.1v.1" stroke-width="2.6" />
+        </symbol>
+        <symbol id="g-danger" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" /></symbol>
+        <symbol id="g-dot" viewBox="0 0 16 16">
+          <circle cx="8" cy="8.2" r="1.6" fill="currentColor" stroke="none" />
+        </symbol>
+        <symbol id="i-search" viewBox="0 0 16 16">
+          <circle cx="7" cy="7" r="4.6" />
+          <path d="M10.4 10.4 14 14" />
+        </symbol>
+        <symbol id="i-copy" viewBox="0 0 16 16">
+          <rect x="5.5" y="5.5" width="8" height="8" rx="1" />
+          <path d="M3 10.5V3.5a1 1 0 0 1 1-1h6.5" />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 16 16"><path d="M3.2 8.6 6.4 11.8 12.8 4.4" /></symbol>
+        <symbol id="i-summary" viewBox="0 0 16 16"><path d="M3 4h10M3 8h10M3 12h6" /></symbol>
+        <symbol id="i-panel" viewBox="0 0 16 16">
+          <rect x="2" y="2.5" width="12" height="11" rx="1" />
+          <path d="M9.5 2.5v11" />
+        </symbol>
+        <symbol id="i-chev" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5" /></symbol>
+        <symbol id="i-back" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8 10 12.5" /></symbol>
+        <symbol id="i-tree" viewBox="0 0 16 16">
+          <rect x="5.5" y="1.8" width="5" height="3.6" rx=".6" />
+          <rect x="1.5" y="10.6" width="4.4" height="3.6" rx=".6" />
+          <rect x="10.1" y="10.6" width="4.4" height="3.6" rx=".6" />
+          <path d="M8 5.4v2.6M3.7 10.6V8h8.6v2.6" />
+        </symbol>
+        <symbol id="i-refresh" viewBox="0 0 16 16">
+          <path d="M13 8a5 5 0 1 1-1.6-3.7" />
+          <path d="M11.8 1.8v2.8H9" />
+        </symbol>
+        <symbol id="i-link" viewBox="0 0 16 16">
+          <path d="M6.8 9.2a2.6 2.6 0 0 0 3.7 0l2.2-2.2a2.6 2.6 0 0 0-3.7-3.7l-.7.7" />
+          <path d="M9.2 6.8a2.6 2.6 0 0 0-3.7 0L3.3 9a2.6 2.6 0 0 0 3.7 3.7l.7-.7" />
+        </symbol>
+        <symbol id="mark" viewBox="0 0 30 50">
+          <path
+            d="M3 2.5v45L27 36.5 13.5 25 27 13.5Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linejoin="miter"
+          />
+        </symbol>
+      </defs>
+    </svg>
+    <header id="mast" class="mast"></header>
+    <main id="app" class="welcome"></main>
+    <footer id="foot" class="foot"></footer>
+    <script type="module" src="welcome.ts"></script>
+  </body>
+</html>

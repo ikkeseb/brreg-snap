@@ -19,14 +19,14 @@ vi.mock('../src/lib/brreg.js', () => ({
 }));
 
 import { searchEnheterWithParams } from '../src/lib/brreg.js';
+import { fakeBrowser } from './helpers/fake-browser.js';
 
-function makeListenerSpy() {
-  return { addListener: vi.fn(), removeListener: vi.fn() };
-}
+type Fn = ReturnType<typeof vi.fn>;
+type EventSpy = { addListener: Fn; removeListener: Fn };
 
 type MenusMock = {
-  create: ReturnType<typeof vi.fn>;
-  onClicked: ReturnType<typeof makeListenerSpy>;
+  create: Fn;
+  onClicked: EventSpy;
 };
 
 // The context-menu API lives under a different namespace per engine
@@ -39,80 +39,44 @@ function menusSpy(mock: unknown): MenusMock {
   return api;
 }
 
-// Any access to browser.tabs / permissions / storage from the
-// background throws — so a module that registered tab listeners (or
-// gated on the toggle) would fail at import, not pass silently.
-function forbidden(name: string): unknown {
-  return new Proxy(
-    {},
-    {
-      get(_t, prop) {
-        throw new Error(`background touched browser.${name}.${String(prop)}`);
-      },
-    },
-  );
-}
-
-type Fn = ReturnType<typeof vi.fn>;
-
 interface BrowserMock {
   runtime: {
-    onInstalled: ReturnType<typeof makeListenerSpy>;
-    onStartup: ReturnType<typeof makeListenerSpy>;
+    onInstalled: EventSpy;
+    onStartup: EventSpy;
     sendMessage: Fn;
   };
   sidebarAction?: { setPanel: Fn; open: Fn };
   menus?: MenusMock;
   sidePanel?: { setOptions: Fn; open: Fn };
   contextMenus?: MenusMock;
+  commands: { onCommand: EventSpy };
 }
 
+// The shared fake exposes only the engine's own namespaces: Firefox has
+// sidebarAction and, under the `menus` permission, `browser.menus` —
+// `browser.contextMenus` is UNDEFINED there. Chromium has sidePanel and
+// only `chrome.contextMenus`. Any access to browser.tabs / windows /
+// permissions / storage throws, so a module that registered tab
+// listeners (or gated on the toggle) would fail at import, not pass
+// silently.
 function installBrowserMock(
   engine: 'firefox' | 'chrome' = 'firefox',
 ): BrowserMock {
-  const mock = {
-    tabs: forbidden('tabs'),
-    permissions: forbidden('permissions'),
-    storage: forbidden('storage'),
-    runtime: {
-      onInstalled: makeListenerSpy(),
-      onStartup: makeListenerSpy(),
-      sendMessage: vi.fn(async () => undefined),
-      getURL: vi.fn((p: string) => `moz-extension://test/${p}`),
-      lastError: undefined,
-    },
-    // Engine marker + context-menu namespace, both engine-realistic.
-    // Firefox exposes sidebarAction and, under the `menus` permission,
-    // `browser.menus` — `browser.contextMenus` is UNDEFINED there.
-    // Chromium exposes sidePanel and only `chrome.contextMenus` (no
-    // `menus`). engine.ts feature-detects on 'sidebarAction'.
-    ...(engine === 'firefox'
-      ? {
-          sidebarAction: {
-            setPanel: vi.fn(async () => undefined),
-            open: vi.fn(async () => undefined),
-          },
-          menus: { create: vi.fn(), onClicked: makeListenerSpy() },
-        }
-      : {
-          sidePanel: {
-            setOptions: vi.fn(async () => undefined),
-            open: vi.fn(async () => undefined),
-          },
-          contextMenus: { create: vi.fn(), onClicked: makeListenerSpy() },
-        }),
-  };
-  (globalThis as { browser?: unknown }).browser = mock;
-  (globalThis as { chrome?: unknown }).chrome = mock;
-  return mock as unknown as BrowserMock;
+  const fake = fakeBrowser({
+    engine,
+    forbid: ['tabs', 'windows', 'permissions', 'storage'],
+  });
+  return fake.browser;
 }
 
 async function loadBackground(): Promise<void> {
   await import('../src/background/background.js');
 }
 
+type InstalledHandler = (details?: { reason?: string; temporary?: boolean }) => void;
+
 type MenuHandler = (
-  info: { menuItemId: string },
+  info: { menuItemId: string; selectionText?: string },
   tab?: { id?: number; windowId?: number; url?: string; title?: string },
 ) => void;
 
@@ -121,6 +85,19 @@ function menuHandler(mock: unknown): MenuHandler {
     | MenuHandler
     | undefined;
   if (!handler) throw new Error('menu onClicked listener not registered');
+  return handler;
+}
+
+type CommandHandler = (
+  command: string,
+  tab?: { id?: number; windowId?: number; url?: string; title?: string },
+) => void;
+
+function commandHandler(mock: BrowserMock): CommandHandler {
+  const handler = mock.commands.onCommand.addListener.mock.calls[0]?.[0] as
+    | CommandHandler
+    | undefined;
+  if (!handler) throw new Error('commands.onCommand listener not registered');
   return handler;
 }
 
@@ -148,6 +125,7 @@ describe('background module load', () => {
       expect(mock.runtime.onInstalled.addListener).toHaveBeenCalledTimes(1);
       expect(mock.runtime.onStartup.addListener).toHaveBeenCalledTimes(1);
       expect(menusSpy(mock).onClicked.addListener).toHaveBeenCalledTimes(1);
+      expect(mock.commands.onCommand.addListener).toHaveBeenCalledTimes(1);
     },
   );
 
@@ -170,15 +148,83 @@ describe('background module load', () => {
     },
   );
 
-  it('registers the menu item on install', async () => {
-    const mock = installBrowserMock('firefox');
+  it.each(['firefox', 'chrome'] as const)(
+    'registers the page and the selection menu items on install (%s)',
+    async (engine) => {
+      const mock = installBrowserMock(engine);
+      await loadBackground();
+      const onInstalled = mock.runtime.onInstalled.addListener.mock.calls[0]?.[0] as InstalledHandler;
+      // An update: the menus are (re)registered, nothing else happens —
+      // this mock forbids tabs, so an install-tab here would throw.
+      onInstalled({ reason: 'update' });
+      const create = menusSpy(mock).create;
+      expect(create).toHaveBeenCalledTimes(2);
+      expect(create).toHaveBeenCalledWith(
+        {
+          id: 'show-in-brreg-sidebar',
+          title: 'Vis i brreg-snap sidebar',
+          contexts: ['page'],
+        },
+        expect.any(Function),
+      );
+      expect(create).toHaveBeenCalledWith(
+        {
+          id: 'lookup-selection',
+          title: 'Slå opp «%s» i brreg-snap',
+          contexts: ['selection'],
+        },
+        expect.any(Function),
+      );
+    },
+  );
+});
+
+describe('install hook (the welcome page)', () => {
+  // Same fake, tabs allowed: the hook is the one place the background
+  // may touch them, and only inside the install event.
+  function installMock(engine: 'firefox' | 'chrome') {
+    return fakeBrowser({ engine, forbid: ['windows', 'permissions', 'storage'] });
+  }
+  const handler = (fake: ReturnType<typeof installMock>): InstalledHandler =>
+    fake.runtime.onInstalled.addListener.mock.calls[0]?.[0] as InstalledHandler;
+
+  it.each(['firefox', 'chrome'] as const)(
+    'a fresh install opens welcome/welcome.html once, and still registers the menus (%s)',
+    async (engine) => {
+      const fake = installMock(engine);
+      await loadBackground();
+      handler(fake)({ reason: 'install' });
+      expect(fake.tabs.create).toHaveBeenCalledTimes(1);
+      expect(fake.tabs.create).toHaveBeenCalledWith({
+        url: `${engine === 'firefox' ? 'moz' : 'chrome'}-extension://test/welcome/welcome.html`,
+      });
+      expect(menusSpy(fake.browser).create).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it('an update registers the menus and opens nothing', async () => {
+    const fake = installMock('chrome');
     await loadBackground();
-    const onInstalled = mock.runtime.onInstalled.addListener.mock.calls[0]?.[0] as () => void;
-    onInstalled();
-    expect(menusSpy(mock).create).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'show-in-brreg-sidebar', contexts: ['page'] }),
-      expect.any(Function),
-    );
+    handler(fake)({ reason: 'update' });
+    expect(fake.tabs.create).not.toHaveBeenCalled();
+    expect(menusSpy(fake.browser).create).toHaveBeenCalledTimes(2);
+  });
+
+  it('a temporary install (about:debugging, web-ext run) opens nothing', async () => {
+    const fake = installMock('firefox');
+    await loadBackground();
+    handler(fake)({ reason: 'install', temporary: true });
+    expect(fake.tabs.create).not.toHaveBeenCalled();
+    expect(menusSpy(fake.browser).create).toHaveBeenCalledTimes(2);
+  });
+
+  it('browser startup registers the menus without opening the page', async () => {
+    const fake = installMock('firefox');
+    await loadBackground();
+    const onStartup = fake.runtime.onStartup.addListener.mock.calls[0]?.[0] as () => void;
+    onStartup();
+    expect(fake.tabs.create).not.toHaveBeenCalled();
+    expect(menusSpy(fake.browser).create).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -207,7 +253,7 @@ describe('context menu click', () => {
       windowId: 3,
       orgnr: '984851006',
       host: 'example.com',
-      method: 'url',
+      method: 'url-path',
     });
   });
 
@@ -253,5 +299,127 @@ describe('context menu click', () => {
     });
     expect(mock.sidebarAction?.open).toHaveBeenCalledTimes(1);
     expect(mock.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe('selection lookup («Slå opp «%s» i brreg-snap»)', () => {
+  const tab = { id: 7, windowId: 3, url: 'https://shop.example/kasse', title: 'Kasse' };
+
+  it('opens a selected orgnr as the user’s own pick, inside the gesture', async () => {
+    const mock = installBrowserMock('firefox');
+    await loadBackground();
+
+    menuHandler(mock)(
+      { menuItemId: 'lookup-selection', selectionText: 'Org.nr. 923 609 016 MVA' },
+      tab,
+    );
+
+    // Synchronous, before any await — and 'manual', not the tab's.
+    expect(mock.sidebarAction?.setPanel).toHaveBeenCalledWith({
+      panel: `moz-extension://test/details/details.html?orgnr=923609016&m=manual&at=${NOW}&w=3`,
+    });
+    expect(mock.sidebarAction?.open).toHaveBeenCalledTimes(1);
+    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'sync',
+      windowId: 3,
+      orgnr: '923609016',
+      method: 'manual',
+    });
+  });
+
+  it('opens the panel’s search on any other text, trimmed and whitespace-collapsed', async () => {
+    const mock = installBrowserMock('chrome');
+    await loadBackground();
+
+    menuHandler(mock)(
+      { menuItemId: 'lookup-selection', selectionText: '  Kiwi\n  Norge ' },
+      tab,
+    );
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+    expect(mock.sidePanel?.setOptions).toHaveBeenCalledWith({
+      path: `details/details.html?q=Kiwi+Norge&at=${NOW}&w=3`,
+      enabled: true,
+    });
+    expect(mock.sidePanel?.open).toHaveBeenCalledWith({ windowId: 3 });
+    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'search',
+      windowId: 3,
+      query: 'Kiwi Norge',
+    });
+    // The panel searches; the background never talks to brreg.
+    expect(searchEnheterWithParams).not.toHaveBeenCalled();
+  });
+
+  it('caps a long selection before it goes anywhere', async () => {
+    const mock = installBrowserMock('firefox');
+    await loadBackground();
+    menuHandler(mock)(
+      { menuItemId: 'lookup-selection', selectionText: 'lorem '.repeat(100) },
+      tab,
+    );
+    const [msg] = mock.runtime.sendMessage.mock.calls[0] as [{ query: string }];
+    expect(msg.query.length).toBeLessThanOrEqual(100);
+    expect(msg.query.startsWith('lorem lorem')).toBe(true);
+  });
+
+  it('two orgnrs in the selection are ambiguous: searched as text, never guessed', async () => {
+    const mock = installBrowserMock('firefox');
+    await loadBackground();
+    menuHandler(mock)(
+      { menuItemId: 'lookup-selection', selectionText: '923609016 og 984851006' },
+      tab,
+    );
+    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'search',
+      windowId: 3,
+      query: '923609016 og 984851006',
+    });
+  });
+
+  it('a blank selection still opens the panel, with nothing to search', async () => {
+    const mock = installBrowserMock('firefox');
+    await loadBackground();
+    menuHandler(mock)({ menuItemId: 'lookup-selection', selectionText: '   ' }, tab);
+    expect(mock.sidebarAction?.setPanel).toHaveBeenCalledWith({
+      panel: 'moz-extension://test/details/details.html',
+    });
+    expect(mock.sidebarAction?.open).toHaveBeenCalledTimes(1);
+    expect(mock.runtime.sendMessage).not.toHaveBeenCalled();
+  });
+});
+
+describe('keyboard command (Chrome «open-panel»)', () => {
+  it('opens the side panel on the page’s company inside the gesture, like the page menu item', async () => {
+    const mock = installBrowserMock('chrome');
+    await loadBackground();
+
+    commandHandler(mock)('open-panel', {
+      id: 7,
+      windowId: 3,
+      url: 'https://example.com/firma/984851006',
+      title: 'DNB',
+    });
+
+    expect(mock.sidePanel?.setOptions).toHaveBeenCalledWith({
+      path: `details/details.html?orgnr=984851006&at=${NOW}&w=3`,
+      enabled: true,
+    });
+    expect(mock.sidePanel?.open).toHaveBeenCalledWith({ windowId: 3 });
+    expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'sync',
+      windowId: 3,
+      orgnr: '984851006',
+      host: 'example.com',
+      method: 'url-path',
+    });
+  });
+
+  it('ignores any other command', async () => {
+    const mock = installBrowserMock('chrome');
+    await loadBackground();
+    commandHandler(mock)('_execute_action', { windowId: 3 });
+    expect(mock.sidePanel?.setOptions).not.toHaveBeenCalled();
+    expect(mock.sidePanel?.open).not.toHaveBeenCalled();
   });
 });

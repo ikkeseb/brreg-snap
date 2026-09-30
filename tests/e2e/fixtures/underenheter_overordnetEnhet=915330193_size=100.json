@@ -1,0 +1,53 @@
+{
+  "request": "/enhetsregisteret/api/underenheter?overordnetEnhet=915330193&size=100",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "underenheter": [
+        {
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LÆRDAL",
+            "kommunenummer": "4642",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "6887",
+            "poststed": "LÆRDAL"
+          },
+          "datoEierskifte": "2015-04-17",
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "2015-03-07 14:50:23",
+              "navn": "1VASK",
+              "tilDato": "2015-05-05 20:18:49"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Rengjøring av bygninger",
+            "kode": "81.210"
+          },
+          "navn": "1VASK AS",
+          "oppstartsdato": "2015-02-27",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "915077021",
+          "overordnetEnhet": "915330193",
+          "registreringsdatoEnhetsregisteret": "2015-03-07",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 1,
+      "totalPages": 1
+    }
+  }
+}

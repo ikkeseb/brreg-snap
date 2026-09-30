@@ -149,6 +149,59 @@ export function hostnameLabel(hostname: string): string | undefined {
   return base;
 }
 
+// Lowercase + Nordic fold: the form hostname labels and title words
+// are compared in.
+function foldLower(s: string): string {
+  return foldNordic(s.toLowerCase());
+}
+
+// Title as a word-boundary hint. A run-together label (rema1000,
+// detnorsketeatret) can't match a registered name with spaces in it
+// («REMA 1000 NORGE AS»), and brreg's name search won't split it. The
+// tab title usually spells the name out, so look there for consecutive
+// words that together ARE the label, and return the label re-spaced at
+// those word boundaries: "rema 1000", "det norske teatret".
+//
+// Privacy invariant: the result carries exactly the label's letters and
+// digits, in order, with only spaces inserted — compared after
+// lowercasing and Nordic folding, so a title's «ø» may stand where the
+// ASCII label has «o» (brreg's name search doesn't fold). Nothing else
+// from the title leaves the browser. Labels that already carry a
+// boundary (a hyphen) and titles without a matching run give [].
+export function titleSegmentations(
+  label: string,
+  title: string,
+  max = 2,
+): string[] {
+  if (!/^[\p{L}\p{N}]+$/u.test(label)) return [];
+  const target = foldLower(label);
+  const words = title.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+  const out = new Set<string>();
+  for (let i = 0; i < words.length; i++) {
+    let acc = '';
+    for (let j = i; j < words.length; j++) {
+      acc += foldLower(words[j]!);
+      if (!target.startsWith(acc)) break;
+      if (acc.length === target.length) {
+        // A single word equal to the label adds no boundary.
+        if (j > i) {
+          out.add(
+            words
+              .slice(i, j + 1)
+              .map((w) => w.toLowerCase())
+              .join(' '),
+          );
+        }
+        break;
+      }
+    }
+  }
+  // Belt and braces for the invariant above.
+  return [...out]
+    .filter((q) => foldLower(q.replace(/ /g, '')) === target)
+    .slice(0, max);
+}
+
 // Words that strongly suggest a satellite organisation (vennelag,
 // pensjonskasse, klubb) rather than the operating company.
 const NOISE_WORDS = [
@@ -182,6 +235,10 @@ export interface ScoreResult {
   // site, a page on it or a subdomain of it — the registry itself ties
   // the two. decideBand requires it for AUTO.
   hjemmesideTie: boolean;
+  // Which of those it is: the site itself, or only a page / subdomain
+  // on it (an artist page on nrk.no, a fund under storebrand.no). The
+  // picker labels the two differently; banding treats them alike.
+  hjemmesideKind?: 'exact' | 'page' | 'subdomain';
 }
 
 // Brreg's hjemmeside field is free text — "http://www.equinor.com",
@@ -198,6 +255,29 @@ export function normalizeHjemmeside(raw: string): string {
     .replace(/^www\./, '')
     .replace(/[/:?#].*$/, '') // drop path, port, query, fragment
     .replace(/\.+$/, ''); // drop trailing dot(s)
+}
+
+// The registrable domains a company's free-text hjemmeside names, in
+// the order written, deduplicated. The field may hold several sites
+// ("a.no, b.no"), pages ("www.storebrand.no/eiendom") or junk
+// ("ingen", an e-mail address); junk yields nothing. IDN spellings are
+// punycoded by the URL parser, so they compare with the tab's hostname.
+export function hjemmesideDomains(raw: string | undefined): string[] {
+  const out = new Set<string>();
+  for (const entry of (raw ?? '').split(/[\s,;]+/)) {
+    if (!entry || entry.includes('@')) continue;
+    let host: string;
+    try {
+      host = new URL(
+        /^[a-z][a-z0-9+.-]*:\/\//i.test(entry) ? entry : `http://${entry}`,
+      ).hostname;
+    } catch {
+      continue;
+    }
+    const domain = registrableDomain(host);
+    if (domain) out.add(domain);
+  }
+  return [...out];
 }
 
 interface HjemmesideEntry {
@@ -281,19 +361,23 @@ export function scoreCandidate(
   const domain = registrableDomain(host) ?? bareHost;
   let hjemScore = 0;
   let hjemReason = '';
+  let hjemmesideKind: ScoreResult['hjemmesideKind'];
   for (const entry of hjemmesideEntries(cand.hjemmeside ?? '')) {
     const sameSite = entry.host === bareHost || entry.host === domain;
     if (sameSite && entry.root) {
       hjemScore = 35;
       hjemReason = 'hjemmeside=exact(+35)';
+      hjemmesideKind = 'exact';
       break;
     }
     if (sameSite) {
       hjemScore = 12;
       hjemReason = 'hjemmeside=page(+12)';
+      hjemmesideKind = 'page';
     } else if (!hjemScore && entry.host.endsWith('.' + domain)) {
       hjemScore = 12;
       hjemReason = 'hjemmeside=subdomain(+12)';
+      hjemmesideKind = 'subdomain';
     }
   }
   if (hjemReason) reasons.push(hjemReason);
@@ -303,7 +387,7 @@ export function scoreCandidate(
   // unrelated candidates that happen to share org form / employee
   // count (norden.org → NORDAN AS).
   if (nameScore === 0 && hjemScore === 0) {
-    return { score: 0, reasons: ['no-relation'], hjemmesideTie };
+    return { score: 0, reasons: ['no-relation'], hjemmesideTie, hjemmesideKind };
   }
 
   let score = nameScore + hjemScore;
@@ -385,10 +469,11 @@ export function scoreCandidate(
     reasons.push('inactive(-30)');
   }
 
-  return { score, reasons, hjemmesideTie };
+  return { score, reasons, hjemmesideTie, hjemmesideKind };
 }
 
-// Thresholds — tuned against scripts/benchmark-hostname.mjs.
+// Thresholds — tuned against the hostname benchmark, now the live resolver corpus
+// (tests/live/resolver-corpus.test.ts, `pnpm test:live`).
 //
 // AUTO: top must be confidently above the noise floor (75) AND
 // clearly ahead of the runner-up (+10) so kjedebutikker (ELKJØP

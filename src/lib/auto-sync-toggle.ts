@@ -1,5 +1,5 @@
 // The panel's «Auto-oppdater» toggle: the consent step, the runtime
-// `tabs` request, and attaching / detaching the tab watcher. details.ts
+// `tabs` request, and attaching / detaching the tab watcher. details/auto-sync-ui.ts
 // wires the DOM events to these handlers; the ordering rules live here
 // so they can be tested without a DOM or a browser. The decision table
 // itself is decideToggle (auto-sync-controller.ts).
@@ -8,6 +8,7 @@
 // held: the user can revoke it outside the panel (about:addons).
 
 import { decideToggle } from './auto-sync-controller.js';
+import { hasPermission } from './platform/permissions.js';
 
 const TABS: browser.permissions.Permissions = { permissions: ['tabs'] };
 
@@ -152,7 +153,7 @@ export function createAutoSyncToggle(deps: AutoSyncToggleDeps): AutoSyncToggle {
     },
 
     async permissionsRemoved(perms): Promise<void> {
-      if (!perms.permissions?.includes('tabs')) return;
+      if (!hasPermission(perms, 'tabs')) return;
       // Detach before any await so no tab event slips in after the revoke.
       apply(false);
       await deps.setAutoSync(false);

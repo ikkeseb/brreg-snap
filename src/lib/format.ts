@@ -25,14 +25,48 @@ export function formatPercent(value: number | undefined): string | undefined {
   return `${sign}${Math.abs(rounded).toLocaleString('nb-NO')}\u00a0%`;
 }
 
+// "923609016" → "923 609 016", the way the orgnr is printed. Plain
+// spaces: this goes on the clipboard and into forms. Anything that
+// isn't nine digits is returned unchanged.
+export function formatOrgnr(orgnr: string): string {
+  return /^\d{9}$/.test(orgnr)
+    ? `${orgnr.slice(0, 3)} ${orgnr.slice(3, 6)} ${orgnr.slice(6)}`
+    : orgnr;
+}
+
 export function formatAddress(addr: Adresse | undefined): string | undefined {
   if (!addr) return undefined;
   const lines = [
     ...(addr.adresse ?? []),
-    [addr.postnummer, addr.poststed].filter(Boolean).join(' '),
+    postalLine(addr),
     addr.land,
   ].filter((s): s is string => Boolean(s && s.trim()));
   return lines.length > 0 ? lines.join(', ') : undefined;
+}
+
+// «STAVANGER» → «Stavanger», «MO I RANA» → «Mo i Rana». Only rewrites
+// an all-caps name; anything already mixed case is left as brreg has it
+// (a foreign poststed like «DE-92711 Parkstein»).
+const SMALL_WORDS = new Set(['i', 'på', 'og', 'ved', 'under', 'over']);
+export function titleCasePlace(place: string): string {
+  if (place !== place.toUpperCase()) return place;
+  return place
+    .toLowerCase()
+    .split(' ')
+    .map((word, i) =>
+      i > 0 && SMALL_WORDS.has(word)
+        ? word
+        : word.replace(/(^|-)(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase()),
+    )
+    .join(' ');
+}
+
+// «4035 Stavanger»: the postcode as registered, the place title-cased
+// (brreg writes poststed in caps). Empty when the address has neither.
+export function postalLine(addr: Adresse): string {
+  const postnummer = addr.postnummer?.trim();
+  const poststed = addr.poststed?.trim();
+  return [postnummer, poststed ? titleCasePlace(poststed) : undefined].filter(Boolean).join(' ');
 }
 
 // Magnitude units, largest first. Two tiers get one decimal ("37,9
@@ -66,6 +100,17 @@ function formatMagnitude(value: number | undefined): string | undefined {
     maximumFractionDigits: unit.digits,
   });
   return `${sign}${text}${unit.word}`;
+}
+
+// «68,0» + «mrd»: the Økonomi rows print the magnitude word apart from
+// the number, in a lighter weight. The currency goes in the heading.
+export function formatAmountParts(
+  value: number | undefined,
+): { amount: string; unit: string } | undefined {
+  const text = formatMagnitude(value);
+  if (text === undefined) return undefined;
+  const m = / (mrd|mill|tusen)$/.exec(text);
+  return m ? { amount: text.slice(0, m.index), unit: m[1]! } : { amount: text, unit: '' };
 }
 
 // A regnskap's figures are in its `valuta`: NOK for most filers, but

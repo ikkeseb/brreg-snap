@@ -2,8 +2,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import {
   isForWindow,
+  normalizeQuery,
   notifyPanel,
   PANEL_HINT_FRESH_MS,
+  QUERY_MAX_LENGTH,
   panelPath,
   parsePanelMessage,
   readPanelHint,
@@ -23,6 +25,20 @@ describe('parsePanelMessage', () => {
     expect(parsePanelMessage(msg)).toEqual(msg);
   });
 
+  it.each(['url-param', 'url-path', 'title', 'host-auto', 'host-pick', 'manual', 'drill-in'])(
+    'carries the %s provenance through',
+    (method) => {
+      const msg = { type: 'sync', windowId: 3, orgnr: DNB, host: 'x.no', method };
+      expect(parsePanelMessage(msg)).toEqual(msg);
+    },
+  );
+
+  it('drops the pre-1.4 catch-all «url» method', () => {
+    expect(
+      parsePanelMessage({ type: 'sync', windowId: 3, orgnr: DNB, method: 'url' }),
+    ).toBeUndefined();
+  });
+
   it('accepts a no-match with or without a host', () => {
     expect(parsePanelMessage({ type: 'no-match', windowId: 3, host: 'x.no' }))
       .toEqual({ type: 'no-match', windowId: 3, host: 'x.no' });
@@ -35,13 +51,13 @@ describe('parsePanelMessage', () => {
 
   it('rejects messages without a window — they could be for any panel', () => {
     expect(
-      parsePanelMessage({ type: 'sync', orgnr: DNB, method: 'url' }),
+      parsePanelMessage({ type: 'sync', orgnr: DNB, method: 'url-path' }),
     ).toBeUndefined();
     expect(parsePanelMessage({ type: 'no-match', host: 'x.no' })).toBeUndefined();
   });
 
   it('rejects an invalid orgnr, an unknown method and junk', () => {
-    const base = { type: 'sync', windowId: 1, method: 'url' };
+    const base = { type: 'sync', windowId: 1, method: 'url-path' };
     expect(parsePanelMessage({ ...base, orgnr: '984851007' })).toBeUndefined();
     expect(
       parsePanelMessage({ ...base, orgnr: DNB, method: 'guess' }),
@@ -50,6 +66,40 @@ describe('parsePanelMessage', () => {
     expect(parsePanelMessage(null)).toBeUndefined();
     expect(parsePanelMessage('sync')).toBeUndefined();
     expect(parsePanelMessage({ type: 'refresh', windowId: 1 })).toBeUndefined();
+  });
+});
+
+describe('parsePanelMessage — search (selection lookup)', () => {
+  it('accepts a search with a window and a query, normalized', () => {
+    expect(
+      parsePanelMessage({ type: 'search', windowId: 3, query: '  Kiwi\n Norge ' }),
+    ).toEqual({ type: 'search', windowId: 3, query: 'Kiwi Norge' });
+  });
+
+  it('rejects a search without a window, without text or with junk', () => {
+    expect(parsePanelMessage({ type: 'search', query: 'kiwi' })).toBeUndefined();
+    expect(parsePanelMessage({ type: 'search', windowId: 3 })).toBeUndefined();
+    expect(parsePanelMessage({ type: 'search', windowId: 3, query: '  ' })).toBeUndefined();
+    expect(parsePanelMessage({ type: 'search', windowId: 3, query: 42 })).toBeUndefined();
+  });
+
+  it('caps an overlong query', () => {
+    const msg = parsePanelMessage({
+      type: 'search',
+      windowId: 3,
+      query: 'a'.repeat(500),
+    });
+    expect(msg).toEqual({ type: 'search', windowId: 3, query: 'a'.repeat(QUERY_MAX_LENGTH) });
+  });
+});
+
+describe('normalizeQuery', () => {
+  it('collapses whitespace, trims and caps', () => {
+    expect(normalizeQuery(' Komplett\tASA\r\n')).toBe('Komplett ASA');
+    expect(normalizeQuery(`${'x'.repeat(99)} tail`)).toBe('x'.repeat(99));
+    expect(normalizeQuery('')).toBeUndefined();
+    expect(normalizeQuery(' \n ')).toBeUndefined();
+    expect(normalizeQuery(undefined)).toBeUndefined();
   });
 });
 
@@ -147,6 +197,41 @@ describe('panelPath / readPanelHint — the stamped panel-URL hint', () => {
     expect(readPanelHint(`?orgnr=${DNB}&at=${now}`, now, undefined).fresh).toBe(
       true,
     );
+  });
+
+  it('carries the opener\'s method with an orgnr (selection lookup = manual)', () => {
+    const path = panelPath({ orgnr: DNB, method: 'manual' }, now, WIN);
+    expect(path).toBe(`details/details.html?orgnr=${DNB}&m=manual&at=${now}&w=${WIN}`);
+    const search = path.slice(path.indexOf('?'));
+    expect(readPanelHint(search, now, WIN)).toEqual({
+      orgnr: DNB,
+      method: 'manual',
+      fresh: true,
+    });
+  });
+
+  it('ignores an unknown method, and a method without an orgnr', () => {
+    expect(readPanelHint(`?orgnr=${DNB}&m=guess&at=${now}`, now, WIN).method).toBeUndefined();
+    expect(readPanelHint(`?nomatch=x.no&m=manual&at=${now}`, now, WIN).method).toBeUndefined();
+  });
+
+  it('encodes a search query and reads it back normalized and fresh', () => {
+    const path = panelPath({ query: 'Kiwi «Norge» & kafé' }, now, WIN);
+    expect(path).toBe(
+      `details/details.html?q=Kiwi+%C2%ABNorge%C2%BB+%26+kaf%C3%A9&at=${now}&w=${WIN}`,
+    );
+    const search = path.slice(path.indexOf('?'));
+    expect(readPanelHint(search, now + 400, WIN)).toEqual({
+      query: 'Kiwi «Norge» & kafé',
+      fresh: true,
+    });
+    // A leftover query is read as such — chooseStart ignores it.
+    expect(readPanelHint(search, now + PANEL_HINT_FRESH_MS + 1, WIN)).toMatchObject({
+      query: 'Kiwi «Norge» & kafé',
+      fresh: false,
+    });
+    // Another window's query is no hint at all.
+    expect(readPanelHint(search, now, 99)).toEqual({ fresh: false });
   });
 
   it('drops an invalid orgnr and an empty nomatch', () => {

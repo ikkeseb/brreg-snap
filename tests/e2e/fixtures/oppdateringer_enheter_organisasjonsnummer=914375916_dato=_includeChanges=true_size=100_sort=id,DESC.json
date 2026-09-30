@@ -1,0 +1,135 @@
+{
+  "request": "/enhetsregisteret/api/oppdateringer/enheter?organisasjonsnummer=914375916&dato=*&includeChanges=true&size=100&sort=id%2CDESC",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "oppdaterteEnheter": [
+        {
+          "dato": "2026-09-01T10:30:11.706Z",
+          "endringer": [
+            {
+              "op": "add",
+              "path": "/postadresse",
+              "value": {
+                "land": "Norge",
+                "landkode": "NO",
+                "postnummer": "0201",
+                "poststed": "OSLO",
+                "adresse": [
+                  "Eksempelveien 1"
+                ],
+                "kommune": "OSLO",
+                "kommunenummer": "0301"
+              }
+            },
+            {
+              "op": "replace",
+              "path": "/forretningsadresse/postnummer",
+              "value": "0256"
+            },
+            {
+              "op": "replace",
+              "path": "/forretningsadresse/adresse/0",
+              "value": "Parkveien 55"
+            },
+            {
+              "op": "replace",
+              "path": "/vedtektsdato",
+              "value": "2026-07-01"
+            },
+            {
+              "op": "replace",
+              "path": "/navn",
+              "value": "TOLLBUGATA 17 OSLO AS"
+            },
+            {
+              "op": "replace",
+              "path": "/vedtektsfestetFormaal/0",
+              "value": "Å eie, drive utleie og utvikling av fast eiendom, og alt annet som"
+            },
+            {
+              "op": "replace",
+              "path": "/vedtektsfestetFormaal/1",
+              "value": "står i naturlig forbindelse med dette."
+            },
+            {
+              "op": "add",
+              "path": "/historiskeNavn/-",
+              "value": {
+                "navn": "OPULENS NÆRING 4 AS",
+                "fraDato": "2014-10-29 14:14:38",
+                "tilDato": "2026-09-01 12:29:08"
+              }
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25152016,
+          "organisasjonsnummer": "914375916"
+        },
+        {
+          "dato": "2026-08-11T22:03:42.412Z",
+          "endringer": [
+            {
+              "op": "remove",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
+            },
+            {
+              "op": "remove",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
+            },
+            {
+              "op": "replace",
+              "path": "/harRegistrertAntallAnsatte",
+              "value": false
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25048345,
+          "organisasjonsnummer": "914375916"
+        },
+        {
+          "dato": "2026-06-18T18:00:15.546Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/sisteInnsendteAarsregnskap",
+              "value": "2025"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24659998,
+          "organisasjonsnummer": "914375916"
+        },
+        {
+          "dato": "2026-06-11T22:04:03.816Z",
+          "endringer": [
+            {
+              "op": "add",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-06-11"
+            },
+            {
+              "op": "add",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-06-10"
+            },
+            {
+              "op": "replace",
+              "path": "/harRegistrertAntallAnsatte",
+              "value": true
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24585313,
+          "organisasjonsnummer": "914375916"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 4,
+      "totalPages": 1
+    }
+  }
+}

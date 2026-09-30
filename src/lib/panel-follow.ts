@@ -1,14 +1,17 @@
-// How the panel (details.ts) decides what to show when something
+// How the panel (details/controller.ts) decides what to show when something
 // outside it moves: its own startup, a tab event while auto-sync is
 // on, a sync / no-match message from the popup or the context menu.
-// The DOM painting stays in details.ts behind the `show` / `keep`
+// The painting stays in the controller behind the `show` / `keep`
 // callbacks; the ordering and "is this still the latest?" logic lives
 // here so it can be tested without a DOM.
 
-import type { DetailedResult } from './hostname-search.js';
+import type { Candidate, DetailedResult } from './hostname-search.js';
 import type { PanelHint } from './panel-protocol.js';
-import type { ResolutionMethod, TabContext } from './ui/resolve-tab.js';
-import type { SearchHit } from '../types/brreg.js';
+import {
+  UNKNOWN_URL_METHOD,
+  type ResolutionMethod,
+} from './resolution-method.js';
+import type { TabContext } from './ui/resolve-tab.js';
 
 // --- load token -------------------------------------------------------
 //
@@ -46,15 +49,22 @@ export type PanelView =
       method: ResolutionMethod;
       host?: string;
     }
-  | { kind: 'picker'; host: string; candidates: SearchHit[] }
-  | { kind: 'empty'; host?: string; degraded?: boolean };
+  | { kind: 'picker'; host: string; candidates: Candidate[] }
+  | {
+      kind: 'empty';
+      host?: string;
+      degraded?: boolean;
+      // Prefill the manual search with this and run it (selection
+      // lookup).
+      query?: string;
+    };
 
 export function viewFromContext(ctx: TabContext): PanelView {
   if (ctx.orgnr) {
     return {
       kind: 'company',
       orgnr: ctx.orgnr,
-      method: ctx.method ?? 'url',
+      method: ctx.method ?? UNKNOWN_URL_METHOD,
       host: ctx.host,
     };
   }
@@ -102,6 +112,9 @@ export function sameView(
     case 'picker':
       return onScreen.kind === 'picker' && onScreen.host === next.host;
     case 'empty':
+      // A search request always repaints: the user asked for it, and
+      // what's on screen may be a search they have since edited.
+      if (next.query !== undefined) return false;
       return (
         onScreen.kind === 'empty' &&
         onScreen.host === next.host &&
@@ -135,19 +148,32 @@ export type StartPlan = PanelView | { kind: 'probe'; host: string };
 //   3. Only when the tab can't be read does a leftover hint apply. A
 //      hint orgnr is never paired with a host label: it didn't come
 //      from this tab.
+//
+// A search query (selection lookup) applies only while fresh: a
+// leftover must not re-send the selected text on a later open. An
+// orgnr that carries its method (a selection lookup: 'manual') is the
+// user's choice, not the tab's, so the tab can't "explain" it.
 export function chooseStart(
   hint: PanelHint,
   tab: TabContext | undefined,
 ): StartPlan {
+  if (hint.fresh && hint.query !== undefined) {
+    return { kind: 'empty', query: hint.query };
+  }
   if (tab && !hint.fresh) return viewFromContext(tab);
-  if (tab && hint.orgnr !== undefined && tab.orgnr === hint.orgnr) {
+  if (
+    tab &&
+    hint.orgnr !== undefined &&
+    hint.method === undefined &&
+    tab.orgnr === hint.orgnr
+  ) {
     return viewFromContext(tab);
   }
   if (tab && hint.nomatch !== undefined && tab.host === hint.nomatch) {
     return viewFromContext(tab);
   }
   if (hint.orgnr !== undefined) {
-    return { kind: 'company', orgnr: hint.orgnr, method: 'url' };
+    return { kind: 'company', orgnr: hint.orgnr, method: hint.method ?? UNKNOWN_URL_METHOD };
   }
   if (hint.nomatch !== undefined) return { kind: 'probe', host: hint.nomatch };
   return tab ? viewFromContext(tab) : { kind: 'empty' };
@@ -156,9 +182,15 @@ export function chooseStart(
 // --- the follower ---------------------------------------------------
 
 export interface TabFields {
+  id?: number;
   url?: string;
   title?: string;
 }
+
+// What moved the panel. A tab event fires while the user works in the
+// page, so a painter must not move focus for it; the rest are
+// user-initiated (an open, a message from a gesture, a probe).
+export type FollowOrigin = 'start' | 'tab' | 'message' | 'probe';
 
 export interface FollowerDeps {
   loads: LoadSequence;
@@ -170,9 +202,12 @@ export interface FollowerDeps {
   searchHost(host: string): Promise<DetailedResult | undefined>;
   onScreen(): PanelView | undefined;
   // Paint a different view. The painters claim their own load token.
-  show(view: PanelView): void;
+  // `tabId`: the tab the view was resolved from (startup, a tab event),
+  // for its toolbar badge; undefined when the view came from a message
+  // or a probe.
+  show(view: PanelView, origin: FollowOrigin, tabId?: number): void;
   // `view` is already on screen: refresh its host label / method only.
-  keep(view: PanelView): void;
+  keep(view: PanelView, origin: FollowOrigin, tabId?: number): void;
 }
 
 export interface PanelFollower {
@@ -187,17 +222,18 @@ export interface PanelFollower {
 }
 
 export function createPanelFollower(deps: FollowerDeps): PanelFollower {
-  function apply(view: PanelView): void {
-    if (sameView(deps.onScreen(), view)) deps.keep(view);
-    else deps.show(view);
+  function apply(view: PanelView, origin: FollowOrigin, tabId?: number): void {
+    if (sameView(deps.onScreen(), view)) deps.keep(view, origin, tabId);
+    else deps.show(view, origin, tabId);
   }
 
   async function probeWith(
     run: LoadToken,
     host: string | undefined,
+    origin: FollowOrigin,
   ): Promise<void> {
     if (!host) {
-      apply({ kind: 'empty' });
+      apply({ kind: 'empty' }, origin);
       return;
     }
     let view: PanelView;
@@ -207,7 +243,7 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
       view = { kind: 'empty', host, degraded: true };
     }
     if (run.isStale()) return;
-    apply(view);
+    apply(view, origin);
   }
 
   async function readTab(
@@ -223,18 +259,22 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
     async start(hint) {
       const run = deps.loads.begin();
       let tab: TabContext | undefined;
+      let tabId: number | undefined;
       try {
-        tab = await readTab(run, await deps.queryActiveTab());
+        const active = await deps.queryActiveTab();
+        tab = await readTab(run, active);
+        // Only a tab the panel could read is the one it resolved.
+        if (tab) tabId = active?.id;
       } catch {
         tab = undefined;
       }
       if (run.isStale()) return;
       const plan = chooseStart(hint, tab);
       if (plan.kind === 'probe') {
-        await probeWith(run, plan.host);
+        await probeWith(run, plan.host, 'start');
         return;
       }
-      apply(plan);
+      apply(plan, 'start', tabId);
     },
 
     async followTab(tabId, given) {
@@ -254,18 +294,18 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
         view = { kind: 'empty' };
       }
       if (run.isStale()) return;
-      apply(view);
+      apply(view, 'tab', tabId);
     },
 
     follow(view) {
       // Claim even when the view is kept: an older tab event still
       // resolving must not paint over what this newer message says.
       deps.loads.begin();
-      apply(view);
+      apply(view, 'message');
     },
 
     async probe(host) {
-      await probeWith(deps.loads.begin(), host);
+      await probeWith(deps.loads.begin(), host, 'probe');
     },
   };
 }

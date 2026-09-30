@@ -1,0 +1,94 @@
+{
+  "organisasjonsnummer": "914375916",
+  "navn": "TOLLBUGATA 17 OSLO AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+      }
+    }
+  },
+  "historiskeNavn": [
+    {
+      "navn": "OPULENS NÆRING 4 AS",
+      "fraDato": "2014-10-29 14:14:38",
+      "tilDato": "2026-09-01 12:29:08"
+    }
+  ],
+  "postadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "0201",
+    "poststed": "OSLO",
+    "adresse": [
+      "c/o Eksempel Eiendom AS",
+      "Postboks 1 Solli"
+    ],
+    "kommune": "OSLO",
+    "kommunenummer": "0301"
+  },
+  "registreringsdatoEnhetsregisteret": "2014-10-29",
+  "registrertIMvaregisteret": true,
+  "frivilligMvaRegistrertBeskrivelser": [
+    "Utleier av bygg eller anlegg"
+  ],
+  "naeringskode1": {
+    "kode": "68.200",
+    "beskrivelse": "Utleie av egen eller leid fast eiendom"
+  },
+  "harRegistrertAntallAnsatte": false,
+  "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2015-08-15",
+  "registreringsdatoMerverdiavgiftsregisteret": "2014-11-01",
+  "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2015-01-20",
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "0256",
+    "poststed": "OSLO",
+    "adresse": [
+      "Eksempelveien 2"
+    ],
+    "kommune": "OSLO",
+    "kommunenummer": "0301"
+  },
+  "stiftelsesdato": "2014-10-09",
+  "institusjonellSektorkode": {
+    "kode": "2100",
+    "beskrivelse": "Private aksjeselskaper mv."
+  },
+  "registrertIForetaksregisteret": true,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2025",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "maalform": "Bokmål",
+  "vedtektsdato": "2026-07-01",
+  "vedtektsfestetFormaal": [
+    "Å eie, drive utleie og utvikling av fast eiendom, og alt annet som",
+    "står i naturlig forbindelse med dette."
+  ],
+  "aktivitet": [
+    "Kjøpe, salg og utleie av fast eiendom."
+  ],
+  "registreringsdatoForetaksregisteret": "2014-10-29",
+  "registrertIPartiregisteret": false,
+  "paategninger": [],
+  "erIKonsern": false,
+  "kapital": {
+    "belop": 35069284.0,
+    "antallAksjer": 100,
+    "type": "Aksjekapital",
+    "valuta": "NOK",
+    "innfortDato": "2022-09-29"
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/914375916"
+    }
+  },
+  "respons_klasse": "Enhet"
+}

@@ -2,14 +2,20 @@
 // decides what a failed fetch means. Shared by the popup and the panel.
 //
 // - The Enhet is the hard dependency: if it fails, the view fails.
-// - roller / underenheter / regnskap are soft: a failure maps to
-//   undefined ("couldn't ask"), which each renderer states as such.
-//   That is distinct from an empty registry answer ("none registered").
+// - roller / underenheter / regnskap / endringer are soft: a failure
+//   maps to undefined ("couldn't ask"), which each renderer states as
+//   such. That is distinct from an empty registry answer ("none
+//   registered"). underenheter and endringer are opt-in, and so are
+//   konsern and aarsregnskapYears, which follow the same rule; the
+//   panel asks for them, the popup doesn't.
 // - An orgnr that is not an enhet may be an underenhet: a branch or
 //   department, the number on a store receipt or a branch page. brreg
 //   has no enhet for it, so the view shows its parent and carries the
 //   branch along as `avdeling`.
 
+import { fetchAarsregnskapYears } from './aarsregnskap.js';
+import { fetchEndringer } from './brreg-endringer.js';
+import { endringerSince } from './trust/endringer.js';
 import {
   fetchEnhet,
   fetchRegnskap,
@@ -18,8 +24,11 @@ import {
   fetchUnderenheter,
   getFetchedAt,
 } from './brreg.js';
+import { deriveKonsern, fetchKonsernstruktur, type Konsern } from './konsern.js';
 import type {
   Enhet,
+  EnhetOppdatering,
+  KonsernNode,
   RegnskapResponse,
   RollerResponse,
   Underenhet,
@@ -74,19 +83,82 @@ interface SoftParts {
   roller: RollerResponse | undefined;
   regnskap: RegnskapResponse | undefined;
   underenheter: UnderenheterPage | undefined;
+  // The change feed for deriveEndringer (src/lib/trust/endringer.ts).
+  endringer: EnhetOppdatering[] | undefined;
+  // Years with an annual-report copy, newest first; [] = none. Only
+  // fetched with `aarsregnskapYears: true`.
+  aarsregnskapYears: string[] | undefined;
 }
 
-function fetchSoftParts(orgnr: string, withUnderenheter: boolean): Promise<SoftParts> {
+export interface LoadCompanyOptions {
+  // The popup doesn't list underenheter, so it doesn't fetch them.
+  underenheter?: boolean;
+  // The change feed: one extra request, for the «Endringer» items.
+  endringer?: boolean;
+  // Where the company sits in its group. Fetched only when the Enhet
+  // says erIKonsern.
+  konsern?: boolean;
+  // The annual-report year list (for the PDF links).
+  aarsregnskapYears?: boolean;
+  // A group tree already in hand (the company the user drilled in
+  // from). When the orgnr sits in it, its place is derived from that
+  // tree instead of fetched: drilling within a group costs no request.
+  konsernTree?: KonsernNode;
+}
+
+function fetchSoftParts(orgnr: string, opts: LoadCompanyOptions): Promise<SoftParts> {
   return Promise.all([
     fetchRoller(orgnr).catch((): RollerResponse | undefined => undefined),
     fetchRegnskap(orgnr).catch((): RegnskapResponse | undefined => undefined),
-    withUnderenheter
+    opts.underenheter
       ? fetchUnderenheter(orgnr).catch((): UnderenheterPage | undefined => undefined)
       : undefined,
-  ]).then(([roller, regnskap, underenheter]) => ({ roller, regnskap, underenheter }));
+    opts.endringer
+      ? fetchEndringer(orgnr, endringerSince(new Date())).catch(
+          (): EnhetOppdatering[] | undefined => undefined,
+        )
+      : undefined,
+    opts.aarsregnskapYears
+      ? fetchAarsregnskapYears(orgnr).catch((): string[] | undefined => undefined)
+      : undefined,
+  ]).then(([roller, regnskap, underenheter, endringer, aarsregnskapYears]) => ({
+    roller,
+    regnskap,
+    underenheter,
+    endringer,
+    aarsregnskapYears,
+  }));
+}
+
+interface KonsernPart {
+  // null = asked, and the company is in no group (erIKonsern false, a
+  // 404, or brreg's tree doesn't list it); undefined = couldn't ask.
+  konsern: Konsern | null | undefined;
+  // The whole tree it was derived from, for the next drill-in.
+  tree?: KonsernNode;
+}
+
+function loadKonsern(enhet: Enhet, known: KonsernNode | undefined): Promise<KonsernPart> {
+  if (enhet.erIKonsern !== true) return Promise.resolve({ konsern: null });
+  const orgnr = enhet.organisasjonsnummer;
+  const fromKnown = known ? deriveKonsern(known, orgnr) : undefined;
+  if (known && fromKnown) return Promise.resolve({ konsern: fromKnown, tree: known });
+  return fetchKonsernstruktur(orgnr)
+    .then((tree): KonsernPart => {
+      const konsern = (tree && deriveKonsern(tree, orgnr)) ?? null;
+      return tree && konsern ? { konsern, tree } : { konsern };
+    })
+    .catch((): KonsernPart => ({ konsern: undefined }));
 }
 
 export interface CompanyData extends OrgnrMatch, SoftParts {
+  // Only with `konsern: true` (else undefined): the company's place in
+  // its group, null when it is in none, undefined when brreg couldn't
+  // be asked.
+  konsern: Konsern | null | undefined;
+  // The group tree `konsern` was derived from; pass it back as
+  // `konsernTree` when drilling into another company in it.
+  konsernTree?: KonsernNode;
   // When this data was fetched from brreg (ms epoch): the oldest of its
   // cached parts, since a cache hit can be up to a day old.
   fetchedAt: number;
@@ -94,19 +166,21 @@ export interface CompanyData extends OrgnrMatch, SoftParts {
 
 export async function loadCompany(
   orgnr: string,
-  // The popup doesn't list underenheter, so it doesn't fetch them.
-  opts: { underenheter?: boolean } = {},
+  opts: LoadCompanyOptions = {},
 ): Promise<CompanyData> {
-  const withUnderenheter = opts.underenheter ?? false;
   // Start the soft fetches alongside the Enhet: the user waits on the
   // slowest request, and almost every orgnr is an enhet. They never
   // reject, so leaving them behind on the underenhet path is safe.
-  const guessed = fetchSoftParts(orgnr, withUnderenheter);
+  const guessed = fetchSoftParts(orgnr, opts);
   const match = await lookupOrgnr(orgnr);
   const shown = match.enhet.organisasjonsnummer;
   // An underenhet has no roller or regnskap of its own; the parent's
-  // are what the view shows.
-  const soft = shown === orgnr ? await guessed : await fetchSoftParts(shown, withUnderenheter);
+  // are what the view shows. Konsern needs the Enhet's erIKonsern, so
+  // it can only start now.
+  const [soft, konsern] = await Promise.all([
+    shown === orgnr ? guessed : fetchSoftParts(shown, opts),
+    opts.konsern ? loadKonsern(match.enhet, opts.konsernTree) : undefined,
+  ]);
   const ages = await Promise.all(
     [...new Set([orgnr, shown])].map((n) => getFetchedAt(n)),
   );
@@ -114,5 +188,7 @@ export async function loadCompany(
   // Nothing cached (the write failed) means it all came from brreg
   // just now.
   const fetchedAt = cached.length > 0 ? Math.min(...cached) : Date.now();
-  return { ...match, ...soft, fetchedAt };
+  const data: CompanyData = { ...match, ...soft, konsern: konsern?.konsern, fetchedAt };
+  if (konsern?.tree) data.konsernTree = konsern.tree;
+  return data;
 }

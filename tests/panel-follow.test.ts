@@ -24,13 +24,15 @@ import {
   type PanelHint,
 } from '../src/lib/panel-protocol.js';
 import type { TabContext } from '../src/lib/ui/resolve-tab.js';
-import type { SearchHit } from '../src/types/brreg.js';
+import type { Candidate } from '../src/lib/hostname-search.js';
 import dnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import equinor from './fixtures/brreg/enhet-923609016-equinor.json';
 
 const DNB = dnb.organisasjonsnummer;
 const EQUINOR = equinor.organisasjonsnummer;
-const CANDIDATES = [dnb, equinor] as SearchHit[];
+const CANDIDATES = [dnb, equinor].map(
+  (e): Candidate => ({ ...e, evidence: 'hjemmeside' }),
+);
 const OWN = 'moz-extension://3f1c0d2e-panel/';
 
 function deferred<T>() {
@@ -116,7 +118,7 @@ describe('viewFromContext / viewFromHostSearch', () => {
 });
 
 describe('sameView', () => {
-  const company: PanelView = { kind: 'company', orgnr: DNB, method: 'url' };
+  const company: PanelView = { kind: 'company', orgnr: DNB, method: 'url-path' };
 
   it('a company is the same by orgnr, whatever the method or host', () => {
     expect(
@@ -132,6 +134,10 @@ describe('sameView', () => {
     const empty: PanelView = { kind: 'empty', host: 'a.no', degraded: false };
     expect(sameView(empty, { kind: 'empty', host: 'a.no' })).toBe(true);
     expect(sameView(empty, { ...empty, degraded: true })).toBe(false);
+    // A search request always repaints, even onto the same search.
+    const search: PanelView = { kind: 'empty', query: 'kiwi' };
+    expect(sameView(search, search)).toBe(false);
+    expect(sameView({ kind: 'empty' }, search)).toBe(false);
   });
 
   it('nothing settled (loading / error) is never the same', () => {
@@ -181,7 +187,7 @@ describe('chooseStart — panel-URL hint vs. the active tab', () => {
     expect(chooseStart({ orgnr: EQUINOR, fresh: true }, tabDnb)).toEqual({
       kind: 'company',
       orgnr: EQUINOR,
-      method: 'url',
+      method: 'url-path',
     });
   });
 
@@ -205,11 +211,38 @@ describe('chooseStart — panel-URL hint vs. the active tab', () => {
     expect(chooseStart(hint, undefined)).toEqual({ kind: 'empty' });
   });
 
+  it('a fresh ?q= (selection lookup) opens the search on it, whatever the tab shows', () => {
+    const hint = { query: 'Kiwi Norge', fresh: true };
+    expect(chooseStart(hint, tabDnb)).toEqual({ kind: 'empty', query: 'Kiwi Norge' });
+    expect(chooseStart(hint, undefined)).toEqual({ kind: 'empty', query: 'Kiwi Norge' });
+  });
+
+  it('a leftover ?q= is never searched again, even when the tab is unreadable', () => {
+    const hint = { query: 'Kiwi Norge', fresh: false };
+    expect(chooseStart(hint, tabDnb)).toEqual(viewFromContext(tabDnb));
+    expect(chooseStart(hint, undefined)).toEqual({ kind: 'empty' });
+  });
+
+  it('a fresh selection-lookup orgnr stays the user’s choice even when the tab shows the same company', () => {
+    // method: 'manual' — no host label, and «Feil bedrift?» is not
+    // offered for a company the user picked.
+    expect(chooseStart({ orgnr: DNB, method: 'manual', fresh: true }, tabDnb)).toEqual({
+      kind: 'company',
+      orgnr: DNB,
+      method: 'manual',
+    });
+    expect(chooseStart({ orgnr: DNB, method: 'manual', fresh: true }, undefined)).toEqual({
+      kind: 'company',
+      orgnr: DNB,
+      method: 'manual',
+    });
+  });
+
   it('an unreadable tab falls back to the hint, fresh or not', () => {
     expect(chooseStart({ orgnr: DNB, fresh: false }, undefined)).toEqual({
       kind: 'company',
       orgnr: DNB,
-      method: 'url',
+      method: 'url-path',
     });
     expect(chooseStart({ nomatch: 'x.no', fresh: false }, undefined)).toEqual({
       kind: 'probe',
@@ -274,8 +307,8 @@ describe('follower — a late result never paints over a newer one', () => {
     const slowGet = deferred<TabFields>();
     const resolveTab = vi.fn(async (url: string): Promise<TabContext> =>
       url.includes('dnb')
-        ? { orgnr: DNB, host: 'www.dnb.no', method: 'url' }
-        : { orgnr: EQUINOR, host: 'www.equinor.com', method: 'url' },
+        ? { orgnr: DNB, host: 'www.dnb.no', method: 'url-path' }
+        : { orgnr: EQUINOR, host: 'www.equinor.com', method: 'url-path' },
     );
     const { follower, shown } = makeFollower({
       getTab: vi.fn(() => slowGet.promise),
@@ -314,7 +347,7 @@ describe('follower — a late result never paints over a newer one', () => {
 
     const following = follower.followTab(1, { url: 'https://www.dnb.no/' });
     // e.g. a drill-in click: details.ts's painters claim the token.
-    deps.show(companyView(EQUINOR));
+    deps.show(companyView(EQUINOR), 'start');
     slowResolve.resolve({ orgnr: DNB, host: 'www.dnb.no', method: 'host-auto' });
     await following;
 
@@ -332,7 +365,7 @@ describe('follower — a late result never paints over a newer one', () => {
     // Nothing is painted for a kept view, so only follow()'s own claim
     // makes the tab event above stale.
     follower.follow(companyView(DNB, 'www.dnb.no'));
-    slowResolve.resolve({ orgnr: EQUINOR, host: 'www.equinor.com', method: 'url' });
+    slowResolve.resolve({ orgnr: EQUINOR, host: 'www.equinor.com', method: 'url-path' });
     await following;
 
     expect(shown).toEqual([companyView(DNB, 'www.dnb.no')]);
@@ -363,7 +396,7 @@ describe('follower — the view already on screen is kept, not repainted', () =>
       resolveTab: vi.fn(async (): Promise<TabContext> => ({
         orgnr: DNB,
         host: 'x.no',
-        method: 'url',
+        method: 'url-path',
       })),
     });
     await follower.start(noHint);
@@ -429,7 +462,7 @@ describe('follower — what it resolves', () => {
     });
     await follower.start({ orgnr: DNB, fresh: false });
     expect(deps.resolveTab).not.toHaveBeenCalled();
-    expect(shown).toEqual([{ kind: 'company', orgnr: DNB, method: 'url' }]);
+    expect(shown).toEqual([{ kind: 'company', orgnr: DNB, method: 'url-path' }]);
   });
 
   it('an unreadable tab event (revoke racing the event) clears the panel without a lookup', async () => {

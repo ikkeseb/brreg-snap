@@ -13,9 +13,10 @@
 // "Prøv igjen" retry — never a full panel error state, which would
 // rip the input away from under the user mid-typing.
 //
-// Result rows are real <button>s (keyboard-operable for free), and the
-// result count is announced through a visually-hidden aria-live region
-// so screen-reader users hear "5 treff" instead of silence.
+// Result rows are painted by the caller's SearchPainter (real <button>s,
+// keyboard-operable for free), and the result count is announced
+// through the surface's live region so screen-reader users hear
+// "5 treff" instead of silence.
 
 import { searchEnheter } from '../brreg.js';
 import {
@@ -25,7 +26,6 @@ import {
 } from '../company-load.js';
 import { isValidOrgnr } from '../mod11.js';
 import type { SearchHit } from '../../types/brreg.js';
-import { appendHitSummary } from './hit-row.js';
 
 const DEBOUNCE_MS = 250;
 const MIN_QUERY_LENGTH = 2;
@@ -102,10 +102,22 @@ async function find(query: string): Promise<SearchRows> {
   return { kind: 'hits', hits: results.map((hit) => ({ hit })) };
 }
 
+// How one search's rows are painted (src/lib/view/components/search.ts
+// § searchPainter). Each method returns the <li>.
+export interface SearchPainter {
+  hit(hit: SearchHit, onSelect: () => void, opts: { avdelingAv?: string }): HTMLElement;
+  note(text: string): HTMLElement;
+  error(text: string, retry: () => void): HTMLElement;
+}
+
 export interface ManualSearchOptions {
   inputEl: HTMLInputElement;
   resultsEl: HTMLUListElement;
   onSelect: (hit: SearchHit) => void;
+  paint: SearchPainter;
+  // Where result counts are announced: the surface's one live region
+  // (src/lib/view/components/live.ts).
+  announce: (text: string) => void;
   // Query dropped below the minimum length and the results were
   // cleared — the popup uses this to restore its recents list.
   onQueryCleared?: () => void;
@@ -118,6 +130,10 @@ export interface ManualSearchController {
   // Clear input + results, cancel any pending debounce, and bump the
   // runId so an in-flight response can't paint into a fresh state.
   reset(): void;
+  // Put `query` in the input and search for it now, no debounce — the
+  // panel's selection lookup («Slå opp «…» i brreg-snap»). Same rules
+  // as typing: min length, capped, newer input wins.
+  search(query: string): void;
 }
 
 export function attachManualSearch(
@@ -125,20 +141,11 @@ export function attachManualSearch(
 ): ManualSearchController {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let runId = 0;
+  const { paint, announce } = opts;
 
-  // aria-live region for result-count announcements. Created here
-  // (not in the HTML) so every surface using the component gets it.
-  const liveRegion = document.createElement('div');
-  liveRegion.className = 'visually-hidden';
-  liveRegion.setAttribute('aria-live', 'polite');
-  opts.resultsEl.insertAdjacentElement('afterend', liveRegion);
-
-  function announce(text: string): void {
-    liveRegion.textContent = text;
-  }
-
-  opts.inputEl.addEventListener('input', () => {
+  function schedule(delayMs: number): void {
     if (timer) clearTimeout(timer);
+    timer = undefined;
     runId += 1;
     const value = opts.inputEl.value.trim();
     if (value.length < MIN_QUERY_LENGTH) {
@@ -149,9 +156,17 @@ export function attachManualSearch(
     }
     opts.onQueryActive?.();
     const capped = value.slice(0, MAX_QUERY_LENGTH);
+    if (delayMs === 0) {
+      void run(capped);
+      return;
+    }
     timer = setTimeout(() => {
       void run(capped);
-    }, DEBOUNCE_MS);
+    }, delayMs);
+  }
+
+  opts.inputEl.addEventListener('input', () => {
+    schedule(DEBOUNCE_MS);
   });
 
   async function run(query: string): Promise<void> {
@@ -161,22 +176,14 @@ export function attachManualSearch(
       if (myRunId !== runId) return;
       opts.resultsEl.replaceChildren();
       if (rows.kind === 'note') {
-        const li = document.createElement('li');
-        li.className = 'empty-result';
-        li.textContent = rows.text;
-        opts.resultsEl.appendChild(li);
+        opts.resultsEl.appendChild(paint.note(rows.text));
         announce(rows.text);
         return;
       }
       for (const { hit, avdelingAv } of rows.hits) {
-        const li = document.createElement('li');
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'manual-hit';
-        appendHitSummary(btn, hit, { avdelingAv });
-        btn.addEventListener('click', () => opts.onSelect(hit));
-        li.appendChild(btn);
-        opts.resultsEl.appendChild(li);
+        opts.resultsEl.appendChild(
+          paint.hit(hit, () => opts.onSelect(hit), avdelingAv ? { avdelingAv } : {}),
+        );
       }
       const n = rows.hits.length;
       announce(n === 1 ? '1 treff.' : `${n} treff.`);
@@ -188,20 +195,11 @@ export function attachManualSearch(
 
   function renderSearchError(query: string): void {
     opts.resultsEl.replaceChildren();
-    const li = document.createElement('li');
-    li.className = 'search-error';
-    const msg = document.createElement('span');
-    msg.textContent = 'Søket feilet.';
-    li.appendChild(msg);
-    const retry = document.createElement('button');
-    retry.type = 'button';
-    retry.className = 'retry-button';
-    retry.textContent = 'Prøv igjen';
-    retry.addEventListener('click', () => {
-      void run(query);
-    });
-    li.appendChild(retry);
-    opts.resultsEl.appendChild(li);
+    opts.resultsEl.appendChild(
+      paint.error('Søket feilet.', () => {
+        void run(query);
+      }),
+    );
     announce('Søket feilet.');
   }
 
@@ -215,6 +213,10 @@ export function attachManualSearch(
         clearTimeout(timer);
         timer = undefined;
       }
+    },
+    search(query: string): void {
+      opts.inputEl.value = query;
+      schedule(0);
     },
   };
 }

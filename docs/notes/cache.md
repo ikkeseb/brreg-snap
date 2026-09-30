@@ -1,7 +1,7 @@
 # Cache + race guards
 
 Source: `src/lib/brreg.ts`, `src/lib/hostname-search.ts`,
-`src/popup/popup.ts`, `src/details/details.ts`.
+`src/popup/popup.ts`, `src/details/controller.ts`.
 
 <!-- SECTION: 24h-session -->
 ## 24h session cache
@@ -42,26 +42,32 @@ The module is `src/lib/session-cache.ts`. Its rules:
 refresh doesn't re-hit (see `docs/notes/brreg-api.md`
 § regnskap-500-unsupported-plan).
 
-`hostname-search.ts` caches under three keys:
+`hostname-search.ts` caches under three keys, all per SITE — the
+registrable domain (`siteKey`: `www.dnb.no`, `dnb.no` and
+`nettbank.dnb.no` are all `dnb.no`; `docs/notes/resolution.md`
+§ undo):
 
-- `hostname:<host>` → `HostnameResult` = `{band: 'auto' | 'picker' |
-  'none', candidates: SearchHit[]}` (orgnr is included on the auto
-  variant). Replaces the older `string | null` shape.
-- `picker-choice:<host>` → `string | null` (null = "Ingen av disse").
+- `hostname:<site>` → `HostnameResult` = `{band: 'auto' | 'picker' |
+  'none', candidates: Candidate[]}` (orgnr is included on the auto
+  variant; each candidate carries its `evidence`). A read that fails
+  the shape guard (an older build's entry) is a miss. The title
+  segmentation run caches under `hostname:<site>[:rej:…]:seg:<queries>`.
+- `picker-choice:<site>` → `string | null` (null = "Ingen av disse").
   Set by the picker (either surface) when the user resolves it. Wins
   over the band cache: if a choice is cached,
   `searchByHostnameDetailed` short-circuits before running the
   pipeline.
-- `rejected:<host>` → `string[]`. Orgnrs the user said "Feil bedrift?"
-  on for this host. The pipeline filters these out before scoring,
+- `rejected:<site>` → `string[]`. Orgnrs the user said "Feil bedrift?"
+  on for this site. The pipeline filters these out before scoring,
   and the band cache key folds the sorted set in
-  (`hostname:<host>:rej:<a>|<b>`) so a fresh rejection doesn't serve
+  (`hostname:<site>:rej:<a>|<b>`) so a fresh rejection doesn't serve
   the stale pre-rejection result. `addRejectedChoice` also clears the
-  positive `picker-choice:<host>` if it equals the rejected orgnr —
+  positive `picker-choice:<site>` if it equals the rejected orgnr —
   otherwise the choice would keep short-circuiting future
   resolutions back to the rejected entity.
 
-All three keys honor the same 24h TTL.
+All three keys honor the same 24h TTL; `forgetHost` removes all of
+them for one site.
 
 <!-- SECTION: failure-no-cache -->
 ## Failures never enter the band cache
@@ -107,10 +113,17 @@ otherwise. Don't simplify it away.
 ## Load-run-id guards
 
 Both surfaces guard their loads with a monotonic token (same pattern
-as manual search's `runId`): `src/details/details.ts` with the one load sequence
+as manual search's `runId`): `src/details/controller.ts` with the one load sequence
 from `src/lib/panel-follow.ts` (every flow that paints claims it — see
 sidebar-sync.md § load-race-guards), so a sync or tab event that lands
 while an older load is still fetching can't be overwritten by the
 older response; `src/popup/popup.ts` with `loadRunId`, so rapid clicks
 (manual hit → recent entry) can't paint the first-clicked, stale
-company. Keep both.
+company. In the popup every flow that awaits before it paints claims
+it (`claim()` / `stale(id)`): a load, `init` before the tab resolves,
+`reject`, `forget`, the picker's `pick` / `none` (claimed on the click,
+before the stored choice lands), and `showEmpty` / `showError` before
+their storage reads — so opening the search view over a load keeps the
+load from painting over it (Escape then re-runs the load), and a pick
+made from the search wins over a host lookup that lands late. Keep
+both.

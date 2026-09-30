@@ -39,15 +39,16 @@
     };
   }
 
-  // regnskapsregisteret sends no CORS headers (enhetsregisteret does).
-  // The extension bypasses CORS via host_permissions; the harness
-  // reroutes those calls through serve.mjs's server-side proxy.
+  // Every data.brreg.no call goes through serve.mjs's /brreg/ path:
+  // regnskapsregisteret sends no CORS headers (the extension bypasses
+  // CORS via host_permissions, a plain tab can't), and one path lets the
+  // server answer from the live API or from recorded fixtures.
   const realFetch = globalThis.fetch.bind(globalThis);
   globalThis.fetch = (input, init) => {
     const url = typeof input === 'string' ? input : input.url ?? String(input);
-    const PREFIX = 'https://data.brreg.no/regnskapsregisteret/';
+    const PREFIX = 'https://data.brreg.no/';
     if (url.startsWith(PREFIX)) {
-      return realFetch('/regnskap-proxy/' + url.slice(PREFIX.length), init);
+      return realFetch('/brreg/' + url.slice(PREFIX.length), init);
     }
     return realFetch(input, init);
   };
@@ -55,6 +56,11 @@
   const params = new URLSearchParams(location.search);
   const tabUrl = params.get('taburl') ?? '';
   const tabTitle = params.get('tabtitle') ?? '';
+  // ?engine=chrome drops the Firefox-only namespaces so engine.ts reads
+  // Chromium (the default shim exposes both engines' APIs at once).
+  const engine = params.get('engine') === 'chrome' ? 'chrome' : 'firefox';
+  // ?keys=none: every command unbound (the welcome page's «ikke satt»).
+  const keysUnset = params.get('keys') === 'none';
 
   const noop = () => {};
 
@@ -82,6 +88,18 @@
       query: async () => [
         { url: tabUrl, title: tabTitle, id: 1, windowId: 1 },
       ],
+      create: async (props) => ({ id: 2, windowId: 1, ...props }),
+    },
+    // The manifest's commands as the engines report them (the welcome
+    // page reads the bindings; both engines return '' for an unbound one).
+    commands: {
+      getAll: async () =>
+        [
+          { name: '_execute_action', description: 'Slå opp bedriften bak siden', shortcut: 'Alt+Shift+O' },
+          engine === 'firefox'
+            ? { name: '_execute_sidebar_action', description: 'Åpne brreg-snap i sidepanelet', shortcut: 'Alt+Shift+S' }
+            : { name: 'open-panel', description: 'Åpne brreg-snap i sidepanelet', shortcut: 'Alt+Shift+S' },
+        ].map((c) => (keysUnset ? { ...c, shortcut: '' } : c)),
     },
     // The panel scopes messages and tab events to its own window.
     windows: { getCurrent: async () => ({ id: 1 }) },
@@ -108,5 +126,9 @@
     menus: { create: noop, onClicked: { addListener: noop } },
     contextMenus: { create: noop, onClicked: { addListener: noop } },
   };
+  if (engine === 'chrome') {
+    delete globalThis.browser.sidebarAction;
+    delete globalThis.browser.menus;
+  }
   globalThis.chrome = globalThis.browser;
 })();

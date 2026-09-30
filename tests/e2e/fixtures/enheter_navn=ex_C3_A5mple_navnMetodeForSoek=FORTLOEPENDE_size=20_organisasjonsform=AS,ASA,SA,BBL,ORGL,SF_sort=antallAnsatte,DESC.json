@@ -1,0 +1,12 @@
+{
+  "request": "/enhetsregisteret/api/enheter?navn=ex%C3%A5mple&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&sort=antallAnsatte%2CDESC",
+  "status": 200,
+  "body": {
+    "page": {
+      "number": 0,
+      "size": 20,
+      "totalElements": 0,
+      "totalPages": 0
+    }
+  }
+}

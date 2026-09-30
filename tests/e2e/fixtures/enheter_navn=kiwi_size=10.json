@@ -1,0 +1,753 @@
+{
+  "request": "/enhetsregisteret/api/enheter?navn=kiwi&size=10",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "enheter": [
+        {
+          "aktivitet": [
+            "Eierseksjonssameie."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "STRAND",
+            "kommunenummer": "1130",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "4120",
+            "poststed": "TAU"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Aktiviteter i borettslag og boligsameier",
+            "kode": "97.001"
+          },
+          "navn": "BOLIGSAMEIET KIWI TAU",
+          "organisasjonsform": {
+            "beskrivelse": "Eierseksjonssameie",
+            "kode": "ESEK"
+          },
+          "organisasjonsnummer": "990972087",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2007-03-31",
+          "registreringsdatoForetaksregisteret": "2007-03-31",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "stiftelsesdato": "2005-11-22",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2009-04-22",
+          "vedtektsfestetFormaal": [
+            "Ivareta sameiernes fellesinteresser og administrasjon av eiendommen",
+            "Gnr. 16 bnr. 240 i Strand kommune."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Dagligvarevirksomhet med hovedvekt på utvikling,",
+            "administrasjon og forvaltning av virksomheter innenfor Kiwi-konseptet."
+          ],
+          "epostadresse": "post@example.no",
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3414",
+            "poststed": "LIERSTRANDA"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "hjelpeenhetskode": {
+            "beskrivelse": "Hovedkontortjenester",
+            "kode": "70.100"
+          },
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 1000,
+            "belop": 1000000000,
+            "innfortDato": "2013-12-10",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Detaljhandel med bredt vareutvalg med hovedvekt på nærings- og nytelsesmidler",
+            "kode": "47.110"
+          },
+          "navn": "KIWI BUTIKKDRIFT AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "995971275",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3412",
+            "poststed": "LIERSTRANDA"
+          },
+          "registreringsdatoEnhetsregisteret": "2010-09-22",
+          "registreringsdatoForetaksregisteret": "2010-09-22",
+          "registreringsdatoMerverdiavgiftsregisteret": "2012-11-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2013-01-17",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2010-08-25",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2025-12-22",
+          "vedtektsfestetFormaal": [
+            "Dagligvarevirksomhet med hovedvekt på",
+            "utvikling, administrasjon og forvaltning av virksomheter innenfor",
+            "Kiwi-konseptet på landsbasis, samt alt som står i forbindelse med",
+            "dette. Herunder inngår investeringer i aksjer og andre selskaper i den",
+            "grad dette inngår i realisering av ovennevnte formål."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Kjøp og salg av egen fast eiendom.",
+            "Utleie av fast eiendom."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "SARPSBORG",
+            "kommunenummer": "3105",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "1719",
+            "poststed": "GREÅKER"
+          },
+          "fravalgRevisjonBeslutningsDato": "2025-03-26",
+          "fravalgRevisjonDato": "2025-04-12",
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 30000,
+            "belop": 30000,
+            "innfortDato": "2025-04-12",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Kjøp og salg av egen fast eiendom",
+            "kode": "68.110"
+          },
+          "navn": "KIWI HOLDING AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "935366488",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2025-04-12",
+          "registreringsdatoForetaksregisteret": "2025-04-12",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "stiftelsesdato": "2025-03-26",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2025-03-26",
+          "vedtektsfestetFormaal": [
+            "Selge varer og tjenester innen eiendomssalg, og annet som naturlig",
+            "sammenfaller med dette, samt deltakelse i andre selskaper,",
+            "investeringer og nærliggende virksomhet."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Levere kjedebaserte fellesfunksjoner for den daglige og operative",
+            "driften av alle butikker tilknyttet Kiwi-konseptet."
+          ],
+          "antallAnsatte": 145,
+          "epostadresse": "post@example.no",
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3414",
+            "poststed": "LIERSTRANDA"
+          },
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "2002-11-25 13:51:01",
+              "navn": "STARTFASE 85 AS",
+              "tilDato": "2003-06-26 23:32:04"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 10000,
+            "belop": 10000000,
+            "innfortDato": "2004-12-09",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Annen forretningsmessig tjenesteyting ikke nevnt annet sted",
+            "kode": "82.990"
+          },
+          "navn": "KIWI MINIDRIFT AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "985131406",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3412",
+            "poststed": "LIERSTRANDA"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "2002-11-25",
+          "registreringsdatoForetaksregisteret": "2002-11-25",
+          "registreringsdatoMerverdiavgiftsregisteret": "2003-07-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2003-08-19",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2002-11-12",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2011-09-13",
+          "vedtektsfestetFormaal": [
+            "Levere kjedebaserte fellesfunksjoner for den daglige og operative",
+            "driften av alle butikker tilknyttet Kiwi-konseptet, i samsvar med de",
+            "mål og retningslinjer som til enhver tid er vedtatt og gjeldene samt",
+            "nedfelt i Overliggende styringsdokument for Kiwi-konseptet."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Utvikle, forvalte, og administrere Kiwi-konseptet."
+          ],
+          "epostadresse": "post@example.no",
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3414",
+            "poststed": "LIERSTRANDA"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "belop": 100000,
+            "innfortDato": "1996-01-04",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Annen forretningsmessig tjenesteyting ikke nevnt annet sted",
+            "kode": "82.990"
+          },
+          "navn": "KIWI NORGE AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "975959171",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3412",
+            "poststed": "LIERSTRANDA"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-12-21",
+          "registreringsdatoForetaksregisteret": "1996-01-04",
+          "registreringsdatoMerverdiavgiftsregisteret": "1996-01-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1996-09-24",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1995-11-20",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2025-12-22",
+          "vedtektsfestetFormaal": [
+            "Utvikle, forvalte, og administrere",
+            "Kiwi-konseptet, herunder vedta Overliggende styringsdokument for",
+            "Kiwi-konseptet. Selskapets formål er videre å kontrollere og følge opp",
+            "gjeldene mål og retningslinjer nedfelt i Overliggende styringsdokument",
+            "for Kiwi-konseptet, samt alt som står i forbindelse med dette.",
+            "Herunder inngår investeringer i aksjer og andre selskaper i den grad",
+            "dette inngår i realisering av ovennevnte formål."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Drive utvekslingsprogram, og kultur og språkreiser for elever på",
+            "videregående skole."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "TROMSØ",
+            "kommunenummer": "5501",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "9007",
+            "poststed": "TROMSØ"
+          },
+          "fravalgRevisjonBeslutningsDato": "2024-11-11",
+          "fravalgRevisjonDato": "2024-11-21",
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 3000,
+            "belop": 30000,
+            "innfortDato": "2024-11-21",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Andre tjenester tilknyttet undervisning ikke nevnt annet sted",
+            "kode": "85.699"
+          },
+          "navn": "ARCTIC KIWI EXCHANGE AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "934516079",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2024-11-21",
+          "registreringsdatoForetaksregisteret": "2024-11-21",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2024",
+          "stiftelsesdato": "2024-11-11",
+          "underAvvikling": true,
+          "underAvviklingDato": "2025-11-07",
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2024-11-11",
+          "vedtektsfestetFormaal": [
+            "Organisere og drive utvekslingsprogram for elever på videregående",
+            "skole."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Eksempelaktivitet."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "GRIMSTAD",
+            "kommunenummer": "4202",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "4879",
+            "poststed": "GRIMSTAD"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Personlig næringsdrivende",
+            "kode": "8200"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Byggeteknisk konsulentvirksomhet",
+            "kode": "71.121"
+          },
+          "navn": "EKSEMPEL ENK",
+          "organisasjonsform": {
+            "beskrivelse": "Enkeltpersonforetak",
+            "kode": "ENK"
+          },
+          "organisasjonsnummer": "999999999",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2016-05-28",
+          "registrertIForetaksregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false
+        },
+        {
+          "aktivitet": [
+            "Å drive catering, salg av mat og drikke og annet som naturlig hører",
+            "sammen med dette, samt investering i andre selskaper."
+          ],
+          "antallAnsatte": 8,
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "SØR-VARANGER",
+            "kommunenummer": "5605",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "9910",
+            "poststed": "BJØRNEVATN"
+          },
+          "fravalgRevisjonBeslutningsDato": "2023-09-25",
+          "fravalgRevisjonDato": "2023-10-10",
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 60,
+            "belop": 60000,
+            "innfortDato": "2016-11-28",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Catering for arrangementer",
+            "kode": "56.210"
+          },
+          "navn": "KIWI KAFE & PUB AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "918103961",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "SØR-VARANGER",
+            "kommunenummer": "5605",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "9910",
+            "poststed": "BJØRNEVATN"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "2016-11-28",
+          "registreringsdatoForetaksregisteret": "2016-11-28",
+          "registreringsdatoMerverdiavgiftsregisteret": "2017-01-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2017-04-18",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2016-11-01",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2016-11-01",
+          "vedtektsfestetFormaal": [
+            "Å drive catering, salg av mat og drikke og annet som naturlig hører",
+            "sammen med dette, samt investering i andre selskaper."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Drive dagligvarevirksomhet innenfor Kiwi-kjeden i definert region,",
+            "samt alt som står i forbindelse med dette."
+          ],
+          "antallAnsatte": 779,
+          "epostadresse": "post@example.no",
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3414",
+            "poststed": "LIERSTRANDA"
+          },
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "2000-04-13 18:32:12",
+              "navn": "VÅGSBYGD SENTER MAT AS",
+              "tilDato": "2002-01-11 15:27:30"
+            },
+            {
+              "fraDato": "2002-01-11 15:27:30",
+              "navn": "KIWI SØR AS",
+              "tilDato": "2002-12-10 20:48:56"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 6250,
+            "belop": 6250000,
+            "innfortDato": "2002-12-12",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Detaljhandel med bredt vareutvalg med hovedvekt på nærings- og nytelsesmidler",
+            "kode": "47.110"
+          },
+          "navn": "NG KIWI AGDER AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "981911946",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3412",
+            "poststed": "LIERSTRANDA"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "2000-04-13",
+          "registreringsdatoForetaksregisteret": "2000-04-13",
+          "registreringsdatoMerverdiavgiftsregisteret": "2000-03-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2000-06-08",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "2000-03-23",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2011-09-13",
+          "vedtektsfestetFormaal": [
+            "Drive dagligvarevirksomhet innenfor Kiwi-kjeden i definert region,",
+            "samt alt som står i forbindelse med dette. Selskapets forvaltning skal",
+            "følge de til enhver tid vedtatte mål og retningslinjer nedfelt i",
+            "Overliggende styringsdokument for Kiwi-konseptet, innenfor det til",
+            "enhver tid geografisk tildelte området. Herunder inngår investeringer",
+            "i aksjer og andre selskaper i den grad dette inngår i realisering av",
+            "ovennevnte formål."
+          ]
+        },
+        {
+          "aktivitet": [
+            "Dagligvarevirksomhet innenfor Kiwi-kjeden i definert region,",
+            "samt alt som står i forbindelse med dette."
+          ],
+          "antallAnsatte": 1250,
+          "epostadresse": "post@example.no",
+          "erIKonsern": true,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3414",
+            "poststed": "LIERSTRANDA"
+          },
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-19 20:33:00",
+              "navn": "TELESENTERET AS",
+              "tilDato": "2003-05-07 20:40:36"
+            }
+          ],
+          "institusjonellSektorkode": {
+            "beskrivelse": "Private aksjeselskaper mv.",
+            "kode": "2100"
+          },
+          "kapital": {
+            "antallAksjer": 1820,
+            "belop": 1820000,
+            "innfortDato": "2007-11-17",
+            "type": "Aksjekapital",
+            "valuta": "NOK"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Detaljhandel med bredt vareutvalg med hovedvekt på nærings- og nytelsesmidler",
+            "kode": "47.110"
+          },
+          "navn": "NG KIWI BUSKERUD AS",
+          "organisasjonsform": {
+            "beskrivelse": "Aksjeselskap",
+            "kode": "AS"
+          },
+          "organisasjonsnummer": "941673651",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "LIER",
+            "kommunenummer": "3312",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3412",
+            "poststed": "LIERSTRANDA"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-02-19",
+          "registreringsdatoForetaksregisteret": "1989-09-28",
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2014-01-18",
+          "registreringsdatoMerverdiavgiftsregisteret": "1986-11-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2002-07-27",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "sisteInnsendteAarsregnskap": "2025",
+          "stiftelsesdato": "1986-10-22",
+          "telefon": "00000000",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2011-09-13",
+          "vedtektsfestetFormaal": [
+            "Dagligvarevirksomhet innenfor Kiwi-kjeden i definert region, samt alt",
+            "som står i forbindelse med dette. Selskapets forvaltning skal følge de",
+            "til enhver tid vedtatte mål og retningslinjer nedfelt i Overliggende",
+            "styringsdokument for Kiwi-konseptet, innenfor det til enhver tid",
+            "geografisk tildelte området. Herunder inngår investeringer i aksjer og",
+            "andre selskaper i den grad dette inngår i realisering av ovennevnte",
+            "formål."
+          ]
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 10,
+      "totalElements": 83,
+      "totalPages": 9
+    }
+  }
+}

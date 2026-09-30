@@ -1,0 +1,100 @@
+name: Canary
+
+# Weekly live-contract canary: asserts the brreg API facts the extension
+# relies on and runs the resolver corpus through the shipped pipeline
+# (`pnpm test:live`, tests/live/**; docs/notes/brreg-api.md § live-canary).
+# A failure opens, or comments on, the one open issue labelled `canary`.
+# Public API only, no secrets.
+
+on:
+  schedule:
+    # Mondays 04:23 UTC (odd minute: the top of the hour is congested).
+    - cron: '23 4 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: canary
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      failures: ${{ steps.failures.outputs.failures }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Reads the pnpm version from the `packageManager` pin in package.json.
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Report only: the dev toolchain's advisories show up in the log
+      # without failing the canary. `pnpm audit --prod` (0 runtime deps)
+      # is the invariant; this is the wider look.
+      - name: Dependency audit (report only)
+        continue-on-error: true
+        run: pnpm audit --audit-level high
+
+      - name: Live contracts + resolver corpus
+        run: pnpm test:live --reporter=verbose --reporter=json --outputFile.json=live-results.json
+
+      - name: Collect failing tests
+        id: failures
+        if: failure()
+        run: node scripts/canary-failures.mjs live-results.json
+
+  report:
+    needs: live
+    if: failure()
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the canary issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          FAILURES: ${{ needs.live.outputs.failures }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create canary --force --color d93f0b \
+            --description "Live-contract canary failure (canary.yml)"
+          {
+            echo "The live canary failed on $(date -u +%Y-%m-%d): ${RUN_URL}"
+            echo
+            echo "Failing tests:"
+            echo
+            echo "${FAILURES:-- (none reported; see the run log)}"
+            echo
+            echo "Run locally with \`pnpm test:live\`; see docs/notes/brreg-api.md § live-canary."
+          } > body.md
+          number=$(gh issue list --label canary --state open --limit 1 --json number --jq '.[0].number // empty')
+          if [ -n "$number" ]; then
+            gh issue comment "$number" --body-file body.md
+          else
+            gh issue create --title "Live canary: brreg contract or resolver drift" \
+              --label canary --body-file body.md
+          fi
+
+  # Scheduled runs only; a manual run doesn't need to re-enable anything.
+  keepalive:
+    if: github.event_name == 'schedule'
+    permissions:
+      actions: write
+    uses: ./.github/workflows/keepalive.yml
+    with:
+      # Every scheduled workflow in the repo (store-status.yml calls this
+      # with the same list).
+      workflows: canary.yml store-status.yml

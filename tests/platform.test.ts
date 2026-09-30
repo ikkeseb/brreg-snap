@@ -161,3 +161,16 @@ describe('platform/sidebar — Chrome (sidePanel) branch', () => {
     await expect(sidebar.isOpen()).resolves.toBe(true);
   });
 });
+
+describe('platform/permissions — hasPermission', () => {
+  it('finds a named permission and rejects an absent one', async () => {
+    const { hasPermission } = await import('../src/lib/platform/permissions.js');
+    expect(hasPermission({ permissions: ['tabs'] }, 'tabs')).toBe(true);
+    expect(hasPermission({ permissions: ['bookmarks'] }, 'tabs')).toBe(false);
+  });
+
+  it('is false when the object carries only origins', async () => {
+    const { hasPermission } = await import('../src/lib/platform/permissions.js');
+    expect(hasPermission({ origins: ['https://data.brreg.no/*'] }, 'tabs')).toBe(false);
+  });
+});

@@ -4,10 +4,12 @@ import {
   decideBand,
   foldNordic,
   generateNordicVariants,
+  hjemmesideDomains,
   hostnameLabel,
   normalizeHjemmeside,
   registrableDomain,
   scoreCandidate,
+  titleSegmentations,
 } from '../src/lib/hostname-score.js';
 import type { SearchHit } from '../src/types/brreg.js';
 
@@ -16,7 +18,7 @@ function cand(over: Partial<SearchHit> & { navn: string }): SearchHit {
     organisasjonsnummer: '999999999',
     organisasjonsform: { kode: 'AS' },
     ...over,
-  } as SearchHit;
+  };
 }
 
 describe('foldNordic', () => {
@@ -568,5 +570,98 @@ describe('decideBand', () => {
   it('treats missing runner-up as score 0 for the margin check', () => {
     expect(decideBand(80, undefined, true)).toBe('auto');
     expect(decideBand(70, undefined, true)).toBe('picker');
+  });
+});
+
+describe('titleSegmentations — the title only places spaces', () => {
+  it('re-spaces a run-together label at the title’s word boundaries', () => {
+    expect(titleSegmentations('rema1000', 'REMA 1000 – Handle mat på nett')).toEqual([
+      'rema 1000',
+    ]);
+    expect(
+      titleSegmentations('detnorsketeatret', 'Forestillinger | Det Norske Teatret'),
+    ).toEqual(['det norske teatret']);
+  });
+
+  it('may carry the title’s æ/ø/å where the ASCII label has the folded form', () => {
+    expect(titleSegmentations('bokogdesign', 'Bok og Design Grünerløkka')).toEqual([
+      'bok og design',
+    ]);
+    expect(titleSegmentations('norskbokhandel', 'Nørsk Bokhandel')).toEqual([
+      'nørsk bokhandel',
+    ]);
+    expect(titleSegmentations('blabaerhuset', 'Blåbær Huset – Butikk')).toEqual([
+      'blåbær huset',
+    ]);
+  });
+
+  it('every result is exactly the label with spaces inserted (after folding)', () => {
+    const fold = (s: string) => foldNordic(s.toLowerCase());
+    const cases: Array<[string, string]> = [
+      ['rema1000', 'Velkommen til REMA 1000!'],
+      ['detnorsketeatret', 'Det Norske Teatret'],
+      ['blabaerhuset', 'Blåbær Huset'],
+    ];
+    for (const [label, title] of cases) {
+      for (const q of titleSegmentations(label, title)) {
+        expect(fold(q.replace(/ /g, ''))).toBe(fold(label));
+        expect(q).toMatch(/^[\p{L}\p{N}]+( [\p{L}\p{N}]+)+$/u);
+      }
+    }
+  });
+
+  it('returns nothing when the title does not spell the label out', () => {
+    // Negative: the words are there but not as one consecutive run.
+    expect(titleSegmentations('rema1000', 'REMA butikker – 1000 varer')).toEqual([]);
+    expect(titleSegmentations('rema1000', 'Handle mat på nett')).toEqual([]);
+    expect(titleSegmentations('rema1000', '')).toEqual([]);
+    // A single title word equal to the label adds no boundary.
+    expect(titleSegmentations('rema1000', 'Rema1000 kundeklubb')).toEqual([]);
+    // A partial run is not enough.
+    expect(titleSegmentations('detnorsketeatret', 'Det Norske')).toEqual([]);
+    // Extra letters glued on are not the label.
+    expect(titleSegmentations('rema1000', 'REMA 10000')).toEqual([]);
+  });
+
+  it('leaves labels that already carry a boundary alone', () => {
+    expect(titleSegmentations('det-norske-teatret', 'Det Norske Teatret')).toEqual([]);
+  });
+
+  it('caps the number of distinct segmentations', () => {
+    expect(
+      titleSegmentations('abcd', 'ab cd · a bcd · abc d · a b c d'),
+    ).toHaveLength(2);
+    expect(titleSegmentations('abcd', 'ab cd · ab cd')).toEqual(['ab cd']);
+  });
+});
+
+describe('hjemmesideDomains — the registrable domains a hjemmeside names', () => {
+  it('normalizes scheme, www, path, port and case', () => {
+    expect(hjemmesideDomains('http://www.Equinor.com/')).toEqual(['equinor.com']);
+    expect(hjemmesideDomains('https://nettbank.dnb.no:443/login')).toEqual(['dnb.no']);
+    expect(hjemmesideDomains('www.storebrand.no/eiendom')).toEqual(['storebrand.no']);
+  });
+
+  it('splits several sites and dedupes', () => {
+    expect(hjemmesideDomains('www.a.no, b.no; https://www.a.no/om c.co.uk')).toEqual([
+      'a.no',
+      'b.no',
+      'c.co.uk',
+    ]);
+  });
+
+  it('drops junk, e-mail addresses and bare public suffixes', () => {
+    expect(hjemmesideDomains('ingen')).toEqual([]);
+    expect(hjemmesideDomains('-')).toEqual([]);
+    expect(hjemmesideDomains('post@firma.no')).toEqual([]);
+    expect(hjemmesideDomains('netlify.app')).toEqual([]);
+    expect(hjemmesideDomains('http://')).toEqual([]);
+    expect(hjemmesideDomains(undefined)).toEqual([]);
+    expect(hjemmesideDomains('')).toEqual([]);
+  });
+
+  it('keeps hosting tenants and punycodes IDN spellings', () => {
+    expect(hjemmesideDomains('firma.netlify.app')).toEqual(['firma.netlify.app']);
+    expect(hjemmesideDomains('www.blåbær.no')).toEqual(['xn--blbr-roah.no']);
   });
 });

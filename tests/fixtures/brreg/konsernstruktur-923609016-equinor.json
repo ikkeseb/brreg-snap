@@ -1,0 +1,936 @@
+{
+  "organisasjonsnummer": "923609016",
+  "navn": "EQUINOR ASA",
+  "organisasjonsform": {
+    "kode": "ASA",
+    "beskrivelse": "Allmennaksjeselskap"
+  },
+  "children": [
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR ANGOLA BLOCK 40 AS",
+      "organisasjonsnummer": "996576027",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR ENERGY AS",
+      "organisasjonsnummer": "990888213",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR RUSSIA ENERGY AS",
+          "organisasjonsnummer": "980321932",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "STATOIL ZAGROS OIL AND GAS AS",
+          "organisasjonsnummer": "980189848",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR MURZUQ AS",
+          "organisasjonsnummer": "979390122",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "NORSK HYDRO SVERIGE AB",
+          "organisasjonsnummer": "979131186",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "UTLA",
+            "beskrivelse": "Utenlandsk enhet"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR ANGOLA BLOCK 25 AS",
+          "organisasjonsnummer": "971142499",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR ENERGY LIBYA AS",
+          "organisasjonsnummer": "970988629",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR ANGOLA AS",
+          "organisasjonsnummer": "960533577",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR INTERNATIONAL WELL RESPONSE COMPANY AS",
+          "organisasjonsnummer": "897971682",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR ENERGY INTERNATIONAL AS",
+          "organisasjonsnummer": "889094532",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "children": [
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "EQUINOR ANGOLA BLOCK 16/21 AS",
+              "organisasjonsnummer": "937785879",
+              "parentNavn": "EQUINOR ENERGY INTERNATIONAL AS",
+              "parentOrganisasjonsnummer": "889094532",
+              "grunnlag": "100%",
+              "dato": "2026-08-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "EQUINOR ANGOLA ULTRADEEP AS",
+              "organisasjonsnummer": "937692676",
+              "parentNavn": "EQUINOR ENERGY INTERNATIONAL AS",
+              "parentOrganisasjonsnummer": "889094532",
+              "grunnlag": "100%",
+              "dato": "2026-08-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "EQUINOR ANGOLA BLOCK 31/21 AS",
+              "organisasjonsnummer": "930816922",
+              "parentNavn": "EQUINOR ENERGY INTERNATIONAL AS",
+              "parentOrganisasjonsnummer": "889094532",
+              "grunnlag": "100%",
+              "dato": "2026-08-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "EQUINOR ANGOLA BLOCK 46 AS",
+              "organisasjonsnummer": "928320715",
+              "parentNavn": "EQUINOR ENERGY INTERNATIONAL AS",
+              "parentOrganisasjonsnummer": "889094532",
+              "grunnlag": "100%",
+              "dato": "2026-08-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "EQUINOR ANGOLA BLOCK 47 AS",
+              "organisasjonsnummer": "928320642",
+              "parentNavn": "EQUINOR ENERGY INTERNATIONAL AS",
+              "parentOrganisasjonsnummer": "889094532",
+              "grunnlag": "100%",
+              "dato": "2026-08-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "EQUINOR ANGOLA BLOCK 29 AS",
+              "organisasjonsnummer": "925368962",
+              "parentNavn": "EQUINOR ENERGY INTERNATIONAL AS",
+              "parentOrganisasjonsnummer": "889094532",
+              "grunnlag": "100%",
+              "dato": "2026-08-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "EQUINOR ANGOLA BLOCK 1/14 AS",
+              "organisasjonsnummer": "925337609",
+              "parentNavn": "EQUINOR ENERGY INTERNATIONAL AS",
+              "parentOrganisasjonsnummer": "889094532",
+              "grunnlag": "100%",
+              "dato": "2026-08-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            },
+            {
+              "nivaa": 3,
+              "knytningsform": {
+                "kode": "KDAT",
+                "beskrivelse": "Konsern datter"
+              },
+              "navn": "EQUINOR ARGENTINA AS",
+              "organisasjonsnummer": "922031843",
+              "parentNavn": "EQUINOR ENERGY INTERNATIONAL AS",
+              "parentOrganisasjonsnummer": "889094532",
+              "grunnlag": "95,00%",
+              "dato": "2026-08-12",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              }
+            }
+          ]
+        },
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR DEZASSETE AS",
+          "organisasjonsnummer": "866009392",
+          "parentNavn": "EQUINOR ENERGY AS",
+          "parentOrganisasjonsnummer": "990888213",
+          "grunnlag": "100%",
+          "dato": "2025-11-08",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        }
+      ]
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR GAS MARKETING EUROPE AS",
+      "organisasjonsnummer": "990836426",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR TANZANIA AS",
+      "organisasjonsnummer": "990023476",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "SVANHOLMEN 8 AS",
+      "organisasjonsnummer": "989972723",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR LIBYA AS",
+      "organisasjonsnummer": "987634626",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR IN SALAH AS",
+      "organisasjonsnummer": "985648085",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR IN AMENAS AS",
+      "organisasjonsnummer": "985648026",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR ALGERIA AS",
+      "organisasjonsnummer": "985619433",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "STATOIL SP GAS AS",
+      "organisasjonsnummer": "985079056",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR BTC FINANCE AS",
+      "organisasjonsnummer": "984611439",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR BTC CASPIAN AS",
+          "organisasjonsnummer": "982265193",
+          "parentNavn": "EQUINOR BTC FINANCE AS",
+          "parentOrganisasjonsnummer": "984611439",
+          "grunnlag": "100%",
+          "dato": "2025-02-24",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        }
+      ]
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "STATOIL IRAN AS",
+      "organisasjonsnummer": "982924383",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR NORSK LNG AS",
+      "organisasjonsnummer": "982771064",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR ASSET MANAGEMENT AS",
+      "organisasjonsnummer": "981363876",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "STATHOLDING AS",
+      "organisasjonsnummer": "981363140",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR NEW ENERGY AS",
+      "organisasjonsnummer": "981269217",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR VENTURES AS",
+      "organisasjonsnummer": "980516229",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR INDIA AS",
+      "organisasjonsnummer": "979206755",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "NORSK HYDRO DANMARK AS",
+      "organisasjonsnummer": "979130899",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "UTLA",
+        "beskrivelse": "Utenlandsk enhet"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR ANGOLA BLOCK 17 AS",
+      "organisasjonsnummer": "977312043",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR ANGOLA BLOCK 15 AS",
+      "organisasjonsnummer": "977311950",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR CHINA AS",
+      "organisasjonsnummer": "976947584",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR APSHERON AS",
+      "organisasjonsnummer": "975798658",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR ANGOLA BLOCK 31 AS",
+      "organisasjonsnummer": "971195290",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR NIGERIA AS",
+      "organisasjonsnummer": "967583936",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR PROJECTS HOLDING AS",
+      "organisasjonsnummer": "933362140",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "Rafinor AS",
+      "organisasjonsnummer": "929321316",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR MIDSTREAM & TRADING AS",
+      "organisasjonsnummer": "928927156",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      },
+      "children": [
+        {
+          "nivaa": 2,
+          "knytningsform": {
+            "kode": "KDAT",
+            "beskrivelse": "Konsern datter"
+          },
+          "navn": "EQUINOR LNG TRADING AS",
+          "organisasjonsnummer": "933236358",
+          "parentNavn": "EQUINOR MIDSTREAM & TRADING AS",
+          "parentOrganisasjonsnummer": "928927156",
+          "grunnlag": "100%",
+          "dato": "2025-02-24",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          }
+        }
+      ]
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR LOW CARBON SOLUTION AS",
+      "organisasjonsnummer": "927998009",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR RUSSIA HOLDING AS",
+      "organisasjonsnummer": "922320810",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR GLOBAL PROJECTS AS",
+      "organisasjonsnummer": "921835086",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR LNG SHIP HOLDING AS",
+      "organisasjonsnummer": "920022146",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR REFINING NORWAY AS",
+      "organisasjonsnummer": "917209405",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    },
+    {
+      "nivaa": 1,
+      "knytningsform": {
+        "kode": "KDAT",
+        "beskrivelse": "Konsern datter"
+      },
+      "navn": "EQUINOR INSURANCE AS",
+      "organisasjonsnummer": "836771192",
+      "parentNavn": "EQUINOR ASA",
+      "parentOrganisasjonsnummer": "923609016",
+      "grunnlag": "100%",
+      "dato": "2025-11-12",
+      "organisasjonsform": {
+        "kode": "AS",
+        "beskrivelse": "Aksjeselskap"
+      }
+    }
+  ]
+}

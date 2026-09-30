@@ -1,0 +1,48 @@
+{
+  "request": "/enhetsregisteret/api/konsernstruktur/976389387",
+  "status": 200,
+  "body": {
+    "children": [
+      {
+        "dato": "2004-10-20",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "SIXA CONFERENCE AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "979535058",
+        "parentNavn": "ERNST & YOUNG AS",
+        "parentOrganisasjonsnummer": "976389387"
+      },
+      {
+        "dato": "2004-10-20",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "ERNST & YOUNG COMPLIANCE SERVICES AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "946823465",
+        "parentNavn": "ERNST & YOUNG AS",
+        "parentOrganisasjonsnummer": "976389387"
+      }
+    ],
+    "navn": "ERNST & YOUNG AS",
+    "organisasjonsform": {
+      "beskrivelse": "Aksjeselskap",
+      "kode": "AS"
+    },
+    "organisasjonsnummer": "976389387"
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "organisasjonsnummer": "935864879",
+  "navn": "SCAN TRANSPORT AS",
+  "organisasjonsform": {
+    "kode": "AS",
+    "beskrivelse": "Aksjeselskap",
+    "_links": {
+      "self": {
+        "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS"
+      }
+    }
+  },
+  "historiskeNavn": [],
+  "postadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "1271",
+    "poststed": "OSLO",
+    "adresse": [
+      "c/o Kari Eksempel",
+      "Eksempelveien 1"
+    ],
+    "kommune": "OSLO",
+    "kommunenummer": "0301"
+  },
+  "registreringsdatoEnhetsregisteret": "2025-07-18",
+  "registrertIMvaregisteret": true,
+  "naeringskode1": {
+    "kode": "53.200",
+    "beskrivelse": "Andre post- og budtjenester"
+  },
+  "harRegistrertAntallAnsatte": true,
+  "registreringsdatoMerverdiavgiftsregisteret": "2025-08-31",
+  "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-19",
+  "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-07-15",
+  "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-07-10",
+  "forretningsadresse": {
+    "land": "Norge",
+    "landkode": "NO",
+    "postnummer": "1290",
+    "poststed": "OSLO",
+    "adresse": [],
+    "kommune": "OSLO",
+    "kommunenummer": "0301"
+  },
+  "stiftelsesdato": "2025-05-23",
+  "institusjonellSektorkode": {
+    "kode": "2100",
+    "beskrivelse": "Private aksjeselskaper mv."
+  },
+  "registrertIForetaksregisteret": true,
+  "registrertIStiftelsesregisteret": false,
+  "registrertIFrivillighetsregisteret": false,
+  "sisteInnsendteAarsregnskap": "2025",
+  "konkurs": false,
+  "underAvvikling": false,
+  "underTvangsavviklingEllerTvangsopplosning": false,
+  "maalform": "Bokmål",
+  "vedtektsdato": "2025-05-23",
+  "vedtektsfestetFormaal": [
+    "Budbil transport."
+  ],
+  "aktivitet": [
+    "Budbil transport."
+  ],
+  "registreringsdatoForetaksregisteret": "2025-07-18",
+  "registrertIPartiregisteret": false,
+  "paategninger": [
+    {
+      "infotype": "FADR",
+      "tekst": "Foretaksregisteret har grunn til å anta at forretningsadressen er feil. Foretaket har fått pålegg om å melde endring.",
+      "innfoertDato": "2026-09-01"
+    }
+  ],
+  "fravalgRevisjonDato": "2025-07-18",
+  "fravalgRevisjonBeslutningsDato": "2025-05-23",
+  "erIKonsern": false,
+  "kapital": {
+    "belop": 30000.0,
+    "antallAksjer": 100,
+    "type": "Aksjekapital",
+    "valuta": "NOK",
+    "innfortDato": "2025-07-18"
+  },
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/935864879"
+    }
+  },
+  "respons_klasse": "Enhet"
+}
