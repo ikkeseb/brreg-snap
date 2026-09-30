@@ -3,10 +3,10 @@
   "status": 200,
   "body": {
     "page": {
+      "number": 0,
       "size": 20,
       "totalElements": 0,
-      "totalPages": 0,
-      "number": 0
+      "totalPages": 0
     }
   }
 }

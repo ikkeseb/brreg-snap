@@ -159,7 +159,10 @@ export function referencedFiles(manifest) {
  * dist-*, scripts/verify-package.mjs the release zips). .map files sit
  * inside these directories and are stripped at packaging.
  */
-export const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'chunks', 'icons', 'assets'];
+// `fonts` holds the bundled Schibsted Grotesk (woff2) and its OFL.txt,
+// copied verbatim by vite.config.ts so the stylesheet's /fonts/ URL is
+// stable across builds and the licence notice ships with the font.
+export const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'chunks', 'icons', 'assets', 'fonts'];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const show = (v) => (v === undefined ? 'undefined' : JSON.stringify(v));

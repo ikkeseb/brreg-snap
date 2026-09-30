@@ -102,10 +102,58 @@ async function find(query: string): Promise<SearchRows> {
   return { kind: 'hits', hits: results.map((hit) => ({ hit })) };
 }
 
+// How one search's rows are painted. The default paints the 1.3
+// markup (li > button.manual-hit); the 1.4 components pass their own
+// (src/lib/view/components/search.ts). Each method returns the <li>.
+export interface SearchPainter {
+  hit(hit: SearchHit, onSelect: () => void, opts: { avdelingAv?: string }): HTMLElement;
+  note(text: string): HTMLElement;
+  error(text: string, retry: () => void): HTMLElement;
+}
+
+export const defaultPainter: SearchPainter = {
+  hit(hit, onSelect, opts) {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'manual-hit';
+    appendHitSummary(btn, hit, opts);
+    btn.addEventListener('click', onSelect);
+    li.appendChild(btn);
+    return li;
+  },
+  note(text) {
+    const li = document.createElement('li');
+    li.className = 'empty-result';
+    li.textContent = text;
+    return li;
+  },
+  error(text, retry) {
+    const li = document.createElement('li');
+    li.className = 'search-error';
+    const msg = document.createElement('span');
+    msg.textContent = text;
+    li.appendChild(msg);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'retry-button';
+    btn.textContent = 'Prøv igjen';
+    btn.addEventListener('click', retry);
+    li.appendChild(btn);
+    return li;
+  },
+};
+
 export interface ManualSearchOptions {
   inputEl: HTMLInputElement;
   resultsEl: HTMLUListElement;
   onSelect: (hit: SearchHit) => void;
+  // Row markup; the default is the 1.3 markup above.
+  paint?: SearchPainter;
+  // Where result counts are announced. Given: the surface's one live
+  // region (src/lib/view/components/live.ts). Omitted: a region of its
+  // own is inserted after the results list.
+  announce?: (text: string) => void;
   // Query dropped below the minimum length and the results were
   // cleared — the popup uses this to restore its recents list.
   onQueryCleared?: () => void;
@@ -124,22 +172,26 @@ export interface ManualSearchController {
   search(query: string): void;
 }
 
+function ownLiveRegion(after: HTMLElement): (text: string) => void {
+  const liveRegion = document.createElement('div');
+  liveRegion.className = 'visually-hidden';
+  liveRegion.setAttribute('aria-live', 'polite');
+  after.insertAdjacentElement('afterend', liveRegion);
+  return (text: string) => {
+    liveRegion.textContent = text;
+  };
+}
+
 export function attachManualSearch(
   opts: ManualSearchOptions,
 ): ManualSearchController {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let runId = 0;
+  const paint = opts.paint ?? defaultPainter;
 
-  // aria-live region for result-count announcements. Created here
-  // (not in the HTML) so every surface using the component gets it.
-  const liveRegion = document.createElement('div');
-  liveRegion.className = 'visually-hidden';
-  liveRegion.setAttribute('aria-live', 'polite');
-  opts.resultsEl.insertAdjacentElement('afterend', liveRegion);
-
-  function announce(text: string): void {
-    liveRegion.textContent = text;
-  }
+  // aria-live region for result-count announcements, unless the
+  // surface routes them through its own.
+  const announce: (text: string) => void = opts.announce ?? ownLiveRegion(opts.resultsEl);
 
   function schedule(delayMs: number): void {
     if (timer) clearTimeout(timer);
@@ -174,22 +226,14 @@ export function attachManualSearch(
       if (myRunId !== runId) return;
       opts.resultsEl.replaceChildren();
       if (rows.kind === 'note') {
-        const li = document.createElement('li');
-        li.className = 'empty-result';
-        li.textContent = rows.text;
-        opts.resultsEl.appendChild(li);
+        opts.resultsEl.appendChild(paint.note(rows.text));
         announce(rows.text);
         return;
       }
       for (const { hit, avdelingAv } of rows.hits) {
-        const li = document.createElement('li');
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'manual-hit';
-        appendHitSummary(btn, hit, { avdelingAv });
-        btn.addEventListener('click', () => opts.onSelect(hit));
-        li.appendChild(btn);
-        opts.resultsEl.appendChild(li);
+        opts.resultsEl.appendChild(
+          paint.hit(hit, () => opts.onSelect(hit), avdelingAv ? { avdelingAv } : {}),
+        );
       }
       const n = rows.hits.length;
       announce(n === 1 ? '1 treff.' : `${n} treff.`);
@@ -201,20 +245,11 @@ export function attachManualSearch(
 
   function renderSearchError(query: string): void {
     opts.resultsEl.replaceChildren();
-    const li = document.createElement('li');
-    li.className = 'search-error';
-    const msg = document.createElement('span');
-    msg.textContent = 'Søket feilet.';
-    li.appendChild(msg);
-    const retry = document.createElement('button');
-    retry.type = 'button';
-    retry.className = 'retry-button';
-    retry.textContent = 'Prøv igjen';
-    retry.addEventListener('click', () => {
-      void run(query);
-    });
-    li.appendChild(retry);
-    opts.resultsEl.appendChild(li);
+    opts.resultsEl.appendChild(
+      paint.error('Søket feilet.', () => {
+        void run(query);
+      }),
+    );
     announce('Søket feilet.');
   }
 

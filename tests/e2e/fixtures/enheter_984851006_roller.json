@@ -4,299 +4,299 @@
   "body": {
     "rollegrupper": [
       {
-        "type": {
-          "kode": "DAGL",
-          "beskrivelse": "Daglig leder"
-        },
-        "sistEndret": "2019-09-05",
         "roller": [
           {
-            "type": {
-              "kode": "DAGL",
-              "beskrivelse": "Daglig leder"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Kari",
                 "etternavn": "Nordmann"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 0
+            "rekkefolge": 0,
+            "type": {
+              "beskrivelse": "Daglig leder",
+              "kode": "DAGL"
+            }
           }
-        ]
+        ],
+        "sistEndret": "2019-09-05",
+        "type": {
+          "beskrivelse": "Daglig leder",
+          "kode": "DAGL"
+        }
       },
       {
-        "type": {
-          "kode": "STYR",
-          "beskrivelse": "Styre"
-        },
-        "sistEndret": "2026-05-04",
         "roller": [
           {
-            "type": {
-              "kode": "LEDE",
-              "beskrivelse": "Styrets leder"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Ola",
                 "etternavn": "Moe"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 0
+            "rekkefolge": 0,
+            "type": {
+              "beskrivelse": "Styrets leder",
+              "kode": "LEDE"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Ingrid",
                 "etternavn": "Strand"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 1
+            "rekkefolge": 1,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Lars",
                 "etternavn": "Hansen"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 2
+            "rekkefolge": 2,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Anne",
                 "etternavn": "Dahl"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 3
+            "rekkefolge": 3,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Per",
                 "etternavn": "Bakke"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 4
+            "rekkefolge": 4,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Marte",
                 "etternavn": "Berg"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 5
+            "rekkefolge": 5,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Nils",
                 "etternavn": "Lie"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 6
+            "rekkefolge": 6,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Kari",
                 "etternavn": "Nordmann"
-              },
-              "erDoed": false
+              }
+            },
+            "rekkefolge": 7,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
             },
             "valgtAv": {
-              "kode": "AREP",
-              "beskrivelse": "Representant for de ansatte"
-            },
-            "avregistrert": false,
-            "rekkefolge": 7
+              "beskrivelse": "Representant for de ansatte",
+              "kode": "AREP"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Ola",
                 "etternavn": "Moe"
-              },
-              "erDoed": false
+              }
+            },
+            "rekkefolge": 8,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
             },
             "valgtAv": {
-              "kode": "AREP",
-              "beskrivelse": "Representant for de ansatte"
-            },
-            "avregistrert": false,
-            "rekkefolge": 8
+              "beskrivelse": "Representant for de ansatte",
+              "kode": "AREP"
+            }
           },
           {
-            "type": {
-              "kode": "MEDL",
-              "beskrivelse": "Styremedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Ingrid",
                 "etternavn": "Strand"
-              },
-              "erDoed": false
+              }
+            },
+            "rekkefolge": 9,
+            "type": {
+              "beskrivelse": "Styremedlem",
+              "kode": "MEDL"
             },
             "valgtAv": {
-              "kode": "AREP",
-              "beskrivelse": "Representant for de ansatte"
-            },
-            "avregistrert": false,
-            "rekkefolge": 9
+              "beskrivelse": "Representant for de ansatte",
+              "kode": "AREP"
+            }
           },
           {
-            "type": {
-              "kode": "VARA",
-              "beskrivelse": "Varamedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Lars",
                 "etternavn": "Hansen"
-              },
-              "erDoed": false
+              }
+            },
+            "rekkefolge": 10,
+            "type": {
+              "beskrivelse": "Varamedlem",
+              "kode": "VARA"
             },
             "valgtAv": {
-              "kode": "AREP",
-              "beskrivelse": "Representant for de ansatte"
-            },
-            "avregistrert": false,
-            "rekkefolge": 10
+              "beskrivelse": "Representant for de ansatte",
+              "kode": "AREP"
+            }
           },
           {
-            "type": {
-              "kode": "VARA",
-              "beskrivelse": "Varamedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Anne",
                 "etternavn": "Dahl"
-              },
-              "erDoed": false
+              }
+            },
+            "rekkefolge": 11,
+            "type": {
+              "beskrivelse": "Varamedlem",
+              "kode": "VARA"
             },
             "valgtAv": {
-              "kode": "AREP",
-              "beskrivelse": "Representant for de ansatte"
-            },
-            "avregistrert": false,
-            "rekkefolge": 11
+              "beskrivelse": "Representant for de ansatte",
+              "kode": "AREP"
+            }
           },
           {
-            "type": {
-              "kode": "VARA",
-              "beskrivelse": "Varamedlem"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Per",
                 "etternavn": "Bakke"
-              },
-              "erDoed": false
+              }
+            },
+            "rekkefolge": 12,
+            "type": {
+              "beskrivelse": "Varamedlem",
+              "kode": "VARA"
             },
             "valgtAv": {
-              "kode": "AREP",
-              "beskrivelse": "Representant for de ansatte"
-            },
-            "avregistrert": false,
-            "rekkefolge": 12
+              "beskrivelse": "Representant for de ansatte",
+              "kode": "AREP"
+            }
           }
-        ]
+        ],
+        "sistEndret": "2026-05-04",
+        "type": {
+          "beskrivelse": "Styre",
+          "kode": "STYR"
+        }
       },
       {
-        "type": {
-          "kode": "REVI",
-          "beskrivelse": "Revisor"
-        },
-        "sistEndret": "2008-08-14",
         "roller": [
           {
-            "type": {
-              "kode": "REVI",
-              "beskrivelse": "Revisor"
-            },
+            "avregistrert": false,
             "enhet": {
-              "organisasjonsnummer": "976389387",
-              "organisasjonsform": {
-                "kode": "AS",
-                "beskrivelse": "Aksjeselskap"
-              },
+              "erSlettet": false,
+              "godkjenningsstatus": "Godkjent revisjonsforetak",
               "navn": [
                 "ERNST & YOUNG AS"
               ],
-              "godkjenningsstatus": "Godkjent revisjonsforetak",
-              "erSlettet": false
+              "organisasjonsform": {
+                "beskrivelse": "Aksjeselskap",
+                "kode": "AS"
+              },
+              "organisasjonsnummer": "976389387"
             },
-            "avregistrert": false,
-            "rekkefolge": 0
+            "rekkefolge": 0,
+            "type": {
+              "beskrivelse": "Revisor",
+              "kode": "REVI"
+            }
           }
-        ]
+        ],
+        "sistEndret": "2008-08-14",
+        "type": {
+          "beskrivelse": "Revisor",
+          "kode": "REVI"
+        }
       }
     ]
   }

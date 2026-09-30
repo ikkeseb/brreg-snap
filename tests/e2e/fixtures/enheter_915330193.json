@@ -2,66 +2,66 @@
   "request": "/enhetsregisteret/api/enheter/915330193",
   "status": 200,
   "body": {
-    "organisasjonsnummer": "915330193",
-    "navn": "1VASK AS",
-    "organisasjonsform": {
-      "kode": "AS",
-      "beskrivelse": "Aksjeselskap"
-    },
-    "historiskeNavn": [],
-    "registreringsdatoEnhetsregisteret": "2015-05-04",
-    "registrertIMvaregisteret": false,
-    "naeringskode1": {
-      "kode": "81.210",
-      "beskrivelse": "Rengjøring av bygninger"
-    },
-    "harRegistrertAntallAnsatte": false,
-    "forretningsadresse": {
-      "land": "Norge",
-      "landkode": "NO",
-      "postnummer": "6887",
-      "poststed": "LÆRDAL",
-      "adresse": [
-        "Eksempelveien 1"
-      ],
-      "kommune": "LÆRDAL",
-      "kommunenummer": "4642"
-    },
-    "stiftelsesdato": "2015-04-17",
-    "institusjonellSektorkode": {
-      "kode": "2100",
-      "beskrivelse": "Private aksjeselskaper mv."
-    },
-    "registrertIForetaksregisteret": true,
-    "registrertIStiftelsesregisteret": false,
-    "registrertIFrivillighetsregisteret": false,
-    "sisteInnsendteAarsregnskap": "2024",
-    "konkurs": true,
-    "konkursdato": "2026-08-26",
-    "underAvvikling": false,
-    "underTvangsavviklingEllerTvangsopplosning": false,
-    "maalform": "Nynorsk",
-    "vedtektsdato": "2015-04-17",
-    "vedtektsfestetFormaal": [
-      "Reinhaldstenester og det som naturleg høyrer til det. Selskapet kan",
-      "også investere i andre verksemder."
-    ],
     "aktivitet": [
       "Reinhaldstenester og det som naturleg høyrer til dette. Selskapet kan",
       "også investere i andre selskap."
     ],
-    "registreringsdatoForetaksregisteret": "2015-05-04",
-    "registrertIPartiregisteret": false,
-    "paategninger": [],
-    "fravalgRevisjonDato": "2015-05-04",
     "erIKonsern": false,
-    "kapital": {
-      "belop": 30000,
-      "antallAksjer": 30,
-      "type": "Aksjekapital",
-      "valuta": "NOK",
-      "innfortDato": "2015-05-04"
+    "forretningsadresse": {
+      "adresse": [
+        "Eksempelveien 1"
+      ],
+      "kommune": "LÆRDAL",
+      "kommunenummer": "4642",
+      "land": "Norge",
+      "landkode": "NO",
+      "postnummer": "6887",
+      "poststed": "LÆRDAL"
     },
-    "respons_klasse": "Enhet"
+    "fravalgRevisjonDato": "2015-05-04",
+    "harRegistrertAntallAnsatte": false,
+    "historiskeNavn": [],
+    "institusjonellSektorkode": {
+      "beskrivelse": "Private aksjeselskaper mv.",
+      "kode": "2100"
+    },
+    "kapital": {
+      "antallAksjer": 30,
+      "belop": 30000,
+      "innfortDato": "2015-05-04",
+      "type": "Aksjekapital",
+      "valuta": "NOK"
+    },
+    "konkurs": true,
+    "konkursdato": "2026-08-26",
+    "maalform": "Nynorsk",
+    "naeringskode1": {
+      "beskrivelse": "Rengjøring av bygninger",
+      "kode": "81.210"
+    },
+    "navn": "1VASK AS",
+    "organisasjonsform": {
+      "beskrivelse": "Aksjeselskap",
+      "kode": "AS"
+    },
+    "organisasjonsnummer": "915330193",
+    "paategninger": [],
+    "registreringsdatoEnhetsregisteret": "2015-05-04",
+    "registreringsdatoForetaksregisteret": "2015-05-04",
+    "registrertIForetaksregisteret": true,
+    "registrertIFrivillighetsregisteret": false,
+    "registrertIMvaregisteret": false,
+    "registrertIPartiregisteret": false,
+    "registrertIStiftelsesregisteret": false,
+    "respons_klasse": "Enhet",
+    "sisteInnsendteAarsregnskap": "2024",
+    "stiftelsesdato": "2015-04-17",
+    "underAvvikling": false,
+    "underTvangsavviklingEllerTvangsopplosning": false,
+    "vedtektsdato": "2015-04-17",
+    "vedtektsfestetFormaal": [
+      "Reinhaldstenester og det som naturleg høyrer til det. Selskapet kan",
+      "også investere i andre verksemder."
+    ]
   }
 }

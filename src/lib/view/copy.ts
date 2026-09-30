@@ -10,11 +10,14 @@ export const COPY = {
   searchPlaceholderPanel: 'Navn eller org.nr',
   searchPlaceholder: 'Bedriftsnavn eller org.nr',
   searchHint: 'Org.nr kan limes inn med eller uten mellomrom.',
+  // Masthead when the tab has no address to look up.
+  noSite: 'Ingen nettside',
 
   // identity
   orgnrLabel: 'Org.nr',
   orgnrAria: (spaced: string) => `Kopier org.nr ${spaced}`,
   orgnrCopied: 'Org.nr kopiert',
+  orgnrTitle: 'Klikk for å kopiere',
   copied: 'Kopiert',
   copyFailed: 'Kunne ikke kopiere',
   copyFailedLive: 'Kunne ikke kopiere til utklippstavlen',
@@ -132,15 +135,20 @@ export const COPY = {
   pickSub: (site: string) => `Ingen har ${site} som registrert hjemmeside. Velg den som stemmer.`,
   pickSubStrong: 'Velg den som stemmer.',
   evidenceStrong: 'hjemmeside',
+  evidencePage: 'underside',
+  evidencePageTitle: (site: string) => `Registrert hjemmeside er en underside på ${site}`,
   evidenceWeak: 'navnetreff',
   none: 'Ingen av disse',
   searchYourself: 'Eller søk selv',
+  pickAnsatte: (n: string) => `${n} ansatte`,
 
   // empty / search
   emptyNoSite: 'Ingen nettside å slå opp',
   emptyNoSiteText: 'Denne fanen har ingen adresse. Søk etter et selskap i stedet.',
   emptyPanelText: 'Søk etter et selskap i feltet over, eller åpne et du har sett.',
   emptyNoMatch: (site: string) => `Fant ikke selskapet bak ${site}`,
+  // The hostname search failed: «couldn't check», never «no match».
+  emptyDegraded: (site: string) => `Fikk ikke sjekket ${site}`,
   emptyNoMatchText: 'Søk etter riktig selskap, eller åpne et du har sett.',
   emptyNone: (site: string) => `Du valgte «Ingen av disse» for ${site}`,
   emptyNoneText: 'Søk etter riktig selskap.',
@@ -149,6 +157,10 @@ export const COPY = {
   searchText: 'Navn eller org.nr.',
   recents: 'Nylig sett',
   results: 'Treff',
+  noHits: 'Ingen treff.',
+  searchFailed: 'Søket feilet.',
+  hitCount: (n: number) => (n === 1 ? '1 treff.' : `${n} treff.`),
+  avdelingAv: (parent: string) => ` — avdeling av ${parent}`,
   forgetSite: (site: string) => `Glem valget for ${site}`,
   backToSite: (site: string) => `Tilbake til treffet for ${site}`,
   searchFailedSupport: (q: string) => `Søket på «${q}» ble ikke fullført.`,
@@ -156,6 +168,7 @@ export const COPY = {
     `${site} kunne ikke sjekkes. Det sier ingenting om nettstedet.`,
 
   // error
+  noAnswerHead: 'Fikk ikke svar fra Brønnøysundregistrene',
   retry: 'Prøv igjen',
   contextFor: 'Oppslag for ',
   contextOrgnr: 'Oppslag på org.nr ',

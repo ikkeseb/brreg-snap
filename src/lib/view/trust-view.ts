@@ -338,7 +338,12 @@ function regnskapFigures(
   return groups.length > 0 ? groups : undefined;
 }
 
-function signalRow(signal: Signal, company: CompanyData, kunngjoringer: string): LedgerRow {
+function signalRow(
+  signal: Signal,
+  company: CompanyData,
+  kunngjoringer: string,
+  answerTone: AnswerTone,
+): LedgerRow {
   const row: LedgerRow = {
     key: signal.key,
     label: signal.label,
@@ -350,8 +355,9 @@ function signalRow(signal: Signal, company: CompanyData, kunngjoringer: string):
     case 'status':
       if (signal.tone === 'danger') {
         // The stamp already carries the date: the row points at the
-        // registry's own announcements instead.
+        // registry's own announcements instead, on the value's line.
         row.dangerValue = true;
+        row.inline = true;
         row.actions.push({ kind: 'link', text: COPY.kunngjoringer, href: kunngjoringer });
       } else if (signal.detail) {
         row.aux = `· ${signal.detail}`;
@@ -367,9 +373,13 @@ function signalRow(signal: Signal, company: CompanyData, kunngjoringer: string):
     case 'regnskap': {
       if (signal.detail === 'levert') row.value = `${signal.value} levert`;
       else if (signal.detail) row.aux = `· ${signal.detail}`;
-      const figures = /^\d{4}$/.test(signal.value)
-        ? regnskapFigures(company.regnskap, signal.value)
-        : undefined;
+      // Under a stamp the row names the year only (P2): the money
+      // lives in the panel's Økonomi tab, and the popup keeps its
+      // 600 px.
+      const figures =
+        answerTone !== 'danger' && /^\d{4}$/.test(signal.value)
+          ? regnskapFigures(company.regnskap, signal.value)
+          : undefined;
       if (figures) row.figures = figures;
       break;
     }
@@ -496,7 +506,7 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   if (spoof) {
     facts = factsLine(signals);
   } else {
-    for (const s of signals) ledger.push(signalRow(s, company, kunngjoringer));
+    for (const s of signals) ledger.push(signalRow(s, company, kunngjoringer, shownAnswer.tone));
     // The popup keeps five rows: when a signal was omitted, næring
     // fills the gap (the panel has it under Registrering).
     const naering = enhet.naeringskode1?.beskrivelse?.trim();
@@ -522,7 +532,11 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   } else if (fc) {
     identity.over = fc;
   }
-  if (surface === 'popup' && roller) {
+  // The popup's leaders line is a normal company's line (P1). Under a
+  // stamp it would read as reassurance next to a konkurs, and on a
+  // spoof the company is the site's claim, not its identity (P2, P4
+  // carry no leaders; the bostyrer is in the stamp).
+  if (surface === 'popup' && roller && answerView.tone !== 'danger') {
     const dagl = findRoleHolder(roller, 'DAGL');
     const lede = findRoleHolder(roller, 'LEDE');
     if (dagl) identity.leaders.push({ label: COPY.dagligLeder, name: dagl });
@@ -543,7 +557,10 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   }
 
   // --- konsern, notes
-  const konsern = company.konsern ? { parts: konsernParts(company.konsern) } : undefined;
+  // On a spoof the group line would read as the site's credentials
+  // (P4 carries none); the facts line already says what the company is.
+  const konsern =
+    company.konsern && !spoof ? { parts: konsernParts(company.konsern) } : undefined;
   const merknadViews: MerknadView[] = merknader.map((m) => {
     const since = formatDateNo(m.since);
     return since && m.since ? { text: m.text, since: { iso: m.since, text: since } } : { text: m.text };

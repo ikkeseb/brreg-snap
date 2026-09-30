@@ -144,6 +144,33 @@ export interface RejectChoiceOptions {
   showEmptyState: (host: string) => void;
 }
 
+export type RejectOutcome =
+  | { kind: 'picker'; candidates: Candidate[] }
+  | { kind: 'empty' };
+
+// «Feil bedrift?»: records the rejection and re-runs the host
+// resolution. Resolves undefined when `isStale` says the caller moved
+// on meanwhile (the rejection is stored either way; only the paint is
+// dropped). `title` keeps the search's word hints (hostname-search.ts
+// § title segmentation).
+export async function rejectChoice(
+  host: string,
+  orgnr: string,
+  title: string | undefined,
+  isStale: () => boolean = () => false,
+): Promise<RejectOutcome | undefined> {
+  await addRejectedChoice(host, orgnr);
+  if (isStale()) return undefined;
+  const detailed = await searchByHostnameDetailed(host, title);
+  if (isStale()) return undefined;
+  if (detailed && detailed.candidates.length > 0) {
+    // Always show the picker (even if a single candidate now wins
+    // band='auto') — the user just expressed doubt; let them confirm.
+    return { kind: 'picker', candidates: detailed.candidates };
+  }
+  return { kind: 'empty' };
+}
+
 // "Feil bedrift? Vis alternativer" — records the rejection, re-runs
 // the host resolution, and re-opens the picker (or falls through to
 // the empty state when nothing plausible is left).
@@ -156,18 +183,10 @@ export function setupRejectChoice(opts: RejectChoiceOptions): void {
     const run = opts.claim?.();
     buttonEl.disabled = true;
     try {
-      // The rejection is stored either way; only the paint is dropped.
-      await addRejectedChoice(host, orgnr);
-      if (run?.isStale()) return;
-      const detailed = await searchByHostnameDetailed(host, title);
-      if (run?.isStale()) return;
-      if (detailed && detailed.candidates.length > 0) {
-        // Always show picker (even if a single candidate now wins
-        // band='auto') — the user just expressed doubt; let them confirm.
-        opts.showPicker(host, detailed.candidates);
-        return;
-      }
-      opts.showEmptyState(host);
+      const outcome = await rejectChoice(host, orgnr, title, () => run?.isStale() ?? false);
+      if (!outcome) return;
+      if (outcome.kind === 'picker') opts.showPicker(host, outcome.candidates);
+      else opts.showEmptyState(host);
     } finally {
       buttonEl.disabled = false;
     }

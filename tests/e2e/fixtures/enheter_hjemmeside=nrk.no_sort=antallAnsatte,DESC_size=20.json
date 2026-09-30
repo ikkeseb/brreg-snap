@@ -5,382 +5,382 @@
     "_embedded": {
       "enheter": [
         {
-          "organisasjonsnummer": "898761142",
-          "navn": "LÍNT DA",
-          "organisasjonsform": {
-            "kode": "DA",
-            "beskrivelse": "Ansvarlig selskap med delt ansvar"
-          },
-          "historiskeNavn": [],
-          "hjemmeside": "nrk.no/urort/artist/lint",
-          "postadresse": {
-            "land": "Norge",
-            "landkode": "NO",
-            "postnummer": "5264",
-            "poststed": "GARNES",
-            "adresse": [
-              "Eksempelveien 1"
-            ],
-            "kommune": "BERGEN",
-            "kommunenummer": "4601"
-          },
-          "registreringsdatoEnhetsregisteret": "2012-09-03",
-          "registrertIMvaregisteret": false,
-          "naeringskode1": {
-            "kode": "90.201",
-            "beskrivelse": "Utøvende kunstnerisk virksomhet og underholdningsvirksomhet innenfor musikk"
-          },
-          "harRegistrertAntallAnsatte": false,
-          "epostadresse": "post@example.no",
-          "mobil": "00000000",
-          "forretningsadresse": {
-            "land": "Norge",
-            "landkode": "NO",
-            "postnummer": "5010",
-            "poststed": "BERGEN",
-            "adresse": [
-              "Eksempelveien 1"
-            ],
-            "kommune": "BERGEN",
-            "kommunenummer": "4601"
-          },
-          "stiftelsesdato": "2012-08-08",
-          "institusjonellSektorkode": {
-            "kode": "2300",
-            "beskrivelse": "Personlige foretak"
-          },
-          "registrertIForetaksregisteret": true,
-          "registrertIStiftelsesregisteret": false,
-          "registrertIFrivillighetsregisteret": false,
-          "konkurs": false,
-          "underAvvikling": true,
-          "underAvviklingDato": "2026-09-02",
-          "underTvangsavviklingEllerTvangsopplosning": false,
-          "maalform": "Bokmål",
-          "vedtektsdato": "2012-08-08",
-          "vedtektsfestetFormaal": [
-            "Formålet er å skape, produsere og utøve/formidle musikk."
-          ],
           "aktivitet": [
             "Musikk: Komponering, utøvelse, formidling."
           ],
+          "epostadresse": "post@example.no",
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5010",
+            "poststed": "BERGEN"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "hjemmeside": "nrk.no/urort/artist/lint",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Personlige foretak",
+            "kode": "2300"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Utøvende kunstnerisk virksomhet og underholdningsvirksomhet innenfor musikk",
+            "kode": "90.201"
+          },
+          "navn": "LÍNT DA",
+          "organisasjonsform": {
+            "beskrivelse": "Ansvarlig selskap med delt ansvar",
+            "kode": "DA"
+          },
+          "organisasjonsnummer": "898761142",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5264",
+            "poststed": "GARNES"
+          },
+          "registreringsdatoEnhetsregisteret": "2012-09-03",
           "registreringsdatoForetaksregisteret": "2012-09-03",
+          "registrertIForetaksregisteret": true,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
           "registrertIPartiregisteret": false,
-          "paategninger": [],
-          "erIKonsern": false,
-          "respons_klasse": "Enhet"
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "stiftelsesdato": "2012-08-08",
+          "underAvvikling": true,
+          "underAvviklingDato": "2026-09-02",
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "vedtektsdato": "2012-08-08",
+          "vedtektsfestetFormaal": [
+            "Formålet er å skape, produsere og utøve/formidle musikk."
+          ]
         },
         {
-          "organisasjonsnummer": "999999999",
-          "navn": "EKSEMPEL ENK",
-          "organisasjonsform": {
-            "kode": "ENK",
-            "beskrivelse": "Enkeltpersonforetak"
-          },
-          "historiskeNavn": [],
-          "hjemmeside": "www.nrk.no/eksempel",
-          "registreringsdatoEnhetsregisteret": "2008-12-10",
-          "registrertIMvaregisteret": false,
-          "naeringskode1": {
-            "kode": "90.209",
-            "beskrivelse": "Annen utøvende kunstnerisk virksomhet og underholdningsvirksomhet ikke nevnt annet sted"
-          },
-          "harRegistrertAntallAnsatte": false,
-          "epostadresse": "post@example.no",
-          "mobil": "00000000",
-          "forretningsadresse": {
-            "land": "Norge",
-            "landkode": "NO",
-            "postnummer": "0367",
-            "poststed": "OSLO",
-            "adresse": [
-              "Eksempelveien 1"
-            ],
-            "kommune": "OSLO",
-            "kommunenummer": "0301"
-          },
-          "institusjonellSektorkode": {
-            "kode": "8200",
-            "beskrivelse": "Personlig næringsdrivende"
-          },
-          "registrertIForetaksregisteret": false,
-          "registrertIStiftelsesregisteret": false,
-          "registrertIFrivillighetsregisteret": false,
-          "konkurs": false,
-          "underAvvikling": false,
-          "underTvangsavviklingEllerTvangsopplosning": false,
-          "maalform": "Bokmål",
           "aktivitet": [
             "Eksempelaktivitet."
           ],
-          "registrertIPartiregisteret": false,
-          "paategninger": [],
-          "erIKonsern": false,
-          "respons_klasse": "Enhet"
-        },
-        {
-          "organisasjonsnummer": "915124941",
-          "navn": "VETERANKLUBBEN NRK",
-          "organisasjonsform": {
-            "kode": "FLI",
-            "beskrivelse": "Forening/lag/innretning"
-          },
-          "historiskeNavn": [],
-          "hjemmeside": "blogg.nrk.no/veteranklubben",
-          "registreringsdatoEnhetsregisteret": "2015-05-06",
-          "registrertIMvaregisteret": false,
-          "naeringskode1": {
-            "kode": "94.992",
-            "beskrivelse": "Aktiviteter i andre medlemsorganisasjoner ellers"
-          },
-          "harRegistrertAntallAnsatte": false,
           "epostadresse": "post@example.no",
-          "forretningsadresse": {
-            "land": "Norge",
-            "landkode": "NO",
-            "postnummer": "0340",
-            "poststed": "OSLO",
-            "adresse": [
-              "Eksempelveien 1"
-            ],
-            "kommune": "OSLO",
-            "kommunenummer": "0301"
-          },
-          "stiftelsesdato": "1983-02-01",
-          "institusjonellSektorkode": {
-            "kode": "7000",
-            "beskrivelse": "Ideelle organisasjoner"
-          },
-          "registrertIForetaksregisteret": false,
-          "registrertIStiftelsesregisteret": false,
-          "registrertIFrivillighetsregisteret": true,
-          "konkurs": false,
-          "underAvvikling": false,
-          "underTvangsavviklingEllerTvangsopplosning": false,
-          "maalform": "Bokmål",
-          "aktivitet": [
-            "Organisere møter for veteranklubbens medlemmer, pensjonister i NRK,",
-            "organisere kortere og lengre reiser for medlemmene."
-          ],
-          "registreringsdatoFrivillighetsregisteret": "2015-05-06",
-          "registrertIPartiregisteret": false,
-          "paategninger": [],
           "erIKonsern": false,
-          "respons_klasse": "Enhet"
-        },
-        {
-          "organisasjonsnummer": "999999999",
-          "navn": "EKSEMPEL ENK",
-          "organisasjonsform": {
-            "kode": "ENK",
-            "beskrivelse": "Enkeltpersonforetak"
-          },
-          "historiskeNavn": [],
-          "hjemmeside": "www11.nrk.no/eksempel",
-          "registreringsdatoEnhetsregisteret": "2006-09-19",
-          "registrertIMvaregisteret": false,
-          "naeringskode1": {
-            "kode": "90.201",
-            "beskrivelse": "Utøvende kunstnerisk virksomhet og underholdningsvirksomhet innenfor musikk"
-          },
-          "harRegistrertAntallAnsatte": false,
-          "epostadresse": "post@example.no",
-          "mobil": "00000000",
           "forretningsadresse": {
-            "land": "Norge",
-            "landkode": "NO",
-            "postnummer": "7069",
-            "poststed": "TRONDHEIM",
-            "adresse": [
-              "Eksempelveien 1"
-            ],
-            "kommune": "TRONDHEIM",
-            "kommunenummer": "5001"
-          },
-          "institusjonellSektorkode": {
-            "kode": "8200",
-            "beskrivelse": "Personlig næringsdrivende"
-          },
-          "registrertIForetaksregisteret": false,
-          "registrertIStiftelsesregisteret": false,
-          "registrertIFrivillighetsregisteret": false,
-          "konkurs": false,
-          "underAvvikling": false,
-          "underTvangsavviklingEllerTvangsopplosning": false,
-          "maalform": "Bokmål",
-          "aktivitet": [
-            "Eksempelaktivitet."
-          ],
-          "registrertIPartiregisteret": false,
-          "paategninger": [],
-          "erIKonsern": false,
-          "respons_klasse": "Enhet"
-        },
-        {
-          "organisasjonsnummer": "999999999",
-          "navn": "EKSEMPEL ENK",
-          "organisasjonsform": {
-            "kode": "ENK",
-            "beskrivelse": "Enkeltpersonforetak"
-          },
-          "historiskeNavn": [],
-          "hjemmeside": "www.nrk.no/eksempel",
-          "registreringsdatoEnhetsregisteret": "2011-08-04",
-          "registrertIMvaregisteret": true,
-          "naeringskode1": {
-            "kode": "90.201",
-            "beskrivelse": "Utøvende kunstnerisk virksomhet og underholdningsvirksomhet innenfor musikk"
-          },
-          "harRegistrertAntallAnsatte": false,
-          "registreringsdatoMerverdiavgiftsregisteret": "2024-05-30",
-          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-08-14",
-          "epostadresse": "post@example.no",
-          "mobil": "00000000",
-          "forretningsadresse": {
-            "land": "Norge",
-            "landkode": "NO",
-            "postnummer": "6250",
-            "poststed": "STORDAL",
             "adresse": [
               "Eksempelveien 1"
             ],
             "kommune": "FJORD",
-            "kommunenummer": "1578"
-          },
-          "institusjonellSektorkode": {
-            "kode": "8200",
-            "beskrivelse": "Personlig næringsdrivende"
-          },
-          "registrertIForetaksregisteret": false,
-          "registrertIStiftelsesregisteret": false,
-          "registrertIFrivillighetsregisteret": false,
-          "konkurs": false,
-          "underAvvikling": false,
-          "underTvangsavviklingEllerTvangsopplosning": false,
-          "maalform": "Bokmål",
-          "aktivitet": [
-            "Eksempelaktivitet."
-          ],
-          "registrertIPartiregisteret": false,
-          "paategninger": [],
-          "erIKonsern": false,
-          "respons_klasse": "Enhet"
-        },
-        {
-          "organisasjonsnummer": "997956400",
-          "navn": "NTL NRK MARIENLYST",
-          "organisasjonsform": {
-            "kode": "FLI",
-            "beskrivelse": "Forening/lag/innretning"
-          },
-          "historiskeNavn": [],
-          "hjemmeside": "www.ntlnrk.no",
-          "postadresse": {
+            "kommunenummer": "1578",
             "land": "Norge",
             "landkode": "NO",
-            "postnummer": "0340",
-            "poststed": "OSLO",
-            "adresse": [
-              "Eksempelveien 1"
-            ],
-            "kommune": "OSLO",
-            "kommunenummer": "0301"
-          },
-          "registreringsdatoEnhetsregisteret": "2012-03-08",
-          "registrertIMvaregisteret": false,
-          "naeringskode1": {
-            "kode": "94.200",
-            "beskrivelse": "Aktiviteter i arbeidstakerorganisasjoner"
+            "postnummer": "6250",
+            "poststed": "STORDAL"
           },
           "harRegistrertAntallAnsatte": false,
-          "epostadresse": "post@example.no",
-          "forretningsadresse": {
-            "land": "Norge",
-            "landkode": "NO",
-            "postnummer": "0340",
-            "poststed": "OSLO",
-            "adresse": [
-              "Eksempelveien 1"
-            ],
-            "kommune": "OSLO",
-            "kommunenummer": "0301"
-          },
-          "stiftelsesdato": "1990-04-01",
+          "historiskeNavn": [],
+          "hjemmeside": "www.nrk.no/eksempel",
           "institusjonellSektorkode": {
-            "kode": "7000",
-            "beskrivelse": "Ideelle organisasjoner"
+            "beskrivelse": "Personlig næringsdrivende",
+            "kode": "8200"
           },
-          "registrertIForetaksregisteret": false,
-          "registrertIStiftelsesregisteret": false,
-          "registrertIFrivillighetsregisteret": false,
           "konkurs": false,
-          "underAvvikling": false,
-          "underTvangsavviklingEllerTvangsopplosning": false,
           "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Utøvende kunstnerisk virksomhet og underholdningsvirksomhet innenfor musikk",
+            "kode": "90.201"
+          },
+          "navn": "EKSEMPEL ENK",
+          "organisasjonsform": {
+            "beskrivelse": "Enkeltpersonforetak",
+            "kode": "ENK"
+          },
+          "organisasjonsnummer": "999999999",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2011-08-04",
+          "registreringsdatoMerverdiavgiftsregisteret": "2024-05-30",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-08-14",
+          "registrertIForetaksregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": true,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false
+        },
+        {
           "aktivitet": [
             "Fagforening som jobber for ansattes lønns- og arbeidsvilkår i NRKs",
             "avdeling på Marienlyst i Oslo."
           ],
-          "registrertIPartiregisteret": false,
-          "paategninger": [],
+          "epostadresse": "post@example.no",
           "erIKonsern": false,
-          "respons_klasse": "Enhet"
-        },
-        {
-          "organisasjonsnummer": "996821099",
-          "navn": "NTL-NRK TROMS AVD 31-31",
-          "organisasjonsform": {
-            "kode": "FLI",
-            "beskrivelse": "Forening/lag/innretning"
-          },
-          "historiskeNavn": [],
-          "hjemmeside": "ntl-nrk.no",
-          "registreringsdatoEnhetsregisteret": "2011-05-26",
-          "registrertIMvaregisteret": false,
-          "naeringskode1": {
-            "kode": "94.200",
-            "beskrivelse": "Aktiviteter i arbeidstakerorganisasjoner"
-          },
-          "harRegistrertAntallAnsatte": false,
-          "mobil": "00000000",
           "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
             "land": "Norge",
             "landkode": "NO",
-            "postnummer": "9006",
-            "poststed": "TROMSØ",
+            "postnummer": "0340",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "hjemmeside": "www.ntlnrk.no",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Ideelle organisasjoner",
+            "kode": "7000"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Aktiviteter i arbeidstakerorganisasjoner",
+            "kode": "94.200"
+          },
+          "navn": "NTL NRK MARIENLYST",
+          "organisasjonsform": {
+            "beskrivelse": "Forening/lag/innretning",
+            "kode": "FLI"
+          },
+          "organisasjonsnummer": "997956400",
+          "paategninger": [],
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0340",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoEnhetsregisteret": "2012-03-08",
+          "registrertIForetaksregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "stiftelsesdato": "1990-04-01",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false
+        },
+        {
+          "aktivitet": [
+            "Fagforening."
+          ],
+          "erIKonsern": false,
+          "forretningsadresse": {
             "adresse": [
               "Eksempelveien 1"
             ],
             "kommune": "TROMSØ",
-            "kommunenummer": "5501"
+            "kommunenummer": "5501",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "9006",
+            "poststed": "TROMSØ"
           },
-          "stiftelsesdato": "1976-06-01",
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "hjemmeside": "ntl-nrk.no",
           "institusjonellSektorkode": {
-            "kode": "7000",
-            "beskrivelse": "Ideelle organisasjoner"
+            "beskrivelse": "Ideelle organisasjoner",
+            "kode": "7000"
           },
-          "registrertIForetaksregisteret": false,
-          "registrertIStiftelsesregisteret": false,
-          "registrertIFrivillighetsregisteret": false,
           "konkurs": false,
-          "underAvvikling": false,
-          "underTvangsavviklingEllerTvangsopplosning": false,
           "maalform": "Bokmål",
-          "aktivitet": [
-            "Fagforening."
-          ],
-          "registrertIPartiregisteret": false,
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Aktiviteter i arbeidstakerorganisasjoner",
+            "kode": "94.200"
+          },
+          "navn": "NTL-NRK TROMS AVD 31-31",
+          "organisasjonsform": {
+            "beskrivelse": "Forening/lag/innretning",
+            "kode": "FLI"
+          },
+          "organisasjonsnummer": "996821099",
           "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2011-05-26",
+          "registrertIForetaksregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "stiftelsesdato": "1976-06-01",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false
+        },
+        {
+          "aktivitet": [
+            "Eksempelaktivitet."
+          ],
+          "epostadresse": "post@example.no",
           "erIKonsern": false,
-          "respons_klasse": "Enhet"
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0367",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "hjemmeside": "www.nrk.no/eksempel",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Personlig næringsdrivende",
+            "kode": "8200"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Annen utøvende kunstnerisk virksomhet og underholdningsvirksomhet ikke nevnt annet sted",
+            "kode": "90.209"
+          },
+          "navn": "EKSEMPEL ENK",
+          "organisasjonsform": {
+            "beskrivelse": "Enkeltpersonforetak",
+            "kode": "ENK"
+          },
+          "organisasjonsnummer": "999999999",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2008-12-10",
+          "registrertIForetaksregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false
+        },
+        {
+          "aktivitet": [
+            "Eksempelaktivitet."
+          ],
+          "epostadresse": "post@example.no",
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "TRONDHEIM",
+            "kommunenummer": "5001",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "7069",
+            "poststed": "TRONDHEIM"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "hjemmeside": "www11.nrk.no/eksempel",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Personlig næringsdrivende",
+            "kode": "8200"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "mobil": "00000000",
+          "naeringskode1": {
+            "beskrivelse": "Utøvende kunstnerisk virksomhet og underholdningsvirksomhet innenfor musikk",
+            "kode": "90.201"
+          },
+          "navn": "EKSEMPEL ENK",
+          "organisasjonsform": {
+            "beskrivelse": "Enkeltpersonforetak",
+            "kode": "ENK"
+          },
+          "organisasjonsnummer": "999999999",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2006-09-19",
+          "registrertIForetaksregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false
+        },
+        {
+          "aktivitet": [
+            "Organisere møter for veteranklubbens medlemmer, pensjonister i NRK,",
+            "organisere kortere og lengre reiser for medlemmene."
+          ],
+          "epostadresse": "post@example.no",
+          "erIKonsern": false,
+          "forretningsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0340",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "hjemmeside": "blogg.nrk.no/veteranklubben",
+          "institusjonellSektorkode": {
+            "beskrivelse": "Ideelle organisasjoner",
+            "kode": "7000"
+          },
+          "konkurs": false,
+          "maalform": "Bokmål",
+          "naeringskode1": {
+            "beskrivelse": "Aktiviteter i andre medlemsorganisasjoner ellers",
+            "kode": "94.992"
+          },
+          "navn": "VETERANKLUBBEN NRK",
+          "organisasjonsform": {
+            "beskrivelse": "Forening/lag/innretning",
+            "kode": "FLI"
+          },
+          "organisasjonsnummer": "915124941",
+          "paategninger": [],
+          "registreringsdatoEnhetsregisteret": "2015-05-06",
+          "registreringsdatoFrivillighetsregisteret": "2015-05-06",
+          "registrertIForetaksregisteret": false,
+          "registrertIFrivillighetsregisteret": true,
+          "registrertIMvaregisteret": false,
+          "registrertIPartiregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "respons_klasse": "Enhet",
+          "stiftelsesdato": "1983-02-01",
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false
         }
       ]
     },
     "page": {
+      "number": 0,
       "size": 20,
       "totalElements": 7,
-      "totalPages": 1,
-      "number": 0
+      "totalPages": 1
     }
   }
 }

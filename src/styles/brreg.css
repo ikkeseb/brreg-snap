@@ -1,0 +1,698 @@
+/* =====================================================================
+   brreg-snap 1.4 — «Dossier, stamped»
+   Production stylesheet for popup.html and details.html (side panel).
+   Lifted from the design deliverable (~/design/brreg-1.4/final/brreg.css)
+   with the seat amendments noted inline («amendment»).
+
+   Principle: loudness is proportional to severity. When nothing is wrong
+   the view is a calm registry extract (paper, ink, hairlines). A warning
+   gets a firmer band. Danger is stamped: a solid seal-like block.
+
+   Order: font · tokens (light, dark via media, .theme-* overrides) ·
+   base · layout shells · components (one commented block each) ·
+   motion · forced colors.
+   CSP-safe: no inline styles needed anywhere; everything is a class,
+   an aria attribute or a data attribute.
+   ===================================================================== */
+
+
+/* ---------- font ------------------------------------------------------
+   Bundled variable Schibsted Grotesk (OFL, fonts/OFL.txt). The absolute
+   path is the extension root: vite.config.ts copies public/fonts/ there
+   unhashed, so popup.css and details.css resolve the same file.
+   Amendment b: font-display swap (the HTML preloads the file), and a
+   size-adjusted local fallback face so the swap barely reflows.
+   Measured in Chromium on a 160-character sample at 13 px: Arial /
+   Liberation Sans (metric-compatible) runs 0.6 % narrower than
+   Schibsted at 400 and 3 % narrower at 700; 101.5 % splits it. Vertical
+   metrics: Schibsted's normal line box is 1.24 em, Arial's 1.15 em. */
+@font-face {
+  font-family: 'Schibsted Grotesk';
+  src: url('/fonts/schibsted-grotesk-var.woff2') format('woff2');
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Schibsted Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Helvetica'), local('Liberation Sans');
+  size-adjust: 101.5%;
+  ascent-override: 95%;
+  descent-override: 29%;
+  line-gap-override: 0%;
+}
+
+
+/* ---------- tokens: theme-independent -------------------------------- */
+:root {
+  --font: 'Schibsted Grotesk', 'Schibsted Fallback', system-ui, sans-serif;
+
+  /* type: four steps + the stamp word. Nothing else. */
+  --t-cap:  600 11px/1.35 var(--font);   /* section heads, micro labels (uppercase +.07em) */
+  --t-body: 400 13px/1.45 var(--font);   /* everything readable */
+  --t-lead: 700 16px/1.28 var(--font);   /* the answer, empty-state heads */
+  --t-name: 800 26px/1.02 var(--font);   /* the company name */
+  --stamp-size: 30px;                    /* danger stamp word; panel overrides with clamp() */
+  --track-cap: .07em;
+
+  /* space: 4 px grid */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px;
+  --gut: 20px;                           /* outer gutter; the panel uses 16 */
+
+  /* shape: no elevation anywhere. Rules separate, fills escalate. */
+  --r: 2px;                              /* inputs, buttons, kbd, tags */
+  --r-stamp: 3px;                        /* the danger stamp only */
+
+  /* motion */
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --t-fast: 120ms;
+}
+
+/* ---------- tokens: light (default) -----------------------------------
+   Contrast on --paper, WCAG 2.x (measured with contrast.py). */
+:root, .theme-light {
+  color-scheme: light;
+  --paper: #F5F2EA;        /* page */
+  --paper-2: #ECE7DB;      /* sunk: inputs, kbd, hover */
+  --ink: #1B1915;          /* 15.7 */
+  --ink-2: #4E483E;        /*  8.1  labels, details */
+  --ink-3: #655E52;        /*  5.7  captions, neutral glyphs (4.8 on warn tint) */
+  --rule: #DDD6C8;         /*  hairline, decorative only */
+  --rule-strong: #8C8476;  /*  3.3  UI boundaries: inputs, buttons, kbd */
+  --ok: #1D6A3A;           /*  5.9 */
+  --warn: #8A5200;         /*  5.7  (4.8 on its own 12 % tint) */
+  --danger: #AE2A1E;       /*  6.0  text tone, negative figures */
+  --danger-fill: #A8281C;  /*  stamp fill; --on-danger on it 6.7 */
+  --on-danger: #FFF8F2;
+  --amber: #8A5A12;        /*  5.3  focus ring only */
+  --brand: #A5711F;        /*  the mark only (graphic, 3.8) */
+  --skel: #E4DED1;
+  --skel-hi: #EFEBE2;
+}
+
+/* ---------- tokens: dark (OS preference) ------------------------------ */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: #14120F;
+    --paper-2: #1D1A16;
+    --ink: #EEE9DF;          /* 15.5 */
+    --ink-2: #BDB5A6;        /*  9.2 */
+    --ink-3: #9A9283;        /*  6.1 */
+    --rule: #302C26;
+    --rule-strong: #6E675B;  /*  3.3 */
+    --ok: #7CC592;           /*  9.1 */
+    --warn: #E6AC4C;         /*  9.2 */
+    --danger: #F2836F;       /*  7.4 */
+    --danger-fill: #B53A2C;  /*  --on-danger on it 5.4; fill vs paper 3.2 */
+    --on-danger: #FFF4EC;
+    --amber: #D9A866;        /*  8.7 */
+    --brand: #D4A574;
+    --skel: #221F1A;
+    --skel-hi: #2C2822;
+  }
+}
+
+/* ---------- tokens: explicit overrides (gallery, tests, a future
+   in-app theme switch). Same values as the media block above. -------- */
+.theme-dark {
+  color-scheme: dark;
+  --paper: #14120F;
+  --paper-2: #1D1A16;
+  --ink: #EEE9DF;
+  --ink-2: #BDB5A6;
+  --ink-3: #9A9283;
+  --rule: #302C26;
+  --rule-strong: #6E675B;
+  --ok: #7CC592;
+  --warn: #E6AC4C;
+  --danger: #F2836F;
+  --danger-fill: #B53A2C;
+  --on-danger: #FFF4EC;
+  --amber: #D9A866;
+  --brand: #D4A574;
+  --skel: #221F1A;
+  --skel-hi: #2C2822;
+}
+
+
+/* ---------- base -------------------------------------------------------
+   .app is the root of both surfaces: <body class="app app--popup"> in
+   popup.html, <body class="app app--panel"> in details.html. */
+.app {
+  container-type: inline-size;           /* 340 px breakpoint below */
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: var(--t-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;
+}
+.app--popup { --gut: 20px; width: 380px; }
+.app--panel { --gut: 16px; min-height: 100vh; --stamp-size: clamp(26px, 9cqi, 36px); }
+
+.app *, .app *::before, .app *::after { box-sizing: border-box; }
+:where(.app) :where(p, h1, h2, h3, dl, dd, ul, ol, blockquote, figure) { margin: 0; padding: 0; }
+:where(.app) :where(ul, ol) { list-style: none; }
+.app :where(button, input) { font: inherit; color: inherit; }
+:where(.app) a { color: inherit; }
+:where(.app) :where(b, strong) { font-weight: 600; }
+
+/* one focus style, everywhere: amber is the tool's own hand */
+.app :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+/* digits that line up; off in dates and amounts (Schibsted's tabular
+   comma/period leave gaps: «68 , 0») */
+.tnum { font-variant-numeric: tabular-nums; }
+.nw { white-space: nowrap; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* uppercase micro label, shared by section heads, captions, eyebrows */
+.cap { font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
+
+
+/* ---------- tone -------------------------------------------------------
+   data-tone="ok|warn|danger|neutral" sets --tone on any element.
+   Tone is never colour alone: .glyph shape (✓ ! ✕ ·) is the first channel. */
+[data-tone] { --tone: var(--ink-3); }
+[data-tone="ok"] { --tone: var(--ok); }
+[data-tone="warn"] { --tone: var(--warn); }
+[data-tone="danger"] { --tone: var(--danger); }
+
+/* Under a danger answer nothing reads as reassurance: ok glyphs go grey
+   (the ✓ shape stays — it is still true, it just isn't comfort). */
+.app[data-answer="danger"] .ledger [data-tone="ok"] { --tone: var(--ink-3); }
+
+
+/* ---------- glyphs + icons ------------------------------------------- */
+.glyph { width: 14px; height: 14px; flex: none; color: var(--tone, var(--ink-3)); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.icon { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+
+/* ---------- masthead ---------------------------------------------------
+   popup: mark · looked-up host · search icon button
+   panel: mark · search field · Auto-oppdater switch */
+.mast {
+  display: flex; align-items: center; gap: 10px;
+  height: 40px; padding: 0 var(--gut);
+  border-bottom: 1px solid var(--rule);
+}
+.app--panel .mast { height: 44px; }
+.mast__mark { width: 12px; height: 20px; flex: none; color: var(--brand); }
+.mast__site { flex: 1; min-width: 0; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mast__site b { color: var(--ink); }
+
+.icon-btn {
+  width: 30px; height: 30px; display: grid; place-items: center; flex: none;
+  background: none; border: 1px solid var(--rule-strong); border-radius: var(--r);
+  cursor: pointer; transition: background-color var(--t-fast) var(--ease);
+}
+.icon-btn:hover { background: var(--paper-2); }
+
+/* search field: the <label> is the box, the input is borderless inside */
+.search {
+  flex: 1; min-width: 0; height: 30px; display: flex; align-items: center; gap: 6px;
+  padding: 0 8px; border: 1px solid var(--rule-strong); border-radius: var(--r);
+  background: var(--paper-2); color: var(--ink-3); cursor: text;
+}
+.search input { flex: 1; min-width: 0; padding: 0; border: 0; background: none; outline: none; color: var(--ink); }
+.search input::placeholder { color: var(--ink-3); opacity: 1; }
+.search:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; }
+/* the box carries the ring; the input inside must not draw a second one */
+.app .search input:focus-visible { outline: none; }
+.search--lg { height: 40px; padding: 0 12px; gap: 8px; }
+/* narrow panel: the placeholder needs the room more than the icon does */
+@container (max-width: 340px) { .mast .search > .icon { display: none; } }
+
+/* Auto-oppdater: a real <button role="switch" aria-checked> */
+.toggle {
+  display: flex; align-items: center; gap: 6px; flex: none; padding: 0;
+  background: none; border: 0; cursor: pointer;
+  font: var(--t-cap); font-weight: 500; color: var(--ink-2);
+}
+.toggle__track { position: relative; width: 26px; height: 16px; border: 1px solid var(--rule-strong); border-radius: 8px; }
+.toggle__track::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--ink-3); transition: transform 140ms var(--ease);
+}
+.toggle[aria-checked="true"] .toggle__track { background: var(--ink); border-color: var(--ink); }
+.toggle[aria-checked="true"] .toggle__track::after { background: var(--paper); transform: translateX(10px); }
+
+
+/* ---------- identity ---------------------------------------------------
+   over (form · city) OR eyebrow (provenance) · name · org.nr line ·
+   leaders line (popup) · flags (panel) */
+.ident { padding: 14px var(--gut) 0; }
+.app--panel .ident { padding-top: 14px; }
+.ident__over { font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
+/* provenance: where the org.nr came from; replaces the overline */
+.ident__eyebrow { display: flex; align-items: center; gap: 6px; color: var(--ink-2); }
+.ident__eyebrow .icon { width: 14px; height: 14px; color: var(--ink-3); }
+.ident__name { margin-top: 5px; font: var(--t-name); letter-spacing: -.022em; text-wrap: balance; overflow-wrap: anywhere; }
+@container (max-width: 340px) { .ident__name { font-size: 23px; } }
+/* the site's claim, not the site's identity (spoof): one step down */
+.ident__name--claim { font-size: 20px; font-weight: 800; letter-spacing: -.012em; }
+.ident__line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin-top: 7px; color: var(--ink-2); }
+.ident__meta { color: var(--ink-2); }
+/* compact leaders line (popup): wraps whole pairs, never a label alone */
+.ident__leaders { display: flex; flex-wrap: wrap; gap: 0 16px; margin-top: 4px; color: var(--ink-3); }
+.ident__leaders > span { white-space: nowrap; }
+.ident__leaders b { color: var(--ink); }
+/* «Avdeling: <navn> (org.nr)»: the orgnr looked up was a branch */
+.ident__note { margin-top: 4px; color: var(--ink-2); }
+/* panel: quiet registry flags + «Kopier sammendrag», one line at ≥ 340 px */
+.ident__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; margin-top: 6px; }
+.ident__flags { font: var(--t-cap); font-weight: 500; color: var(--ink-3); }
+.ident__row .text-btn { font: var(--t-cap); font-weight: 500; }
+.ident__row .text-btn .icon { width: 12px; height: 12px; }
+
+/* inline text link: ink, underlined, never blue, never amber */
+.link { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.link:hover { color: var(--ink); text-decoration-color: currentColor; }
+/* the same look on a <button> (Oppdater, Kopier sammendrag in the panel) */
+.text-btn {
+  display: inline-flex; align-items: baseline; gap: 5px; padding: 0; border: 0; background: none; cursor: pointer;
+  color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px;
+}
+.text-btn:hover { color: var(--ink); text-decoration-color: currentColor; }
+.text-btn .icon { width: 13px; height: 13px; align-self: center; color: var(--ink-3); }
+
+
+/* ---------- org.nr copy button -----------------------------------------
+   <button class="orgnr"> label · number · icon (copy ⇄ check).
+   Amendment a: no floating toast. JS adds .is-copied for 1.4 s (the icon
+   swaps to the check and the number tints --ok) and writes «Org.nr
+   kopiert» into the app's aria-live region; a refused clipboard write
+   adds .is-failed instead (danger tint, «Kunne ikke kopiere» announced). */
+.orgnr {
+  position: relative; display: inline-flex; align-items: baseline; gap: 6px;
+  padding: 0; border: 0; background: none; cursor: copy;
+  color: var(--ink); font-weight: 600;
+}
+.orgnr__label { color: var(--ink-3); font-weight: 400; }
+.orgnr__num { font-variant-numeric: tabular-nums; text-decoration: underline dotted var(--rule-strong); text-underline-offset: 4px; }
+.orgnr:hover .orgnr__num { font-variant-numeric: tabular-nums; text-decoration-color: var(--ink); }
+.orgnr__icon { position: relative; width: 13px; height: 13px; align-self: center; color: var(--ink-3); }
+.orgnr__icon .icon { position: absolute; inset: 0; width: 13px; height: 13px; transition: opacity 160ms, transform 200ms var(--ease); }
+.orgnr__icon .icon--done { opacity: 0; transform: scale(.5); color: var(--ok); stroke-width: 2.2; }
+.orgnr.is-copied .icon--copy { opacity: 0; transform: scale(.5); }
+.orgnr.is-copied .icon--done { opacity: 1; transform: none; }
+.orgnr.is-copied .orgnr__num { color: var(--ok); text-decoration-color: var(--ok); transition: color var(--t-fast); }
+.orgnr.is-failed .orgnr__num { color: var(--danger); text-decoration-color: var(--danger); }
+/* small variant in lists (Enheter) */
+.orgnr--sm { font-weight: 500; color: var(--ink-2); }
+
+
+/* ---------- answer ------------------------------------------------------
+   ONE headline in the tone of the most severe finding. Three forms:
+   .answer--ok      quiet band: 3 px rule, 5 % tint, seal, no support line
+   .answer--warn    firmer band: 4 px rule, 12 % tint, 800 head, support
+                    line, the way-out action inside the band
+   .answer--danger  the stamp: solid fill, inset seal rule, key word in
+                    900 caps (.stamp-word) — DOM stays plain prose
+   <section class="answer answer--warn" aria-labelledby="…"> */
+.answer {
+  --tint: 5%;
+  display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 0 10px;
+  margin-top: 14px; padding: 11px var(--gut) 13px;
+  border-top: 3px solid var(--tone);
+  background: color-mix(in oklab, var(--tone) var(--tint), var(--paper));
+}
+.answer--ok { --tone: var(--ok); }
+.answer--warn { --tone: var(--warn); --tint: 12%; border-top-width: 4px; padding-top: 12px; padding-bottom: 14px; }
+.answer__seal {
+  width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--tone); color: var(--paper);
+}
+.answer__seal .glyph { width: 12px; height: 12px; stroke-width: 2.6; color: inherit; }
+.answer__head { font: var(--t-lead); letter-spacing: -.008em; }
+.answer--warn .answer__head { font-weight: 800; }
+.answer__support { grid-column: 2; margin-top: 3px; color: var(--ink-2); }
+.answer__support b { color: var(--ink); }
+.answer__actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+/* danger: the stamp. An object placed on the page, not a band across it. */
+.answer--danger {
+  --tone: var(--danger-fill);
+  position: relative; display: block;
+  margin: 12px var(--gut) 0; padding: 12px 15px 13px;
+  border: 0; border-radius: var(--r-stamp);
+  background: var(--danger-fill); color: var(--on-danger);
+}
+.answer--danger::before {                /* the seal detail: 1 px rule inset 5 px */
+  content: ""; position: absolute; inset: 5px; pointer-events: none;
+  border: 1px solid color-mix(in oklab, var(--on-danger) 55%, var(--danger-fill)); border-radius: 1px;
+}
+.answer--danger .answer__seal { display: none; }
+.answer--danger .answer__head { font-weight: 600; letter-spacing: 0; }
+.stamp-pre, .stamp-rest { display: block; }
+.stamp-word {
+  display: flex; align-items: center; gap: .2em; margin: 1px 0 3px;
+  font-size: var(--stamp-size); line-height: .98; font-weight: 900;
+  letter-spacing: -.02em; text-transform: uppercase; text-wrap: balance;
+}
+.stamp-word .glyph { width: .62em; height: .62em; color: inherit; stroke-width: 3.4; }
+.answer--danger .answer__support {
+  margin-top: 10px; padding-top: 9px; color: var(--on-danger);
+  border-top: 1px solid color-mix(in oklab, var(--on-danger) 45%, var(--danger-fill));
+}
+.answer--danger .answer__support b { color: inherit; }
+.answer--danger .answer__actions { align-items: center; gap: 8px 12px; margin-top: 10px; }
+.text-btn--on-fill { color: var(--on-danger); font-weight: 600; text-decoration-color: color-mix(in oklab, var(--on-danger) 60%, var(--danger-fill)); }
+.text-btn--on-fill:hover { color: var(--on-danger); text-decoration-color: currentColor; }
+
+
+/* ---------- ledger (signals) -------------------------------------------
+   <dl class="ledger"><div class="ledger-row" data-tone="ok">
+     <dt><svg class="glyph">…</svg>Kobling<span class="sr-only">, ok</span></dt>
+     <dd>value<span class="ledger-row__detail">…</span></dd></div>
+   A signal whose fetch failed is OMITTED, never rendered as «Ingen». */
+.ledger { margin: 12px var(--gut) 0; border-top: 1px solid var(--ink); }
+.ledger-row {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 0 8px;
+  padding: 5px 0 6px; border-bottom: 1px solid var(--rule);
+}
+.ledger-row dt { display: flex; align-items: flex-start; gap: 10px; color: var(--ink-2); }
+.ledger-row dt .glyph { margin-top: 2.5px; }
+.ledger-row dd { min-width: 0; font-weight: 600; }
+.ledger-row__aux { font-weight: 400; color: var(--ink-2); }
+.ledger-row__detail { display: block; font-weight: 400; color: var(--ink-2); }
+.ledger-row__detail .link, .ledger-row__detail .text-btn { font-weight: 400; }
+/* short value + its way out on one line (wraps under the value when narrow) */
+.ledger-row--inline .ledger-row__detail { display: inline; margin-left: 6px; white-space: nowrap; }
+.ledger-row__act { display: block; }
+.ledger-row--danger-value dd { color: var(--danger); }
+.num--neg { color: var(--danger); font-weight: 600; }
+/* «Om selskapet — sier ingenting om dette nettstedet» (spoof) */
+.ledger-cap { margin: 0 var(--gut); padding: 10px 0 4px; border-bottom: 1px solid var(--rule); font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
+.ledger-cap span { text-transform: none; letter-spacing: 0; font-weight: 400; }
+/* the company's own facts on a spoofed site: plain prose, no glyphs, no
+   tone — true, but they say nothing about the site you are on */
+.facts { margin: 0 var(--gut); padding: 6px 0 7px; border-bottom: 1px solid var(--rule); color: var(--ink-2); }
+.facts b { color: var(--ink); }
+
+
+/* ---------- konsern drill row ----------------------------------------- */
+.konsern {
+  display: flex; align-items: center; gap: 10px; width: calc(100% - 2 * var(--gut));
+  margin: 0 var(--gut); padding: 8px 0; border: 0; border-bottom: 1px solid var(--rule);
+  background: none; text-align: left; cursor: pointer;
+}
+.konsern > .icon:first-child, .konsern__chev { color: var(--ink-3); }
+.konsern__text { flex: 1; min-width: 0; }
+.konsern b { font-weight: 700; }
+.konsern:hover .konsern__text { text-decoration: underline; text-underline-offset: 3px; }
+
+
+/* ---------- buttons -----------------------------------------------------
+   .btn            hairline (secondary)
+   .btn--primary   solid ink
+   .btn--tone      hairline in the answer's tone (inside a warn band)
+   .btn--on-fill / .btn--on-fill-quiet   inside the danger stamp
+   .btn--sm        28 px */
+.btn {
+  height: 34px; padding: 0 12px; display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--rule-strong); border-radius: var(--r); background: none;
+  font-weight: 600; white-space: nowrap; text-decoration: none; cursor: pointer;
+  transition: background-color var(--t-fast) var(--ease);
+}
+.btn:hover { background: var(--paper-2); }
+.btn .icon { width: 15px; height: 15px; }
+.btn--primary { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.btn--primary:hover { background: color-mix(in oklab, var(--ink) 86%, var(--paper)); }
+.btn--tone { border-color: var(--tone); color: var(--ink); }
+.btn--tone:hover { background: color-mix(in oklab, var(--tone) 14%, transparent); }
+.btn--on-fill { background: var(--on-danger); border-color: var(--on-danger); color: var(--danger-fill); }
+.btn--on-fill:hover { background: color-mix(in oklab, var(--on-danger) 88%, var(--danger-fill)); }
+.btn--on-fill-quiet { border-color: var(--on-danger); color: var(--on-danger); }
+.btn--on-fill-quiet:hover { background: color-mix(in oklab, var(--on-danger) 12%, transparent); }
+.btn--sm { height: 28px; padding: 0 10px; }
+/* «Kopier sammendrag»: JS swaps the label to «Kopiert» and adds .is-copied */
+:is(.btn, .text-btn).is-copied .icon--copy { display: none; }
+:is(.btn, .text-btn):not(.is-copied) .icon--done { display: none; }
+.text-btn.is-copied .icon--done { color: var(--ok); }
+.btn.is-copied .icon--done { color: var(--ok); }
+/* a refused clipboard write: the button says so in the danger tone */
+:is(.btn, .text-btn).is-failed { color: var(--danger); border-color: var(--danger); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px var(--gut) 0; }
+
+
+/* ---------- footer -------------------------------------------------------
+   freshness + Oppdater · Rapporter feil treff · attribution (licence
+   condition: must stay visible — sticky under the popup's 600 px cap) */
+.foot {
+  margin: 12px var(--gut) 0; padding: 8px 0 11px; border-top: 1px solid var(--rule);
+  font: var(--t-cap); font-weight: 400; color: var(--ink-3);
+}
+.app--popup .foot { position: sticky; bottom: 0; background: var(--paper); }
+.foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; }
+.foot__row + .foot__row { margin-top: 3px; }
+.foot :is(a, button) {
+  padding: 0; border: 0; background: none; font: inherit; color: var(--ink-2); cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 2px;
+}
+
+
+/* ---------- tabs --------------------------------------------------------
+   <div role="tablist" class="tabs"><button role="tab" class="tab"
+   aria-selected aria-controls>Personer <span class="tab__count">6</span> */
+.tabs { display: flex; gap: 18px; margin: 16px var(--gut) 0; border-bottom: 1px solid var(--rule); }
+.tab {
+  padding: 0 0 9px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent;
+  background: none; color: var(--ink-2); font-weight: 500; white-space: nowrap; cursor: pointer;
+}
+.tab[aria-selected="true"] { color: var(--ink); font-weight: 700; border-bottom-color: var(--ink); }
+.tab__count { margin-left: 3px; font: var(--t-cap); font-weight: 500; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+@container (max-width: 340px) {
+  .tabs { gap: 0; justify-content: space-between; }
+  .tab__count { display: none; }
+}
+
+
+/* ---------- sections + definition rows ---------------------------------- */
+.section { margin: 18px var(--gut) 0; }
+.section__head {
+  display: flex; justify-content: space-between; gap: 12px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--ink);
+  font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3);
+}
+.section__head .tab__count { margin: 0; letter-spacing: 0; }
+.def-row { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 0 12px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+.def-row dt { color: var(--ink-2); }
+.def-row dd { min-width: 0; overflow-wrap: anywhere; }
+.def-row__sub { color: var(--ink-3); white-space: nowrap; }
+.section :is(.def-row, .person, .entity-row, .ext-row, .recent, .unit):last-child { border-bottom: 0; }
+@container (max-width: 340px) {
+  .def-row { grid-template-columns: minmax(0, 1fr); }
+  .def-row dt { margin-bottom: 1px; font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
+}
+/* drillable entity name inside a value */
+.ent { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.ent:hover { text-decoration-color: currentColor; }
+
+
+/* ---------- merknad + endret nylig ---------------------------------------
+   The registry's own words, quoted verbatim with their date, warn tone. */
+.notes { margin: 18px var(--gut) 0; }
+.notes > * + * { margin-top: 16px; }
+.note-head { display: flex; align-items: center; gap: 8px; font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
+.note-head .glyph { color: var(--tone); }
+.quote { margin-top: 8px; padding: 2px 0 2px 14px; border-left: 2px solid var(--tone); }
+.quote p { color: var(--ink); line-height: 1.5; }
+.quote p::before { content: "«"; margin-left: -.45em; }
+.quote p::after { content: "»"; }
+.quote__date { margin-top: 6px; padding-left: 16px; color: var(--ink-2); }
+.changes { margin-top: 8px; border-top: 1px solid var(--rule); }
+.changes li { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 0 12px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+.changes time { color: var(--ink-2); }
+.changes span { color: var(--ink-2); }
+.changes b { color: var(--ink); }
+
+
+/* ---------- personer ----------------------------------------------------- */
+.person { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.person__role { color: var(--ink-2); text-align: right; }
+.person--gone b { color: var(--ink-3); font-weight: 400; text-decoration: line-through; }
+.person--gone .person__role { color: var(--ink-3); }
+/* a role-holder that is itself an entity: drills into its own dossier */
+.entity-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) 16px; gap: 1px 10px; align-items: center;
+  width: 100%; padding: 8px 0; border: 0; border-bottom: 1px solid var(--rule);
+  background: none; text-align: left; cursor: pointer;
+}
+.entity-row b { text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.entity-row small { grid-column: 1; font: var(--t-body); color: var(--ink-2); }
+.entity-row .icon { grid-row: 1 / 3; grid-column: 2; color: var(--ink-2); }
+.entity-row:hover b { text-decoration-color: currentColor; }
+/* back bar after drilling */
+.back {
+  display: flex; align-items: center; gap: 6px; width: 100%; padding: 9px var(--gut);
+  border: 0; border-bottom: 1px solid var(--rule); background: none; color: var(--ink-2); text-align: left; cursor: pointer;
+}
+.back b { color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+
+/* ---------- økonomi -------------------------------------------------------
+   One year of figures exists (open API). No trend chart, no sparkline. */
+.fig-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.fig-head h2 { font: var(--t-lead); }
+.fig-status { display: flex; align-items: center; gap: 8px; margin-top: 4px; color: var(--ink-2); }
+.figs { margin-top: 12px; border-top: 1px solid var(--ink); }
+.fig-group { padding: 13px 0 5px; border-bottom: 1px solid var(--rule); }
+.fig-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+.fig-row dt { color: var(--ink-2); }
+.fig-row dd { font-weight: 600; text-align: right; }
+.fig-row__unit { margin-left: 3px; font-weight: 400; color: var(--ink-3); }
+.fig-row--total { border-bottom-color: var(--ink); }
+.fig-row--total dt { color: var(--ink); font-weight: 700; }
+.fig-row--total dd { font-weight: 800; }
+/* single-year equity ratio: a proportion, not a trend */
+.equity { margin-top: 10px; }
+.equity__track { display: flex; height: 6px; background: var(--skel); }
+.equity__fill { width: 38%; background: var(--ink); }  /* width set per company via a class or <meter> in code */
+.equity__legend { display: flex; justify-content: space-between; margin-top: 5px; font: var(--t-cap); font-weight: 400; color: var(--ink-3); }
+.honest { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 0 10px; margin-top: 14px; color: var(--ink-2); }
+.honest .glyph { margin-top: 2.5px; }
+.doc-row { padding: 8px 0 9px; border-bottom: 1px solid var(--rule); }
+.doc-row__label { display: block; color: var(--ink-2); }
+.years { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 3px; }
+.years a { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.years a + a::before { content: "·"; display: inline-block; padding: 0 9px; color: var(--ink-3); font-weight: 400; }
+.years .years__more { font-weight: 400; color: var(--ink-2); }
+.ext-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rule); }
+.ext-row a { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.ext-row span { color: var(--ink-3); }
+
+
+/* ---------- enheter (underenheter) --------------------------------------- */
+.units-count { margin-top: 8px; color: var(--ink-2); }
+.unit { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.unit__name { display: block; font-weight: 600; }
+.unit__meta { display: block; color: var(--ink-2); }
+.unit--gone .unit__name { color: var(--ink-3); font-weight: 400; text-decoration: line-through; }
+.unit--gone .unit__meta { color: var(--ink-3); }
+
+
+/* ---------- compact sticky head (panel, once scrolled past identity) ----- */
+.stick {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; align-items: center; gap: 10px; padding: 10px var(--gut);
+  border-bottom: 1px solid var(--rule); background: var(--paper);
+}
+.stick .answer__seal { width: 16px; height: 16px; }
+.stick .answer__seal .glyph { width: 10px; height: 10px; }
+.stick__name { flex: 1; min-width: 0; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stick__num { color: var(--ink-2); }
+.stick + .tabs { margin-top: 12px; }
+
+
+/* ---------- picker -------------------------------------------------------
+   Digit shortcuts 1–4, 0 = «Ingen av disse». Evidence tag: solid =
+   hjemmeside (strong), dashed = navnetreff (weak). */
+.pick-head { padding: 16px var(--gut) 0; }
+.pick-head h1 { font: var(--t-lead); }
+.pick-head p { margin-top: 4px; color: var(--ink-2); }
+.picker { margin: 12px var(--gut) 0; border-top: 1px solid var(--ink); }
+.pick {
+  display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 0 10px; align-items: start;
+  width: 100%; padding: 8px 6px 9px 0; border: 0; border-bottom: 1px solid var(--rule);
+  background: none; text-align: left; cursor: pointer;
+}
+.pick:hover { background: color-mix(in oklab, var(--ink) 4%, var(--paper)); }
+.pick:focus-visible { outline-offset: -2px; }
+.pick__name { display: block; font-weight: 600; }
+.pick__sub { display: block; margin-top: 1px; color: var(--ink-2); }
+.pick__right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--ink-2); white-space: nowrap; }
+.pick--none { align-items: center; color: var(--ink-2); }
+.kbd {
+  width: 20px; height: 20px; display: grid; place-items: center; margin-top: -1px;
+  border: 1px solid var(--rule-strong); border-radius: var(--r); background: var(--paper-2);
+  font: var(--t-cap); font-weight: 600; color: var(--ink-2); font-variant-numeric: tabular-nums;
+}
+.evidence { padding: 0 5px; border-radius: var(--r); font: var(--t-cap); font-weight: 500; line-height: 16px; color: var(--ink-2); }
+.evidence--weak { border: 1px dashed var(--rule-strong); }
+.evidence--strong { border: 1px solid var(--ink-2); color: var(--ink); }
+/* negative status as a small inline mark (picker, recents) */
+.status-mark { --tone: var(--danger); display: inline-flex; align-items: center; gap: 4px; color: var(--danger); font: var(--t-cap); font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
+.status-mark .glyph { width: 11px; height: 11px; stroke-width: 2.4; }
+.pick-search { margin: 14px var(--gut) 0; }
+.field-label { display: block; margin-bottom: 6px; font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
+
+
+/* ---------- empty state + recents ---------------------------------------- */
+.empty { padding: 20px var(--gut) 0; }
+.empty h1 { font: var(--t-lead); }
+.empty > p { margin-top: 4px; color: var(--ink-2); }
+.empty .search { margin-top: 14px; }
+.hint { margin-top: 7px; font: var(--t-cap); font-weight: 400; color: var(--ink-3); }
+.context { padding: 16px var(--gut) 0; color: var(--ink-2); }
+.context b { color: var(--ink); }
+.recent {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 12px; align-items: baseline;
+  width: 100%; padding: 8px 0; border: 0; border-bottom: 1px solid var(--rule);
+  background: none; text-align: left; cursor: pointer;
+}
+.recent__on { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.recent__name { min-width: 0; }
+.recent__sub { display: block; color: var(--ink-2); }
+.recent .status-mark { display: flex; margin-top: 2px; }
+.recent:hover b { text-decoration: underline; text-underline-offset: 3px; }
+/* search results share the recents' rows; a note («Ingen treff.») is a line */
+.results__note { padding: 8px 0; color: var(--ink-2); }
+.empty__undo { margin-top: 6px; }
+/* «Tilbake til treffet for <site>» / «Glem valget» under a manual result */
+.undo { margin: 10px var(--gut) 0; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+
+
+/* ---------- skeleton ------------------------------------------------------
+   Same geometry as the loaded layout: labels are real text, only values
+   shimmer, so nothing jumps when data lands. */
+.sk {
+  display: inline-block; height: 10px; border-radius: 1px; vertical-align: middle;
+  background: linear-gradient(90deg, var(--skel) 0 40%, var(--skel-hi) 50%, var(--skel) 60% 100%);
+  background-size: 300% 100%; animation: shimmer 1.6s linear infinite;
+}
+.sk--cap { height: 8px; width: 170px; }
+.sk--name { display: block; height: 22px; width: 78%; margin: 7px 0 4px; }
+.sk--orgnr { width: 128px; }
+.sk--seal { width: 20px; height: 20px; border-radius: 50%; }
+.sk--lead { height: 13px; width: 62%; margin-top: 3px; }
+.sk--glyph { width: 12px; height: 12px; border-radius: 50%; margin-top: 3px; }
+.sk--icon { width: 16px; height: 14px; }
+.sk--xs { width: 26%; } .sk--s { width: 40%; } .sk--m { width: 62%; } .sk--l { width: 86%; }
+.answer--loading { --tone: var(--rule); background: none; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: 0 0; } }
+
+
+/* ---------- motion: content arrival ----------------------------------------
+   The answer lands with the identity; the rest rises 4 px, 30 ms apart.
+   Add .reveal to the content container when data replaces the skeleton. */
+.reveal > * { animation: arrive 320ms var(--ease) both; }
+.reveal > :nth-child(3) { animation-delay: 30ms; }
+.reveal > :nth-child(4) { animation-delay: 60ms; }
+.reveal > :nth-child(5) { animation-delay: 90ms; }
+.reveal > :nth-child(n + 6) { animation-delay: 120ms; }
+@keyframes arrive { from { opacity: 0; transform: translateY(4px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .app *, .app *::before, .app *::after { animation: none !important; transition: none !important; }
+}
+
+
+/* ---------- forced colors: rules, seals and the stamp must survive -------- */
+@media (forced-colors: active) {
+  .answer { border-top-color: CanvasText; }
+  .answer--danger { border: 3px solid CanvasText; }
+  .answer--danger::before, .answer--danger .answer__support { border-color: CanvasText; }
+  .answer__seal { forced-color-adjust: none; background: CanvasText; color: Canvas; }
+  .equity__fill { forced-color-adjust: none; background: CanvasText; }
+  .toggle[aria-checked="true"] .toggle__track { forced-color-adjust: none; background: Highlight; border-color: Highlight; }
+  .sk { forced-color-adjust: none; background: GrayText; }
+}

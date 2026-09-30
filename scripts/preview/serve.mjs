@@ -33,6 +33,8 @@ const MIME = {
   '.png': 'image/png',
   '.map': 'application/json',
   '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.txt': 'text/plain; charset=utf-8',
 };
 
 // The built manifest's extension-page CSP, sent as a response header so

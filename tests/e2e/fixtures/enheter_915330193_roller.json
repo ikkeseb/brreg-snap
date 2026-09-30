@@ -4,83 +4,83 @@
   "body": {
     "rollegrupper": [
       {
-        "type": {
-          "kode": "DAGL",
-          "beskrivelse": "Daglig leder"
-        },
-        "sistEndret": "2015-05-04",
         "roller": [
           {
-            "type": {
-              "kode": "DAGL",
-              "beskrivelse": "Daglig leder"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Kari",
                 "etternavn": "Nordmann"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 0
+            "rekkefolge": 0,
+            "type": {
+              "beskrivelse": "Daglig leder",
+              "kode": "DAGL"
+            }
           }
-        ]
+        ],
+        "sistEndret": "2015-05-04",
+        "type": {
+          "beskrivelse": "Daglig leder",
+          "kode": "DAGL"
+        }
       },
       {
-        "type": {
-          "kode": "BOBE",
-          "beskrivelse": "Bostyrer"
-        },
-        "sistEndret": "2026-08-26",
         "roller": [
           {
-            "type": {
-              "kode": "BOBE",
-              "beskrivelse": "Bostyrer"
-            },
+            "avregistrert": false,
             "bostyrer": {
               "navn": "Adv. Ola Nordmann",
               "postadresse": {
-                "landkode": "NO",
-                "postnummer": "6851",
-                "poststed": "SOGNDAL",
                 "adresse": [
                   "Eksempelveien 1"
-                ]
+                ],
+                "landkode": "NO",
+                "postnummer": "6851",
+                "poststed": "SOGNDAL"
               },
               "erDoed": false
             },
-            "avregistrert": false,
-            "rekkefolge": 0
+            "rekkefolge": 0,
+            "type": {
+              "beskrivelse": "Bostyrer",
+              "kode": "BOBE"
+            }
           }
-        ]
+        ],
+        "sistEndret": "2026-08-26",
+        "type": {
+          "beskrivelse": "Bostyrer",
+          "kode": "BOBE"
+        }
       },
       {
-        "type": {
-          "kode": "STYR",
-          "beskrivelse": "Styre"
-        },
-        "sistEndret": "2026-07-24",
         "roller": [
           {
-            "type": {
-              "kode": "LEDE",
-              "beskrivelse": "Styrets leder"
-            },
+            "avregistrert": false,
             "person": {
+              "erDoed": false,
               "fodselsdato": "1970-01-01",
               "navn": {
                 "fornavn": "Ola",
                 "etternavn": "Moe"
-              },
-              "erDoed": false
+              }
             },
-            "avregistrert": false,
-            "rekkefolge": 0
+            "rekkefolge": 0,
+            "type": {
+              "beskrivelse": "Styrets leder",
+              "kode": "LEDE"
+            }
           }
-        ]
+        ],
+        "sistEndret": "2026-07-24",
+        "type": {
+          "beskrivelse": "Styre",
+          "kode": "STYR"
+        }
       }
     ]
   }

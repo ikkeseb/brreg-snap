@@ -1,0 +1,252 @@
+{
+  "request": "/enhetsregisteret/api/konsernstruktur/984851006",
+  "status": 200,
+  "body": {
+    "children": [
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB CARNEGIE INC.",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Utenlandsk enhet",
+          "kode": "UTLA"
+        },
+        "organisasjonsnummer": "992083654",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB LUXEMBOURG S A",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Utenlandsk enhet",
+          "kode": "UTLA"
+        },
+        "organisasjonsnummer": "992083565",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB MONCHEBANK",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Utenlandsk enhet",
+          "kode": "UTLA"
+        },
+        "organisasjonsnummer": "992083514",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB GJENSTANDSADMINISTRASJON AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "990932085",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB BOLIGKREDITT AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "985621551",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB ENERGY ASSETS INC",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Utenlandsk enhet",
+          "kode": "UTLA"
+        },
+        "organisasjonsnummer": "979152809",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "LUXCAP SA",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Utenlandsk enhet",
+          "kode": "UTLA"
+        },
+        "organisasjonsnummer": "979152388",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB NÆRINGSMEGLING AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "975265145",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB INVEST HOLDING AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "956238455",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "HAFJELL AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "950254823",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB EIENDOMSUTVIKLING AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "921286791",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "VIUL HOVEDGÅRD AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "917218951",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "DNB EIENDOM AS",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Aksjeselskap",
+          "kode": "AS"
+        },
+        "organisasjonsnummer": "910968955",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      },
+      {
+        "dato": "2020-11-25",
+        "grunnlag": "100%",
+        "knytningsform": {
+          "beskrivelse": "Konsern datter",
+          "kode": "KDAT"
+        },
+        "navn": "BANK DNB A/S (DANMARK)",
+        "nivaa": 1,
+        "organisasjonsform": {
+          "beskrivelse": "Utenlandsk enhet",
+          "kode": "UTLA"
+        },
+        "organisasjonsnummer": "892083312",
+        "parentNavn": "DNB BANK ASA",
+        "parentOrganisasjonsnummer": "984851006"
+      }
+    ],
+    "navn": "DNB BANK ASA",
+    "organisasjonsform": {
+      "beskrivelse": "Allmennaksjeselskap",
+      "kode": "ASA"
+    },
+    "organisasjonsnummer": "984851006"
+  }
+}

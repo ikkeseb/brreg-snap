@@ -123,8 +123,9 @@ export async function notifyPanel(msg: PanelMessage): Promise<void> {
 export type PanelTarget =
   // `method` travels with the orgnr when the opener knows the panel
   // must not read it as the site's own (a selection lookup is the
-  // user's choice: 'manual').
-  | { orgnr: string; method?: ResolutionMethod }
+  // user's choice: 'manual'). `tab` names the panel tab to open on
+  // (the popup's konsern row opens Enheter); the panel reads ?tab=.
+  | { orgnr: string; method?: ResolutionMethod; tab?: string }
   | { nomatch: string }
   | { query: string }
   | undefined;
@@ -151,6 +152,7 @@ export function panelPath(
   if ('orgnr' in target) {
     params.set('orgnr', target.orgnr);
     if (target.method) params.set('m', target.method);
+    if (target.tab) params.set('tab', target.tab);
   } else if ('nomatch' in target) {
     params.set('nomatch', target.nomatch);
   } else {

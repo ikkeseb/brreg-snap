@@ -182,3 +182,7 @@ hosts, or relax CSP will be closed.
 ## License
 
 [MIT](LICENSE).
+
+Third-party: the bundled typeface Schibsted Grotesk (Bakken & Bæck /
+Schibsted) is licensed under the [SIL Open Font License 1.1](public/fonts/OFL.txt)
+and ships with its notice in `fonts/OFL.txt`.

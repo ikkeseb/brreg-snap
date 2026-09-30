@@ -1,463 +1,468 @@
+// The popup controller: resolves the active tab, loads the company,
+// builds the view model (buildTrustView) and runs the paints in
+// views.ts. Small on purpose — every string, tone and action comes from
+// the view model, every element from the shared components.
+//
+// Focus moves only on user-initiated transitions (a pick, a search, a
+// retry): the result heading, or the first picker row. The initial
+// load is not one; the popup opens with focus where the browser put it.
+
 // Side-effect import: aliases `globalThis.browser = chrome` on Chromium
 // before any `browser.*` access. Must stay the first import.
 import '../lib/platform/globals.js';
-import { sidebar } from '../lib/platform/sidebar.js';
+import { invalidateCache } from '../lib/brreg.js';
+import {
+  isPermanentLoadError,
+  loadCompany,
+  type CompanyData,
+} from '../lib/company-load.js';
+import { writeClipboard } from '../lib/copy-orgnr.js';
+import { hostnameLabel } from '../lib/hostname-score.js';
+import {
+  forgetHost,
+  getRememberedChoice,
+  setPickerChoice,
+  type Candidate,
+} from '../lib/hostname-search.js';
 import {
   notifyPanel,
   panelPath,
   type PanelMessage,
   type PanelTarget,
 } from '../lib/panel-protocol.js';
-import {
-  isPermanentLoadError,
-  loadCompany,
-  type CompanyData,
-} from '../lib/company-load.js';
-import { renderOrgnrCopy } from '../lib/copy-orgnr.js';
-import { formatAddress, formatNaering } from '../lib/format.js';
-import { findRoleHolder } from '../lib/roller.js';
-import { addLink, addRow } from '../details/render/dom.js';
-import { describeLoadError } from '../lib/ui/error-message.js';
-import { renderFlags } from '../lib/ui/flags.js';
-import { attachManualSearch } from '../lib/ui/manual-search.js';
-import { createPicker, setupRejectChoice } from '../lib/ui/picker.js';
-import { pushRecent, renderRecentSection } from '../lib/ui/recent.js';
+import { setTrustBadge } from '../lib/platform/badge.js';
+import { isFirefox } from '../lib/platform/engine.js';
+import { sidebar } from '../lib/platform/sidebar.js';
+import { describeLoadFailure } from '../lib/ui/error-message.js';
+import { primaryStatusFlag } from '../lib/ui/flags.js';
+import { rejectChoice } from '../lib/ui/picker.js';
+import { getRecent, pushRecent } from '../lib/ui/recent.js';
 import {
   resolveTabContext,
-  isHostDerived,
   UNKNOWN_URL_METHOD,
   type ResolutionMethod,
   type TabContext,
 } from '../lib/ui/resolve-tab.js';
-import { createSourceLabel } from '../lib/ui/source-label.js';
-import { avdelingNote, revenueLine } from '../lib/ui/summary-lines.js';
-import { deriveVerdict, renderVerdict } from '../lib/ui/verdict.js';
-import type { Candidate } from '../lib/hostname-search.js';
+import { focusElement, liveRegionOf } from '../lib/view/components/live.js';
+import { COPY, reportHref } from '../lib/view/copy.js';
+import {
+  buildTrustView,
+  orgnrText,
+  siteName,
+  type TrustView,
+} from '../lib/view/trust-view.js';
+import {
+  paintEmpty,
+  paintError,
+  paintLoading,
+  paintPicker,
+  paintResult,
+  type EmptyKind,
+  type Roots,
+} from './views.js';
 
-const app = document.getElementById('app') as HTMLElement;
-const brandMark = document.getElementById('brand-mark') as HTMLImageElement;
-brandMark.src = browser.runtime.getURL('icons/icon-32.png');
-const statusEl = document.getElementById('status') as HTMLElement;
-const skeletonEl = document.getElementById('skeleton') as HTMLElement;
-const errorActionsEl = document.getElementById('error-actions') as HTMLElement;
-const retryLoadBtn = document.getElementById(
-  'retry-load',
-) as HTMLButtonElement;
-const resultEl = document.getElementById('result') as HTMLElement;
-const resolutionActionsEl = document.getElementById(
-  'resolution-actions',
-) as HTMLElement;
-const rejectChoiceBtn = document.getElementById(
-  'reject-choice',
-) as HTMLButtonElement;
-const pickerEl = document.getElementById('picker') as HTMLElement;
-const pickerListEl = document.getElementById('picker-list') as HTMLUListElement;
-const pickerNoneBtn = document.getElementById(
-  'picker-none',
-) as HTMLButtonElement;
-const emptyStateEl = document.getElementById('empty-state') as HTMLElement;
-const emptyMessageEl = document.getElementById('empty-message') as HTMLElement;
-const manualQueryEl = document.getElementById(
-  'manual-query',
-) as HTMLInputElement;
-const manualResultsEl = document.getElementById(
-  'manual-results',
-) as HTMLUListElement;
-const recentSectionEl = document.getElementById(
-  'recent-section',
-) as HTMLElement;
-const recentListEl = document.getElementById('recent-list') as HTMLUListElement;
-const brregLink = document.getElementById('brreg-link') as HTMLAnchorElement;
-const detailsLink = document.getElementById('details-link') as HTMLAnchorElement;
-const footerSourceEl = document.getElementById('footer-source') as HTMLElement;
-const sourceHostEl = document.getElementById('source-host') as HTMLElement;
+const roots: Roots = {
+  body: document.body,
+  mast: document.getElementById('mast') as HTMLElement,
+  main: document.getElementById('app') as HTMLElement,
+  foot: document.getElementById('foot') as HTMLElement,
+  live: liveRegionOf(document.getElementById('live') as HTMLElement),
+};
 
-const BRREG_LINK_FALLBACK =
-  'https://virksomhet.brreg.no/nb/oppslag/enheter';
+// What «Rapporter feil treff» reports about this install. getManifest
+// is optional-called: the preview harness's shim has none.
+const env = {
+  version: browser.runtime.getManifest?.()?.version ?? '',
+  browser: isFirefox ? 'Firefox' : 'Chrome',
+};
+
+// The tab this popup opened on: its host is the site every lookup is
+// about, its title feeds the hostname search's word hints, and its ids
+// go to the gesture-bound side-panel open (Chrome's sidePanel.open
+// needs a windowId/tabId and can't await a tabs.query inside the
+// gesture) and to the toolbar badge.
+let host: string | undefined;
+let tabTitle: string | undefined;
+let tabId: number | undefined;
+let windowId: number | undefined;
 
 let currentOrgnr: string | undefined;
-let currentResolutionMethod: ResolutionMethod | undefined;
-// Active tab/window ids captured during resolution so the "open in
-// side panel" click can pass them to sidebar.open() synchronously —
-// Chrome's sidePanel.open needs a windowId/tabId and can't await a
-// tabs.query inside the gesture. Firefox's open() ignores them; the
-// window still goes into the panel path and the sync messages.
-let currentWindowId: number | undefined;
-let currentTabId: number | undefined;
-// The active tab's title: «Feil bedrift?» passes it to the host search.
-let currentTabTitle: string | undefined;
+let currentMethod: ResolutionMethod | undefined;
+let currentView: TrustView | undefined;
 // Monotonic guard for loadAndRender — from the empty state the user
-// can click a manual result then a recent entry in quick succession;
+// can click a search result then a recent entry in quick succession;
 // without this the last-to-RESOLVE fetch chain paints, which can be
-// the stale one. The panel uses one load sequence for every flow
-// instead (panel-follow.ts); the popup has only this one.
+// the stale one.
 let loadRunId = 0;
-// Re-trigger for the "Prøv igjen" button in the full error state.
+// «Prøv igjen» in the error state re-runs the last load.
 let lastLoad: (() => void) | undefined;
+// Re-paints the state on screen without fetching: what the search view
+// (opened from the masthead over any state) returns to.
+let repaint: (() => void) | undefined;
+let searchOpen = false;
 
-const sourceLabel = createSourceLabel(footerSourceEl, sourceHostEl);
+const site = (): string | undefined => (host ? siteName(host) : undefined);
+const report = (): string =>
+  reportHref({ host, orgnr: currentOrgnr, method: currentMethod, ...env });
 
-const picker = createPicker({
-  appEl: app,
-  listEl: pickerListEl,
-  noneBtn: pickerNoneBtn,
-  onChoose: (_host, orgnr) => {
-    void loadAndRender(orgnr, 'host-pick');
-  },
-  onNone: (host) => {
-    syncSidebarNoMatch(host);
-    showEmptyState(host);
-  },
-});
+// --- side panel -----------------------------------------------------------
 
-const manualSearch = attachManualSearch({
-  inputEl: manualQueryEl,
-  resultsEl: manualResultsEl,
-  onSelect: (hit) => {
-    void loadAndRender(hit.organisasjonsnummer, 'manual');
-  },
-  // Empty query restores the recent list; an active query hides it
-  // so manual-search results don't share airspace with stale recents.
-  onQueryCleared: () => {
-    void renderRecentList();
-  },
-  onQueryActive: () => {
-    recentSectionEl.hidden = true;
-  },
-});
-
-setupRejectChoice({
-  buttonEl: rejectChoiceBtn,
-  getContext: () => ({
-    host: sourceLabel.get(),
-    orgnr: currentOrgnr,
-    title: currentTabTitle,
-  }),
-  showPicker,
-  showEmptyState,
-});
-
-retryLoadBtn.addEventListener('click', () => {
-  lastLoad?.();
-});
-
-function setBrregLink(orgnr?: string): void {
-  brregLink.href = orgnr
-    ? `https://virksomhet.brreg.no/nb/oppslag/enheter/${orgnr}`
-    : BRREG_LINK_FALLBACK;
+function panelHref(target: PanelTarget): string {
+  // The link names no window: shift-click can open it in a new one.
+  return browser.runtime.getURL(panelPath(target, Date.now()));
 }
 
-function setDetailsLink(): void {
-  // Visible in every state where the sidebar can do something useful:
-  // resolved orgnr → ?orgnr=, or host-without-pick → ?nomatch= so the
-  // sidebar opens on the picker/empty surface for the same host
-  // instead of stale state. Only hidden when we have neither — popup
-  // opened on about:blank or an unresolvable URL.
-  let target: PanelTarget;
-  const sourceHost = sourceLabel.get();
-  if (currentOrgnr) {
-    target = { orgnr: currentOrgnr };
-  } else if (sourceHost) {
-    target = { nomatch: sourceHost };
-  }
-  if (!target) {
-    detailsLink.hidden = true;
-    detailsLink.removeAttribute('href');
-    detailsLink.onclick = null;
-    return;
-  }
-  const panelTarget = target;
-  detailsLink.hidden = false;
-  // Keep href so middle-click and keyboard activation still open the
-  // details page somewhere. The onclick docks it into the browser's
-  // sidebar / side panel instead of stealing focus into a new tab or
-  // popup window. The href names no window: shift-click can open it in
-  // a new one.
-  detailsLink.href = browser.runtime.getURL(panelPath(panelTarget, Date.now()));
-  detailsLink.onclick = (ev) => {
-    ev.preventDefault();
-    // setPanel + open must both fire inside this click's gesture stack.
-    // No await before open() — both engines consume the activation
-    // token on the first await, and Chrome's sidePanel.open hard-
-    // requires a live gesture. open() picks up the panel path setPanel
-    // just queued. The path is stamped with the click's time and this
-    // window, so the panel treats it as this open's target, not a
-    // leftover, and a panel in another window ignores it.
-    sidebar.setPanel(panelPath(panelTarget, Date.now(), currentWindowId));
-    sidebar.open({ windowId: currentWindowId, tabId: currentTabId });
-    window.close();
-  };
+function openPanel(target: PanelTarget, ev?: Event): void {
+  ev?.preventDefault();
+  // setPanel + open must both fire inside this click's gesture stack.
+  // No await before open() — both engines consume the activation token
+  // on the first await, and Chrome's sidePanel.open hard-requires a
+  // live gesture. The path is stamped with the click's time and this
+  // window, so the panel treats it as this open's target, not a
+  // leftover, and a panel in another window ignores it.
+  sidebar.setPanel(panelPath(target, Date.now(), windowId));
+  sidebar.open({ windowId, tabId });
+  window.close();
 }
 
-function updateRejectButtonVisibility(): void {
-  // Every result derived from the site (URL, title or hostname) is
-  // disputable — the site controls its own URL and title. Manual picks
-  // are the user's own explicit choice.
-  const overridable =
-    app.dataset.state === 'result' &&
-    isHostDerived(currentResolutionMethod) &&
-    sourceLabel.get() !== undefined &&
-    currentOrgnr !== undefined;
-  resolutionActionsEl.hidden = !overridable;
-}
-
-async function resolveFromActiveTab(): Promise<TabContext> {
-  // Same band-aware cascade the panel runs on its active tab —
-  // shared in lib/ui/resolve-tab.ts. Only the tabs.query (and the
-  // window/tab-id capture for the gesture-bound side-panel open)
-  // lives here.
-  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
-  const tab = tabs[0];
-  // Capture for the gesture-bound side-panel open (Chrome). Harmless on
-  // Firefox, whose adapter ignores the target.
-  currentWindowId = tab?.windowId;
-  currentTabId = tab?.id;
-  currentTabTitle = tab?.title || undefined;
-  return resolveTabContext(tab?.url ?? '', tab?.title ?? '');
-}
-
-async function init(): Promise<void> {
-  try {
-    const ctx = await resolveFromActiveTab();
-    sourceLabel.set(ctx.host);
-    if (ctx.orgnr) {
-      await loadAndRender(ctx.orgnr, ctx.method);
-      return;
-    }
-    if (ctx.pickerCandidates && ctx.host) {
-      showPicker(ctx.host, ctx.pickerCandidates);
-      return;
-    }
-    showEmptyState(ctx.host, ctx.degraded);
-  } catch (err) {
-    showError(err);
-  }
+function panelTarget(): PanelTarget {
+  if (currentOrgnr) return { orgnr: currentOrgnr };
+  if (host) return { nomatch: host };
+  return undefined;
 }
 
 async function syncOpenPanel(msg: PanelMessage): Promise<void> {
-  // The popup runs with activeTab grant on the current tab — it can
-  // read the URL and resolve the orgnr. A panel open in this window,
-  // opened earlier on a different tab, holds stale data until
-  // something tells it to repaint: this message, which the open
-  // details page picks up and applies in place (a company it already
-  // shows is kept, not reloaded). No setPanel here — that would only
-  // leave a global panel URL behind for some later open; the panel
-  // reads the active tab itself when it next opens.
-  //
-  // Fire-and-forget — popup rendering shouldn't block on this.
+  // A panel open in this window, opened earlier on a different tab,
+  // holds stale data until something tells it to repaint: this
+  // message, which the open details page applies in place. No setPanel
+  // here — that would only leave a global panel URL behind.
   try {
     if (!(await sidebar.isOpen(msg.windowId))) return;
   } catch {
-    // Sidebar API unavailable / errored — the popup itself still
-    // rendered; nothing more to do.
     return;
   }
   await notifyPanel(msg);
 }
 
-function syncSidebarIfOpen(orgnr: string): void {
-  if (currentWindowId === undefined) return;
-  const method = currentResolutionMethod ?? UNKNOWN_URL_METHOD;
+function syncSidebar(orgnr: string): void {
+  if (windowId === undefined) return;
+  const method = currentMethod ?? UNKNOWN_URL_METHOD;
   void syncOpenPanel({
     type: 'sync',
-    windowId: currentWindowId,
+    windowId,
     orgnr,
-    // A manual pick has nothing to do with the tab's site: without a
-    // host the panel's footer doesn't claim «Synket fra <host>».
-    host: method === 'manual' ? undefined : sourceLabel.get(),
+    // A manual pick has nothing to do with the tab's site.
+    host: method === 'manual' ? undefined : host,
     method,
   });
 }
 
-function syncSidebarNoMatch(host: string | undefined): void {
-  // Counterpart for the "Ingen av disse" path — tells an open panel
-  // that this host has no current pick so it can clear stale company
-  // data instead of keeping the previous picker / result up.
-  if (currentWindowId === undefined) return;
-  void syncOpenPanel({ type: 'no-match', windowId: currentWindowId, host });
+function syncSidebarNoMatch(): void {
+  if (windowId === undefined) return;
+  void syncOpenPanel({ type: 'no-match', windowId, host });
 }
+
+// --- badge ------------------------------------------------------------------
+
+// The toolbar button of the popup's tab: «!» / «✕» only when the company
+// on screen is the tab's own and something is worth a look.
+function badge(view: TrustView | undefined): void {
+  if (tabId === undefined) return;
+  const tone = view?.badgeTone;
+  void setTrustBadge(tabId, tone === 'warn' || tone === 'danger' ? tone : undefined);
+}
+
+// --- paints -------------------------------------------------------------------
+
+const onSearch = (): void => openSearch();
+
+function showLoading(orgnr: string): void {
+  repaint = undefined;
+  paintLoading(roots, host, { onSearch });
+  roots.live.announce(COPY.loadingOrgnr(orgnrText(orgnr).spaced));
+}
+
+function showResult(view: TrustView, opts: { focus: boolean; reveal: boolean }): void {
+  currentView = view;
+  searchOpen = false;
+  const target = panelTarget();
+  const paint = (reveal: boolean): ReturnType<typeof paintResult> =>
+    paintResult(roots, view, {
+      host,
+      now: Date.now(),
+      reveal,
+      onSearch,
+      copy: writeClipboard,
+      announce: roots.live.announce,
+      onReject: () => void reject(),
+      onForget: () => void forget(),
+      onBackToSite: () => void init({ focus: true }),
+      onRefresh: () => void refresh(),
+      onOpenPanel: (ev) => openPanel(target, ev),
+      onOpenKonsern: () => openPanel(currentOrgnr ? { orgnr: currentOrgnr, tab: 'enheter' } : target),
+      ...(target ? { panelHref: panelHref(target) } : {}),
+    });
+  const painted = paint(opts.reveal);
+  repaint = () => paint(false);
+  badge(view);
+  if (opts.focus) focusElement(painted.heading);
+}
+
+function showPicker(candidates: Candidate[], opts: { focus: boolean }): void {
+  if (!host) return;
+  const h = host;
+  currentOrgnr = undefined;
+  currentView = undefined;
+  searchOpen = false;
+  const paint = (): ReturnType<typeof paintPicker> =>
+    paintPicker(
+      roots,
+      {
+        host: h,
+        site: siteName(h),
+        query: hostnameLabel(h) ?? siteName(h),
+        candidates,
+        reportHref: report(),
+      },
+      {
+        onSearch,
+        onPick: (orgnr) => void pick(h, orgnr),
+        onNone: () => void none(h),
+        onSearchSelect: (orgnr) => void loadAndRender(orgnr, 'manual', { focus: true }),
+      },
+    );
+  const picker = paint();
+  repaint = paint;
+  badge(undefined);
+  if (opts.focus) focusElement(picker.firstRow);
+}
+
+async function showEmpty(kind: EmptyKind, opts: { focus: boolean }): Promise<void> {
+  if (kind.kind !== 'search') {
+    currentOrgnr = undefined;
+    currentView = undefined;
+    currentMethod = undefined;
+  }
+  searchOpen = kind.kind === 'search';
+  const [recents, remembered] = await Promise.all([
+    getRecent(),
+    host ? getRememberedChoice(host) : undefined,
+  ]);
+  const returnTo = repaint;
+  const paint = (): ReturnType<typeof paintEmpty> =>
+    paintEmpty(
+      roots,
+      {
+        kind,
+        recents,
+        ...(site() ? { site: site() } : {}),
+        ...(remembered && site() && kind.kind !== 'search' ? { forgetSite: site() } : {}),
+        ...(host ? { reportHref: report() } : {}),
+      },
+      {
+        onSearch,
+        onSelect: (orgnr) => void loadAndRender(orgnr, 'manual', { focus: true }),
+        onForget: () => void forget(),
+        onRetry: () => void init({ focus: true }),
+        onBack: () => closeSearch(returnTo),
+      },
+    );
+  const view = paint();
+  if (kind.kind !== 'search') repaint = paint;
+  badge(undefined);
+  if (opts.focus) focusElement(kind.kind === 'search' ? view.input : view.heading);
+}
+
+async function showError(err: unknown): Promise<void> {
+  currentView = undefined;
+  searchOpen = false;
+  const recents = await getRecent();
+  const error = describeLoadFailure(err);
+  // «Prøv igjen» only when there is a load to re-run and asking again
+  // could change the answer: a not-found can't.
+  error.retry = error.retry && lastLoad !== undefined && !isPermanentLoadError(err);
+  const context = currentOrgnr
+    ? { label: COPY.contextOrgnr, strong: orgnrText(currentOrgnr).spaced }
+    : site()
+      ? { label: COPY.contextFor, strong: site()! }
+      : undefined;
+  const paint = (): void => {
+    paintError(
+      roots,
+      {
+        host,
+        error,
+        recents,
+        ...(context ? { context } : {}),
+        ...(host || currentOrgnr ? { reportHref: report() } : {}),
+      },
+      {
+        onSearch,
+        onRetry: () => lastLoad?.(),
+        onSelect: (orgnr) => void loadAndRender(orgnr, 'manual', { focus: true }),
+      },
+    );
+  };
+  paint();
+  repaint = paint;
+  badge(undefined);
+}
+
+// --- search view (from the masthead, over any state) ------------------------
+
+function openSearch(): void {
+  if (searchOpen) return;
+  const name = currentView?.identity.name ?? site();
+  const back = name ? COPY.back(name) : COPY.backPlain;
+  void showEmpty({ kind: 'search', host, back }, { focus: true });
+}
+
+function closeSearch(returnTo: (() => void) | undefined): void {
+  searchOpen = false;
+  if (returnTo) {
+    returnTo();
+    repaint = returnTo;
+  } else {
+    void showEmpty(host ? { kind: 'no-match', host } : { kind: 'no-site' }, { focus: false });
+  }
+  focusElement(roots.mast.querySelector('.icon-btn'));
+}
+
+document.addEventListener('keydown', (ev) => {
+  if (ev.key !== 'Escape' || !searchOpen) return;
+  const back = roots.main.querySelector<HTMLButtonElement>('button.back');
+  if (!back) return;
+  ev.preventDefault();
+  back.click();
+});
+
+// --- intents ---------------------------------------------------------------------
 
 async function loadAndRender(
   orgnr: string,
-  method?: ResolutionMethod,
+  method: ResolutionMethod | undefined,
+  opts: { focus: boolean },
 ): Promise<void> {
-  // Monotonic guard — a second load started while the first is still
-  // in flight (manual result → recent entry) must win regardless of
-  // which fetch chain resolves last.
   const myRunId = ++loadRunId;
   currentOrgnr = orgnr;
-  if (method !== undefined) currentResolutionMethod = method;
-  lastLoad = () => {
-    void loadAndRender(orgnr, method);
-  };
-  setState('loading');
-  statusEl.textContent = `Henter ${orgnr}…`;
-  setBrregLink(orgnr);
-  setDetailsLink();
-  syncSidebarIfOpen(orgnr);
+  if (method !== undefined) currentMethod = method;
+  lastLoad = () => void loadAndRender(orgnr, method, opts);
+  showLoading(orgnr);
+  syncSidebar(orgnr);
   try {
-    // Roller and regnskap are extra API calls but live behind the same
-    // 24h session cache, and both feed the quick glance: daglig leder
-    // in the rows, "leverer regnskap?" and revenue from the filing.
-    // They are soft dependencies — a failure maps to undefined
-    // ("couldn't ask"): the verdict omits what it can't back, and the
-    // Daglig leder row says it couldn't fetch rather than "—" (none
-    // registered). An underenhet orgnr loads its parent (company-load).
-    const company = await loadCompany(orgnr);
+    // Roller and regnskap ride along (soft: a failure is «couldn't
+    // ask», and the view omits what it can't back). Konsern is one
+    // more request only when the Enhet says erIKonsern. An underenhet
+    // orgnr loads its parent (company-load).
+    const [company, remembered] = await Promise.all([
+      loadCompany(orgnr, { konsern: true }),
+      host ? getRememberedChoice(host) : undefined,
+    ]);
     if (myRunId !== loadRunId) return;
-    // For an underenhet that is the parent — the company on screen.
-    setBrregLink(company.enhet.organisasjonsnummer);
-    renderEnhet(company);
+    currentOrgnr = company.enhet.organisasjonsnummer;
+    const view = buildTrustView({
+      company,
+      method: currentMethod,
+      host,
+      now: new Date(),
+      surface: 'popup',
+      ...(remembered ? { remembered } : {}),
+      env,
+    });
+    remember(company);
+    showResult(view, { focus: opts.focus, reveal: true });
   } catch (err) {
     if (myRunId !== loadRunId) return;
-    showError(err);
+    await showError(err);
   }
 }
 
-function renderEnhet({ enhet, avdeling, roller, regnskap }: CompanyData): void {
-  setState('result');
-  resultEl.replaceChildren();
-
-  // Stamp the recent stack as soon as we have a confirmed Enhet — earlier
-  // than this we don't know the navn, later (in init or loadAndRender)
-  // would also persist orgnrs that failed to fetch.
-  void pushRecent(enhet.organisasjonsnummer, enhet.navn);
-
-  const heading = document.createElement('h2');
-  heading.textContent = enhet.navn;
-  resultEl.appendChild(heading);
-
-  const orgnrEl = document.createElement('div');
-  orgnrEl.className = 'orgnr';
-  renderOrgnrCopy(orgnrEl, enhet.organisasjonsnummer);
-  resultEl.appendChild(orgnrEl);
-
-  if (avdeling) {
-    const note = document.createElement('p');
-    note.className = 'avdeling-note';
-    note.textContent = avdelingNote(avdeling);
-    resultEl.appendChild(note);
-  }
-
-  // The verdict strip answers the user's actual question ("kan jeg
-  // stole på dette firmaet?") before the detail rows: status, age,
-  // size, filing record. Registrert/Ansatte therefore no longer get
-  // their own dl rows — the strip carries them.
-  const verdictEl = document.createElement('div');
-  verdictEl.setAttribute('role', 'group');
-  verdictEl.setAttribute('aria-label', 'Vurdering');
-  renderVerdict(verdictEl, deriveVerdict(enhet, regnskap));
-  resultEl.appendChild(verdictEl);
-
-  const dl = document.createElement('dl');
-  addRow(dl, 'Form', enhet.organisasjonsform?.beskrivelse);
-  addRow(dl, 'Næring', formatNaering(enhet.naeringskode1));
-  // How big: the latest filing's driftsinntekter, from the regnskap the
-  // verdict already needed. Omitted when there is no figure.
-  addRow(dl, 'Omsetning', revenueLine(regnskap));
-  // Always render daglig leder, even when missing, so the user sees we
-  // looked — "—" means "no role registered", distinct from "we couldn't
-  // check". Other rows can legitimately be missing on certain forms
-  // (ENK has no Form-suffix, foreign entities lack næring).
-  addRow(
-    dl,
-    'Daglig leder',
-    roller ? (findRoleHolder(roller, 'DAGL') ?? '—') : 'Kunne ikke hentes',
+// Stamp the recent stack once a company is confirmed: earlier we don't
+// know the name, later would also keep orgnrs that failed to load.
+function remember(company: CompanyData): void {
+  const flag = primaryStatusFlag(company.enhet);
+  void pushRecent(
+    company.enhet.organisasjonsnummer,
+    company.enhet.navn,
+    flag.severity === 'danger' ? flag.label : undefined,
   );
-  // Styreleder is the natural "who else runs it" companion; shown only
-  // when registered so the fast-glance popup stays tight (the sidebar
-  // overview carries the fuller revisor/regnskapsfører set).
-  if (roller) addRow(dl, 'Styreleder', findRoleHolder(roller, 'LEDE'));
-  addRow(dl, 'Adresse', formatAddress(enhet.forretningsadresse));
-  if (enhet.hjemmeside) {
-    const href = enhet.hjemmeside.startsWith('http')
-      ? enhet.hjemmeside
-      : `https://${enhet.hjemmeside}`;
-    addLink(dl, 'Hjemmeside', href, enhet.hjemmeside, true);
+}
+
+async function pick(h: string, orgnr: string): Promise<void> {
+  await setPickerChoice(h, orgnr);
+  await loadAndRender(orgnr, 'host-pick', { focus: true });
+}
+
+async function none(h: string): Promise<void> {
+  await setPickerChoice(h, null);
+  syncSidebarNoMatch();
+  await showEmpty({ kind: 'none', host: h }, { focus: true });
+}
+
+// «Feil bedrift?»: record the rejection, re-run the host search, and
+// show what is left (the picker, or the empty state).
+async function reject(): Promise<void> {
+  if (!host || !currentOrgnr) return;
+  const h = host;
+  const myRunId = ++loadRunId;
+  const outcome = await rejectChoice(h, currentOrgnr, tabTitle, () => myRunId !== loadRunId);
+  if (!outcome) return;
+  if (outcome.kind === 'picker') showPicker(outcome.candidates, { focus: true });
+  else await showEmpty({ kind: 'no-match', host: h }, { focus: true });
+}
+
+// «Glem valget for <site>»: drop everything remembered about the site
+// and resolve it from scratch.
+async function forget(): Promise<void> {
+  if (!host) return;
+  await forgetHost(host);
+  await init({ focus: true });
+}
+
+async function refresh(): Promise<void> {
+  if (!currentOrgnr) return;
+  await invalidateCache(currentOrgnr);
+  lastLoad?.();
+}
+
+// --- init -----------------------------------------------------------------------
+
+async function resolveFromActiveTab(): Promise<TabContext> {
+  const tabs = await browser.tabs.query({ active: true, currentWindow: true });
+  const tab = tabs[0];
+  windowId = tab?.windowId;
+  tabId = tab?.id;
+  tabTitle = tab?.title || undefined;
+  const ctx = await resolveTabContext(tab?.url ?? '', tab?.title ?? '');
+  host = ctx.host;
+  return ctx;
+}
+
+async function init(opts: { focus: boolean }): Promise<void> {
+  loadRunId += 1;
+  try {
+    const ctx = await resolveFromActiveTab();
+    if (ctx.orgnr) {
+      await loadAndRender(ctx.orgnr, ctx.method, opts);
+      return;
+    }
+    currentOrgnr = undefined;
+    currentMethod = undefined;
+    if (ctx.pickerCandidates && ctx.host) {
+      showPicker(ctx.pickerCandidates, opts);
+      return;
+    }
+    if (!ctx.host) {
+      await showEmpty({ kind: 'no-site' }, opts);
+      return;
+    }
+    await showEmpty(
+      ctx.degraded ? { kind: 'degraded', host: ctx.host } : { kind: 'no-match', host: ctx.host },
+      opts,
+    );
+  } catch (err) {
+    await showError(err);
   }
-  resultEl.appendChild(dl);
-
-  // Secondary status pills (rare combos) + registry memberships. The
-  // primary status lives in the verdict strip.
-  const flags = document.createElement('div');
-  flags.className = 'flags';
-  renderFlags(flags, enhet);
-  if (!flags.hidden) resultEl.appendChild(flags);
-
-  updateRejectButtonVisibility();
 }
 
-function showPicker(host: string, candidates: Candidate[]): void {
-  currentOrgnr = undefined;
-  setState('picker');
-  setBrregLink();
-  setDetailsLink();
-  picker.render(host, candidates);
-}
-
-function showEmptyState(host: string | undefined, degraded = false): void {
-  currentOrgnr = undefined;
-  currentResolutionMethod = undefined;
-  setState('empty');
-  setBrregLink();
-  setDetailsLink();
-  // degraded = the hostname search itself failed (offline, brreg down)
-  // — "we couldn't check" must not read as a confirmed "no match".
-  emptyMessageEl.textContent = degraded
-    ? `Fikk ikke svar fra Brønnøysundregistrene, så ${host ?? 'siden'} kunne ikke sjekkes. Prøv igjen om litt.`
-    : host
-      ? `Ingen bedrift identifisert på ${host}. Søk for å finne riktig bedrift.`
-      : 'Popup-en ble åpnet uten en bedrift å vise. Søk i Brønnøysundregistrene under.';
-  manualSearch.reset();
-  void renderRecentList();
-  manualQueryEl.focus();
-}
-
-async function renderRecentList(): Promise<void> {
-  await renderRecentSection(recentSectionEl, recentListEl, (entry) => {
-    void loadAndRender(entry.orgnr, 'manual');
-  });
-}
-
-function showError(err: unknown): void {
-  setState('error');
-  setDetailsLink();
-  statusEl.textContent = describeLoadError(err);
-  // "Prøv igjen" only makes sense when there is a load to re-trigger —
-  // an init-time resolution failure has nothing to retry — and when
-  // asking again could change the answer: a not-found can't.
-  errorActionsEl.hidden = lastLoad === undefined || isPermanentLoadError(err);
-}
-
-function setState(
-  state: 'loading' | 'result' | 'picker' | 'empty' | 'error',
-): void {
-  // Leaving the picker — clear candidate state so a stray keydown
-  // can't fire the picker's onChoose on a previous host's list.
-  if (state !== 'picker') picker.clear();
-  app.dataset.state = state;
-  // statusEl carries the polite aria-live announcement during loading
-  // (kept off-screen, not display:none, so screen readers still read
-  // "Henter …" while the skeleton is what's shown), and becomes the
-  // visible error message during state='error'. Same pattern as the
-  // sidebar (src/details/details.ts).
-  if (state === 'loading') {
-    statusEl.hidden = false;
-    statusEl.classList.add('visually-hidden');
-  } else if (state === 'error') {
-    statusEl.hidden = false;
-    statusEl.classList.remove('visually-hidden');
-  } else {
-    statusEl.hidden = true;
-    statusEl.classList.remove('visually-hidden');
-  }
-  skeletonEl.hidden = state !== 'loading';
-  // showError unhides this when a retry target exists.
-  errorActionsEl.hidden = true;
-  resultEl.hidden = state !== 'result';
-  pickerEl.hidden = state !== 'picker';
-  emptyStateEl.hidden = state !== 'empty';
-  updateRejectButtonVisibility();
-}
-
-void init();
+void init({ focus: false });

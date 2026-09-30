@@ -122,6 +122,16 @@ export default defineConfig(({ mode }) => {
               { recursive: true, filter: (src) => !src.endsWith('.md') },
             );
           }
+          // The bundled font (src/styles/brreg.css resolves it at the
+          // stable path /fonts/…, so it is copied, not hashed) and its
+          // OFL notice, which the licence requires to travel with it.
+          if (existsSync(resolve(import.meta.dirname, 'public/fonts'))) {
+            cpSync(
+              resolve(import.meta.dirname, 'public/fonts'),
+              resolve(dist, 'fonts'),
+              { recursive: true },
+            );
+          }
 
           function relocateHtml(from: string, to: string): void {
             const src = resolve(dist, from);
