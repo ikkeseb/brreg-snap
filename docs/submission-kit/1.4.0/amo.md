@@ -103,14 +103,7 @@ pnpm 10.33.0 (pinned via the `packageManager` field). The
 unzipped package matches the CI build attached to the GitHub
 Release for `v1.4.0`.
 
-The privacy policy is the one on this listing (same text as
-`PRIVACY.md` in the repository).
-
-The `tabs` permission is listed as `optional_permissions` and is
-requested at runtime only from the «Slå på» button of the
-auto-sync disclosure in the sidebar. On Firefox 140+ the install
-prompt therefore shows only access to data.brreg.no and the
-browsing-activity data collection.
+The listing privacy policy matches `PRIVACY.md`.
 ```
 
 ## What changed (CHANGELOG § [1.4.0])
