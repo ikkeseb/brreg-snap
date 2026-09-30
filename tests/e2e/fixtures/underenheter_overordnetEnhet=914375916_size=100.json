@@ -1,0 +1,63 @@
+{
+  "request": "/enhetsregisteret/api/underenheter?overordnetEnhet=914375916&size=100",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "underenheter": [
+        {
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0256",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "2014-10-30 20:09:30",
+              "navn": "OPULENS NÆRING 4 AS",
+              "tilDato": "2026-09-01 12:29:07"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Utleie av egen eller leid fast eiendom",
+            "kode": "68.200"
+          },
+          "navn": "TOLLBUGATA 17 OSLO AS",
+          "oppstartsdato": "2014-10-09",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "914380391",
+          "overordnetEnhet": "914375916",
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0201",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoEnhetsregisteret": "2014-10-30",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 1,
+      "totalPages": 1
+    }
+  }
+}

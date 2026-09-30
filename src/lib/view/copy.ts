@@ -176,6 +176,21 @@ export const COPY = {
   // auto-sync (panel)
   autoSync: 'Auto-oppdater',
   autoSyncTitle: 'Oppdaterer automatisk når du bytter fane eller åpner en ny side',
+  // The consent disclosure, shown before the runtime `tabs` request.
+  // Word for word what the store review saw; change it only with the
+  // privacy text (PRIVACY.md, docs/notes/permissions-model.md).
+  autoSyncConsent:
+    'Auto-oppdater slår opp siden du ser på hver gang du bytter fane eller åpner en ny side, ' +
+    'så lenge et brreg-snap-panel er åpent: domenet sendes til Brønnøysundregistrene (data.brreg.no). ' +
+    'Ingenting sendes til utvikleren. Nettleseren spør deretter om tilgang til fanene.',
+  autoSyncAccept: 'Slå på',
+  autoSyncCancel: 'Avbryt',
+
+  // panel: the compact head, sections with a sentence for a body
+  regnskap: 'Regnskap',
+  konsernPath: 'Eierkjede',
+  registered: (n: string) => `${n} registrert`,
+  registeredPlural: (n: string) => `${n} registrerte`,
 } as const;
 
 // «Rapporter feil treff»: a mailto link the user clicks, prefilled with

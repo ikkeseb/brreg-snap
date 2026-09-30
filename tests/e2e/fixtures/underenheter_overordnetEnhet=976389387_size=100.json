@@ -1,0 +1,259 @@
+{
+  "request": "/enhetsregisteret/api/underenheter?overordnetEnhet=976389387&size=100",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "underenheter": [
+        {
+          "antallAnsatte": 117,
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5006",
+            "poststed": "BERGEN"
+          },
+          "datoEierskifte": "2000-01-01",
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-23 01:36:00",
+              "navn": "ERNST & YOUNG-BERGEN AS",
+              "tilDato": "1997-05-30 18:23:56"
+            },
+            {
+              "fraDato": "1997-05-30 18:23:56",
+              "navn": "ERNST & YOUNG AS",
+              "tilDato": "1999-02-09 19:13:44"
+            },
+            {
+              "fraDato": "1999-02-09 19:13:44",
+              "navn": "ERNST & YOUNG AS AVD BERGEN",
+              "tilDato": "2000-06-21 18:12:25"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Revisjon",
+            "kode": "69.201"
+          },
+          "navn": "ERNST & YOUNG AS AVD BERGEN",
+          "oppstartsdato": "1988-07-01",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "972142727",
+          "overordnetEnhet": "976389387",
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5892",
+            "poststed": "BERGEN"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-02-23",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet",
+          "telefon": "00000000"
+        },
+        {
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BRØNNØY",
+            "kommunenummer": "1813",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "8900",
+            "poststed": "BRØNNØYSUND"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [],
+          "naeringskode1": {
+            "beskrivelse": "Revisjon",
+            "kode": "69.201"
+          },
+          "navn": "ERNST & YOUNG AS AVD BRØNNØYSUND",
+          "oppstartsdato": "2008-01-01",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "992500182",
+          "overordnetEnhet": "976389387",
+          "registreringsdatoEnhetsregisteret": "2008-04-02",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet"
+        },
+        {
+          "antallAnsatte": 43,
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "DRAMMEN",
+            "kommunenummer": "3301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3044",
+            "poststed": "DRAMMEN"
+          },
+          "datoEierskifte": "2000-01-01",
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [
+            {
+              "fraDato": "1995-02-22 23:12:00",
+              "navn": "ERNST & YOUNG DA",
+              "tilDato": "1997-01-20 18:26:00"
+            },
+            {
+              "fraDato": "1997-01-20 18:26:00",
+              "navn": "ERNST & YOUNG AS",
+              "tilDato": "2000-06-21 18:12:27"
+            }
+          ],
+          "naeringskode1": {
+            "beskrivelse": "Revisjon",
+            "kode": "69.201"
+          },
+          "navn": "ERNST & YOUNG AS AVD DRAMMEN",
+          "oppstartsdato": "1965-12-31",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "971690887",
+          "overordnetEnhet": "976389387",
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "DRAMMEN",
+            "kommunenummer": "3301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3002",
+            "poststed": "DRAMMEN"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "1995-02-22",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet",
+          "telefon": "00000000"
+        },
+        {
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "HAMAR",
+            "kommunenummer": "3403",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "2317",
+            "poststed": "HAMAR"
+          },
+          "datoEierskifte": "2012-02-20",
+          "epostadresse": "post@example.no",
+          "harRegistrertAntallAnsatte": false,
+          "historiskeNavn": [
+            {
+              "fraDato": "1998-05-25 18:25:38",
+              "navn": "ERGO REVISJON & RÅDGIVNING AS",
+              "tilDato": "2011-07-27 20:16:11"
+            },
+            {
+              "fraDato": "2011-07-27 20:16:11",
+              "navn": "ERNST & YOUNG AS",
+              "tilDato": "2012-02-28 21:15:01"
+            },
+            {
+              "fraDato": "2012-02-28 21:15:01",
+              "navn": "ERNST & YOUNG AS AVD ELVERUM",
+              "tilDato": "2022-01-29 14:28:22"
+            }
+          ],
+          "hjemmeside": "www.ergorevisjon.no",
+          "naeringskode1": {
+            "beskrivelse": "Revisjon",
+            "kode": "69.201"
+          },
+          "navn": "ERNST & YOUNG AS AVD HAMAR",
+          "oppstartsdato": "1998-09-01",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "979884354",
+          "overordnetEnhet": "976389387",
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0107",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoEnhetsregisteret": "1998-05-25",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet",
+          "telefon": "00000000"
+        },
+        {
+          "antallAnsatte": 8,
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "HAUGESUND",
+            "kommunenummer": "1106",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5537",
+            "poststed": "HAUGESUND"
+          },
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [],
+          "naeringskode1": {
+            "beskrivelse": "Revisjon",
+            "kode": "69.201"
+          },
+          "navn": "ERNST & YOUNG AS AVD HAUGESUND",
+          "oppstartsdato": "2017-01-01",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "919203277",
+          "overordnetEnhet": "976389387",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoEnhetsregisteret": "2017-06-27",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 18,
+      "totalPages": 1
+    }
+  }
+}

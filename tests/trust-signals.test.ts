@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  ansatteLine,
   deriveSignals,
   expectedLatestFiledYear,
   monthsSince,
   yearsSince,
 } from '../src/lib/trust/signals.js';
-import { deriveVerdict } from '../src/lib/ui/verdict.js';
 import type { Enhet, RegnskapResponse } from '../src/types/brreg.js';
 import dnbEnhet from './fixtures/brreg/enhet-984851006-dnb.json';
 import enkEnhet from './fixtures/brreg/enhet-999999998-enk.json';
@@ -523,12 +523,27 @@ describe('monthsSince', () => {
   });
 });
 
-describe('deriveVerdict (adapter until the UI rewrite)', () => {
-  it('returns exactly what deriveSignals does', () => {
-    const enhet = equinorEnhet as Enhet;
-    expect(deriveVerdict(enhet, undefined, NOW)).toEqual(
-      deriveSignals(enhet, undefined, NOW),
+describe('ansatteLine (the ansatte signal value)', () => {
+  it('formats a registered count', () => {
+    expect(ansatteLine(equinorEnhet as Enhet)).toBe(
+      equinorEnhet.antallAnsatte.toLocaleString('nb-NO'),
     );
+  });
+
+  it('reads a flagged employer without a count as 1–4, not none', () => {
+    expect(ansatteLine(smallEmployer as Enhet)).toBe('1–4');
+  });
+
+  it('says «Ingen» only when the register does', () => {
+    expect(ansatteLine(konkursEnhet as Enhet)).toBe('Ingen'); // flag false
+    const zero: Enhet = { organisasjonsnummer: '923609016', navn: 'X', antallAnsatte: 0 };
+    expect(ansatteLine(zero)).toBe('Ingen');
+  });
+
+  it('is omitted when the payload says nothing (deleted entity)', () => {
+    expect(ansatteLine(slettetEnhet as Enhet)).toBeUndefined();
+    const silent: Enhet = { organisasjonsnummer: '923609016', navn: 'X' };
+    expect(ansatteLine(silent)).toBeUndefined();
   });
 });
 

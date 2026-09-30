@@ -1,7 +1,7 @@
 # Permissions model
 
 Source: `manifest.json`, `src/background/background.ts`,
-`src/details/details.ts`, `src/lib/auto-sync-*.ts`.
+`src/details/{auto-sync-ui,auto-sync-switch}.ts`, `src/lib/auto-sync-*.ts`.
 
 <!-- SECTION: active-tab-limits -->
 ## Auto-sync on tab switch is blocked by activeTab — by design
@@ -32,7 +32,7 @@ tabs or open a new page, as long as a brreg-snap panel is open in any
 window; the domain goes to data.brreg.no, nothing to the developer.
 Its «Slå på» button is the consent and the gesture that calls
 `permissions.request`. The flow lives in `src/lib/auto-sync-toggle.ts`
-(tested without a DOM); `details.ts` only wires its events. With it
+(tested without a DOM); `details/auto-sync-switch.ts` only binds the DOM. With it
 on, the panel page registers
 `tabs.onActivated`/`onUpdated` for its own window and resolves the
 new tab itself — see sidebar-sync.md § panel-hosted-auto-sync. Nothing

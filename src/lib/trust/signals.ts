@@ -14,10 +14,9 @@
 // is OMITTED, never guessed: a failed regnskap fetch must not render
 // as "not filed". See docs/notes/trust.md § signals.
 
-import { formatDateNumeric, parseIsoDate } from '../format.js';
+import { formatCount, formatDateNumeric, parseIsoDate } from '../format.js';
 import { sortRegnskapDesc } from '../regnskap.js';
 import { primaryStatusFlag, type FlagSpec } from '../ui/flags.js';
-import { ansatteLine } from '../ui/summary-lines.js';
 import type { Enhet, RegnskapResponse } from '../../types/brreg.js';
 import type { Signal, Tone } from './types.js';
 
@@ -50,6 +49,21 @@ const FOREIGN_FORMS = new Set(['NUF', 'UTLA']);
 
 function formCode(enhet: Enhet): string {
   return enhet.organisasjonsform?.kode?.trim().toUpperCase() ?? '';
+}
+
+// Employee count as the register states it. brreg leaves antallAnsatte
+// out below five employees (API docs: «vil være null når virksomheten
+// har mellom 0-4 ansatte»), so a missing count with
+// harRegistrertAntallAnsatte true means 1–4, and only false means none.
+// Undefined when the payload says nothing: a SlettetEnhet carries no
+// employee data at all.
+export function ansatteLine(enhet: Enhet): string | undefined {
+  const count = enhet.antallAnsatte;
+  if (typeof count === 'number' && count > 0) return formatCount(count);
+  if (enhet.slettedato) return undefined;
+  if (enhet.harRegistrertAntallAnsatte === true) return '1–4';
+  if (count === 0 || enhet.harRegistrertAntallAnsatte === false) return 'Ingen';
+  return undefined;
 }
 
 // Whole years between an ISO date and `now`; undefined when unparsable.

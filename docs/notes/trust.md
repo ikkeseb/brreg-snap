@@ -49,8 +49,8 @@ company's board changes all the time (Equinor's STYR changed
 ## Signals
 
 `deriveSignals(enhet, regnskap, now)` → status, alder, ansatte, regnskap
-(the kobling row comes from `kobling.ts`). `src/lib/ui/verdict.ts` keeps
-`renderVerdict` and a `deriveVerdict` alias until the 1.4 UI rewrite.
+(the kobling row comes from `kobling.ts`); the surfaces paint them as
+the ledger (`src/lib/view/components/ledger.ts`).
 
 - **Status** is `primaryStatusFlag` (`src/lib/ui/flags.ts`): slettet
   first (a SlettetEnhet has no konkurs/avvikling fields), then konkurs,

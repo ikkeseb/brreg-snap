@@ -109,3 +109,30 @@ export function uniqueId(prefix: string): string {
   idCounter += 1;
   return `${prefix}-${idCounter}`;
 }
+
+// A section head: <h3 class="section__head">Label<span class="tab__count">N</span>
+export function sectionHead(label: string, count?: number | string): HTMLHeadingElement {
+  const head = el('h3', 'section__head', label);
+  if (count !== undefined) head.appendChild(el('span', 'tab__count', String(count)));
+  return head;
+}
+
+export function section(label: string, count?: number | string): HTMLElement {
+  const sec = el('section', 'section');
+  sec.appendChild(sectionHead(label, count));
+  return sec;
+}
+
+// Amendment c: a branch or subsidiary named after its parent («NORDVIK
+// ENERGI ASA AVD FORUS») — the shared prefix is written in a quieter
+// span so the distinguishing part reads first. The text stays the full
+// name; only the shape of the nodes changes.
+export function appendName(container: HTMLElement, name: string, parentName?: string): void {
+  const prefix = parentName?.trim();
+  if (prefix && name.length > prefix.length + 1 && name.toUpperCase().startsWith(`${prefix.toUpperCase()} `)) {
+    container.appendChild(el('span', 'name-prefix', name.slice(0, prefix.length + 1)));
+    container.append(name.slice(prefix.length + 1));
+    return;
+  }
+  container.append(name);
+}

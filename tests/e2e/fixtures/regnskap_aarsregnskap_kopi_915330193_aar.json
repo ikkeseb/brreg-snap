@@ -1,0 +1,16 @@
+{
+  "request": "/regnskapsregisteret/regnskap/aarsregnskap/kopi/915330193/aar",
+  "status": 200,
+  "body": [
+    "2015",
+    "2016",
+    "2017",
+    "2018",
+    "2019",
+    "2020",
+    "2021",
+    "2022",
+    "2023",
+    "2024"
+  ]
+}

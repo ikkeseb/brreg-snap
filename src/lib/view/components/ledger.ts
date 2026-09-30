@@ -54,17 +54,21 @@ export function buildLedgerRow(row: LedgerRow, handlers: LedgerHandlers = {}): H
   div.appendChild(dt);
 
   const dd = el('dd');
-  dd.append(row.value);
+  // The value (and its aux) is one node, so an inline row can lay the
+  // value and its action out as flex items: when the action wraps it
+  // starts flush with the value, never after a stray space or margin.
+  const value = el('span', 'ledger-row__value', row.value);
   if (row.aux) {
-    dd.append(' ');
-    dd.appendChild(el('span', 'ledger-row__aux', row.aux));
+    value.append(' ');
+    value.appendChild(el('span', 'ledger-row__aux', row.aux));
   }
+  dd.appendChild(value);
   const actions = row.actions
     .map((a) => buildAction(a, handlers))
     .filter((a): a is HTMLElement => a !== undefined);
   const hasDetail = row.detail !== undefined || row.figures !== undefined || actions.length > 0;
   if (hasDetail) {
-    dd.append(' ');
+    if (!row.inline) dd.append(' ');
     const detail = el('span', 'ledger-row__detail');
     if (row.detail) detail.append(row.detail);
     if (row.figures) {

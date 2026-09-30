@@ -4,7 +4,7 @@
 // § live-canary.
 //
 // Responses go through the SHIPPED fetchers (fetchEnhet, fetchRoller, …)
-// and helpers (deriveVerdict, findRoleHolder, regnskapGap, isValidOrgnr)
+// and helpers (deriveSignals, findRoleHolder, regnskapGap, isValidOrgnr)
 // wherever they exist, so a shape change fails here the way it would
 // fail in the extension. Raw requests are used only for endpoints the
 // code doesn't call yet (the 1.4 contracts at the bottom).
@@ -27,7 +27,7 @@ import {
 import { isValidOrgnr } from '../../src/lib/mod11.js';
 import { keyFigures, regnskapGap } from '../../src/lib/regnskap.js';
 import { findRoleHolder, isResigned } from '../../src/lib/roller.js';
-import { deriveVerdict } from '../../src/lib/ui/verdict.js';
+import { deriveSignals } from '../../src/lib/trust/signals.js';
 import type { Enhet, Rolle, RollerResponse, SearchHit } from '../../src/types/brreg.js';
 import {
   ER_API,
@@ -94,7 +94,7 @@ const allRoles = (r: RollerResponse): Rolle[] =>
   (r.rollegrupper ?? []).flatMap((g) => g.roller ?? []);
 
 const statusOf = (e: Enhet) =>
-  deriveVerdict(e, undefined).find((s) => s.key === 'status')?.value ?? '';
+  deriveSignals(e, undefined, new Date()).find((s) => s.key === 'status')?.value ?? '';
 
 const seenOrgnrs = new Set<string>();
 const remember = (hits: SearchHit[]) => {
@@ -157,9 +157,9 @@ const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
     const e = await dnb();
     expect(e.naeringskode1?.kode).toMatch(/^64\.1/);
     expect(regnskapGap(e.naeringskode1?.kode, r.unsupportedPlan)).toBe('special-accounts');
-    // The verdict strip takes the filing year from the Enhet instead.
+    // The regnskap signal takes the filing year from the Enhet instead.
     expect(e.sisteInnsendteAarsregnskap).toMatch(/^\d{4}$/);
-    const cell = deriveVerdict(e, r).find((s) => s.key === 'regnskap');
+    const cell = deriveSignals(e, r, new Date()).find((s) => s.key === 'regnskap');
     expect(cell?.value).toContain(e.sisteInnsendteAarsregnskap);
   },
 

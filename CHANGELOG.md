@@ -6,6 +6,28 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Changed — the side panel on the 1.4 design
+
+- The panel is rebuilt on the same view model and components as the
+  popup: identity with the registry flags and «Kopier sammendrag», the
+  answer (quiet band, firmer warn band, danger stamp), the ledger, the
+  konsern row, merknader and «Endret nylig» after the ledger, then
+  Oversikt · Personer · Økonomi · Enheter as a real tablist with counts.
+- Oversikt gains Stiftet, Registrert, Formål, Aktivitet and Tidligere
+  navn; Økonomi shows the latest filing with its currency, the equity
+  share, the «Årsregnskap (PDF)» years and «Kunngjøringer»; Enheter
+  opens on the Konsern section (path to the top, direct subsidiaries,
+  each a drill-in) and lists the underenheter with copyable org.nr.
+- The masthead field is the search from every state: typing shows the
+  hits (or «Nylig sett» while it is empty), Escape or «Tilbake» puts the
+  previous view back without a new lookup.
+- A compact head (seal · name · org.nr) sticks to the top once the
+  identity is scrolled past; «Auto-oppdater» is a switch in the
+  masthead with its consent as a band under it.
+- Fixed in both surfaces: a wrapped ledger action («Feil bedrift?») no
+  longer starts its line indented, and «brreg.no ↗» never lands alone
+  on a line under a provenance eyebrow.
+
 ## [1.3.1] — 2026-09-23
 
 Correctness and privacy patch. brreg's open API changed after 1.3.0

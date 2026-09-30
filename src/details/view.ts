@@ -4,9 +4,9 @@
 // so the controller is tested with a fake painter and a redesigned
 // painter plugs in without touching the state machine.
 //
-// Today's painter is legacy-painter.ts (the existing render modules
-// and markup). The next one builds its view from the same inputs
-// (buildTrustView takes company / method / host / remembered).
+// The painter is painter.ts: it builds the trust view from these inputs
+// (buildTrustView takes company / method / host / remembered) and
+// paints it with the shared components.
 
 import type { CompanyData } from '../lib/company-load.js';
 import type { Candidate, RememberedChoice } from '../lib/hostname-search.js';

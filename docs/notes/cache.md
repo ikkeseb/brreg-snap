@@ -1,7 +1,7 @@
 # Cache + race guards
 
 Source: `src/lib/brreg.ts`, `src/lib/hostname-search.ts`,
-`src/popup/popup.ts`, `src/details/details.ts`.
+`src/popup/popup.ts`, `src/details/controller.ts`.
 
 <!-- SECTION: 24h-session -->
 ## 24h session cache
@@ -113,7 +113,7 @@ otherwise. Don't simplify it away.
 ## Load-run-id guards
 
 Both surfaces guard their loads with a monotonic token (same pattern
-as manual search's `runId`): `src/details/details.ts` with the one load sequence
+as manual search's `runId`): `src/details/controller.ts` with the one load sequence
 from `src/lib/panel-follow.ts` (every flow that paints claims it — see
 sidebar-sync.md § load-race-guards), so a sync or tab event that lands
 while an older load is still fetching can't be overwritten by the

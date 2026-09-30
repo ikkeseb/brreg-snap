@@ -244,7 +244,12 @@ describe('identity', () => {
     expect(div.querySelector('.ident__eyebrow')?.textContent).toBe('Org.nr funnet i sidetittelen');
     expect(div.querySelector('.ident__eyebrow use')?.getAttribute('href')).toBe('#i-link');
     expect(div.querySelector('h1')?.classList.contains('ident__name--claim')).toBe(true);
-    expect(div.querySelector('.ident__line .ident__meta')?.textContent).toBe('Allmennaksjeselskap · Stavanger');
+    // Amendment b: the org.nr owns its line; «form · city» takes the
+    // next with the brreg.no link glued to its last word (never orphaned).
+    const rest = div.querySelector('.ident__line .ident__rest')!;
+    expect(rest.querySelector('.ident__meta')?.textContent).toBe('Allmennaksjeselskap · Stavanger brreg.no ↗');
+    expect(rest.querySelector('.nw')?.textContent).toBe('Stavanger brreg.no ↗');
+    expect(rest.querySelector('.nw a.link')).not.toBeNull();
     expect(div.querySelector('.ident__leaders')).toBeNull();
     expect(div.querySelector('.ident__note')?.textContent).toMatch(/^Avdeling: /);
   });

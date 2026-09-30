@@ -2,9 +2,8 @@
 // interface that names no DOM type. The ordering rules (consent before
 // the grant, the gesture-stack rule for permissions.request, attach /
 // detach of the tab watcher) live in lib/auto-sync-toggle.ts; this
-// module only binds a UI to them. The current UI is a checkbox
-// (legacy-painter.ts § createCheckboxAutoSyncUi); the next one is a
-// button[role=switch] and implements the same interface.
+// module only binds a UI to them. The UI is the masthead's
+// button[role=switch] and its consent band (auto-sync-switch.ts).
 //
 // With «Auto-oppdater» on (toggle stored on AND the runtime `tabs`
 // grant), the panel follows the active tab of its own window: it

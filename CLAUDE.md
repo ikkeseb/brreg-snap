@@ -101,28 +101,33 @@ note before reading the source file.
 | Concern                                       | Source                          | Note                              |
 | --------------------------------------------- | ------------------------------- | --------------------------------- |
 | Resolution cascade, provenance (resolution method), Kobling, scoring bands + hjemmeside ties, registrable domain + site keys, picker choice + undo, title word hints, orgnr → underenhet fallback | `src/lib/orgnr.ts`, `mod11.ts`, `resolution-method.ts`, `hostname-search.ts`, `hostname-score.ts`, `company-load.ts`, `trust/kobling.ts` | `docs/notes/resolution.md`        |
-| Session cache (TTL, sweep, data age), failures never cached, race guards (manual search `runId`, popup `loadRunId`, the panel's load token) | `src/lib/session-cache.ts`, `brreg.ts`, `hostname-search.ts`, `ui/manual-search.ts`, `panel-follow.ts`, `src/popup/popup.ts`, `src/details/details.ts` | `docs/notes/cache.md`             |
-| Sidebar sync: panel-hosted auto-sync, window-scoped messages, same-view keep | `src/details/details.ts`, `src/lib/panel-protocol.ts`, `panel-follow.ts`, `tab-sync.ts`, `popup/popup.ts`, `background/background.ts` | `docs/notes/sidebar-sync.md`      |
-| Permissions: `activeTab` limits, runtime `tabs` opt-in + consent step, gesture-stack rules, background wake-up, `browsingActivity` declaration, selection lookup + `commands` + toolbar badge (no new permission) | `public/manifest.*.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts`, `src/lib/platform/badge.ts` | `docs/notes/permissions-model.md` |
+| Session cache (TTL, sweep, data age), failures never cached, race guards (manual search `runId`, popup `loadRunId`, the panel's load token) | `src/lib/session-cache.ts`, `brreg.ts`, `hostname-search.ts`, `ui/manual-search.ts`, `panel-follow.ts`, `src/popup/popup.ts`, `src/details/controller.ts` | `docs/notes/cache.md`             |
+| Sidebar sync: panel-hosted auto-sync, window-scoped messages, same-view keep | `src/details/{controller,main,painter}.ts`, `src/lib/panel-protocol.ts`, `panel-follow.ts`, `tab-sync.ts`, `popup/popup.ts`, `background/background.ts` | `docs/notes/sidebar-sync.md`      |
+| Permissions: `activeTab` limits, runtime `tabs` opt-in + consent step, gesture-stack rules, background wake-up, `browsingActivity` declaration, selection lookup + `commands` + toolbar badge (no new permission) | `public/manifest.*.json`, `src/background/background.ts`, `src/details/auto-sync-switch.ts`, `src/lib/auto-sync-*.ts`, `src/lib/platform/badge.ts` | `docs/notes/permissions-model.md` |
 | brreg API: regnskap base URL + latest year only, regnskap 500 = not in the open API, error contract (search throws, `[]` = real empty), no signatur, name search matches a dot literally (finn.no misses because FINN was renamed), konsernstruktur (whole group, duplicate parents), annual-report copies + kunngjøringer links, live canary | `src/lib/brreg.ts`, `regnskap.ts`, `konsern.ts`, `aarsregnskap.ts`, `tests/live/` | `docs/notes/brreg-api.md`         |
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
 | Trust view: answer priority, signals (deadline-aware regnskap, rekonstruksjon, NUF), merknader (påtegninger), endringer + the change feed | `src/lib/trust/*.ts`, `src/lib/brreg-endringer.ts`, `company-load.ts` | `docs/notes/trust.md`             |
 | Stores: store-status probe + verdict rules, what AMO/CWS change in a package | `scripts/store-status*.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
 
-Sidebar render functions are pure DOM writers in `src/details/render/*.ts`
-(one module per section: header, overview, roles, parent, underenheter,
-nokkeltall, plus shared helpers in `dom.ts`). No gotchas worth a topic
-note — grep the source.
+The panel is a controller (`src/details/controller.ts`, the state
+machine, tested with a fake painter) behind a painting seam
+(`src/details/view.ts`) that `src/details/painter.ts` implements with
+the shared components; `main.ts` wires the document and the browser.
+The tab content is built as data in `src/lib/view/dossier-view.ts` and
+painted by `src/lib/view/components/{oversikt,personer,okonomi,
+enheter,notes}.ts`.
 
-Frontend system (since Phase 3, 2026-07-04): design tokens + all shared
-components live in `src/styles/shared.css` (dark base, light theme via
-`prefers-color-scheme`); the surface CSS files keep layout/scale only.
-The verdict strip (`src/lib/ui/verdict.ts`, rendering
-`deriveSignals` from `src/lib/trust/signals.ts`) synthesizes status /
-alder / ansatte / regnskap under the company name on both surfaces — a
-signal whose fetch failed is OMITTED, never rendered as "not filed". Visual
-dev loop: `scripts/preview/` runs the real bundles against the live API
-in a plain browser tab (see its README for limits).
+Frontend system (1.4, «Dossier, stamped»): tokens + every component
+live in `src/styles/brreg.css` (light + dark via `prefers-color-scheme`
+and `.theme-*`); `popup.css` / `details.css` keep layout only. One view
+model, `src/lib/view/trust-view.ts` (`buildTrustView`), feeds both
+surfaces; the components in `src/lib/view/components/` are pure DOM
+writers and every user-facing string is in `src/lib/view/copy.ts`.
+Loudness follows severity: ok is a quiet band, warn a firmer band with
+the way out inside it, danger a stamp. A signal whose fetch failed is
+OMITTED, never rendered as "not filed". Visual dev loop:
+`scripts/preview/` runs the real bundles against the live API in a
+plain browser tab (see its README for limits).
 
 Targeted lookups:
 

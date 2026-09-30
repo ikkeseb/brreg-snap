@@ -1,0 +1,59 @@
+{
+  "request": "/enhetsregisteret/api/underenheter?overordnetEnhet=935864879&size=100",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "underenheter": [
+        {
+          "beliggenhetsadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "1290",
+            "poststed": "OSLO"
+          },
+          "harRegistrertAntallAnsatte": true,
+          "historiskeNavn": [],
+          "naeringskode1": {
+            "beskrivelse": "Andre post- og budtjenester",
+            "kode": "53.200"
+          },
+          "navn": "SCAN TRANSPORT AS",
+          "oppstartsdato": "2025-07-21",
+          "organisasjonsform": {
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning",
+            "kode": "BEDR"
+          },
+          "organisasjonsnummer": "935884705",
+          "overordnetEnhet": "935864879",
+          "postadresse": {
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301",
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "1271",
+            "poststed": "OSLO"
+          },
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-07-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-07-10",
+          "registreringsdatoEnhetsregisteret": "2025-07-26",
+          "registrertIMvaregisteret": false,
+          "respons_klasse": "Underenhet"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 1,
+      "totalPages": 1
+    }
+  }
+}

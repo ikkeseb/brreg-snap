@@ -8,7 +8,7 @@ import type { CompanyData } from '../src/lib/company-load.js';
 import type { Candidate, DetailedResult } from '../src/lib/hostname-search.js';
 import type { PanelView, TabFields } from '../src/lib/panel-follow.js';
 import type { TabContext } from '../src/lib/ui/resolve-tab.js';
-import { createPanelController, type ControllerDeps } from '../src/details/controller.js';
+import { createPanelController, PANEL_LOAD_OPTIONS, type ControllerDeps } from '../src/details/controller.js';
 import { createPanelHistory, type HistoryWindow } from '../src/details/history.js';
 import type { PanelPainter } from '../src/details/view.js';
 import dnb from './fixtures/brreg/enhet-984851006-dnb.json';
@@ -201,7 +201,53 @@ describe('load races', () => {
     intents.pick('example.com', DNB);
     await settle();
     expect(deps.loadCompany).toHaveBeenCalledTimes(1);
-    expect(deps.loadCompany).toHaveBeenCalledWith(EQUINOR);
+    expect(deps.loadCompany).toHaveBeenCalledWith(EQUINOR, PANEL_LOAD_OPTIONS);
+  });
+});
+
+describe('what the panel loads', () => {
+  it('asks for the dossier parts, and hands the group tree on to a drill-in and Back', async () => {
+    const { controller, intents, deps } = setup();
+    const tree = { organisasjonsnummer: DNB, navn: dnb.navn, children: [] };
+    vi.mocked(deps.loadCompany).mockResolvedValueOnce({ ...company(DNB), konsernTree: tree });
+    controller.follow(companyView(DNB, 'dnb.no'));
+    await settle();
+    expect(deps.loadCompany).toHaveBeenLastCalledWith(DNB, PANEL_LOAD_OPTIONS);
+
+    // The last tree in hand rides along on a drill-in…
+    intents.drill(EQUINOR);
+    await settle();
+    expect(deps.loadCompany).toHaveBeenLastCalledWith(EQUINOR, { ...PANEL_LOAD_OPTIONS, konsernTree: tree });
+    // …and on the Back that returns (the drilled-in company had no
+    // tree of its own, so nothing newer replaced it).
+    intents.back();
+    await settle();
+    expect(deps.loadCompany).toHaveBeenLastCalledWith(DNB, PANEL_LOAD_OPTIONS);
+  });
+
+  it('«Oppdater» never reuses a tree: everything is refetched', async () => {
+    const { controller, intents, deps } = setup();
+    const tree = { organisasjonsnummer: DNB, navn: dnb.navn, children: [] };
+    vi.mocked(deps.loadCompany).mockResolvedValueOnce({ ...company(DNB), konsernTree: tree });
+    controller.follow(companyView(DNB, 'dnb.no'));
+    await settle();
+    intents.refresh();
+    await settle();
+    expect(deps.loadCompany).toHaveBeenLastCalledWith(DNB, PANEL_LOAD_OPTIONS);
+  });
+
+  it('«Prøv igjen» under a degraded empty state re-runs the host search', async () => {
+    const searchHost = vi
+      .fn<ControllerDeps['searchHost']>()
+      .mockResolvedValueOnce({ band: 'none', candidates: [], complete: false })
+      .mockResolvedValueOnce({ band: 'auto', choice: DNB, candidates: CANDIDATES, complete: true });
+    const { controller, intents, painter, shownOrgnrs } = setup({ searchHost });
+    await controller.probe('dnb.no');
+    expect(painter.empty).toHaveBeenLastCalledWith(expect.objectContaining({ host: 'dnb.no', degraded: true }));
+    intents.retry();
+    await settle();
+    expect(searchHost).toHaveBeenCalledTimes(2);
+    expect(shownOrgnrs()).toEqual([DNB]);
   });
 });
 

@@ -1,0 +1,81 @@
+{
+  "request": "/regnskapsregisteret/regnskap/976389387",
+  "status": 200,
+  "body": [
+    {
+      "id": 6336111,
+      "journalnr": "2025763317",
+      "regnskapstype": "SELSKAP",
+      "virksomhet": {
+        "organisasjonsnummer": "976389387",
+        "organisasjonsform": "AS",
+        "morselskap": true
+      },
+      "regnskapsperiode": {
+        "fraDato": "2024-07-01",
+        "tilDato": "2025-06-30"
+      },
+      "valuta": "NOK",
+      "avviklingsregnskap": false,
+      "oppstillingsplan": "store",
+      "revisjon": {
+        "ikkeRevidertAarsregnskap": false,
+        "fravalgRevisjon": false
+      },
+      "regnkapsprinsipper": {
+        "smaaForetak": false,
+        "regnskapsregler": "regnskapslovenAlminneligRegler"
+      },
+      "egenkapitalGjeld": {
+        "sumEgenkapitalGjeld": 1965290000,
+        "egenkapital": {
+          "sumEgenkapital": 171071000,
+          "opptjentEgenkapital": {},
+          "innskuttEgenkapital": {
+            "sumInnskuttEgenkaptial": 171071000
+          }
+        },
+        "gjeldOversikt": {
+          "sumGjeld": 1794219000,
+          "kortsiktigGjeld": {
+            "sumKortsiktigGjeld": 1621898000
+          },
+          "langsiktigGjeld": {
+            "sumLangsiktigGjeld": 172321000
+          }
+        }
+      },
+      "eiendeler": {
+        "sumEiendeler": 1965290000,
+        "omloepsmidler": {
+          "sumOmloepsmidler": 1806732000
+        },
+        "anleggsmidler": {
+          "sumAnleggsmidler": 158558000
+        }
+      },
+      "resultatregnskapResultat": {
+        "ordinaertResultatFoerSkattekostnad": 145460000,
+        "aarsresultat": 115890000,
+        "finansresultat": {
+          "nettoFinans": 50929000,
+          "finansinntekt": {
+            "sumFinansinntekter": 144800000
+          },
+          "finanskostnad": {
+            "sumFinanskostnad": 93871000
+          }
+        },
+        "driftsresultat": {
+          "driftsresultat": 94531000,
+          "driftsinntekter": {
+            "sumDriftsinntekter": 4139101000
+          },
+          "driftskostnad": {
+            "sumDriftskostnad": 4044570000
+          }
+        }
+      }
+    }
+  ]
+}

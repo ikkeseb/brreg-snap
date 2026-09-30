@@ -133,15 +133,17 @@ brreg-snap panel is open.
 src/
   background/   FF event page / Chrome service worker (context menu)
   popup/        toolbar popup
-  details/      detail panel (FF sidebar_action / Chrome side_panel);
-                render/ holds one DOM writer per section
+  details/      side panel (FF sidebar_action / Chrome side_panel):
+                controller (state machine) + painter (the markup)
   lib/          brreg API client, orgnr + hostname resolution, session
-                cache, formatters
+                cache, formatters, the trust derivations
     platform/   engine differences (browser alias, sidebar vs side
                 panel, menus vs contextMenus); no polyfill
-    ui/         pieces shared by popup and panel (verdict strip,
-                picker, manual search, recents)
-  styles/       shared.css: design tokens + shared components
+    ui/         resolution pieces shared by popup and panel (manual
+                search, reject flow, recents, tab resolution)
+    view/       the view model (trust-view, dossier-view), the copy,
+                and the pure DOM components both surfaces paint
+  styles/       brreg.css: design tokens + every component
   types/        brreg response types
 public/         manifest.firefox.json, manifest.chrome.json, icons/
 tests/          Vitest unit tests

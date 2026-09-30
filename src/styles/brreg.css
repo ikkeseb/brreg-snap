@@ -153,6 +153,9 @@
 .app--panel { --gut: 16px; min-height: 100vh; --stamp-size: clamp(26px, 9cqi, 36px); }
 
 .app *, .app *::before, .app *::after { box-sizing: border-box; }
+/* `hidden` wins over every component's display value (the smoke asserts
+   no [hidden] element renders) */
+.app [hidden] { display: none !important; }
 :where(.app) :where(p, h1, h2, h3, dl, dd, ul, ol, blockquote, figure) { margin: 0; padding: 0; }
 :where(.app) :where(ul, ol) { list-style: none; }
 .app :where(button, input) { font: inherit; color: inherit; }
@@ -260,6 +263,11 @@
 .ident__name--claim { font-size: 20px; font-weight: 800; letter-spacing: -.012em; }
 .ident__line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin-top: 7px; color: var(--ink-2); }
 .ident__meta { color: var(--ink-2); }
+/* amendment b: with an eyebrow the org.nr owns its line; «form · city» and
+   brreg.no ↗ share the next, the link glued to the last word (.nw) so it
+   never lands alone on a line */
+.ident__rest { flex-basis: 100%; }
+.ident__rest .link { margin-left: 9px; }
 /* compact leaders line (popup): wraps whole pairs, never a label alone */
 .ident__leaders { display: flex; flex-wrap: wrap; gap: 0 16px; margin-top: 4px; color: var(--ink-3); }
 .ident__leaders > span { white-space: nowrap; }
@@ -384,8 +392,11 @@
 .ledger-row__aux { font-weight: 400; color: var(--ink-2); }
 .ledger-row__detail { display: block; font-weight: 400; color: var(--ink-2); }
 .ledger-row__detail .link, .ledger-row__detail .text-btn { font-weight: 400; }
-/* short value + its way out on one line (wraps under the value when narrow) */
-.ledger-row--inline .ledger-row__detail { display: inline; margin-left: 6px; white-space: nowrap; }
+/* short value + its way out on one line. Amendment a: a flex-wrap row with
+   a column gap, never a leading margin — when the action wraps it starts
+   flush with the value's left edge */
+.ledger-row--inline dd { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; }
+.ledger-row--inline .ledger-row__detail { display: inline; white-space: nowrap; }
 .ledger-row__act { display: block; }
 .ledger-row--danger-value dd { color: var(--danger); }
 .num--neg { color: var(--danger); font-weight: 600; }
@@ -493,9 +504,13 @@
   .def-row { grid-template-columns: minmax(0, 1fr); }
   .def-row dt { margin-bottom: 1px; font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
 }
-/* drillable entity name inside a value */
+/* drillable entity name inside a value (an <a> or a <button>) */
 .ent { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+button.ent { padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
 .ent:hover { text-decoration-color: currentColor; }
+/* a section whose body is a sentence or two (a failed fetch, no filing) */
+.section__text { padding: 8px 0; color: var(--ink-2); }
+.section__text + .section__text { padding-top: 0; }
 
 
 /* ---------- merknad + endret nylig ---------------------------------------
@@ -531,6 +546,16 @@
 .entity-row small { grid-column: 1; font: var(--t-body); color: var(--ink-2); }
 .entity-row .icon { grid-row: 1 / 3; grid-column: 2; color: var(--ink-2); }
 .entity-row:hover b { text-decoration-color: currentColor; }
+.entity-row--self { cursor: default; }
+.entity-row--self b { text-decoration: none; }
+/* konsern: the path from the top down to the company, then its children */
+.konsern-path li { padding-left: calc(var(--depth, 0) * 12px); }
+.konsern-sub { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+.konsern-sub .tab__count { margin: 0; letter-spacing: 0; }
+.show-all { margin-top: 8px; }
+/* amendment c: a child or branch named after its parent — the shared
+   prefix recedes so the distinguishing part reads first */
+.name-prefix { color: var(--ink-3); font-weight: 400; }
 /* back bar after drilling */
 .back {
   display: flex; align-items: center; gap: 6px; width: 100%; padding: 9px var(--gut);
@@ -556,7 +581,8 @@
 /* single-year equity ratio: a proportion, not a trend */
 .equity { margin-top: 10px; }
 .equity__track { display: flex; height: 6px; background: var(--skel); }
-.equity__fill { width: 38%; background: var(--ink); }  /* width set per company via a class or <meter> in code */
+.equity__fill { width: var(--share, 0%); background: var(--ink); }  /* --share set via el.style.setProperty */
+.fig-row[data-tone="warn"] dd { color: var(--tone); }
 .equity__legend { display: flex; justify-content: space-between; margin-top: 5px; font: var(--t-cap); font-weight: 400; color: var(--ink-3); }
 .honest { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 0 10px; margin-top: 14px; color: var(--ink-2); }
 .honest .glyph { margin-top: 2.5px; }
@@ -566,6 +592,8 @@
 .years a { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
 .years a + a::before { content: "·"; display: inline-block; padding: 0 9px; color: var(--ink-3); font-weight: 400; }
 .years .years__more { font-weight: 400; color: var(--ink-2); }
+.years button.years__more { padding: 0; border: 0; background: none; cursor: pointer; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.years button.years__more::before { content: "·"; display: inline-block; padding: 0 9px; color: var(--ink-3); }
 .ext-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rule); }
 .ext-row a { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
 .ext-row span { color: var(--ink-3); }
@@ -580,9 +608,11 @@
 .unit--gone .unit__meta { color: var(--ink-3); }
 
 
-/* ---------- compact sticky head (panel, once scrolled past identity) ----- */
+/* ---------- compact sticky head (panel, once scrolled past identity) -----
+   The wrapper is sticky and zero-height, so the head overlays the content
+   instead of pushing it: showing it on scroll never moves the page. */
+.stick-wrap { position: sticky; top: 0; z-index: 1; height: 0; }
 .stick {
-  position: sticky; top: 0; z-index: 1;
   display: flex; align-items: center; gap: 10px; padding: 10px var(--gut);
   border-bottom: 1px solid var(--rule); background: var(--paper);
 }
@@ -591,6 +621,15 @@
 .stick__name { flex: 1; min-width: 0; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .stick__num { color: var(--ink-2); }
 .stick + .tabs { margin-top: 12px; }
+
+
+/* ---------- auto-sync consent (panel) --------------------------------------
+   A calm band under the mast: what auto-sync sends and to whom, then
+   «Slå på» (the click that may request the permission) and «Avbryt». */
+.consent { padding: 12px var(--gut) 14px; border-bottom: 1px solid var(--rule); background: var(--paper-2); }
+.consent__text { color: var(--ink-2); }
+.consent__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 10px; }
+.consent__status { padding: 8px var(--gut); border-bottom: 1px solid var(--rule); color: var(--ink-2); }
 
 
 /* ---------- picker -------------------------------------------------------

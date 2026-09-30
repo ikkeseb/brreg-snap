@@ -3,7 +3,7 @@
 // history write goes through `onSelect` so this module owns no URL.
 
 // ?tab=<key> where key is the tab id minus its "tab-" prefix
-// ('oversikt' | 'personer' | 'nokkeltall' | 'enheter').
+// ('oversikt' | 'personer' | 'okonomi' | 'enheter').
 const tabKey = (id: string): string => id.replace(/^tab-/, '');
 
 export interface TabsOptions {

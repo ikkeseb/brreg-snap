@@ -11,6 +11,28 @@ import { join } from 'node:path';
  * @typedef {{ status: number, headers: Record<string, string>, body: string }} FixtureReply
  */
 
+// Query values that differ per page load and carry no information for
+// the recorded reply: the change feed's `dato=` (now minus the window).
+// Both the recorder and the lookup key on the normalised form, so one
+// fixture serves every load.
+const VOLATILE = ['dato'];
+
+/**
+ * The request key a fixture is stored under: path + query with the
+ * volatile values replaced by a placeholder.
+ * @param {string} pathAndQuery
+ * @returns {string}
+ */
+export function normalizeRequest(pathAndQuery) {
+  const at = pathAndQuery.indexOf('?');
+  if (at < 0) return pathAndQuery;
+  const params = new URLSearchParams(pathAndQuery.slice(at + 1));
+  for (const name of VOLATILE) {
+    if (params.has(name)) params.set(name, '*');
+  }
+  return `${pathAndQuery.slice(0, at)}?${params.toString()}`;
+}
+
 /**
  * Loads every *.json fixture in `dir` into a map keyed by `request`.
  * @param {string} dir
@@ -21,7 +43,7 @@ export async function loadFixtures(dir) {
   for (const name of await readdir(dir)) {
     if (!name.endsWith('.json')) continue;
     const f = JSON.parse(await readFile(join(dir, name), 'utf8'));
-    map.set(f.request, { status: f.status, body: f.body });
+    map.set(normalizeRequest(f.request), { status: f.status, body: f.body });
   }
   return map;
 }
@@ -38,7 +60,7 @@ export const MISS_HEADER = 'x-fixture-miss';
  * @returns {FixtureReply}
  */
 export function fixtureReply(fixtures, pathAndQuery) {
-  const hit = fixtures.get(pathAndQuery);
+  const hit = fixtures.get(normalizeRequest(pathAndQuery));
   if (!hit) {
     return {
       status: 404,

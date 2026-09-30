@@ -1,6 +1,7 @@
-// The panel's entry: wiring only. Looks up the document, builds the
-// painter and the controller, hooks the browser events, and starts.
-// The decisions live in controller.ts; the markup in legacy-painter.ts.
+// The panel's entry: wiring only. Looks up the document, renders the
+// masthead, builds the painter and the controller, hooks the browser
+// events, and starts. The decisions live in controller.ts; the markup
+// in painter.ts.
 
 // Side-effect import: aliases `globalThis.browser = chrome` on Chromium
 // before any `browser.*` access. Must stay the first import.
@@ -12,11 +13,13 @@ import {
 } from '../lib/auto-sync-settings.js';
 import { invalidateCache } from '../lib/brreg.js';
 import { loadCompany } from '../lib/company-load.js';
+import { writeClipboard } from '../lib/copy-orgnr.js';
 import {
   addRejectedChoice,
   forgetHost,
   getRememberedChoice,
   searchByHostnameDetailed,
+  setPickerChoice,
 } from '../lib/hostname-search.js';
 import {
   isForWindow,
@@ -25,16 +28,30 @@ import {
 } from '../lib/panel-protocol.js';
 import { isFirefox } from '../lib/platform/engine.js';
 import { createTabWatcher } from '../lib/tab-sync.js';
-import { pushRecent } from '../lib/ui/recent.js';
+import { getRecent, pushRecent } from '../lib/ui/recent.js';
 import { resolveTabContext } from '../lib/ui/resolve-tab.js';
+import { liveRegionOf } from '../lib/view/components/live.js';
+import { renderMasthead } from '../lib/view/components/masthead.js';
+import { createSwitchAutoSyncUi } from './auto-sync-switch.js';
 import { wireAutoSync } from './auto-sync-ui.js';
 import { createPanelController } from './controller.js';
 import { createPanelHistory } from './history.js';
-import { createCheckboxAutoSyncUi, createLegacyPainter } from './legacy-painter.js';
+import { createPanelPainter } from './painter.js';
 
 function main(): void {
-  const brandMark = document.getElementById('brand-mark') as HTMLImageElement;
-  brandMark.src = browser.runtime.getURL('icons/icon-48.png');
+  const byId = <T extends HTMLElement>(id: string): T => document.getElementById(id) as T;
+  const live = liveRegionOf(byId('live'));
+  // The masthead is rendered once: its search field is the manual
+  // search from every state and its switch keeps its state across paints.
+  const mast = renderMasthead(byId('mast'), { kind: 'panel', autoSync: { on: false } });
+  const searchInput = mast.input!;
+  const autoSyncToggle = mast.toggle!;
+  // What «Rapporter feil treff» reports about this install. getManifest
+  // is optional-called: the preview harness's shim has none.
+  const env = {
+    version: browser.runtime.getManifest?.()?.version ?? '',
+    browser: isFirefox ? 'Firefox' : 'Chrome',
+  };
 
   // The window this panel document lives in. Firefox sidebars and
   // Chrome side panels are one document per browser window, and
@@ -52,7 +69,22 @@ function main(): void {
 
   const controller = createPanelController({
     painter: (intents) =>
-      createLegacyPainter(document, intents, { initialTab: history.tabFromUrl() }),
+      createPanelPainter(
+        {
+          body: document.body,
+          search: searchInput,
+          stick: byId('stick'),
+          back: byId<HTMLButtonElement>('back'),
+          main: byId('app'),
+          foot: byId('foot'),
+          live,
+        },
+        intents,
+        {
+          initialTab: history.tabFromUrl(),
+          deps: { copy: writeClipboard, getRecent, getRememberedChoice, setPickerChoice, env },
+        },
+      ),
     history,
     hasFocus: () => document.hasFocus(),
     ownUrlPrefix: browser.runtime.getURL(''),
@@ -70,7 +102,7 @@ function main(): void {
     getTab: (tabId) => browser.tabs.get(tabId),
     resolveTab: resolveTabContext,
     searchHost: searchByHostnameDetailed,
-    loadCompany: (orgnr) => loadCompany(orgnr, { underenheter: true }),
+    loadCompany,
     invalidateCache,
     pushRecent,
     addRejectedChoice,
@@ -80,7 +112,7 @@ function main(): void {
 
   async function setupAutoSync(): Promise<void> {
     const windowId = await panelWindowId;
-    const autoSync = wireAutoSync(createCheckboxAutoSyncUi(document), {
+    const autoSync = wireAutoSync(createSwitchAutoSyncUi(autoSyncToggle, byId('under-mast'), live), {
       permissions: browser.permissions,
       getAutoSync,
       setAutoSync,

@@ -1,48 +1,13 @@
-// Click-to-copy widget for orgnr digits, used in three places: popup
-// result row, sidebar header, and the underenheter table. The button
-// is the click target so the affordance is on the digits, not the
-// surrounding label — and it stays keyboard-reachable.
-//
-// navigator.clipboard.writeText works in extension contexts without a
-// `clipboardWrite` manifest permission as long as the call lives in a
-// user-gesture stack (i.e. inside a click handler) — which it does.
-export function buildOrgnrCopyButton(orgnr: string): HTMLButtonElement {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'orgnr-copy';
-  btn.textContent = orgnr;
-  btn.title = 'Klikk for å kopiere';
-  btn.setAttribute('aria-label', `Kopier organisasjonsnummer ${orgnr}`);
-  btn.addEventListener('click', () => {
-    void copyOrgnr(orgnr, btn);
-  });
-  return btn;
-}
+// The clipboard write every copy action goes through (org.nr, «Kopier
+// sammendrag»). navigator.clipboard.writeText works in extension
+// contexts without a `clipboardWrite` manifest permission as long as
+// the call lives in a user-gesture stack — inside a click handler,
+// before any other await (that gesture is what lets it through). The
+// buttons and their feedback are src/lib/view/components/copy-feedback.ts.
 
-// Populate a container with "Org.nr <button>digits</button>". Used in
-// the popup row and sidebar header where the orgnr is presented with
-// the label inline.
-export function renderOrgnrCopy(
-  container: HTMLElement,
-  orgnr: string,
-): void {
-  container.textContent = '';
-  container.append('Org.nr ');
-  container.appendChild(buildOrgnrCopyButton(orgnr));
-}
-
-// One pending feedback reset per button. A second click inside the
-// 1.5 s window re-arms that timer instead of stacking another, and the
-// reset writes back `orgnr` — reading textContent then would capture
-// "Kopiert!" and leave it stuck on the button.
-const resetTimers = new WeakMap<HTMLElement, number>();
-
-// Write `text` to the clipboard; false when the browser refused. Call
-// it from inside a click handler, before any other await — that
-// gesture is what lets the write through without the `clipboardWrite`
-// permission. Every copy action (orgnr, summary, invoice block) goes
-// through here and shows the outcome: a silent failure reads as
-// "copied" to the user, who then pastes the wrong thing elsewhere.
+// Write `text` to the clipboard; false when the browser refused. A
+// silent failure reads as "copied" to the user, who then pastes the
+// wrong thing elsewhere, so every caller shows the outcome.
 export async function writeClipboard(text: string): Promise<boolean> {
   try {
     await navigator.clipboard.writeText(text);
@@ -50,20 +15,4 @@ export async function writeClipboard(text: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-async function copyOrgnr(orgnr: string, btn: HTMLElement): Promise<void> {
-  const ok = await writeClipboard(orgnr);
-  window.clearTimeout(resetTimers.get(btn));
-  btn.classList.remove('copied', 'copy-failed');
-  btn.classList.add(ok ? 'copied' : 'copy-failed');
-  btn.textContent = ok ? 'Kopiert!' : 'Kunne ikke kopiere';
-  resetTimers.set(
-    btn,
-    window.setTimeout(() => {
-      resetTimers.delete(btn);
-      btn.textContent = orgnr;
-      btn.classList.remove('copied', 'copy-failed');
-    }, 1500),
-  );
 }

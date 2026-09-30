@@ -1,0 +1,182 @@
+{
+  "request": "/enhetsregisteret/api/oppdateringer/enheter?organisasjonsnummer=984851006&dato=*&includeChanges=true&size=100&sort=id%2CDESC",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "oppdaterteEnheter": [
+        {
+          "dato": "2026-09-14T22:08:40.421Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-09-14"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 7353
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-09-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25224621,
+          "organisasjonsnummer": "984851006"
+        },
+        {
+          "dato": "2026-08-12T22:05:42.092Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-08-12"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 7488
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-08-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25083754,
+          "organisasjonsnummer": "984851006"
+        },
+        {
+          "dato": "2026-07-15T22:07:58.131Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-07-15"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 7569
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-07-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24883572,
+          "organisasjonsnummer": "984851006"
+        },
+        {
+          "dato": "2026-06-17T22:00:52.436Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/vedtektsdato",
+              "value": "2026-04-21"
+            },
+            {
+              "op": "replace",
+              "path": "/kapital/antallAksjer",
+              "value": 1440664864
+            },
+            {
+              "op": "replace",
+              "path": "/kapital/innfortDato",
+              "value": "2026-06-17"
+            },
+            {
+              "op": "replace",
+              "path": "/kapital/belop",
+              "value": 18008310800
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24655105,
+          "organisasjonsnummer": "984851006"
+        },
+        {
+          "dato": "2026-06-13T15:04:56.823Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-06-13"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 7536
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-06-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24623965,
+          "organisasjonsnummer": "984851006"
+        },
+        {
+          "dato": "2026-05-12T22:03:16.844Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-05-12"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 7491
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-05-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24415313,
+          "organisasjonsnummer": "984851006"
+        },
+        {
+          "dato": "2026-04-14T22:06:51.013Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-04-14"
+            },
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 7495
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-04-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 24151882,
+          "organisasjonsnummer": "984851006"
+        }
+      ]
+    },
+    "page": {
+      "number": 0,
+      "size": 100,
+      "totalElements": 7,
+      "totalPages": 1
+    }
+  }
+}

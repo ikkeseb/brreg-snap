@@ -5,7 +5,7 @@
 // (view.ts). No DOM: window and document reach this module only as
 // injected deps (history.ts, hasFocus), so it is tested with fakes.
 
-import type { CompanyData } from '../lib/company-load.js';
+import type { CompanyData, LoadCompanyOptions } from '../lib/company-load.js';
 import { isPermanentLoadError } from '../lib/company-load.js';
 import type {
   Candidate,
@@ -50,7 +50,9 @@ export interface ControllerDeps {
   // `title`: the tab's title as a word-boundary hint (hostname-search.ts
   // § title segmentation). Given only when the panel has one for the host.
   searchHost: (host: string, title?: string) => Promise<DetailedResult | undefined>;
-  loadCompany: (orgnr: string) => Promise<CompanyData>;
+  // Called with PANEL_LOAD_OPTIONS (plus the group tree in hand on a
+  // drill-in within the same konsern).
+  loadCompany: (orgnr: string, opts: LoadCompanyOptions) => Promise<CompanyData>;
   invalidateCache: (orgnr: string) => Promise<void>;
   pushRecent: (orgnr: string, navn: string) => Promise<void>;
   addRejectedChoice: (host: string, orgnr: string) => Promise<void>;
@@ -58,6 +60,16 @@ export interface ControllerDeps {
   getRememberedChoice: (host: string) => Promise<RememberedChoice | undefined>;
   loads?: LoadSequence;
 }
+
+// What the panel fetches for a company: everything the dossier paints.
+// The popup asks for less (konsern only); this is the one place the
+// panel's set lives.
+export const PANEL_LOAD_OPTIONS: LoadCompanyOptions = {
+  underenheter: true,
+  endringer: true,
+  konsern: true,
+  aarsregnskapYears: true,
+};
 
 export interface PanelController {
   intents: PanelIntents;
@@ -104,8 +116,13 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   // checks this rather than the load token: a sync that keeps the same
   // company claims a token but leaves this load's result standing.
   let shownLoad: LoadToken | undefined;
-  // Re-trigger for the «Prøv igjen» button in the full error state.
+  // Re-trigger for the «Prøv igjen» button in the full error state, or
+  // under a degraded empty state (the host search failed).
   let lastLoad: (() => void) | undefined;
+  // The group tree of the last company loaded (company-load.ts). A
+  // drill-in within the same konsern derives its place from it instead
+  // of fetching the tree again.
+  let lastTree: CompanyData['konsernTree'];
 
   // Focus moves only for a user-initiated flow, and only when the
   // panel window has focus. A background tab event never asks for it.
@@ -136,6 +153,9 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       // «Oppdater»: orgnrs whose cached data is dropped first, so every
       // part is refetched from brreg.
       invalidate?: Array<string | undefined>;
+      // A drill-in or a Back within a group: hand the tree in hand to
+      // company-load, which uses it when the orgnr sits in it.
+      reuseTree?: boolean;
     } = {},
   ): Promise<void> {
     // If a second sync lands while this one is still in flight, the
@@ -164,12 +184,15 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       // underenheter and regnskap come back undefined when their fetch
       // failed ("couldn't ask"), and each renderer says so instead of
       // claiming an empty registry. An underenhet orgnr loads its parent.
+      const loadOpts: LoadCompanyOptions = { ...PANEL_LOAD_OPTIONS };
+      if (opts.reuseTree && lastTree) loadOpts.konsernTree = lastTree;
       const [company, remembered] = await Promise.all([
-        deps.loadCompany(orgnr),
+        deps.loadCompany(orgnr, loadOpts),
         host === undefined ? undefined : deps.getRememberedChoice(host),
       ]);
       if (run.isStale()) return;
       const { enhet } = company;
+      lastTree = company.konsernTree;
 
       // Stamp the recent stack now that the Enhet is confirmed — same
       // rule as the popup: never persist orgnrs that failed to fetch.
@@ -232,6 +255,13 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     currentHost = view.host;
     currentOrgnr = undefined;
     history.clearOrgnr();
+    // «Prøv igjen» under a degraded empty state re-runs the host search.
+    if (view.degraded && view.host) {
+      const host = view.host;
+      lastLoad = () => {
+        void follower.probe(host);
+      };
+    }
     painter.empty({
       host: view.host,
       degraded: view.degraded === true,
@@ -310,7 +340,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       if (!isValidOrgnr(orgnr)) return;
       currentHost = undefined;
       history.setOrgnr(orgnr, 'drill-in', undefined, { push: true });
-      void loadOrgnr(orgnr, 'drill-in', { focus: 'heading' });
+      void loadOrgnr(orgnr, 'drill-in', { focus: 'heading', reuseTree: true });
     },
 
     back(): void {
@@ -440,6 +470,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         currentHost = entry?.host;
         void loadOrgnr(orgnr, entry?.method ?? UNKNOWN_URL_METHOD, {
           focus: 'heading',
+          reuseTree: true,
         });
         // Re-activate the tab the restored entry's URL records, so the
         // selected tab matches the ?tab= it was left on instead of

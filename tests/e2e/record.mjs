@@ -12,6 +12,7 @@ import { readdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
+import { normalizeRequest } from '../../scripts/preview/fixtures.mjs';
 import { STATES } from './states.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -121,6 +122,17 @@ try {
     await page.goto(server.origin + s.path);
     await page.locator('main#app:not([data-state="loading"])').waitFor();
     await page.waitForLoadState('networkidle');
+    for (const a of s.actions ?? []) {
+      // The load state is sticky: 'networkidle' resolves at once when
+      // the page was already idle, so wait for the action's first
+      // request instead, then for the page to settle again.
+      const first = page.waitForRequest((r) => r.url().includes('/brreg/'), { timeout: 5000 }).catch(() => {});
+      if (a.type === 'click') await page.click(a.selector);
+      else await page.fill(a.selector, a.text ?? '');
+      await first;
+      await page.locator('main#app:not([data-state="loading"])').waitFor();
+      await page.waitForTimeout(1500);
+    }
     const state = await page.locator('main#app').getAttribute('data-state');
     console.log(`${s.name}: ${state}${state === s.state ? '' : ` (expected ${s.state})`}`);
     await page.close();
@@ -133,7 +145,16 @@ try {
 for (const name of await readdir(outDir)) {
   if (name.endsWith('.json')) await rm(join(outDir, name));
 }
+// One fixture per normalised request: the change feed's `dato=` differs
+// per load, so the file is keyed on the placeholder form and fetched
+// with the first value seen.
+/** @type {Map<string, string>} */
+const byKey = new Map();
 for (const request of [...requests].sort()) {
+  const key = normalizeRequest(request);
+  if (!byKey.has(key)) byKey.set(key, request);
+}
+for (const [key, request] of [...byKey].sort()) {
   const resp = await fetch('https://data.brreg.no' + request, {
     headers: { accept: 'application/json' },
   });
@@ -147,7 +168,7 @@ for (const request of [...requests].sort()) {
   }
   anonymise(body);
   trim(body);
-  const file = fileName(request);
-  await writeFile(join(outDir, file), JSON.stringify({ request, status, body }, null, 2) + '\n');
+  const file = fileName(key);
+  await writeFile(join(outDir, file), JSON.stringify({ request: key, status, body }, null, 2) + '\n');
   console.log(`  ${status} ${file}`);
 }

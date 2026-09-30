@@ -13,9 +13,10 @@
 // "Prøv igjen" retry — never a full panel error state, which would
 // rip the input away from under the user mid-typing.
 //
-// Result rows are real <button>s (keyboard-operable for free), and the
-// result count is announced through a visually-hidden aria-live region
-// so screen-reader users hear "5 treff" instead of silence.
+// Result rows are painted by the caller's SearchPainter (real <button>s,
+// keyboard-operable for free), and the result count is announced
+// through the surface's live region so screen-reader users hear
+// "5 treff" instead of silence.
 
 import { searchEnheter } from '../brreg.js';
 import {
@@ -25,7 +26,6 @@ import {
 } from '../company-load.js';
 import { isValidOrgnr } from '../mod11.js';
 import type { SearchHit } from '../../types/brreg.js';
-import { appendHitSummary } from './hit-row.js';
 
 const DEBOUNCE_MS = 250;
 const MIN_QUERY_LENGTH = 2;
@@ -102,58 +102,22 @@ async function find(query: string): Promise<SearchRows> {
   return { kind: 'hits', hits: results.map((hit) => ({ hit })) };
 }
 
-// How one search's rows are painted. The default paints the 1.3
-// markup (li > button.manual-hit); the 1.4 components pass their own
-// (src/lib/view/components/search.ts). Each method returns the <li>.
+// How one search's rows are painted (src/lib/view/components/search.ts
+// § searchPainter). Each method returns the <li>.
 export interface SearchPainter {
   hit(hit: SearchHit, onSelect: () => void, opts: { avdelingAv?: string }): HTMLElement;
   note(text: string): HTMLElement;
   error(text: string, retry: () => void): HTMLElement;
 }
 
-export const defaultPainter: SearchPainter = {
-  hit(hit, onSelect, opts) {
-    const li = document.createElement('li');
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'manual-hit';
-    appendHitSummary(btn, hit, opts);
-    btn.addEventListener('click', onSelect);
-    li.appendChild(btn);
-    return li;
-  },
-  note(text) {
-    const li = document.createElement('li');
-    li.className = 'empty-result';
-    li.textContent = text;
-    return li;
-  },
-  error(text, retry) {
-    const li = document.createElement('li');
-    li.className = 'search-error';
-    const msg = document.createElement('span');
-    msg.textContent = text;
-    li.appendChild(msg);
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'retry-button';
-    btn.textContent = 'Prøv igjen';
-    btn.addEventListener('click', retry);
-    li.appendChild(btn);
-    return li;
-  },
-};
-
 export interface ManualSearchOptions {
   inputEl: HTMLInputElement;
   resultsEl: HTMLUListElement;
   onSelect: (hit: SearchHit) => void;
-  // Row markup; the default is the 1.3 markup above.
-  paint?: SearchPainter;
-  // Where result counts are announced. Given: the surface's one live
-  // region (src/lib/view/components/live.ts). Omitted: a region of its
-  // own is inserted after the results list.
-  announce?: (text: string) => void;
+  paint: SearchPainter;
+  // Where result counts are announced: the surface's one live region
+  // (src/lib/view/components/live.ts).
+  announce: (text: string) => void;
   // Query dropped below the minimum length and the results were
   // cleared — the popup uses this to restore its recents list.
   onQueryCleared?: () => void;
@@ -172,26 +136,12 @@ export interface ManualSearchController {
   search(query: string): void;
 }
 
-function ownLiveRegion(after: HTMLElement): (text: string) => void {
-  const liveRegion = document.createElement('div');
-  liveRegion.className = 'visually-hidden';
-  liveRegion.setAttribute('aria-live', 'polite');
-  after.insertAdjacentElement('afterend', liveRegion);
-  return (text: string) => {
-    liveRegion.textContent = text;
-  };
-}
-
 export function attachManualSearch(
   opts: ManualSearchOptions,
 ): ManualSearchController {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let runId = 0;
-  const paint = opts.paint ?? defaultPainter;
-
-  // aria-live region for result-count announcements, unless the
-  // surface routes them through its own.
-  const announce: (text: string) => void = opts.announce ?? ownLiveRegion(opts.resultsEl);
+  const { paint, announce } = opts;
 
   function schedule(delayMs: number): void {
     if (timer) clearTimeout(timer);

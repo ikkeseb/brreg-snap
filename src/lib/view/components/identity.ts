@@ -13,15 +13,20 @@ export interface Identity {
   heading: HTMLHeadingElement;
 }
 
+export interface OrgnrButtonOptions {
+  // The list variant (Enheter rows): smaller weight, no «Org.nr» label.
+  small?: boolean;
+}
+
 export function buildOrgnrButton(
   orgnr: { digits: string; spaced: string },
   handlers: CopyHandlers,
-  small = false,
+  opts: OrgnrButtonOptions = {},
 ): HTMLButtonElement {
-  const btn = button(small ? 'orgnr orgnr--sm' : 'orgnr');
+  const btn = button(opts.small ? 'orgnr orgnr--sm' : 'orgnr');
   btn.setAttribute('aria-label', COPY.orgnrAria(orgnr.spaced));
   btn.title = COPY.orgnrTitle;
-  btn.appendChild(el('span', 'orgnr__label', COPY.orgnrLabel));
+  if (!opts.small) btn.appendChild(el('span', 'orgnr__label', COPY.orgnrLabel));
   btn.appendChild(el('span', 'orgnr__num', orgnr.spaced));
   const icons = el('span', 'orgnr__icon');
   icons.appendChild(icon('i-copy', 'icon--copy'));
@@ -54,8 +59,24 @@ export function renderIdentity(
 
   const line = el('p', 'ident__line');
   line.appendChild(buildOrgnrButton(identity.orgnr, handlers));
-  if (identity.meta) line.appendChild(el('span', 'ident__meta', identity.meta));
-  line.appendChild(link(COPY.brregLink, identity.brregUrl, { external: true }));
+  const brreg = link(COPY.brregLink, identity.brregUrl, { external: true });
+  if (identity.meta) {
+    // With a provenance eyebrow the org.nr owns its line and «form ·
+    // city» takes the next, the brreg.no link glued to its last word so
+    // it is never orphaned on a line of its own.
+    const rest = el('span', 'ident__rest');
+    const meta = el('span', 'ident__meta');
+    const at = identity.meta.lastIndexOf(' ');
+    meta.append(identity.meta.slice(0, at + 1));
+    const tail = el('span', 'nw', identity.meta.slice(at + 1));
+    tail.append(' ');
+    tail.appendChild(brreg);
+    meta.appendChild(tail);
+    rest.appendChild(meta);
+    line.appendChild(rest);
+  } else {
+    line.appendChild(brreg);
+  }
   container.appendChild(line);
 
   if (identity.leaders.length > 0) {

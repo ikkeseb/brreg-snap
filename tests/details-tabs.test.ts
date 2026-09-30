@@ -6,7 +6,7 @@ import { describe, expect, it, vi } from 'vitest';
 
 import { setupTabs } from '../src/details/tabs.js';
 
-const KEYS = ['oversikt', 'personer', 'nokkeltall', 'enheter'];
+const KEYS = ['oversikt', 'personer', 'okonomi', 'enheter'];
 
 function mount(initial?: string) {
   const root = document.createElement('div');
@@ -68,9 +68,9 @@ describe('setupTabs', () => {
   });
 
   it('restores the initial key on load and via activateByKey without persisting', () => {
-    const { tabs, selected, shown, onSelect } = mount('nokkeltall');
-    expect(selected()).toEqual(['nokkeltall']);
-    expect(shown()).toEqual(['nokkeltall']);
+    const { tabs, selected, shown, onSelect } = mount('okonomi');
+    expect(selected()).toEqual(['okonomi']);
+    expect(shown()).toEqual(['okonomi']);
     tabs.activateByKey('enheter');
     expect(selected()).toEqual(['enheter']);
     tabs.activateByKey('unknown');

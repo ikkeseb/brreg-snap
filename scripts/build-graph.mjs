@@ -8,7 +8,7 @@
 //
 // Not covered: CSS @import (Vite inlines it inside its CSS transform, so
 // it never becomes a graph module; src CSS only @imports
-// ../styles/shared.css today) and url() assets small enough to be
+// ../styles/brreg.css today) and url() assets small enough to be
 // inlined as data: URIs (no file is emitted).
 import { extname, isAbsolute, relative, resolve, sep } from 'node:path';
 

@@ -1,6 +1,6 @@
 # Sidebar sync
 
-Source: `src/details/details.ts`, `src/lib/panel-follow.ts`,
+Source: `src/details/{controller,main,painter}.ts`, `src/lib/panel-follow.ts`,
 `src/lib/panel-protocol.ts`, `src/lib/tab-sync.ts`,
 `src/popup/popup.ts`, `src/background/background.ts`.
 
@@ -116,7 +116,7 @@ disse» so an open panel clears the stale company.
 <!-- SECTION: load-race-guards -->
 ## One load token; every flow that paints checks it
 
-`details.ts` has one `createLoadSequence()` (`panel-follow.ts`). The
+`controller.ts` has one `createLoadSequence()` (`panel-follow.ts`). The
 painters (`loadOrgnr`, `showPicker`, `showEmptyState`) claim a token
 themselves; flows that await before painting — startup, a tab event,
 a no-match probe, the «Feil bedrift?» reject flow (`claim` in
@@ -150,7 +150,7 @@ change of the active tab, most of which stay on the same company.
 ## Background repaints must not steal focus or lie in the footer
 
 With auto-sync on, the panel repaints on tab switches while the user
-is working in the page. The rules, in `details.ts` unless noted:
+is working in the page. The rules, in `controller.ts` and `painter.ts` unless noted:
 
 - `showEmptyState` focuses the manual-search input only when
   `document.hasFocus()` — an unconditional `focus()` yanked the
@@ -168,14 +168,21 @@ is working in the page. The rules, in `details.ts` unless noted:
   no host with a manual pick (`syncSidebarIfOpen` in `popup.ts`).
 
 <!-- SECTION: shared-ui-modules -->
-## Popup and sidebar share their resolution UX via `src/lib/ui/`
+## Popup and sidebar share their resolution UX via `src/lib/ui/` and `src/lib/view/`
 
-The picker (incl. digit shortcuts + "Ingen av disse" +
-"Feil bedrift?" reject flow), the debounced manual search (incl.
-inline error + "Prøv igjen" retry — manual-search failures never flip
-the panel to the full error state), the active-tab resolution cascade
-(`resolveTabContext`, `TabContext`, `ResolutionMethod`) and the
-source-host footer label live in `src/lib/ui/{picker,manual-search,
-resolve-tab,source-label,hit-row,flags}.ts`. The surfaces keep only
-their side effects (URL params, load tokens, panel messages, the
-popup's recents list) in callbacks. Fixes to that UX land there, once.
+The "Feil bedrift?" reject flow (`rejectChoice`), the debounced manual
+search (incl. inline error + "Prøv igjen" retry — manual-search
+failures never flip the panel to the full error state), the recents
+stack and the active-tab resolution cascade (`resolveTabContext`,
+`TabContext`, `ResolutionMethod`) live in `src/lib/ui/{picker,
+manual-search,recent,resolve-tab,flags}.ts`. The markup — picker rows
+with digit shortcuts and «Ingen av disse», search rows, the identity,
+answer and ledger — is the pure components in
+`src/lib/view/components/`. The surfaces keep only their side effects
+(URL params, load tokens, panel messages) in callbacks. Fixes to that
+UX land there, once.
+
+The panel's masthead field is its manual search from every state:
+typing keeps the current view aside as live DOM and shows the search
+view; Escape or the back bar puts it back without a refetch. Any paint
+from the controller (a sync, a tab event, a pick) discards the aside.

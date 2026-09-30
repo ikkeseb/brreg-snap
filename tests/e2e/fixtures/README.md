@@ -26,3 +26,6 @@ commits personal data:
   host stays: scoring reads it)
 - trimmed: `_links` dropped, underenhet lists cut to 5 entries
   (`page.totalElements` stays real), error-body timestamp/trace pinned
+- keyed on the normalised request: a per-load query value (the change
+  feed's `dato=`) is stored and matched as `*`
+  (`scripts/preview/fixtures.mjs` § normalizeRequest)

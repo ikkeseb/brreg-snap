@@ -4,262 +4,92 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>brreg-snap</title>
+    <link
+      rel="preload"
+      href="/fonts/schibsted-grotesk-var.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="stylesheet" href="details.css" />
   </head>
-  <body>
-    <main id="app" data-state="loading">
-      <header>
-        <h1 class="visually-hidden">brreg-snap</h1>
-        <div class="brand-row">
-          <img id="brand-mark" class="brand-mark" alt="" />
-          <div class="toolbar" role="toolbar" aria-label="Sidebar-handlinger">
-          <label
-            class="toggle"
-            for="auto-sync-toggle"
-            title="Oppdaterer automatisk når du bytter fane eller åpner en ny side"
-          >
-            <input type="checkbox" id="auto-sync-toggle" />
-            <span class="toggle-track" aria-hidden="true"></span>
-            <span class="toggle-label">Auto-oppdater</span>
-          </label>
-          </div>
-        </div>
-        <p id="auto-sync-status" class="auto-sync-status" role="status" aria-live="polite" hidden></p>
-        <div
-          id="auto-sync-consent"
-          class="auto-sync-consent"
-          role="group"
-          aria-labelledby="auto-sync-consent-text"
-          hidden
-        >
-          <p id="auto-sync-consent-text">
-            Auto-oppdater slår opp siden du ser på hver gang du bytter fane
-            eller åpner en ny side, så lenge et brreg-snap-panel er åpent:
-            domenet sendes til Brønnøysundregistrene (data.brreg.no).
-            Ingenting sendes til utvikleren. Nettleseren spør deretter om
-            tilgang til fanene.
-          </p>
-          <div class="auto-sync-consent-actions">
-            <button type="button" id="auto-sync-consent-accept" class="retry-button">
-              Slå på
-            </button>
-            <button type="button" id="auto-sync-consent-cancel" class="ghost-link">
-              Avbryt
-            </button>
-          </div>
-        </div>
-      </header>
-      <section id="status" class="visually-hidden" aria-live="polite"></section>
-      <div id="error-actions" class="error-actions" hidden>
-        <button type="button" id="retry-load" class="retry-button">
-          Prøv igjen
-        </button>
-      </div>
-      <section id="skeleton" aria-hidden="true">
-        <div class="skel skel-name"></div>
-        <div class="skel skel-orgnr"></div>
-        <div class="skel-verdict">
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-          <div class="skel skel-cell"></div>
-        </div>
-        <div class="skel skel-card"></div>
-        <div class="skel skel-card"></div>
-      </section>
-      <section id="empty-state" hidden>
-        <p id="empty-message" class="empty-message"></p>
-        <div class="manual-search">
-          <label for="manual-query" class="manual-search-label"
-            >Søk i Brønnøysundregistrene</label
-          >
-          <input
-            id="manual-query"
-            type="search"
-            autocomplete="off"
-            placeholder="Bedriftsnavn eller 9-sifret orgnr"
-            spellcheck="false"
+  <!--
+    body is the surface root (.app, SPEC): data-answer carries the tone
+    of what is on screen (ok|warn|danger|pick|empty|loading) for the
+    stylesheet. main#app[data-state] (loading|result|picker|empty|error|
+    search) is the stable state hook the smoke and the tests key on.
+    The painter (painter.ts) fills every root below; nothing here is
+    per-state markup.
+  -->
+  <body class="app app--panel" data-answer="loading">
+    <svg class="sprite" width="0" height="0" aria-hidden="true" focusable="false">
+      <!-- brreg-snap 1.4 icon sprite (design: icons.svg). Hand-drawn on a
+           16 px grid, stroke-only; stroke width, colour and size come from
+           .glyph / .icon in brreg.css. Referenced with
+           <svg class="icon"><use href="#i-copy"/></svg>. -->
+      <defs>
+        <symbol id="g-ok" viewBox="0 0 16 16"><path d="M3.2 8.6 6.4 11.8 12.8 4.4" /></symbol>
+        <symbol id="g-warn" viewBox="0 0 16 16">
+          <path d="M8 2.8v6.6" />
+          <path d="M8 13.1v.1" stroke-width="2.6" />
+        </symbol>
+        <symbol id="g-danger" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" /></symbol>
+        <symbol id="g-dot" viewBox="0 0 16 16">
+          <circle cx="8" cy="8.2" r="1.6" fill="currentColor" stroke="none" />
+        </symbol>
+        <symbol id="i-search" viewBox="0 0 16 16">
+          <circle cx="7" cy="7" r="4.6" />
+          <path d="M10.4 10.4 14 14" />
+        </symbol>
+        <symbol id="i-copy" viewBox="0 0 16 16">
+          <rect x="5.5" y="5.5" width="8" height="8" rx="1" />
+          <path d="M3 10.5V3.5a1 1 0 0 1 1-1h6.5" />
+        </symbol>
+        <symbol id="i-check" viewBox="0 0 16 16"><path d="M3.2 8.6 6.4 11.8 12.8 4.4" /></symbol>
+        <symbol id="i-summary" viewBox="0 0 16 16"><path d="M3 4h10M3 8h10M3 12h6" /></symbol>
+        <symbol id="i-panel" viewBox="0 0 16 16">
+          <rect x="2" y="2.5" width="12" height="11" rx="1" />
+          <path d="M9.5 2.5v11" />
+        </symbol>
+        <symbol id="i-chev" viewBox="0 0 16 16"><path d="M6 3.5 10.5 8 6 12.5" /></symbol>
+        <symbol id="i-back" viewBox="0 0 16 16"><path d="M10 3.5 5.5 8 10 12.5" /></symbol>
+        <symbol id="i-tree" viewBox="0 0 16 16">
+          <rect x="5.5" y="1.8" width="5" height="3.6" rx=".6" />
+          <rect x="1.5" y="10.6" width="4.4" height="3.6" rx=".6" />
+          <rect x="10.1" y="10.6" width="4.4" height="3.6" rx=".6" />
+          <path d="M8 5.4v2.6M3.7 10.6V8h8.6v2.6" />
+        </symbol>
+        <symbol id="i-refresh" viewBox="0 0 16 16">
+          <path d="M13 8a5 5 0 1 1-1.6-3.7" />
+          <path d="M11.8 1.8v2.8H9" />
+        </symbol>
+        <symbol id="i-link" viewBox="0 0 16 16">
+          <path d="M6.8 9.2a2.6 2.6 0 0 0 3.7 0l2.2-2.2a2.6 2.6 0 0 0-3.7-3.7l-.7.7" />
+          <path d="M9.2 6.8a2.6 2.6 0 0 0-3.7 0L3.3 9a2.6 2.6 0 0 0 3.7 3.7l.7-.7" />
+        </symbol>
+        <symbol id="mark" viewBox="0 0 30 50">
+          <path
+            d="M3 2.5v45L27 36.5 13.5 25 27 13.5Z"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linejoin="miter"
           />
-          <ul id="manual-results" class="manual-results"></ul>
-        </div>
-        <section id="recent-section" class="recent-section" hidden>
-          <h3 class="recent-title">Nylig sett</h3>
-          <ul id="recent-list" class="recent-list"></ul>
-        </section>
-      </section>
-      <section id="picker" hidden>
-        <p class="picker-intro">Vi fant flere mulige treff på denne siden:</p>
-        <ul id="picker-list" class="picker-list"></ul>
-        <button
-          type="button"
-          id="picker-none"
-          class="picker-none"
-          aria-keyshortcuts="0"
-        >
-          Ingen av disse
-          <kbd class="picker-key" aria-hidden="true">0</kbd>
-        </button>
-      </section>
-      <section id="result" hidden>
-        <header id="result-head">
-          <!-- Shown only on drilled-in entities (history.state.method
-               === 'drill-in') — the sidebar has no browser chrome, so
-               without this the drill-in is a one-way trip. -->
-          <button type="button" id="back-link" class="ghost-link back-link" hidden>
-            ← Tilbake
-          </button>
-          <!-- tabindex=-1: not in the tab order, but focusable by script
-               so a drill-in / Back moves focus here and screen readers
-               announce the new company name. -->
-          <h2 id="name" tabindex="-1"></h2>
-          <div id="orgnr" class="orgnr"></div>
-          <!-- Shown when the orgnr looked up was an underenhet and this
-               is its parent. -->
-          <p id="avdeling-note" class="avdeling-note" hidden></p>
-          <div id="verdict" class="verdict" role="group" aria-label="Vurdering"></div>
-          <div id="flags" class="flags"></div>
-          <div id="resolution-actions" class="resolution-actions" hidden>
-            <button type="button" id="reject-choice" class="ghost-link">
-              Feil bedrift? Vis alternativer
-            </button>
-          </div>
-        </header>
-
-        <nav class="tablist" role="tablist" aria-label="Selskapsdetaljer">
-          <button
-            type="button"
-            role="tab"
-            id="tab-oversikt"
-            aria-controls="panel-oversikt"
-            aria-selected="true"
-            tabindex="0"
-          >
-            Oversikt
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="tab-personer"
-            aria-controls="panel-personer"
-            aria-selected="false"
-            tabindex="-1"
-          >
-            Personer
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="tab-nokkeltall"
-            aria-controls="panel-nokkeltall"
-            aria-selected="false"
-            tabindex="-1"
-          >
-            Nøkkeltall
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="tab-enheter"
-            aria-controls="panel-enheter"
-            aria-selected="false"
-            tabindex="-1"
-          >
-            Enheter
-          </button>
-        </nav>
-
-        <section
-          role="tabpanel"
-          id="panel-oversikt"
-          aria-labelledby="tab-oversikt"
-        >
-          <section id="overview" class="card">
-            <h3>Oversikt</h3>
-            <dl id="overview-list"></dl>
-          </section>
-
-          <section id="contact" class="card">
-            <h3>Kontakt</h3>
-            <dl id="contact-list"></dl>
-          </section>
-
-          <section id="parent" class="card" hidden>
-            <h3>Overordnet enhet</h3>
-            <div id="parent-body"></div>
-          </section>
-        </section>
-
-        <section
-          role="tabpanel"
-          id="panel-personer"
-          aria-labelledby="tab-personer"
-          hidden
-        >
-          <section id="roles" class="card">
-            <h3 class="visually-hidden">Roller</h3>
-            <div id="roles-body"></div>
-          </section>
-        </section>
-
-        <section
-          role="tabpanel"
-          id="panel-nokkeltall"
-          aria-labelledby="tab-nokkeltall"
-          hidden
-        >
-          <section id="nokkeltall" class="card">
-            <h3 class="visually-hidden">Nøkkeltall</h3>
-            <div id="nokkeltall-body"></div>
-          </section>
-        </section>
-
-        <section
-          role="tabpanel"
-          id="panel-enheter"
-          aria-labelledby="tab-enheter"
-          hidden
-        >
-          <section id="underenheter" class="card">
-            <h3 class="visually-hidden">Underenheter</h3>
-            <div id="underenheter-body">
-              <p class="empty">Ingen registrerte underenheter.</p>
-            </div>
-          </section>
-        </section>
-      </section>
-      <footer>
-        <a
-          id="brreg-link"
-          href="https://virksomhet.brreg.no/nb/oppslag/enheter"
-          target="_blank"
-          rel="noopener noreferrer"
-          >Åpne på brreg.no ↗</a
-        >
-        <span id="footer-updated" class="footer-updated" hidden>
-          <span id="footer-source" hidden
-            >Synket fra <span id="source-host"></span> ·
-          </span>
-          Data hentet <time id="updated-time"></time> ·
-          <button
-            type="button"
-            id="refresh-data"
-            class="refresh-button"
-            title="Hent dataene på nytt fra Brønnøysundregistrene"
-          >
-            Oppdater
-          </button>
-        </span>
-        <p class="attribution">
-          Data fra Brønnøysundregistrene (<a
-            href="https://data.norge.no/nlod/no/2.0"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Norsk lisens for offentlige data"
-            >NLOD 2.0</a
-          >)
-        </p>
-      </footer>
-    </main>
+        </symbol>
+      </defs>
+    </svg>
+    <p id="live" class="sr-only" aria-live="polite"></p>
+    <header id="mast" class="mast"></header>
+    <!-- The auto-sync consent band and status line, under the mast. -->
+    <div id="under-mast"></div>
+    <!-- The compact head once the identity is scrolled past: a
+         zero-height sticky wrapper, so showing it never moves the page. -->
+    <div class="stick-wrap"><div id="stick" class="stick" hidden></div></div>
+    <!-- Shown only on a drilled-in entity: the sidebar has no browser
+         chrome, so without this the drill-in is a one-way trip. -->
+    <nav class="back-nav"><button type="button" id="back" class="back" hidden></button></nav>
+    <main id="app" data-state="loading" aria-busy="true"></main>
+    <footer id="foot" class="foot"></footer>
     <script type="module" src="main.ts"></script>
   </body>
 </html>

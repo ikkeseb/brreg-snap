@@ -146,7 +146,7 @@ organisasjonsnummer.» without a request. Pinned in
 ## Why `mod11.ts` is its own module
 
 `isValidOrgnr` is consumed by `orgnr.ts` (URL/title cascade) and
-`details.ts` (validating the `?orgnr=` URL param before fetching).
+`details/history.ts` (validating the `?orgnr=` URL param before fetching).
 Keeping it in a zero-dependency module means new callers can pull
 it in without dragging the rest of `orgnr.ts` along and without
 risking an import cycle.

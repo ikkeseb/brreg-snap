@@ -24,7 +24,7 @@ interface BadgeStyle {
   color: string;
 }
 
-// The light theme's --danger (shared.css) behind white, and the dark
+// The light theme's --danger (brreg.css) behind white, and the dark
 // theme's --warn amber behind near-black: both well above 4.5:1.
 const BADGE: Partial<Record<Tone, BadgeStyle>> = {
   danger: { text: TONE_GLYPH.danger, background: '#b91c1c', color: '#ffffff' },
