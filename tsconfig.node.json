@@ -14,5 +14,5 @@
     // JSDoc.
     "allowJs": true
   },
-  "include": ["vite.config.ts", "vitest.config.ts", "vitest.live.config.ts"]
+  "include": ["vite.config.ts", "vitest.config.ts", "vitest.live.config.ts", "playwright.config.ts"]
 }

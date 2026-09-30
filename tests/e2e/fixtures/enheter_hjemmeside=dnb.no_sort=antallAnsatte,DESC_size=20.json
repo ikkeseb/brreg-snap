@@ -1,0 +1,1473 @@
+{
+  "request": "/enhetsregisteret/api/enheter?hjemmeside=dnb.no&sort=antallAnsatte%2CDESC&size=20",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "enheter": [
+        {
+          "organisasjonsnummer": "984851006",
+          "navn": "DNB BANK ASA",
+          "organisasjonsform": {
+            "kode": "ASA",
+            "beskrivelse": "Allmennaksjeselskap"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "GJENSIDIGE NOR SPAREBANK ASA",
+              "fraDato": "2002-09-12 16:22:48",
+              "tilDato": "2004-01-19 09:15:52"
+            },
+            {
+              "navn": "DNB NOR BANK ASA",
+              "fraDato": "2004-01-19 09:15:52",
+              "tilDato": "2011-11-11 08:45:34"
+            }
+          ],
+          "hjemmeside": "www.dnb.no",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2002-09-12",
+          "registrertIMvaregisteret": true,
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "naeringskode1": {
+            "kode": "64.190",
+            "beskrivelse": "Banker og kredittforetak"
+          },
+          "antallAnsatte": 7353,
+          "harRegistrertAntallAnsatte": true,
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2014-01-27",
+          "registreringsdatoMerverdiavgiftsregisteret": "2002-09-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2006-10-23",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "mobil": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2002-09-10",
+          "institusjonellSektorkode": {
+            "kode": "3200",
+            "beskrivelse": "Banker"
+          },
+          "registrertIForetaksregisteret": true,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "vedtektsdato": "2026-04-21",
+          "vedtektsfestetFormaal": [
+            "Å drive bank-, finansierings- og investeringstjenestevirksomhet, samt",
+            "virksomhet som har en naturlig tilknytning til dette, og å inneha",
+            "eierinteresser eller være deltaker i andre foretak innenfor rammen av",
+            "den til enhver tid gjeldende lovgivning."
+          ],
+          "aktivitet": [
+            "Alle forretninger og tjenester som det er vanlig eller naturlig at en",
+            "bank utfører."
+          ],
+          "registreringsdatoForetaksregisteret": "2002-09-12",
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": true,
+          "kapital": {
+            "belop": 18008310800,
+            "antallAksjer": 1440664864,
+            "type": "Aksjekapital",
+            "valuta": "NOK",
+            "innfortDato": "2026-06-17"
+          },
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "914782007",
+          "navn": "DNB LIVSFORSIKRING AS",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "VITAL FORSIKRING ASA",
+              "fraDato": "1996-01-22 21:03:00",
+              "tilDato": "2011-11-11 08:42:14"
+            },
+            {
+              "navn": "DNB LIVSFORSIKRING ASA",
+              "fraDato": "2011-11-11 08:42:14",
+              "tilDato": "2014-07-04 14:51:14"
+            }
+          ],
+          "hjemmeside": "www.dnb.no",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5020",
+            "poststed": "BERGEN",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-03-12",
+          "registrertIMvaregisteret": true,
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "naeringskode1": {
+            "kode": "65.110",
+            "beskrivelse": "Livsforsikring"
+          },
+          "antallAnsatte": 296,
+          "harRegistrertAntallAnsatte": true,
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2014-01-21",
+          "registreringsdatoMerverdiavgiftsregisteret": "1991-01-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1995-03-12",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5058",
+            "poststed": "BERGEN",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "BERGEN",
+            "kommunenummer": "4601"
+          },
+          "stiftelsesdato": "1938-05-11",
+          "institusjonellSektorkode": {
+            "kode": "5500",
+            "beskrivelse": "Livsforsikringsselskaper og pensjonskasser"
+          },
+          "registrertIForetaksregisteret": true,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "vedtektsdato": "2022-10-26",
+          "vedtektsfestetFormaal": [
+            "Drive pensjonsforsikring, livsforsikring og annen personforsikring,",
+            "samt virksomhet som har naturlig tilknytning til dette."
+          ],
+          "aktivitet": [
+            "Drive livsforsikring, annen personforsikring og",
+            "virksomhet som lovlig kan knyttes til forsikring."
+          ],
+          "registreringsdatoForetaksregisteret": "1988-10-17",
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": true,
+          "kapital": {
+            "belop": 1641465828.53,
+            "antallAksjer": 64827288,
+            "type": "Aksjekapital",
+            "valuta": "NOK",
+            "innfortDato": "2020-01-27"
+          },
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "816521432",
+          "navn": "DNB FINANS AS",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "AS EKSPORTFINANS Norske bankers finansierings- og eksportkredittinstitutt.",
+              "fraDato": "1995-03-12 15:49:00",
+              "tilDato": "1996-02-08 18:59:38"
+            },
+            {
+              "navn": "EKSPORTFINANS ASA",
+              "fraDato": "1996-06-06 19:26:50",
+              "tilDato": "2025-05-16 08:34:54"
+            },
+            {
+              "navn": "EKSPORTFINANS AS",
+              "fraDato": "2025-05-16 08:34:54",
+              "tilDato": "2026-01-29 06:07:11"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/om-oss/organisasjonen-styret-og-ledelsen/dnb-finans",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-03-12",
+          "registrertIMvaregisteret": true,
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "naeringskode1": {
+            "kode": "64.190",
+            "beskrivelse": "Banker og kredittforetak"
+          },
+          "antallAnsatte": 266,
+          "harRegistrertAntallAnsatte": true,
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-11-15",
+          "registreringsdatoMerverdiavgiftsregisteret": "2025-11-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2025-11-15",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "epostadresse": "post@example.no",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "1962-03-02",
+          "institusjonellSektorkode": {
+            "kode": "3500",
+            "beskrivelse": "Kredittforetak"
+          },
+          "registrertIForetaksregisteret": true,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "vedtektsdato": "2026-02-13",
+          "vedtektsfestetFormaal": [
+            "Drive leasingvirksomhet og annen finansieringsvirksomhet, samt",
+            "virksomhet som har en naturlig tilknytning til dette, og å inneha",
+            "eierinteresser eller være deltaker i andre foretak innenfor rammen av",
+            "den til enhver tid gjeldende lovgivning."
+          ],
+          "aktivitet": [
+            "Leasingvirksomhet og annen finansieringsvirksomhet."
+          ],
+          "registreringsdatoForetaksregisteret": "1989-02-25",
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "kapital": {
+            "belop": 2999910438,
+            "antallAksjer": 263914,
+            "type": "Aksjekapital",
+            "valuta": "NOK",
+            "innfortDato": "2026-04-13"
+          },
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "985621551",
+          "navn": "DNB BOLIGKREDITT AS",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "DNB BOLIGKREDITT AS",
+              "fraDato": "2003-06-14 14:41:07",
+              "tilDato": "2004-08-02 20:23:27"
+            },
+            {
+              "navn": "DNB NOR BOLIGKREDITT AS",
+              "fraDato": "2004-08-02 20:23:27",
+              "tilDato": "2011-11-11 08:34:09"
+            }
+          ],
+          "hjemmeside": "www.dnb.no",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2003-06-14",
+          "registrertIMvaregisteret": true,
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "naeringskode1": {
+            "kode": "64.190",
+            "beskrivelse": "Banker og kredittforetak"
+          },
+          "harRegistrertAntallAnsatte": true,
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2025-01-07",
+          "registreringsdatoMerverdiavgiftsregisteret": "2023-12-02",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2024-12-17",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2024-11-16",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2024-11-10",
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2003-03-21",
+          "institusjonellSektorkode": {
+            "kode": "3500",
+            "beskrivelse": "Kredittforetak"
+          },
+          "registrertIForetaksregisteret": true,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "vedtektsdato": "2025-04-24",
+          "vedtektsfestetFormaal": [
+            "Yte og erverve bolighypoteklån, lån med pant i fritidseiendommer og",
+            "fellessfinansiering av borettslag, som hovedsakelig finansieres ved",
+            "opptak av obligasjonslån ved utstedelse av obligasjoner med",
+            "fortrinnsrett."
+          ],
+          "aktivitet": [
+            "Å utvikle boligfinansieringsløsninger for norske kunder av",
+            "DnB-konsernet."
+          ],
+          "registreringsdatoForetaksregisteret": "2003-06-14",
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": true,
+          "kapital": {
+            "belop": 4527000000,
+            "antallAksjer": 1,
+            "type": "Aksjekapital",
+            "valuta": "NOK",
+            "innfortDato": "2021-08-31"
+          },
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "898233782",
+          "navn": "DNB TØNSBERG OG OMEGN IDRETTSLAG",
+          "organisasjonsform": {
+            "kode": "FLI",
+            "beskrivelse": "Forening/lag/innretning"
+          },
+          "historiskeNavn": [],
+          "hjemmeside": "www.dnb.no",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3103",
+            "poststed": "TØNSBERG",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "TØNSBERG",
+            "kommunenummer": "3905"
+          },
+          "registreringsdatoEnhetsregisteret": "2012-04-12",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "94.992",
+            "beskrivelse": "Aktiviteter i andre medlemsorganisasjoner ellers"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3125",
+            "poststed": "TØNSBERG",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "TØNSBERG",
+            "kommunenummer": "3905"
+          },
+          "stiftelsesdato": "2012-04-11",
+          "institusjonellSektorkode": {
+            "kode": "7000",
+            "beskrivelse": "Ideelle organisasjoner"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": true,
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Ønske om sosial omgang rundt forskjellige typer idrett i",
+            "Tønsbergregionen for ansatte i DNB ASA."
+          ],
+          "registreringsdatoFrivillighetsregisteret": "2012-04-12",
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "976983831",
+          "navn": "VERDIPAPIRFONDET DNB AKTIV 10",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "VESTA 2010",
+              "fraDato": "1996-12-10 19:41:01",
+              "tilDato": "2000-10-04 18:22:30"
+            },
+            {
+              "navn": "SKANDIA 2010 VERDIPAPIRFOND",
+              "fraDato": "2000-10-04 18:22:30",
+              "tilDato": "2003-02-04 20:21:18"
+            },
+            {
+              "navn": "VERDIPAPIRFONDET DNB 2010",
+              "fraDato": "2003-02-04 20:21:18",
+              "tilDato": "2004-12-16 20:31:30"
+            },
+            {
+              "navn": "DNB NOR 2010 VERDIPAPIRFOND",
+              "fraDato": "2004-12-16 20:31:30",
+              "tilDato": "2009-11-14 15:04:47"
+            },
+            {
+              "navn": "VERDIPAPIRFONDET DNB NOR SENIOR",
+              "fraDato": "2009-11-14 15:04:47",
+              "tilDato": "2011-11-14 20:30:24"
+            },
+            {
+              "navn": "VERDIPAPIRFONDET DNB SENIOR",
+              "fraDato": "2011-11-14 20:30:24",
+              "tilDato": "2013-06-08 14:31:29"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "1996-12-10",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "mobil": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "1995-02-02",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Kombinasjonsfond."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "912381978",
+          "navn": "VERDIPAPIRFONDET DNB AKTIV RENTE (II)",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2013-09-03",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2013-08-28",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Fond."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "920573096",
+          "navn": "VERDIPAPIRFONDET DNB CRITICAL MATERIALS",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "VERDIPAPIRFONDET DNB GLOBAL MATERIALSEKTOR INDEKS",
+              "fraDato": "2018-03-09 11:36:32",
+              "tilDato": "2026-05-27 12:19:11"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2018-03-09",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2018-03-02",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Aksjefond"
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "920284558",
+          "navn": "VERDIPAPIRFONDET DNB EMERGING MARKETS INDEX",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "VERDIPAPIRFONDET DNB GLOBAL EMERGING MARKETS INDEKS",
+              "fraDato": "2018-01-22 17:25:59",
+              "tilDato": "2026-08-26 11:15:39"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2018-01-22",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2018-01-15",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Aksjefond."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "958251580",
+          "navn": "VERDIPAPIRFONDET DNB FINANS",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "VERDIPAPIRFONDET AVANSE FINANS",
+              "fraDato": "1999-08-09 18:49:17",
+              "tilDato": "2006-11-25 14:36:04"
+            },
+            {
+              "navn": "VERDIPAPIRFONDET DNB NOR FINANS",
+              "fraDato": "2006-11-25 14:36:04",
+              "tilDato": "2011-11-14 20:21:40"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "1999-08-09",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "mobil": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "1989-10-19",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Kjøp og salg av verdipapirer."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "920573029",
+          "navn": "VERDIPAPIRFONDET DNB GLOBAL INDUSTRISEKTOR INDEKS",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2018-03-09",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2018-03-02",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Aksjefond"
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "964324867",
+          "navn": "VERDIPAPIRFONDET DNB LIKVIDITET",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "GJENSIDIGE LIKVIDITET VERDIPAPIRFOND",
+              "fraDato": "1999-01-08 18:51:40",
+              "tilDato": "2000-11-10 18:18:20"
+            },
+            {
+              "navn": "VERDIPAPIRFONDET AVANSE KORT LIKVIDITET II",
+              "fraDato": "2000-11-10 18:18:20",
+              "tilDato": "2004-12-11 14:51:44"
+            },
+            {
+              "navn": "DNB NOR LIKVIDITET (IV) VERDIPAPIRFOND",
+              "fraDato": "2004-12-22 20:40:06",
+              "tilDato": "2011-11-14 20:24:53"
+            },
+            {
+              "navn": "VERDIPAPIRFONDET DNB LIKVIDITET (IV)",
+              "fraDato": "2011-11-14 20:24:53",
+              "tilDato": "2019-10-21 10:40:58"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "1999-01-08",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "mobil": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "1992-06-01",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Verdipapirfond."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "958251769",
+          "navn": "VERDIPAPIRFONDET DNB NORDEN",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "VERDIPAPIRFONDET AVANSE INDUSTRI",
+              "fraDato": "1999-08-09 18:49:19",
+              "tilDato": "2004-12-11 14:48:50"
+            },
+            {
+              "navn": "DNB NOR NORDEN (III) VERDIPAPIRFOND",
+              "fraDato": "2004-12-22 20:40:03",
+              "tilDato": "2011-11-14 20:26:52"
+            },
+            {
+              "navn": "VERDIPAPIRFONDET DNB NORDEN (III)",
+              "fraDato": "2011-11-14 20:26:52",
+              "tilDato": "2019-09-17 10:02:05"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "1999-08-09",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "mobil": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "1989-10-19",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Kjøp og salg av verdipapirer."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "920284833",
+          "navn": "VERDIPAPIRFONDET DNB NORDEN INDEKS",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2018-01-22",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2018-01-15",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Aksjefond"
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "919450002",
+          "navn": "VERDIPAPIRFONDET DNB NORDIC INVESTMENT GRADE",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [],
+          "hjemmeside": "dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2017-08-23",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2017-08-08",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Obligasjonsfond"
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "913570332",
+          "navn": "VERDIPAPIRFONDET DNB PRIVATE BANKING PREMIUM 100",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2014-05-06",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2014-04-25",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Verdipapirfond."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "888556982",
+          "navn": "VERDIPAPIRFONDET DNB AKTIV RENTE",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "VERDIPAPIRFONDET DNB NOR AKTIV RENTE",
+              "fraDato": "2005-08-31 20:37:42",
+              "tilDato": "2011-11-14 20:20:35"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2005-08-31",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "mobil": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2005-08-19",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Kjøp og salg av verdipapirer."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "912971708",
+          "navn": "VERDIPAPIRFONDET DNB AM KORT OBLIGASJON 2",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2014-01-08",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2013-12-13",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Obligasjonsfond."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "916476043",
+          "navn": "VERDIPAPIRFONDET DNB GLOBAL TREASURY",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2016-01-06",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2015-12-11",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Verdipapirfond."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "887156212",
+          "navn": "VERDIPAPIRFONDET DNB KREDITTOBLIGASJON",
+          "organisasjonsform": {
+            "kode": "VPFO",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "VERDIPAPIRFONDET DNB NOR KREDITTOBLIGASJON",
+              "fraDato": "2004-08-26 20:27:33",
+              "tilDato": "2011-11-14 20:24:00"
+            }
+          ],
+          "hjemmeside": "www.dnb.no/fond",
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0021",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2004-08-26",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "64.311",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "mobil": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0191",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2004-06-21",
+          "institusjonellSektorkode": {
+            "kode": "4300",
+            "beskrivelse": "Verdipapirfond"
+          },
+          "registrertIForetaksregisteret": false,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "aktivitet": [
+            "Kjøp og salg av verdipapirer. Obligasjonsfond."
+          ],
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        }
+      ]
+    },
+    "page": {
+      "size": 20,
+      "totalElements": 65,
+      "totalPages": 4,
+      "number": 0
+    }
+  }
+}

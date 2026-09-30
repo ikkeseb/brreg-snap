@@ -43,7 +43,9 @@ The gate is `pnpm verify` (CI, the release workflow and the pre-push
 hook all run it): `verify:fast` (typecheck + lint + test), both builds,
 `verify:dist`, `lint:ext`. `pnpm install` points git at the committed
 hook (`prepare` sets `core.hooksPath .githooks`); `git push --no-verify`
-is the conscious bypass.
+is the conscious bypass. The browser smoke (`pnpm smoke`) is NOT in the
+gate or the hook (it needs a browser): CI runs it as its own `smoke`
+job after `ci`.
 
 ```bash
 pnpm verify                                # the full gate (about 12 s)
@@ -53,6 +55,9 @@ pnpm lint                                  # ESLint on src, tests, scripts (not 
 pnpm lint:ext                              # web-ext lint on dist-firefox/; fails on errors + unlisted warnings
 pnpm verify:dist                           # dist manifests + the files they reference, file set, no eval/Function (AST); run both builds first
 pnpm test                                  # vitest run
+pnpm smoke                                 # build:chrome + Playwright smoke (tests/e2e/): harness states x widths x themes + real Chromium load; screenshots in test-results/
+pnpm smoke:record                          # re-record tests/e2e/fixtures/ from the live API (build:chrome first; review the diff)
+pnpm exec playwright install chromium      # one-time browser download for the smoke
 pnpm test:watch                            # vitest interactive
 pnpm test:live                             # live brreg canary: API contracts + resolver corpus (network; not in verify)
 pnpm exec vitest run tests/orgnr.test.ts   # single file

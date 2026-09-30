@@ -1,0 +1,303 @@
+{
+  "request": "/enhetsregisteret/api/enheter/984851006/roller",
+  "status": 200,
+  "body": {
+    "rollegrupper": [
+      {
+        "type": {
+          "kode": "DAGL",
+          "beskrivelse": "Daglig leder"
+        },
+        "sistEndret": "2019-09-05",
+        "roller": [
+          {
+            "type": {
+              "kode": "DAGL",
+              "beskrivelse": "Daglig leder"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Kari",
+                "etternavn": "Nordmann"
+              },
+              "erDoed": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 0
+          }
+        ]
+      },
+      {
+        "type": {
+          "kode": "STYR",
+          "beskrivelse": "Styre"
+        },
+        "sistEndret": "2026-05-04",
+        "roller": [
+          {
+            "type": {
+              "kode": "LEDE",
+              "beskrivelse": "Styrets leder"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Ola",
+                "etternavn": "Moe"
+              },
+              "erDoed": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 0
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Ingrid",
+                "etternavn": "Strand"
+              },
+              "erDoed": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 1
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Lars",
+                "etternavn": "Hansen"
+              },
+              "erDoed": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 2
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Anne",
+                "etternavn": "Dahl"
+              },
+              "erDoed": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 3
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Per",
+                "etternavn": "Bakke"
+              },
+              "erDoed": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 4
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Marte",
+                "etternavn": "Berg"
+              },
+              "erDoed": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 5
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Nils",
+                "etternavn": "Lie"
+              },
+              "erDoed": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 6
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Kari",
+                "etternavn": "Nordmann"
+              },
+              "erDoed": false
+            },
+            "valgtAv": {
+              "kode": "AREP",
+              "beskrivelse": "Representant for de ansatte"
+            },
+            "avregistrert": false,
+            "rekkefolge": 7
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Ola",
+                "etternavn": "Moe"
+              },
+              "erDoed": false
+            },
+            "valgtAv": {
+              "kode": "AREP",
+              "beskrivelse": "Representant for de ansatte"
+            },
+            "avregistrert": false,
+            "rekkefolge": 8
+          },
+          {
+            "type": {
+              "kode": "MEDL",
+              "beskrivelse": "Styremedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Ingrid",
+                "etternavn": "Strand"
+              },
+              "erDoed": false
+            },
+            "valgtAv": {
+              "kode": "AREP",
+              "beskrivelse": "Representant for de ansatte"
+            },
+            "avregistrert": false,
+            "rekkefolge": 9
+          },
+          {
+            "type": {
+              "kode": "VARA",
+              "beskrivelse": "Varamedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Lars",
+                "etternavn": "Hansen"
+              },
+              "erDoed": false
+            },
+            "valgtAv": {
+              "kode": "AREP",
+              "beskrivelse": "Representant for de ansatte"
+            },
+            "avregistrert": false,
+            "rekkefolge": 10
+          },
+          {
+            "type": {
+              "kode": "VARA",
+              "beskrivelse": "Varamedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Anne",
+                "etternavn": "Dahl"
+              },
+              "erDoed": false
+            },
+            "valgtAv": {
+              "kode": "AREP",
+              "beskrivelse": "Representant for de ansatte"
+            },
+            "avregistrert": false,
+            "rekkefolge": 11
+          },
+          {
+            "type": {
+              "kode": "VARA",
+              "beskrivelse": "Varamedlem"
+            },
+            "person": {
+              "fodselsdato": "1970-01-01",
+              "navn": {
+                "fornavn": "Per",
+                "etternavn": "Bakke"
+              },
+              "erDoed": false
+            },
+            "valgtAv": {
+              "kode": "AREP",
+              "beskrivelse": "Representant for de ansatte"
+            },
+            "avregistrert": false,
+            "rekkefolge": 12
+          }
+        ]
+      },
+      {
+        "type": {
+          "kode": "REVI",
+          "beskrivelse": "Revisor"
+        },
+        "sistEndret": "2008-08-14",
+        "roller": [
+          {
+            "type": {
+              "kode": "REVI",
+              "beskrivelse": "Revisor"
+            },
+            "enhet": {
+              "organisasjonsnummer": "976389387",
+              "organisasjonsform": {
+                "kode": "AS",
+                "beskrivelse": "Aksjeselskap"
+              },
+              "navn": [
+                "ERNST & YOUNG AS"
+              ],
+              "godkjenningsstatus": "Godkjent revisjonsforetak",
+              "erSlettet": false
+            },
+            "avregistrert": false,
+            "rekkefolge": 0
+          }
+        ]
+      }
+    ]
+  }
+}

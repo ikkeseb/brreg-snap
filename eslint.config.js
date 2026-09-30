@@ -116,8 +116,8 @@ export default defineConfig(
       'node_modules/',
       'coverage/',
       '.claude/',
-      // Preview harness (browser shim + dev server): not linted yet.
-      'scripts/preview/',
+      // Preview harness browser shim (browser globals): not linted yet.
+      'scripts/preview/shim.js',
     ],
   },
   {
@@ -160,7 +160,7 @@ export default defineConfig(
   // Root config files live in tsconfig.node.json, which the project
   // service can't discover (it only finds files named tsconfig.json).
   {
-    files: ['vite.config.ts', 'vitest.config.ts', 'vitest.live.config.ts'],
+    files: ['vite.config.ts', 'vitest.config.ts', 'vitest.live.config.ts', 'playwright.config.ts'],
     languageOptions: {
       parserOptions: {
         projectService: false,
