@@ -30,6 +30,7 @@ import {
   scoreCandidate,
   titleSegmentations,
   type ResolutionBand,
+  type ScoreResult,
 } from './hostname-score.js';
 import { cacheGet, cacheSet } from './session-cache.js';
 import type { SearchHit } from '../types/brreg.js';
@@ -43,10 +44,11 @@ const REJECTED_KEY_PREFIX = 'rejected:';
 export const MAX_PICKER_CANDIDATES = 4;
 
 // What ties a candidate to the site, for the picker's per-row label:
-// 'hjemmeside' — its registered hjemmeside is this site (the site
-// itself, a page on it or a subdomain); 'navn' — only its name matched
-// the hostname.
-export type CandidateEvidence = 'hjemmeside' | 'navn';
+// 'hjemmeside' — its registered hjemmeside is this site itself;
+// 'side' — only a page or subdomain on it (nrk.no/urort/artist/…,
+// www.elkjop.no/leknes): the site has far more of those than owners;
+// 'navn' — only its name matched the hostname.
+export type CandidateEvidence = 'hjemmeside' | 'side' | 'navn';
 
 export interface Candidate extends SearchHit {
   evidence: CandidateEvidence;
@@ -288,9 +290,11 @@ function dedupeByOrgnr(hits: SearchHit[]): SearchHit[] {
 // Candidates are copied, never mutated: search hits may be shared.
 function toCandidate(
   hit: SearchHit,
-  hjemmesideTie: boolean,
+  kind: ScoreResult['hjemmesideKind'],
 ): Candidate {
-  return { ...hit, evidence: hjemmesideTie ? 'hjemmeside' : 'navn' };
+  const evidence: CandidateEvidence =
+    kind === 'exact' ? 'hjemmeside' : kind ? 'side' : 'navn';
+  return { ...hit, evidence };
 }
 
 // Best score over the name forms a candidate may match.
@@ -325,7 +329,7 @@ function decide(
   );
   const candidates = scored
     .slice(0, MAX_PICKER_CANDIDATES)
-    .map((s) => toCandidate(s.cand, s.hjemmesideTie));
+    .map((s) => toCandidate(s.cand, s.hjemmesideKind));
   if (band === 'auto' && top) {
     return { band: 'auto', orgnr: top.cand.organisasjonsnummer, candidates };
   }
@@ -394,7 +398,7 @@ function isCandidate(value: unknown): value is Candidate {
   return (
     typeof c.organisasjonsnummer === 'string' &&
     typeof c.navn === 'string' &&
-    (c.evidence === 'hjemmeside' || c.evidence === 'navn')
+    (c.evidence === 'hjemmeside' || c.evidence === 'side' || c.evidence === 'navn')
   );
 }
 

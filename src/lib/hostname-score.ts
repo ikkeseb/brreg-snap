@@ -235,6 +235,10 @@ export interface ScoreResult {
   // site, a page on it or a subdomain of it — the registry itself ties
   // the two. decideBand requires it for AUTO.
   hjemmesideTie: boolean;
+  // Which of those it is: the site itself, or only a page / subdomain
+  // on it (an artist page on nrk.no, a fund under storebrand.no). The
+  // picker labels the two differently; banding treats them alike.
+  hjemmesideKind?: 'exact' | 'page' | 'subdomain';
 }
 
 // Brreg's hjemmeside field is free text — "http://www.equinor.com",
@@ -357,19 +361,23 @@ export function scoreCandidate(
   const domain = registrableDomain(host) ?? bareHost;
   let hjemScore = 0;
   let hjemReason = '';
+  let hjemmesideKind: ScoreResult['hjemmesideKind'];
   for (const entry of hjemmesideEntries(cand.hjemmeside ?? '')) {
     const sameSite = entry.host === bareHost || entry.host === domain;
     if (sameSite && entry.root) {
       hjemScore = 35;
       hjemReason = 'hjemmeside=exact(+35)';
+      hjemmesideKind = 'exact';
       break;
     }
     if (sameSite) {
       hjemScore = 12;
       hjemReason = 'hjemmeside=page(+12)';
+      hjemmesideKind = 'page';
     } else if (!hjemScore && entry.host.endsWith('.' + domain)) {
       hjemScore = 12;
       hjemReason = 'hjemmeside=subdomain(+12)';
+      hjemmesideKind = 'subdomain';
     }
   }
   if (hjemReason) reasons.push(hjemReason);
@@ -379,7 +387,7 @@ export function scoreCandidate(
   // unrelated candidates that happen to share org form / employee
   // count (norden.org → NORDAN AS).
   if (nameScore === 0 && hjemScore === 0) {
-    return { score: 0, reasons: ['no-relation'], hjemmesideTie };
+    return { score: 0, reasons: ['no-relation'], hjemmesideTie, hjemmesideKind };
   }
 
   let score = nameScore + hjemScore;
@@ -461,7 +469,7 @@ export function scoreCandidate(
     reasons.push('inactive(-30)');
   }
 
-  return { score, reasons, hjemmesideTie };
+  return { score, reasons, hjemmesideTie, hjemmesideKind };
 }
 
 // Thresholds — tuned against the hostname benchmark, now the live resolver corpus

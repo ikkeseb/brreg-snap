@@ -650,7 +650,7 @@ describe('candidate evidence for per-row labels', () => {
     searchMock.mockReset();
   });
 
-  it('marks hjemmeside-tied rows «hjemmeside» and name-only rows «navn»', async () => {
+  it('marks the site itself «hjemmeside», a page on it «side» and name-only rows «navn»', async () => {
     searchMock.mockImplementation(async (params: URLSearchParams) =>
       params.has('hjemmeside')
         ? [
@@ -665,10 +665,27 @@ describe('candidate evidence for per-row labels', () => {
       (result?.candidates ?? []).map((c) => [c.organisasjonsnummer, c.evidence]),
     );
     expect(evidence).toEqual({
-      '111111118': 'hjemmeside',
-      '222222226': 'hjemmeside',
+      '111111118': 'side',
+      '222222226': 'side',
       '333333334': 'navn',
     });
+  });
+
+  it('keeps «hjemmeside» for the site itself and «side» for an artist page on it (nrk.no)', async () => {
+    searchMock.mockImplementation(async (params: URLSearchParams) =>
+      params.has('hjemmeside')
+        ? [
+            hit('EKSEMPEL MEDIA AS', '444444440', { hjemmeside: 'https://www.nrk.no/' }),
+            hit('LÍNT DA', '555555556', { hjemmeside: 'nrk.no/urort/artist/lint' }),
+          ]
+        : [],
+    );
+    const result = await searchByHostnameDetailed('www.nrk.no');
+    const evidence = Object.fromEntries(
+      (result?.candidates ?? []).map((c) => [c.organisasjonsnummer, c.evidence]),
+    );
+    expect(evidence['444444440']).toBe('hjemmeside');
+    expect(evidence['555555556']).toBe('side');
   });
 
   it('treats a cached band from an older build (no evidence) as a miss', async () => {
