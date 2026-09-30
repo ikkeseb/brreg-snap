@@ -7,6 +7,7 @@ base of the browser smoke (`pnpm smoke`, tests/e2e/), not a substitute
 for `pnpm dev` before shipping.
 
 ```bash
+pnpm preview                                                 # = build:chrome + serve.mjs on the live API
 pnpm build:chrome
 node scripts/preview/serve.mjs                               # live API, http://127.0.0.1:8123
 node scripts/preview/serve.mjs --fixtures tests/e2e/fixtures # recorded smoke states
