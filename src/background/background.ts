@@ -1,7 +1,8 @@
 // The popup is the entire toolbar UI surface. The background script
 // hosts only the entry points that open the panel: the two context-menu
 // items (the page, and «Slå opp «…»» on selected text) and, on Chrome,
-// the «open-panel» keyboard command. Firefox opens its sidebar from the
+// the «open-panel» keyboard command — plus the install hook that opens
+// the welcome page once. Firefox opens its sidebar from the
 // built-in `_execute_sidebar_action` command, which needs no listener.
 //
 // It registers no tab listeners. Auto-sync («Auto-oppdater ved
@@ -73,10 +74,23 @@ function registerMenu(): void {
   );
 }
 
+// The first-run page, once: a fresh install, not an update, and not a
+// temporary load (about:debugging / web-ext run: Firefox marks those;
+// Chrome's unpacked load counts as an install). tabs.create needs no
+// permission for one of the extension's own pages. See
+// docs/notes/permissions-model.md § install-tab.
+const WELCOME_PATH = 'welcome/welcome.html';
+
+function onInstalled(details: { reason?: string; temporary?: boolean } | undefined): void {
+  registerMenu();
+  if (details?.reason !== 'install' || details.temporary) return;
+  void browser.tabs.create({ url: browser.runtime.getURL(WELCOME_PATH) });
+}
+
 // Top-level, synchronous registration: the background is a
 // non-persistent event page / service worker, and the runtime only
 // wakes it for events whose addListener ran during module evaluation.
-browser.runtime.onInstalled.addListener(registerMenu);
+browser.runtime.onInstalled.addListener(onInstalled);
 browser.runtime.onStartup.addListener(registerMenu);
 
 function hostFromUrl(url: string | undefined): string | undefined {

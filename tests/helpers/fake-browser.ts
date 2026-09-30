@@ -181,6 +181,9 @@ export function fakeBrowser(opts: FakeBrowserOptions = {}) {
   const tabs = {
     query: vi.fn(async (_q: unknown): Promise<unknown[]> => []),
     get: vi.fn(async (tabId: number): Promise<unknown> => ({ id: tabId })),
+    // Both engines resolve with the new Tab; neither needs a permission
+    // for it.
+    create: vi.fn(async (props: { url?: string }): Promise<unknown> => ({ id: 2, ...props })),
     onActivated: fakeEvent(),
     onUpdated: fakeEvent(),
     onRemoved: fakeEvent(),
@@ -192,9 +195,11 @@ export function fakeBrowser(opts: FakeBrowserOptions = {}) {
   };
 
   // Both engines expose `commands` when the manifest declares the key
-  // (both do, for the keyboard shortcuts).
+  // (both do, for the keyboard shortcuts). getAll resolves with the
+  // manifest's commands and their current bindings ('' when unbound).
   const commands = {
     onCommand: fakeEvent(),
+    getAll: vi.fn(async (): Promise<Array<{ name: string; description?: string; shortcut: string }>> => []),
   };
 
   const menusApi = () => ({

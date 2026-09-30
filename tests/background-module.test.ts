@@ -73,6 +73,8 @@ async function loadBackground(): Promise<void> {
   await import('../src/background/background.js');
 }
 
+type InstalledHandler = (details?: { reason?: string; temporary?: boolean }) => void;
+
 type MenuHandler = (
   info: { menuItemId: string; selectionText?: string },
   tab?: { id?: number; windowId?: number; url?: string; title?: string },
@@ -151,8 +153,10 @@ describe('background module load', () => {
     async (engine) => {
       const mock = installBrowserMock(engine);
       await loadBackground();
-      const onInstalled = mock.runtime.onInstalled.addListener.mock.calls[0]?.[0] as () => void;
-      onInstalled();
+      const onInstalled = mock.runtime.onInstalled.addListener.mock.calls[0]?.[0] as InstalledHandler;
+      // An update: the menus are (re)registered, nothing else happens —
+      // this mock forbids tabs, so an install-tab here would throw.
+      onInstalled({ reason: 'update' });
       const create = menusSpy(mock).create;
       expect(create).toHaveBeenCalledTimes(2);
       expect(create).toHaveBeenCalledWith(
@@ -173,6 +177,55 @@ describe('background module load', () => {
       );
     },
   );
+});
+
+describe('install hook (the welcome page)', () => {
+  // Same fake, tabs allowed: the hook is the one place the background
+  // may touch them, and only inside the install event.
+  function installMock(engine: 'firefox' | 'chrome') {
+    return fakeBrowser({ engine, forbid: ['windows', 'permissions', 'storage'] });
+  }
+  const handler = (fake: ReturnType<typeof installMock>): InstalledHandler =>
+    fake.runtime.onInstalled.addListener.mock.calls[0]?.[0] as InstalledHandler;
+
+  it.each(['firefox', 'chrome'] as const)(
+    'a fresh install opens welcome/welcome.html once, and still registers the menus (%s)',
+    async (engine) => {
+      const fake = installMock(engine);
+      await loadBackground();
+      handler(fake)({ reason: 'install' });
+      expect(fake.tabs.create).toHaveBeenCalledTimes(1);
+      expect(fake.tabs.create).toHaveBeenCalledWith({
+        url: `${engine === 'firefox' ? 'moz' : 'chrome'}-extension://test/welcome/welcome.html`,
+      });
+      expect(menusSpy(fake.browser).create).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it('an update registers the menus and opens nothing', async () => {
+    const fake = installMock('chrome');
+    await loadBackground();
+    handler(fake)({ reason: 'update' });
+    expect(fake.tabs.create).not.toHaveBeenCalled();
+    expect(menusSpy(fake.browser).create).toHaveBeenCalledTimes(2);
+  });
+
+  it('a temporary install (about:debugging, web-ext run) opens nothing', async () => {
+    const fake = installMock('firefox');
+    await loadBackground();
+    handler(fake)({ reason: 'install', temporary: true });
+    expect(fake.tabs.create).not.toHaveBeenCalled();
+    expect(menusSpy(fake.browser).create).toHaveBeenCalledTimes(2);
+  });
+
+  it('browser startup registers the menus without opening the page', async () => {
+    const fake = installMock('firefox');
+    await loadBackground();
+    const onStartup = fake.runtime.onStartup.addListener.mock.calls[0]?.[0] as () => void;
+    onStartup();
+    expect(fake.tabs.create).not.toHaveBeenCalled();
+    expect(menusSpy(fake.browser).create).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe('context menu click', () => {

@@ -1,7 +1,8 @@
 # Permissions model
 
 Source: `manifest.json`, `src/background/background.ts`,
-`src/details/{auto-sync-ui,auto-sync-switch}.ts`, `src/lib/auto-sync-*.ts`.
+`src/details/{auto-sync-ui,auto-sync-switch}.ts`, `src/lib/auto-sync-*.ts`,
+`src/welcome/welcome.ts`.
 
 <!-- SECTION: active-tab-limits -->
 ## Auto-sync on tab switch is blocked by activeTab — by design
@@ -120,6 +121,23 @@ to the panel (sidebar-sync.md § no-match-broadcast).
   `ExtensionActionRunner::DidFinishNavigation`; MDN: «Resets when the
   user navigates»), so a badge can't follow the user to the next site.
   It is not dropped on a same-document (SPA) navigation.
+
+<!-- SECTION: install-tab -->
+## The welcome tab on install needs no permission
+
+`runtime.onInstalled` with `reason: 'install'` opens
+`welcome/welcome.html` through `tabs.create` (`background.ts`,
+`onInstalled`). `tabs.create` is one of the tabs-API calls that need
+no permission at all (MDN tabs API: only `url`, `title`, `favIconUrl`
+reads on other tabs are gated, and the page opened is the extension's
+own). An update (`reason: 'update'`) and a Firefox temporary load
+(`details.temporary`, about:debugging / `web-ext run`) open nothing;
+Chrome's unpacked load counts as an install. The page itself reads
+only `commands.getAll()` — the user's current shortcut bindings, no
+permission — and makes no request: its two examples are fictional
+view data painted with the shared components. `welcome/` is an
+allowed package root in `scripts/manifest-invariants.mjs`; no manifest
+key points at it.
 
 <!-- SECTION: iframe-not-a-gesture-surface -->
 ## A button *inside* the sidebar iframe does NOT grant activeTab

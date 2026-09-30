@@ -191,6 +191,33 @@ export const COPY = {
   konsernPath: 'Eierkjede',
   registered: (n: string) => `${n} registrert`,
   registeredPlural: (n: string) => `${n} registrerte`,
+
+  // welcome page (opened once, on install)
+  welcome: {
+    title: 'Velkommen til brreg-snap',
+    head: 'Hvem står bak nettsiden?',
+    lead: 'brreg-snap slår opp selskapet bak siden du ser på i Brønnøysundregistrene, og sier fra når noe er galt.',
+    // The two fictional examples; the tag says so on the card itself.
+    exampleTag: 'Oppdiktet eksempel',
+    calm: 'Rolig når alt er i orden',
+    loud: 'Tydelig når det ikke er det',
+    waysHead: 'Tre måter å slå opp',
+    toolbarHead: 'Knappen i verktøylinjen',
+    toolbarChrome: 'Fest den først: klikk puslespillbrikken øverst til høyre og trykk nålen ved brreg-snap.',
+    toolbarFirefox: 'Den ligger allerede i verktøylinjen. Klikk den på en nettside du lurer på.',
+    keysHead: 'Tastatur',
+    keysPopup: 'Slå opp siden',
+    keysPanel: 'Åpne sidepanelet',
+    keysUnset: 'ikke satt',
+    keysEditChrome: 'Endre snarveier',
+    keysEditFirefox: 'Endre i Tillegg → Behandle snarveier.',
+    menuHead: 'Høyreklikk',
+    menuText: 'Marker et navn eller org.nr på en side, høyreklikk og velg «Slå opp «…» i brreg-snap».',
+    privacy:
+      'Bare domenet til siden du er på sendes til Brønnøysundregistrene (data.brreg.no). Ingenting går til utvikleren. Ingen konto, ingen sporing.',
+    source: 'Kildekode på GitHub',
+    sourceUrl: 'https://github.com/ikkeseb/brreg-snap',
+  },
 } as const;
 
 // «Rapporter feil treff»: a mailto link the user clicks, prefilled with
