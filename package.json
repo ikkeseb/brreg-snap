@@ -30,7 +30,8 @@
     "verify:dist": "node scripts/verify-dist.mjs",
     "verify": "pnpm run verify:fast && pnpm run build:firefox && pnpm run build:chrome && pnpm run verify:dist && pnpm run lint:ext",
     "prepare": "node scripts/install-hooks.mjs",
-    "release": "node scripts/release.mjs"
+    "release": "node scripts/release.mjs",
+    "store-status": "node scripts/store-status.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

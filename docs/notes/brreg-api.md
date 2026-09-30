@@ -180,8 +180,9 @@ It runs in CI via `.github/workflows/canary.yml`, weekly (Mondays
 issue labelled `canary`, or comments on it if one is open, with the
 failing test names and a run link. The same workflow runs `pnpm audit
 --audit-level high` as a report-only step. It also calls
-`.github/workflows/keepalive.yml`, which re-enables every scheduled
-workflow so GitHub's 60-day inactivity rule doesn't switch them off.
+`.github/workflows/keepalive.yml` on scheduled runs, as
+`store-status.yml` does: it re-enables every scheduled workflow so
+GitHub's 60-day inactivity rule doesn't switch them off.
 
 To run it locally, use `pnpm test:live`, or pass one file:
 `pnpm test:live tests/live/resolver-corpus.test.ts`. When brreg

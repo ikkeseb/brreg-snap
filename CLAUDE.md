@@ -6,10 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Active work is driven by `docs/plans/2026-09-23-plan.md` — read its
 Decisions and Progress first; evidence per item is in
-`docs/plans/2026-09-23-findings.md`. Release state is not restated
-here: it lives in git tags (`v*` = tagged release, `amo-submission-*` /
-`cws-submission-*` = what was uploaded to each store) and GitHub
-Releases.
+`docs/plans/2026-09-23-findings.md`. Release state lives in git tags
+(`v*` = tagged release, `amo-submission-*` / `cws-submission-*` = what
+was uploaded to each store) and GitHub Releases. Store state is never
+written down; run `pnpm store-status` (`--deep` compares the served
+packages with the Release).
 
 - `main` is the only long-running branch. Docs-only changes that don't
   affect the `.xpi` may land on `main` directly.
@@ -66,6 +67,7 @@ pnpm package                               # = package:firefox (.xpi/.zip, maps 
 pnpm package:chrome                        # dist-chrome/ -> CWS-ready .zip (manifest at root)
 pnpm release X.Y.Z [--dry-run]             # bump, date CHANGELOG, verify, render kit (docs/release.md)
 pnpm release X.Y.Z --tag                   # commit + annotated tag vX.Y.Z; prints the push
+pnpm store-status                          # live AMO/CWS versions vs tags; --deep diffs packages, --strict for CI
 ```
 
 `pnpm dev` is the only way to exercise the popup — there is no Vite
@@ -99,6 +101,7 @@ note before reading the source file.
 | Permissions: `activeTab` limits, runtime `tabs` opt-in + consent step, gesture-stack rules, background wake-up, `browsingActivity` declaration | `public/manifest.*.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts` | `docs/notes/permissions-model.md` |
 | brreg API: regnskap base URL + latest year only, regnskap 500 = not in the open API, error contract (search throws, `[]` = real empty), no signatur, name search matches a dot literally (finn.no misses because FINN was renamed), live canary | `src/lib/brreg.ts`, `regnskap.ts`, `tests/live/` | `docs/notes/brreg-api.md`         |
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
+| Stores: store-status probe + verdict rules, what AMO/CWS change in a package | `scripts/store-status*.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
 
 Sidebar render functions are pure DOM writers in `src/details/render/*.ts`
 (one module per section: header, overview, roles, parent, underenheter,

@@ -95,6 +95,6 @@ jobs:
       actions: write
     uses: ./.github/workflows/keepalive.yml
     with:
-      # Every scheduled workflow in the repo; store-status.yml is skipped
-      # with a warning until it exists.
+      # Every scheduled workflow in the repo (store-status.yml calls this
+      # with the same list).
       workflows: canary.yml store-status.yml
