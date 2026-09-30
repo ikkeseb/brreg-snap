@@ -1,5 +1,5 @@
 // The panel's «Auto-oppdater» toggle: the consent step, the runtime
-// `tabs` request, and attaching / detaching the tab watcher. details.ts
+// `tabs` request, and attaching / detaching the tab watcher. details/auto-sync-ui.ts
 // wires the DOM events to these handlers; the ordering rules live here
 // so they can be tested without a DOM or a browser. The decision table
 // itself is decideToggle (auto-sync-controller.ts).
