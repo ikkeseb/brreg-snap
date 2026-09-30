@@ -78,7 +78,7 @@ jobs:
           path: dist
 
       - name: Unzip the source zip
-        run: unzip -q "dist/brreg-snap-source-${GITHUB_REF_NAME#v}.zip" -d source
+        run: unzip -q "dist/web-ext-artifacts/brreg-snap-source-${GITHUB_REF_NAME#v}.zip" -d source
 
       - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
@@ -94,7 +94,7 @@ jobs:
           (cd source && pnpm install --frozen-lockfile && pnpm package:firefox)
           mkdir rebuilt released
           unzip -q "source/web-ext-artifacts/brreg-snap-$v.zip" -d rebuilt
-          unzip -q "dist/brreg-snap-$v.zip" -d released
+          unzip -q "dist/web-ext-artifacts/brreg-snap-$v.zip" -d released
           diff -r rebuilt released
           echo "Rebuilt from brreg-snap-source-$v.zip: identical to brreg-snap-$v.zip" >> "$GITHUB_STEP_SUMMARY"
 
@@ -115,13 +115,13 @@ jobs:
       # `gh attestation verify <zip> --repo ikkeseb/brreg-snap`.
       - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-path: dist/*.zip
+          subject-path: dist/web-ext-artifacts/*.zip
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" dist/*.zip \
+          gh release create "$GITHUB_REF_NAME" dist/web-ext-artifacts/*.zip \
             --repo "$GITHUB_REPOSITORY" \
             --verify-tag \
             --title "brreg-snap $GITHUB_REF_NAME" \
