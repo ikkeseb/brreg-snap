@@ -1,7 +1,7 @@
-// How the panel (details.ts) decides what to show when something
+// How the panel (details/controller.ts) decides what to show when something
 // outside it moves: its own startup, a tab event while auto-sync is
 // on, a sync / no-match message from the popup or the context menu.
-// The DOM painting stays in details.ts behind the `show` / `keep`
+// The painting stays in the controller behind the `show` / `keep`
 // callbacks; the ordering and "is this still the latest?" logic lives
 // here so it can be tested without a DOM.
 
@@ -186,6 +186,11 @@ export interface TabFields {
   title?: string;
 }
 
+// What moved the panel. A tab event fires while the user works in the
+// page, so a painter must not move focus for it; the rest are
+// user-initiated (an open, a message from a gesture, a probe).
+export type FollowOrigin = 'start' | 'tab' | 'message' | 'probe';
+
 export interface FollowerDeps {
   loads: LoadSequence;
   // browser.runtime.getURL('') — see isReadableSite.
@@ -196,9 +201,9 @@ export interface FollowerDeps {
   searchHost(host: string): Promise<DetailedResult | undefined>;
   onScreen(): PanelView | undefined;
   // Paint a different view. The painters claim their own load token.
-  show(view: PanelView): void;
+  show(view: PanelView, origin: FollowOrigin): void;
   // `view` is already on screen: refresh its host label / method only.
-  keep(view: PanelView): void;
+  keep(view: PanelView, origin: FollowOrigin): void;
 }
 
 export interface PanelFollower {
@@ -213,17 +218,18 @@ export interface PanelFollower {
 }
 
 export function createPanelFollower(deps: FollowerDeps): PanelFollower {
-  function apply(view: PanelView): void {
-    if (sameView(deps.onScreen(), view)) deps.keep(view);
-    else deps.show(view);
+  function apply(view: PanelView, origin: FollowOrigin): void {
+    if (sameView(deps.onScreen(), view)) deps.keep(view, origin);
+    else deps.show(view, origin);
   }
 
   async function probeWith(
     run: LoadToken,
     host: string | undefined,
+    origin: FollowOrigin,
   ): Promise<void> {
     if (!host) {
-      apply({ kind: 'empty' });
+      apply({ kind: 'empty' }, origin);
       return;
     }
     let view: PanelView;
@@ -233,7 +239,7 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
       view = { kind: 'empty', host, degraded: true };
     }
     if (run.isStale()) return;
-    apply(view);
+    apply(view, origin);
   }
 
   async function readTab(
@@ -257,10 +263,10 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
       if (run.isStale()) return;
       const plan = chooseStart(hint, tab);
       if (plan.kind === 'probe') {
-        await probeWith(run, plan.host);
+        await probeWith(run, plan.host, 'start');
         return;
       }
-      apply(plan);
+      apply(plan, 'start');
     },
 
     async followTab(tabId, given) {
@@ -280,18 +286,18 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
         view = { kind: 'empty' };
       }
       if (run.isStale()) return;
-      apply(view);
+      apply(view, 'tab');
     },
 
     follow(view) {
       // Claim even when the view is kept: an older tab event still
       // resolving must not paint over what this newer message says.
       deps.loads.begin();
-      apply(view);
+      apply(view, 'message');
     },
 
     async probe(host) {
-      await probeWith(deps.loads.begin(), host);
+      await probeWith(deps.loads.begin(), host, 'probe');
     },
   };
 }

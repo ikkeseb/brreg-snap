@@ -347,7 +347,7 @@ describe('follower — a late result never paints over a newer one', () => {
 
     const following = follower.followTab(1, { url: 'https://www.dnb.no/' });
     // e.g. a drill-in click: details.ts's painters claim the token.
-    deps.show(companyView(EQUINOR));
+    deps.show(companyView(EQUINOR), 'start');
     slowResolve.resolve({ orgnr: DNB, host: 'www.dnb.no', method: 'host-auto' });
     await following;
 
