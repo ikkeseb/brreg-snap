@@ -39,15 +39,16 @@
     };
   }
 
-  // regnskapsregisteret sends no CORS headers (enhetsregisteret does).
-  // The extension bypasses CORS via host_permissions; the harness
-  // reroutes those calls through serve.mjs's server-side proxy.
+  // Every data.brreg.no call goes through serve.mjs's /brreg/ path:
+  // regnskapsregisteret sends no CORS headers (the extension bypasses
+  // CORS via host_permissions, a plain tab can't), and one path lets the
+  // server answer from the live API or from recorded fixtures.
   const realFetch = globalThis.fetch.bind(globalThis);
   globalThis.fetch = (input, init) => {
     const url = typeof input === 'string' ? input : input.url ?? String(input);
-    const PREFIX = 'https://data.brreg.no/regnskapsregisteret/';
+    const PREFIX = 'https://data.brreg.no/';
     if (url.startsWith(PREFIX)) {
-      return realFetch('/regnskap-proxy/' + url.slice(PREFIX.length), init);
+      return realFetch('/brreg/' + url.slice(PREFIX.length), init);
     }
     return realFetch(input, init);
   };

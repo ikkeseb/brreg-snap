@@ -1,0 +1,251 @@
+{
+  "request": "/enhetsregisteret/api/enheter?navn=nrk&navnMetodeForSoek=FORTLOEPENDE&size=20&organisasjonsform=AS%2CASA%2CSA%2CBBL%2CORGL%2CSF&sort=antallAnsatte%2CDESC",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "enheter": [
+        {
+          "organisasjonsnummer": "971526327",
+          "navn": "NRK BARNEHAGEN OSLO SA",
+          "organisasjonsform": {
+            "kode": "SA",
+            "beskrivelse": "Samvirkeforetak"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "KRINGKASTINGSFUNKSJONÆRENES BARNEHAGE - N R K",
+              "fraDato": "1995-02-20 08:55:00",
+              "tilDato": "1996-11-13 17:23:07"
+            },
+            {
+              "navn": "KRINGKASTINGSFUNKSJONÆRENES BARNEHAGE - N R K",
+              "fraDato": "2006-03-31 12:41:30",
+              "tilDato": "2008-03-04 20:26:17"
+            },
+            {
+              "navn": "NRK BARNEHAGEN OSLO",
+              "fraDato": "2008-03-04 20:26:17",
+              "tilDato": "2017-04-05 10:00:47"
+            }
+          ],
+          "registreringsdatoEnhetsregisteret": "1995-02-20",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "85.100",
+            "beskrivelse": "Førskoleundervisning og drift av barnehager"
+          },
+          "antallAnsatte": 22,
+          "harRegistrertAntallAnsatte": true,
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "telefon": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0340",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "1970-12-30",
+          "institusjonellSektorkode": {
+            "kode": "2100",
+            "beskrivelse": "Private aksjeselskaper mv."
+          },
+          "registrertIForetaksregisteret": true,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "vedtektsdato": "2012-11-26",
+          "vedtektsfestetFormaal": [
+            "Eie og drive barnehage til det beste for medlemmene og deres barn.",
+            "Foretaket skal fremme medlemmenes økonomiske interesser gjennom deres",
+            "deltakelse i virksomheten som kjøpere av barnehagetjenester fra",
+            "foretaket."
+          ],
+          "aktivitet": [
+            "Barnehagedrift."
+          ],
+          "registreringsdatoForetaksregisteret": "2017-04-05",
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "978650759",
+          "navn": "NRK AKTIVUM AS",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "historiskeNavn": [],
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0340",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "1997-06-25",
+          "registrertIMvaregisteret": true,
+          "naeringskode1": {
+            "kode": "59.110",
+            "beskrivelse": "Produksjon av film, video og fjernsynsprogrammer"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "registreringsdatoMerverdiavgiftsregisteret": "1997-11-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "1997-12-17",
+          "epostadresse": "post@example.no",
+          "telefon": "00000000",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0340",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "1997-04-25",
+          "institusjonellSektorkode": {
+            "kode": "1120",
+            "beskrivelse": "Statlig eide aksjeselskaper mv."
+          },
+          "registrertIForetaksregisteret": true,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "vedtektsdato": "2021-02-05",
+          "vedtektsfestetFormaal": [
+            "Kommersiell omsetning av varer og tjenester med relasjon til",
+            "mediemarkedet, herunder særskilt produksjon og salg av varer og",
+            "tjenester basert på Norsk rikskringkasting AS'program- og",
+            "kringkastingsvirksomhet."
+          ],
+          "aktivitet": [
+            "Produksjon og salg av sekundærprodukter av kringkastingsprogram, bl.a",
+            "video, CD, CD-rom m.v"
+          ],
+          "registreringsdatoForetaksregisteret": "1997-07-03",
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "kapital": {
+            "belop": 4900000,
+            "antallAksjer": 4900,
+            "type": "Aksjekapital",
+            "valuta": "NOK",
+            "innfortDato": "2006-11-16"
+          },
+          "respons_klasse": "Enhet"
+        },
+        {
+          "organisasjonsnummer": "927119773",
+          "navn": "NRK NORMANNSLØKKA AS",
+          "organisasjonsform": {
+            "kode": "AS",
+            "beskrivelse": "Aksjeselskap"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "NFH 210478 AS",
+              "fraDato": "2021-05-18 14:56:20",
+              "tilDato": "2021-07-01 15:14:13"
+            }
+          ],
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0340",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "registreringsdatoEnhetsregisteret": "2021-05-18",
+          "registrertIMvaregisteret": true,
+          "frivilligMvaRegistrertBeskrivelser": [
+            "Utleier av bygg eller anlegg"
+          ],
+          "naeringskode1": {
+            "kode": "68.120",
+            "beskrivelse": "Utvikling og salg av byggeprosjekter"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2021-12-09",
+          "registreringsdatoMerverdiavgiftsregisteret": "2022-01-01",
+          "registreringsdatoMerverdiavgiftsregisteretEnhetsregisteret": "2021-12-09",
+          "forretningsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "0340",
+            "poststed": "OSLO",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "OSLO",
+            "kommunenummer": "0301"
+          },
+          "stiftelsesdato": "2021-04-01",
+          "institusjonellSektorkode": {
+            "kode": "1120",
+            "beskrivelse": "Statlig eide aksjeselskaper mv."
+          },
+          "registrertIForetaksregisteret": true,
+          "registrertIStiftelsesregisteret": false,
+          "registrertIFrivillighetsregisteret": false,
+          "sisteInnsendteAarsregnskap": "2025",
+          "konkurs": false,
+          "underAvvikling": false,
+          "underTvangsavviklingEllerTvangsopplosning": false,
+          "maalform": "Bokmål",
+          "vedtektsdato": "2023-12-21",
+          "vedtektsfestetFormaal": [
+            "Eie og utvikle fast eiendom."
+          ],
+          "aktivitet": [
+            "Eie og utvikle fast eiendom."
+          ],
+          "registreringsdatoForetaksregisteret": "2021-05-18",
+          "registrertIPartiregisteret": false,
+          "paategninger": [],
+          "erIKonsern": false,
+          "kapital": {
+            "belop": 60000,
+            "antallAksjer": 3000,
+            "type": "Aksjekapital",
+            "valuta": "NOK",
+            "innfortDato": "2024-01-19"
+          },
+          "respons_klasse": "Enhet"
+        }
+      ]
+    },
+    "page": {
+      "size": 20,
+      "totalElements": 3,
+      "totalPages": 1,
+      "number": 0
+    }
+  }
+}

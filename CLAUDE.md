@@ -6,19 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Active work is driven by `docs/plans/2026-09-23-plan.md` — read its
 Decisions and Progress first; evidence per item is in
-`docs/plans/2026-09-23-findings.md`. Release state is not restated
-here: it lives in git tags (`v*` = tagged release, `amo-submission-*`
-= what was uploaded to the stores) and GitHub Releases.
+`docs/plans/2026-09-23-findings.md`. Release state lives in git tags
+(`v*` = tagged release, `amo-submission-*` / `cws-submission-*` = what
+was uploaded to each store) and GitHub Releases. Store state is never
+written down; run `pnpm store-status` (`--deep` compares the served
+packages with the Release).
 
 - `main` is the only long-running branch. Docs-only changes that don't
   affect the `.xpi` may land on `main` directly.
 - Support email everywhere: `sebastian@nuez.no`.
-- Store submission kit: when prepping a store submission, generate a
-  **committed** kit in `docs/submission-kit/<version>/` — one file per
-  destination (amo.md, cws.md) with the EXACT copy-paste text for every
-  store form field plus release notes, topped with a short numbered
-  upload recipe. Source the content from `docs/amo-submission.md`,
-  `docs/cws-submission.md` and `CHANGELOG.md`; those stay canonical.
+- Releasing and store publishing (`pnpm release`, the generated
+  submission kit, `release.yml`, `publish.yml`): `docs/release.md`.
 - Chrome-port history + decision log (D1–D15): `docs/chrome-port.md`
   (historical).
 
@@ -45,17 +43,23 @@ The gate is `pnpm verify` (CI, the release workflow and the pre-push
 hook all run it): `verify:fast` (typecheck + lint + test), both builds,
 `verify:dist`, `lint:ext`. `pnpm install` points git at the committed
 hook (`prepare` sets `core.hooksPath .githooks`); `git push --no-verify`
-is the conscious bypass.
+is the conscious bypass. The browser smoke (`pnpm smoke`) is NOT in the
+gate or the hook (it needs a browser): CI runs it as its own `smoke`
+job after `ci`.
 
 ```bash
 pnpm verify                                # the full gate (about 12 s)
 pnpm verify:fast                           # typecheck + lint + test
 pnpm typecheck                             # tsc: src, tests/, tsconfig.node.json projects
-pnpm lint                                  # ESLint on src, tests, scripts, configs; 0 warnings
+pnpm lint                                  # ESLint on src, tests, scripts (not scripts/preview/), configs; 0 warnings
 pnpm lint:ext                              # web-ext lint on dist-firefox/; fails on errors + unlisted warnings
-pnpm verify:dist                           # dist manifests, file set, no eval (run both builds first)
+pnpm verify:dist                           # dist manifests + the files they reference, file set, no eval/Function (AST); run both builds first
 pnpm test                                  # vitest run
+pnpm smoke                                 # build:chrome + Playwright smoke (tests/e2e/): harness states x widths x themes + real Chromium load; screenshots in test-results/
+pnpm smoke:record                          # re-record tests/e2e/fixtures/ from the live API (build:chrome first; review the diff)
+pnpm exec playwright install chromium      # one-time browser download for the smoke
 pnpm test:watch                            # vitest interactive
+pnpm test:live                             # live brreg canary: API contracts + resolver corpus (network; not in verify)
 pnpm exec vitest run tests/orgnr.test.ts   # single file
 pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # single test by name
 pnpm build                                 # = build:firefox (default target)
@@ -66,6 +70,9 @@ pnpm dev                                   # = dev:firefox (build + web-ext run,
 pnpm dev:chrome                            # build:chrome + web-ext run -t chromium
 pnpm package                               # = package:firefox (.xpi/.zip, maps stripped)
 pnpm package:chrome                        # dist-chrome/ -> CWS-ready .zip (manifest at root)
+pnpm release X.Y.Z [--dry-run]             # bump, date CHANGELOG, verify, render kit (docs/release.md)
+pnpm release X.Y.Z --tag                   # commit + annotated tag vX.Y.Z; prints the push
+pnpm store-status                          # live AMO/CWS versions vs tags; --deep diffs packages, --strict for CI
 ```
 
 `pnpm dev` is the only way to exercise the popup — there is no Vite
@@ -97,9 +104,10 @@ note before reading the source file.
 | Session cache (TTL, sweep, data age), failures never cached, race guards (manual search `runId`, popup `loadRunId`, the panel's load token) | `src/lib/session-cache.ts`, `brreg.ts`, `hostname-search.ts`, `ui/manual-search.ts`, `panel-follow.ts`, `src/popup/popup.ts`, `src/details/details.ts` | `docs/notes/cache.md`             |
 | Sidebar sync: panel-hosted auto-sync, window-scoped messages, same-view keep | `src/details/details.ts`, `src/lib/panel-protocol.ts`, `panel-follow.ts`, `tab-sync.ts`, `popup/popup.ts`, `background/background.ts` | `docs/notes/sidebar-sync.md`      |
 | Permissions: `activeTab` limits, runtime `tabs` opt-in + consent step, gesture-stack rules, background wake-up, `browsingActivity` declaration, selection lookup + `commands` + toolbar badge (no new permission) | `public/manifest.*.json`, `src/background/background.ts`, `src/details/details.ts`, `src/lib/auto-sync-*.ts`, `src/lib/platform/badge.ts` | `docs/notes/permissions-model.md` |
-| brreg API: regnskap base URL + latest year only, regnskap 500 = not in the open API, error contract (search throws, `[]` = real empty), no signatur, search drops dots, konsernstruktur (whole group, duplicate parents), annual-report copies + kunngjøringer links | `src/lib/brreg.ts`, `regnskap.ts`, `konsern.ts`, `aarsregnskap.ts` | `docs/notes/brreg-api.md`         |
+| brreg API: regnskap base URL + latest year only, regnskap 500 = not in the open API, error contract (search throws, `[]` = real empty), no signatur, name search matches a dot literally (finn.no misses because FINN was renamed), konsernstruktur (whole group, duplicate parents), annual-report copies + kunngjøringer links, live canary | `src/lib/brreg.ts`, `regnskap.ts`, `konsern.ts`, `aarsregnskap.ts`, `tests/live/` | `docs/notes/brreg-api.md`         |
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
 | Trust view: answer priority, signals (deadline-aware regnskap, rekonstruksjon, NUF), merknader (påtegninger), endringer + the change feed | `src/lib/trust/*.ts`, `src/lib/brreg-endringer.ts`, `company-load.ts` | `docs/notes/trust.md`             |
+| Stores: store-status probe + verdict rules, what AMO/CWS change in a package | `scripts/store-status*.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
 
 Sidebar render functions are pure DOM writers in `src/details/render/*.ts`
 (one module per section: header, overview, roles, parent, underenheter,
@@ -166,8 +174,10 @@ PRs that relax any of the above will be rejected.
 ## Dependencies
 
 Zero runtime dependencies in the shipped bundle (everything is
-inlined TypeScript). `pnpm verify` enforces it: ESLint bans
-non-relative imports in `src/`, and `verify:dist` fails if
-`package.json` gains a `dependencies` field. Every package is a dev
+inlined TypeScript). `pnpm verify` enforces it: the build fails when
+any module outside `src/`, or any non-`.ts` script, enters the bundle
+graph (`scripts/build-graph.mjs`); ESLint bans non-relative imports in
+`src/`; `verify:dist` fails if `package.json` gains a `dependencies`
+field. Every package is a dev
 dependency, so `pnpm audit` advisories concern the toolchain, not the
 extension.

@@ -1,0 +1,300 @@
+{
+  "request": "/enhetsregisteret/api/underenheter?overordnetEnhet=923609016&size=100",
+  "status": 200,
+  "body": {
+    "_embedded": {
+      "underenheter": [
+        {
+          "organisasjonsnummer": "973861883",
+          "navn": "EQUINOR ASA AVD CCB SOTRA",
+          "organisasjonsform": {
+            "kode": "BEDR",
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "STATOIL BERGEN DRIFTSTJENESTER FORSYNINGSBASE BERGEN",
+              "fraDato": "1995-09-14 19:48:00",
+              "tilDato": "1999-10-28 18:46:15"
+            },
+            {
+              "navn": "STATOIL CCB SOTRA",
+              "fraDato": "1999-10-28 18:46:15",
+              "tilDato": "2008-10-25 15:38:30"
+            },
+            {
+              "navn": "STATOILHYDRO ASA AVD CCB SOTRA",
+              "fraDato": "2009-06-25 20:44:50",
+              "tilDato": "2009-11-25 20:47:09"
+            },
+            {
+              "navn": "STATOIL ASA AVD CCB SOTRA",
+              "fraDato": "2009-11-25 20:47:09",
+              "tilDato": "2018-05-17 21:09:48"
+            }
+          ],
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "4035",
+            "poststed": "STAVANGER",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "STAVANGER",
+            "kommunenummer": "1103"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-09-14",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "06.100",
+            "beskrivelse": "Utvinning av råolje"
+          },
+          "hjelpeenhetskode": {
+            "kode": "52.220",
+            "beskrivelse": "Andre tjenester tilknyttet sjøtransport"
+          },
+          "antallAnsatte": 39,
+          "harRegistrertAntallAnsatte": true,
+          "overordnetEnhet": "923609016",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-08-11",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-08-10",
+          "telefon": "00000000",
+          "beliggenhetsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "5347",
+            "poststed": "ÅGOTNES",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "ØYGARDEN",
+            "kommunenummer": "4626"
+          },
+          "respons_klasse": "Underenhet"
+        },
+        {
+          "organisasjonsnummer": "991770526",
+          "navn": "EQUINOR ASA AVD CSO GBS PRS PURCHASING",
+          "organisasjonsform": {
+            "kode": "BEDR",
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "STATOILHYDRO ASA AVD CSO GBS PRS PURCHASING",
+              "fraDato": "2009-06-25 20:45:01",
+              "tilDato": "2009-11-25 20:47:07"
+            },
+            {
+              "navn": "STATOIL ASA AVD CSO GBS PRS PURCHASING",
+              "fraDato": "2009-11-25 20:47:07",
+              "tilDato": "2018-05-17 21:09:50"
+            }
+          ],
+          "registreringsdatoEnhetsregisteret": "2007-09-29",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "06.100",
+            "beskrivelse": "Utvinning av råolje"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "overordnetEnhet": "923609016",
+          "oppstartsdato": "2007-10-01",
+          "beliggenhetsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "3660",
+            "poststed": "RJUKAN",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "TINN",
+            "kommunenummer": "4026"
+          },
+          "respons_klasse": "Underenhet"
+        },
+        {
+          "organisasjonsnummer": "973861832",
+          "navn": "EQUINOR ASA AVD DRIFTSSENTER BYGSNES",
+          "organisasjonsform": {
+            "kode": "BEDR",
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "STATOIL A/S BYGSNES",
+              "fraDato": "1995-09-14 19:48:00",
+              "tilDato": "1999-10-22 18:34:53"
+            },
+            {
+              "navn": "STATOIL DRIFTSENTER BYGSNES",
+              "fraDato": "1999-10-22 18:34:53",
+              "tilDato": "2008-10-25 15:38:27"
+            },
+            {
+              "navn": "STATOILHYDRO ASA AVD DRIFTSENTER BYGSNES",
+              "fraDato": "2009-06-25 20:44:46",
+              "tilDato": "2009-11-25 20:46:37"
+            },
+            {
+              "navn": "STATOIL ASA AVD DRIFTSSENTER BYGSNES",
+              "fraDato": "2009-11-25 20:46:37",
+              "tilDato": "2018-05-17 21:09:47"
+            }
+          ],
+          "postadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "4035",
+            "poststed": "STAVANGER",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "STAVANGER",
+            "kommunenummer": "1103"
+          },
+          "registreringsdatoEnhetsregisteret": "1995-09-14",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "06.100",
+            "beskrivelse": "Utvinning av råolje"
+          },
+          "hjelpeenhetskode": {
+            "kode": "70.200",
+            "beskrivelse": "Bedriftsrådgivning og annen administrativ rådgivning"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "overordnetEnhet": "923609016",
+          "beliggenhetsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "4250",
+            "poststed": "KOPERVIK",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "KARMØY",
+            "kommunenummer": "1149"
+          },
+          "respons_klasse": "Underenhet"
+        },
+        {
+          "organisasjonsnummer": "974160099",
+          "navn": "EQUINOR ASA AVD EPN DRIFT NORD AVD HARSTAD",
+          "organisasjonsform": {
+            "kode": "BEDR",
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "NORSK HYDRO A/S U & P, HARSTAD",
+              "fraDato": "1999-12-06 14:07:05",
+              "tilDato": "1999-12-06 18:38:54"
+            },
+            {
+              "navn": "NORSK HYDRO AS U&P HARSTAD",
+              "fraDato": "1999-12-06 18:38:54",
+              "tilDato": "2007-10-01 20:52:03"
+            },
+            {
+              "navn": "STATOILHYDRO ASA AVD EPN DRIFT NORD AVD HARSTAD",
+              "fraDato": "2009-06-25 20:44:43",
+              "tilDato": "2009-11-25 20:46:35"
+            },
+            {
+              "navn": "STATOIL ASA AVD EPN DRIFT NORD AVD HARSTAD",
+              "fraDato": "2009-11-25 20:46:35",
+              "tilDato": "2018-05-17 21:09:49"
+            }
+          ],
+          "registreringsdatoEnhetsregisteret": "1995-02-23",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "06.100",
+            "beskrivelse": "Utvinning av råolje"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "overordnetEnhet": "923609016",
+          "datoEierskifte": "2007-10-01",
+          "beliggenhetsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "9411",
+            "poststed": "HARSTAD",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "HARSTAD",
+            "kommunenummer": "5503"
+          },
+          "respons_klasse": "Underenhet"
+        },
+        {
+          "organisasjonsnummer": "973101870",
+          "navn": "EQUINOR ASA AVD EPN DRIFT NORD AVD KRISTIANSUND",
+          "organisasjonsform": {
+            "kode": "BEDR",
+            "beskrivelse": "Underenhet til næringsdrivende og offentlig forvaltning"
+          },
+          "historiskeNavn": [
+            {
+              "navn": "NORSK HYDRO PRODUKSJON AS",
+              "fraDato": "1995-02-23 02:21:00",
+              "tilDato": "1996-04-24 19:07:19"
+            },
+            {
+              "navn": "NORSK HYDRO KRISTIANSUND",
+              "fraDato": "1996-04-24 19:07:19",
+              "tilDato": "1999-06-01 18:42:58"
+            },
+            {
+              "navn": "NORSK HYDRO KRISTIANSUND KONTOR KRISTIANSUND",
+              "fraDato": "1999-12-06 14:18:06",
+              "tilDato": "2007-10-01 20:52:53"
+            },
+            {
+              "navn": "STATOILHYDRO ASA AVD EPN DRIFT NORD AVD KRISTIANSUND",
+              "fraDato": "2009-06-25 20:44:56",
+              "tilDato": "2009-11-25 20:46:36"
+            },
+            {
+              "navn": "STATOIL ASA AVD EPN DRIFT NORD AVD KRISTIANSUND",
+              "fraDato": "2009-11-25 20:46:36",
+              "tilDato": "2018-05-17 21:09:43"
+            }
+          ],
+          "registreringsdatoEnhetsregisteret": "1995-02-23",
+          "registrertIMvaregisteret": false,
+          "naeringskode1": {
+            "kode": "06.100",
+            "beskrivelse": "Utvinning av råolje"
+          },
+          "harRegistrertAntallAnsatte": false,
+          "overordnetEnhet": "923609016",
+          "telefon": "00000000",
+          "oppstartsdato": "1987-01-01",
+          "datoEierskifte": "2007-10-01",
+          "beliggenhetsadresse": {
+            "land": "Norge",
+            "landkode": "NO",
+            "postnummer": "6517",
+            "poststed": "KRISTIANSUND N",
+            "adresse": [
+              "Eksempelveien 1"
+            ],
+            "kommune": "KRISTIANSUND",
+            "kommunenummer": "1505"
+          },
+          "respons_klasse": "Underenhet"
+        }
+      ]
+    },
+    "page": {
+      "size": 100,
+      "totalElements": 35,
+      "totalPages": 1,
+      "number": 0
+    }
+  }
+}

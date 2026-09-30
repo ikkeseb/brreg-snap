@@ -23,15 +23,21 @@
     "lint:ext": "node scripts/lint-ext.mjs",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:live": "vitest run --config vitest.live.config.ts",
     "typecheck": "tsc -p tsconfig.json && tsc -p tests/tsconfig.json && tsc -p tsconfig.node.json",
     "lint": "eslint --max-warnings 0 .",
     "verify:fast": "pnpm run typecheck && pnpm run lint && pnpm run test",
     "verify:dist": "node scripts/verify-dist.mjs",
     "verify": "pnpm run verify:fast && pnpm run build:firefox && pnpm run build:chrome && pnpm run verify:dist && pnpm run lint:ext",
-    "prepare": "node scripts/install-hooks.mjs"
+    "smoke": "pnpm run build:chrome && playwright test",
+    "smoke:record": "node tests/e2e/record.mjs",
+    "prepare": "node scripts/install-hooks.mjs",
+    "release": "node scripts/release.mjs",
+    "store-status": "node scripts/store-status.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.63.0",
     "@types/firefox-webext-browser": "^143.0.0",
     "@types/node": "^24.13.5",
     "eslint": "^10.10.0",

@@ -2,17 +2,11 @@
 // `build:firefox` and `build:chrome`. The source manifests are checked
 // with the same module in tests/manifest.test.ts; this catches a build
 // step that mangles them, and whatever else lands in dist-*/.
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { check } from './manifest-invariants.mjs';
-
-// What a package may contain at its root. .map files sit inside these
-// directories and are stripped at packaging (package:* --ignore-files).
-const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'chunks', 'icons', 'assets'];
-
-// Runtime code generation, forbidden by CLAUDE.md § Security constraints.
-const CODEGEN = [/(?<![\w$])eval\s*\(/, /(?<![\w$.])(?:new\s+)?Function\s*\(/];
+import { findCodegen } from './codegen-scan.mjs';
+import { check, DIST_ROOT, referencedFiles } from './manifest-invariants.mjs';
 
 const failures = [];
 const fail = (where, msg) => failures.push(`${where}: ${msg}`);
@@ -41,15 +35,18 @@ for (const target of ['firefox', 'chrome']) {
     continue;
   }
   for (const v of check(manifest, target, pkg)) fail(`${dist}/manifest.json`, v);
+  for (const file of referencedFiles(manifest)) {
+    if (!existsSync(join(dist, file))) fail(`${dist}/manifest.json`, `references "${file}", which is not in the package`);
+  }
 
   for (const name of readdirSync(dist)) {
     if (!DIST_ROOT.includes(name)) fail(dist, `unexpected entry "${name}" at the package root`);
   }
   for (const file of walk(dist)) {
     if (!file.endsWith('.js')) continue;
-    const code = readFileSync(file, 'utf8');
-    for (const re of CODEGEN) {
-      if (re.test(code)) fail(relative('.', file), `runtime code generation (${re.source})`);
+    // Runtime code generation, forbidden by CLAUDE.md § Security constraints.
+    for (const hit of findCodegen(readFileSync(file, 'utf8'), file)) {
+      fail(relative('.', file), `runtime code generation: ${hit}`);
     }
   }
 }
@@ -60,8 +57,9 @@ if (failures.length) {
     '\nDist invariants violated. These are the security non-negotiables from' +
       '\nCLAUDE.md: exact manifest keys and permissions, tabs as runtime opt-in,' +
       '\ndata.brreg.no as the only host, the exact CSP, an honest Firefox' +
-      '\ndata-collection declaration, no eval, zero runtime dependencies.',
+      '\ndata-collection declaration, every manifest-referenced file present,' +
+      '\nno eval, zero runtime dependencies.',
   );
   process.exit(1);
 }
-console.log('OK dist-firefox, dist-chrome: manifest invariants, file set, no eval; no runtime deps.');
+console.log('OK dist-firefox, dist-chrome: manifest invariants, referenced files, file set, no eval; no runtime deps.');

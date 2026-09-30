@@ -37,8 +37,7 @@ runtime JS, no curated host→orgnr table).
 | # | Item | Effort | Risk | Notes |
 |---|------|--------|------|-------|
 | P6 | `commands` keyboard shortcut to open the popup (`_execute_action`, e.g. `Alt+B`) — both manifests, zero JS. Bundle Firefox's `_execute_sidebar_action` in the same pass. | S | low | Already in `backlog.md`. `commands` is a manifest key, not a permission. |
-| P12 | **Reconcile `scripts/benchmark-hostname.mjs` with shipped scoring.** *Verified drift:* the benchmark reimplements `scoreCandidate`/`generateNordicVariants`/thresholds instead of importing `src/lib/hostname-score.ts` (it's a `.mjs`, can't import the `.ts` without a build step). The correctness safety-net is therefore measuring drifted code. **Prerequisite for P8.** | M | low | Not a shipped bug — dev-tooling reliability. |
-| P8 | Trim hostname-search request fan-out (~13 brreg requests per cold resolution; the Nordic-variant fan-out is the bulk). | M | med | **Do P12 first.** Safety process: `node scripts/benchmark-hostname.mjs` to lock the baseline ledger (the `0 AUTO-WRONG` line is the invariant), change one thing, re-run, accept only if the ledger is byte-identical AND request count dropped. Never trim by reasoning — measure. |
+| P8 | Trim hostname-search request fan-out (~13 brreg requests per cold resolution; the Nordic-variant fan-out is the bulk). | M | med | Safety process: `pnpm test:live tests/live/resolver-corpus.test.ts` (the shipped pipeline over the live corpus) to lock the baseline ledger (`AUTO-WRONG: 0` is the invariant), change one thing, re-run, accept only if the ledger is byte-identical AND request count dropped. Never trim by reasoning — measure. |
 | P9 | Batch `addRejectedChoice`'s ~4 sequential `storage.session` round-trips (the two reads can `Promise.all`). | S | low | `tests/hostname-search.test.ts` covers the reject/picker-choice interaction — keep green. |
 
 ## Parked / rejected

@@ -4,6 +4,10 @@ Everything needed to publish the Chrome build of brreg-snap to the
 Chrome Web Store (CWS). Mirrors `docs/amo-submission.md` for Firefox.
 Listing: <https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokhakeijmbafhdmli>.
 
+<!-- SECTION: item-id -->
+CWS item id (public; `scripts/store-status.mjs` reads it from here):
+`mccggmiialopdaaokhakeijmbafhdmli`
+
 ## 0. Account
 
 - Developer account registered (one-time USD $5 fee); two-step
@@ -15,12 +19,13 @@ Listing: <https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokh
 
 ## 1. Package
 
-Upload only `brreg-snap-chrome-<version>.zip` from the GitHub Release
-for tag `v<version>`, which CI builds from the tagged tree. Never a
-local build. It has `manifest.json` at the archive root and no `.map`
-files (`pnpm package:chrome` is what CI runs). Put its sha256 in the
-annotated `amo-submission-<version>` tag message next to the AMO
-digests (see `docs/amo-submission.md` § Upload).
+The publish workflow uploads `brreg-snap-chrome-<version>.zip` from the
+GitHub Release for tag `v<version>`, which CI builds from the tagged
+tree, submits it for review, and tags `cws-submission-<version>` with
+its sha256. Never a local build. The package has `manifest.json` at
+the archive root and no `.map` files (`pnpm package:chrome` is what CI
+runs; `scripts/verify-package.mjs` checks it). The flow and the manual
+fallback: `docs/release.md`.
 
 Each upload must carry a strictly higher `version` than the previous
 one. Manifest metadata (name etc.) effectively can't be edited in the
@@ -40,6 +45,7 @@ dashboard after submission — get it right in the zip.
 - **Privacy policy URL:**
   `https://github.com/ikkeseb/brreg-snap/blob/main/PRIVACY.md`
 
+<!-- SECTION: description-nb -->
 ### Description (nb — paste as is)
 
 ```
@@ -67,6 +73,7 @@ Sikkerhet og personvern:
 Kildekoden er åpen under MIT-lisens: https://github.com/ikkeseb/brreg-snap
 ```
 
+<!-- SECTION: description-en -->
 ### Description (en)
 
 ```
@@ -94,6 +101,7 @@ Security and privacy:
 Source code (MIT licence): https://github.com/ikkeseb/brreg-snap
 ```
 
+<!-- SECTION: privacy-practices -->
 ## 3. Privacy practices tab
 
 1. **Single purpose** (required free text):
