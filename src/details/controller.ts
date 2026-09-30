@@ -118,9 +118,10 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   // while loading or on error. Lets a sync or tab event for what's
   // already shown keep it instead of repainting through the skeleton.
   let onScreen: PanelView | undefined;
-  // The load whose result is on screen. renderParent's late name upgrade
-  // checks this rather than the load token: a sync that keeps the same
-  // company claims a token but leaves this load's result standing.
+  // The load whose result is on screen. A painter's post-paint fetch
+  // checks this (the result's isStale) rather than the load token: a
+  // sync that keeps the same company claims a token but leaves this
+  // load's result standing.
   let shownLoad: LoadToken | undefined;
   // Re-trigger for the «Prøv igjen» button in the full error state, or
   // under a degraded empty state (the host search failed).

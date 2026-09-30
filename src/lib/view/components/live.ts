@@ -15,13 +15,6 @@ export interface LiveRegion {
   readonly announce: (text: string) => void;
 }
 
-export function createLiveRegion(): LiveRegion {
-  const region = document.createElement('p');
-  region.className = 'sr-only';
-  region.setAttribute('aria-live', 'polite');
-  return liveRegionOf(region);
-}
-
 // Wrap a region that already exists in the page (popup.html ships one
 // so it is present before any script runs).
 export function liveRegionOf(region: HTMLElement): LiveRegion {

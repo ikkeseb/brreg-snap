@@ -14,7 +14,6 @@ import {
   buildAnswer,
   buildAnswerLoading,
   buildErrorAnswer,
-  renderAnswer,
 } from '../src/lib/view/components/answer.js';
 import { COPY_FEEDBACK_MS } from '../src/lib/view/components/copy-feedback.js';
 import { appendParts, glyph, icon } from '../src/lib/view/components/dom.js';
@@ -22,7 +21,7 @@ import { renderFooter } from '../src/lib/view/components/footer.js';
 import { renderIdentity } from '../src/lib/view/components/identity.js';
 import { buildKonsernRow } from '../src/lib/view/components/konsern.js';
 import { buildFacts, buildLedger, buildLedgerRow } from '../src/lib/view/components/ledger.js';
-import { createLiveRegion, focusElement } from '../src/lib/view/components/live.js';
+import { focusElement, liveRegionOf } from '../src/lib/view/components/live.js';
 import { appendSiteLabel, renderMasthead } from '../src/lib/view/components/masthead.js';
 import { renderPicker } from '../src/lib/view/components/picker.js';
 import {
@@ -79,11 +78,9 @@ describe('dom helpers', () => {
 });
 
 describe('live region + focus', () => {
-  it('is one polite sr-only region, and a repeat announces again', async () => {
+  it('announces through the page region, and a repeat announces again', async () => {
     vi.useFakeTimers();
-    const live = createLiveRegion();
-    expect(live.el.getAttribute('aria-live')).toBe('polite');
-    expect(live.el.className).toBe('sr-only');
+    const live = liveRegionOf(document.createElement('p'));
     live.announce('Org.nr kopiert');
     expect(live.el.textContent).toBe('');
     await vi.advanceTimersByTimeAsync(0);
@@ -349,12 +346,7 @@ describe('answer', () => {
     expect(noRetry.section.querySelector('.answer__actions')).toBeNull();
   });
 
-  it('renderAnswer replaces the container content; the skeleton is hidden from AT', () => {
-    const div = document.createElement('div');
-    div.append(document.createElement('p'));
-    renderAnswer(div, { tone: 'ok', headline: 'x', actions: [] });
-    expect(div.childElementCount).toBe(1);
-    expect(div.firstElementChild?.classList.contains('answer--ok')).toBe(true);
+  it('the loading skeleton is hidden from AT', () => {
     expect(buildAnswerLoading().getAttribute('aria-hidden')).toBe('true');
   });
 });

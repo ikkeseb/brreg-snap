@@ -38,9 +38,9 @@ export interface ResultPaint {
   // old — never when it was painted.
   fetchedAt: number;
   // True once this result is no longer the one on screen. A painter
-  // that fetches after painting (renderParent's name upgrade) checks
-  // it before writing. It stays false across a same-company sync
-  // that keeps the view, unlike the load token.
+  // that fetches after painting must check it before writing. It stays
+  // false across a same-company sync that keeps the view, unlike the
+  // load token.
   isStale: () => boolean;
   focus: ResultFocus;
   // The tab the panel follows (the one it resolved at startup or on a

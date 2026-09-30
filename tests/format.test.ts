@@ -1,14 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import type { Adresse, Kode } from '../src/types/brreg.js';
+import type { Adresse } from '../src/types/brreg.js';
 import {
   formatAddress,
   formatDateNo,
   formatDateNumeric,
-  formatListCount,
   formatMoney,
-  formatMoneyCompact,
-  formatNaering,
   formatOrgnr,
   formatPercent,
   formatRelativeTime,
@@ -279,30 +276,6 @@ describe('formatAddress', () => {
   });
 });
 
-describe('formatNaering', () => {
-  const kode = (k: string, b?: string): Kode => ({ kode: k, beskrivelse: b });
-
-  it('pairs description with code', () => {
-    expect(formatNaering(kode('62.020', 'Konsulentvirksomhet'))).toBe(
-      'Konsulentvirksomhet (62.020)',
-    );
-  });
-
-  it('falls back to description only when code is blank', () => {
-    expect(formatNaering(kode('', 'Konsulentvirksomhet'))).toBe(
-      'Konsulentvirksomhet',
-    );
-  });
-
-  it('falls back to bare code when no description', () => {
-    expect(formatNaering(kode('62.020'))).toBe('62.020');
-  });
-
-  it('returns undefined for undefined input', () => {
-    expect(formatNaering(undefined)).toBeUndefined();
-  });
-});
-
 const EQUINOR_USD: Regnskap[] = equinorRegnskap;
 const MOWI_EUR: Regnskap[] = mowiRegnskap;
 
@@ -332,40 +305,6 @@ describe('formatMoney with a foreign valuta', () => {
     expect(formatMoney(-250, 'EUR')).toBe('-250 EUR');
   });
 });
-
-describe('formatMoneyCompact', () => {
-  it('drops the " kr" suffix but keeps the magnitude word', () => {
-    expect(formatMoneyCompact(37_877_000_000)).toBe('37,9 mrd');
-    expect(formatMoneyCompact(5_200_000, 'NOK')).toBe('5,2 mill');
-    expect(formatMoneyCompact(850_000)).toBe('850 tusen');
-  });
-
-  it('keeps a foreign currency code — dropping it would read as kroner', () => {
-    expect(formatMoneyCompact(67_956_000_000, 'USD')).toBe('68,0 mrd USD');
-  });
-
-  it('keeps the sign on losses', () => {
-    expect(formatMoneyCompact(-1_200_000_000)).toBe('-1,2 mrd');
-  });
-
-  it('returns undefined for nullish / NaN', () => {
-    expect(formatMoneyCompact(undefined)).toBeUndefined();
-    expect(formatMoneyCompact(Number.NaN, 'USD')).toBeUndefined();
-  });
-});
-
-describe('formatListCount', () => {
-  it('counts a complete list', () => {
-    expect(formatListCount(1, 1)).toBe('1 registrert.');
-    expect(formatListCount(3, 3)).toBe('3 registrerte.');
-  });
-
-  it('says a capped page is capped (Posten: 100 of 133)', () => {
-    expect(formatListCount(100, 133)).toBe('Viser 100 av 133.');
-    expect(formatListCount(100, 1234)).toBe(`Viser 100 av 1${NBSP}234.`);
-  });
-});
-
 describe('parseIsoDate / formatDateNo', () => {
   // A date-only string must be the same calendar day in every time
   // zone. new Date('2002-09-12') is UTC midnight — the 11th west of UTC.

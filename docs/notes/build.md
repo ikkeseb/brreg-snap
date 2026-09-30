@@ -54,6 +54,6 @@ is. Don't add `clipboardWrite` to the permission list.
 
 Every other copy action goes through the same `writeClipboard(text)`
 (returns false when refused, so the UI can say so): the text comes
-from the pure builders in `src/lib/trust/summary.ts` (`buildSummary`,
-`orgnrFormats`), built and written inside the click handler with no
+from the pure builders in `src/lib/trust/summary.ts` (`buildSummary`),
+built and written inside the click handler with no
 await before the write.

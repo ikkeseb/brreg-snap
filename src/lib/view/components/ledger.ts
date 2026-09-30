@@ -104,16 +104,6 @@ export function buildLedger(rows: readonly LedgerRow[], handlers: LedgerHandlers
   return dl;
 }
 
-export function renderLedger(
-  container: HTMLElement,
-  rows: readonly LedgerRow[],
-  handlers: LedgerHandlers = {},
-): HTMLDListElement {
-  const dl = buildLedger(rows, handlers);
-  container.replaceChildren(dl);
-  return dl;
-}
-
 // Spoof: «Om selskapet — sier ingenting om dette nettstedet» + one
 // prose line of the company's own facts, no glyphs, no tone.
 export function buildFacts(facts: readonly TextPart[]): [HTMLParagraphElement, HTMLParagraphElement] {

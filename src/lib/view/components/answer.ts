@@ -102,16 +102,6 @@ function buildSupport(text: string): HTMLParagraphElement {
   return p;
 }
 
-export function renderAnswer(
-  container: HTMLElement,
-  answer: AnswerView,
-  handlers: AnswerHandlers = {},
-): Answer {
-  const built = buildAnswer(answer, handlers);
-  container.replaceChildren(built.section);
-  return built;
-}
-
 // The skeleton while loading: same geometry, shimmering values.
 export function buildAnswerLoading(): HTMLElement {
   const sec = el('section', 'answer answer--loading');

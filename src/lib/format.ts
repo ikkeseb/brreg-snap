@@ -1,15 +1,4 @@
-import type { Adresse, Kode } from '../types/brreg.js';
-
-// "Konsulentvirksomhet … (62.020)" — pairs the NACE description with its
-// code so the user can cross-reference the official register. Falls back
-// to whichever field exists (description-only, or bare code).
-export function formatNaering(kode: Kode | undefined): string | undefined {
-  if (!kode) return undefined;
-  const desc = kode.beskrivelse?.trim();
-  const digits = kode.kode?.trim();
-  if (desc && digits) return `${desc} (${digits})`;
-  return desc || digits || undefined;
-}
+import type { Adresse } from '../types/brreg.js';
 
 // Whole-percent string in nb-NO with a non-breaking space before the
 // sign ("42 %", "-25 %"). Returns undefined for nullish/NaN so addRow
@@ -133,18 +122,6 @@ export function formatMoney(
   return `${amount} ${isNok(valuta) ? 'kr' : valuta!.toUpperCase()}`;
 }
 
-// formatMoney without the " kr" suffix, for the dense multi-year trend
-// table, where every cell is monetary: repeating "kr" 9× adds noise and
-// makes "63,4 mrd kr" wrap in a narrow side panel. The magnitude word
-// stays, so figures remain unambiguous. A foreign currency keeps its
-// code — dropping it would silently relabel USD as kroner.
-export function formatMoneyCompact(
-  value: number | undefined,
-  valuta?: string,
-): string | undefined {
-  return isNok(valuta) ? formatMagnitude(value) : formatMoney(value, valuta);
-}
-
 // brreg dates are date-only ISO strings ("2002-09-12"). `new Date()`
 // reads those as UTC midnight, which is the previous calendar day
 // anywhere west of UTC — so date-only input becomes LOCAL midnight here.
@@ -186,15 +163,6 @@ export function formatDateNumeric(iso: string | undefined): string | undefined {
   const dd = String(date.getDate()).padStart(2, '0');
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   return `${dd}.${mm}.${date.getFullYear()}`;
-}
-
-// "3 registrerte." / "1 registrert." — or "Viser 100 av 133." when a
-// list is a capped page, so it never passes for the full count.
-export function formatListCount(shown: number, total: number): string {
-  if (total > shown) {
-    return `Viser ${formatCount(shown)} av ${formatCount(total)}.`;
-  }
-  return `${formatCount(shown)} registrert${shown === 1 ? '' : 'e'}.`;
 }
 
 // Integer with nb-NO thousands separators ("7 536"). Returns undefined

@@ -14,8 +14,11 @@ uploaded to each store) and GitHub Releases. Store state is never
 written down; run `pnpm store-status` (`--deep` compares the served
 packages with the Release).
 
-- `main` is the only long-running branch. Docs-only changes that don't
-  affect the `.xpi` may land on `main` directly.
+- `main` is the only branch that lives. One maintainer, so work lands
+  on `main` directly once `pnpm verify` is green (the pre-push hook
+  enforces it); a branch + PR is for when you want CI's browser smoke
+  before `main`, not a requirement. CI still runs smoke on every push to
+  `main`: a red smoke there is fixed forward first.
 - Support email everywhere: `sebastian@nuez.no`.
 - Releasing and store publishing (`pnpm release`, the generated
   submission kit, `release.yml`, `publish.yml`): `docs/release.md`.
@@ -41,64 +44,35 @@ Say which rung you reached; "done" without one means rung 1 only.
 
 ## Commands
 
-This project uses **pnpm** (pinned via `packageManager` in
-`package.json`). Don't run `npm install` — it will recreate
-`package-lock.json` next to `pnpm-lock.yaml` and drift the dep tree.
-
-`pnpm verify` = `verify:fast` (typecheck + lint + test), `check:docs`,
-both builds, `verify:dist`, `lint:ext`. `pnpm install` points git at the
-committed hook (`prepare` sets `core.hooksPath .githooks`); `git push
---no-verify` is the conscious bypass. The browser smoke (`pnpm smoke`)
-is NOT in the gate or the hook (it needs a browser): CI runs it as its
-own `smoke` job after `ci`.
+pnpm only (pinned via `packageManager`): `npm install` would recreate
+`package-lock.json` beside `pnpm-lock.yaml` and drift the dep tree.
+`package.json` lists every script; these are the ones with a catch.
+`pnpm install` points git at the committed pre-push hook (it runs
+`pnpm verify`); `git push --no-verify` is the conscious bypass.
 
 ```bash
-pnpm verify                                # the full gate (about 12 s)
-pnpm verify:fast                           # typecheck + lint + test
-pnpm typecheck                             # tsc: src, tests/, tsconfig.node.json projects
-pnpm lint                                  # ESLint on src, tests, scripts (not scripts/preview/), configs; 0 warnings
-pnpm check:docs                            # backticked repo paths and § anchors in the live docs resolve
-pnpm lint:ext                              # web-ext lint on dist-firefox/; fails on errors + unlisted warnings
-pnpm verify:dist                           # dist manifests + the files they reference, file set, no eval/Function (AST); run both builds first
-pnpm test                                  # vitest run
-pnpm smoke                                 # build:chrome + Playwright smoke (tests/e2e/): harness states x widths x themes + real Chromium load; screenshots in test-results/
-pnpm smoke:record                          # re-record tests/e2e/fixtures/ from the live API (build:chrome first; review the diff)
-pnpm exec playwright install chromium      # one-time browser download for the smoke
-pnpm preview                               # build:chrome + the preview harness on the live API (scripts/preview/README.md)
-pnpm test:watch                            # vitest interactive
-pnpm test:live                             # live brreg canary: API contracts + resolver corpus (network; not in verify)
-pnpm exec vitest run tests/orgnr.test.ts   # single file
-pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # single test by name
-pnpm build                                 # = build:firefox (default target)
-pnpm build:firefox                         # vite build --mode firefox -> dist-firefox/
-pnpm build:chrome                          # vite build --mode chrome   -> dist-chrome/
-pnpm watch                                 # vite build --watch (firefox target)
-pnpm dev                                   # = dev:firefox (build + web-ext run, FF profile)
-pnpm dev:chrome                            # build:chrome + web-ext run -t chromium
-pnpm package                               # = package:firefox (.xpi/.zip, maps stripped)
-pnpm package:chrome                        # dist-chrome/ -> CWS-ready .zip (manifest at root)
-pnpm release X.Y.Z [--dry-run]             # bump, date CHANGELOG, verify, render kit (docs/release.md)
-pnpm release X.Y.Z --tag                   # commit + annotated tag vX.Y.Z; prints the push
-pnpm store-status                          # live AMO/CWS versions vs tags; --deep diffs packages, --strict for CI
+pnpm verify                     # the gate (~12 s): typecheck, lint, test, check:docs, both builds, verify:dist, lint:ext
+pnpm exec vitest run tests/orgnr.test.ts                                 # one file
+pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # one test
+pnpm smoke                      # Playwright: harness states x widths x themes + a real Chromium load; not in the gate (CI runs it); once: pnpm exec playwright install chromium
+pnpm smoke:record               # re-record tests/e2e/fixtures/ from the live API; review the diff
+pnpm test:live                  # live brreg canary: API contracts + resolver corpus (network; not in the gate)
+pnpm preview                    # the built pages in a plain tab against the live API (scripts/preview/README.md)
+pnpm dev                        # the real extension in a Firefox profile (dev:chrome for Chromium)
+pnpm release X.Y.Z [--dry-run]  # then --tag; docs/release.md
+pnpm store-status [--deep]      # live AMO/CWS versions vs the tags
 ```
 
-There is no Vite dev server for popup-only extensions: `pnpm dev`
-exercises the popup as an extension, and `pnpm preview` renders the
-built pages in a plain tab. Chrome has no `web-ext run` parity for the
-side panel; load `dist-chrome/` unpacked via `chrome://extensions` →
-Developer mode → "Load unpacked" instead.
+There is no Vite dev server for an extension popup: use `pnpm dev` or
+`pnpm preview`. Chrome's side panel needs `dist-chrome/` loaded
+unpacked (`chrome://extensions` → Developer mode → Load unpacked).
 
-### Dual-browser build
-
-One source tree, two targets via `vite build --mode firefox|chrome`.
-Outputs go to `dist-firefox/` and `dist-chrome/`; the matching
-`public/manifest.<browser>.json` is copied to `manifest.json` by the
-`copy-static-assets` plugin in `vite.config.ts` (`publicDir` is
-disabled so the source manifests don't leak). Engine differences are
-isolated in `src/lib/platform/` — see `docs/notes/platform.md`. Store
-uploads are the CI release artifacts only (`.gitattributes` forces LF
-so local and CI builds match; AMO re-serialises the manifest when it
-signs, so the shipped one is never byte-identical anyway).
+One source tree, two targets (`--mode firefox|chrome` → `dist-firefox/`,
+`dist-chrome/`): only the manifest differs at build time
+(`docs/notes/build.md` § dual-browser-build), and engine differences
+are runtime checks (`docs/notes/platform.md`). Store uploads are the CI
+release artifacts only; `.gitattributes` forces LF so local and CI
+builds match.
 
 ## Architecture — routing table
 
@@ -119,28 +93,11 @@ note before reading the source file.
 | Stores: store-status probe + verdict rules, what AMO/CWS change in a package; listing text lives in `docs/amo-submission.md` / `docs/cws-submission.md` (the kit renders from their anchors) | `scripts/store-status*.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
 | UI system (1.4): the loudness rule, tokens + type scale, font + CSP, the component inventory (module → API → markup), the a11y contract, the popup's 600 px budget, seat amendments, the panel's search view + compact head + tab landing, the badge rule, the welcome page | `src/styles/brreg.css`, `src/lib/view/{trust-view,dossier-view,copy}.ts`, `src/lib/view/components/*.ts`, `src/popup/views.ts`, `src/details/{painter,tabs}.ts`, `src/welcome/` | `docs/notes/ui.md`                |
 
-The panel is a controller (`src/details/controller.ts`, the state
-machine, tested with a fake painter) behind a painting seam
-(`src/details/view.ts`) that `src/details/painter.ts` implements with
-the shared components; `main.ts` wires the document and the browser.
-The tab content is built as data in `src/lib/view/dossier-view.ts` and
-painted by `src/lib/view/components/{oversikt,personer,okonomi,
-enheter,notes}.ts`.
-
-Frontend system (1.4, «Dossier, stamped», `docs/notes/ui.md`): tokens
-and every component live in `src/styles/brreg.css` (light + dark via
-`prefers-color-scheme` and `.theme-*`); `popup.css` / `details.css` /
-`welcome.css` keep layout only. One view model,
-`src/lib/view/trust-view.ts` (`buildTrustView`, with the panel's tab
-content from `dossier-view.ts`), feeds the popup, the panel and the
-welcome page's examples; the components in `src/lib/view/components/`
-are pure DOM writers and every user-facing string is in
-`src/lib/view/copy.ts`. Loudness follows severity: ok is a quiet band,
-warn a firmer band with the way out inside it, danger a stamp. A
-signal whose fetch failed is OMITTED, never rendered as "not filed".
-No `style` attributes (CSP): state is classes and `data-*` / `aria-*`,
-computed widths go through `style.setProperty`. `src/welcome/` is the
-first-run page the install hook opens once (no network).
+UI work starts in `docs/notes/ui.md`. Three rules bite most often:
+every user-facing string lives in `src/lib/view/copy.ts`; no `style`
+attributes (CSP), so state is classes and `data-*` / `aria-*` and
+computed widths go through `style.setProperty`; a signal whose fetch
+failed is omitted, never rendered as "not filed".
 
 ### Docs conventions
 
@@ -153,20 +110,12 @@ first-run page the install hook opens once (no network).
 - Living docs hold decisions and invariants; history belongs to git and
   `CHANGELOG.md`.
 
-```bash
-# Pull a single gotcha by anchor:
-grep -n 'SECTION: regnskap-500-unsupported-plan' docs/notes/brreg-api.md
-```
-
 ## No curated data
 
 Every orgnr resolves via the live brreg API only — no static
 hostname → orgnr table, even for hard cases (FINN.no, regulated
 subsidiaries). Hosts brreg can't disambiguate fall through to the
-inline manual search in both popup and sidebar empty states. Both
-empty states also surface a `storage.session`-scoped recents list
-(`src/lib/ui/recent.ts`, max 5) so the user can re-open a recently
-viewed orgnr without re-typing.
+inline manual search in both popup and sidebar empty states.
 
 ## Security constraints
 
@@ -186,14 +135,10 @@ workaround.
 | No `eval`, no `Function()`, no remote-loaded code | `src` lint rules in `eslint.config.js` (pinned by `tests/lint-security.test.ts`) and the AST scan of the built JS (`scripts/codegen-scan.mjs`, in `verify:dist`) |
 | No HTML sinks (`innerHTML` & co.) in `src`: brreg text is written by the registrants themselves | `src` lint rules, `tests/lint-security.test.ts` |
 
-`tabs` opt-in flow: the user flips «Auto-oppdater» in the sidebar's
-masthead and confirms the inline disclosure, whose «Slå på» click calls
-`permissions.request({permissions: ['tabs']})`; flipping off calls
-`permissions.remove`. `menus` is on Mozilla's no-prompt list, so the
-install dialog advertises only `activeTab` + storage + the brreg host
-(plus, on Firefox 140+, the `browsingActivity` declaration). The data
-declarations stay honest because the visited site's domain goes to
-data.brreg.no.
+The `tabs` opt-in flow (a runtime request from the panel's
+«Auto-oppdater» consent step, `permissions.remove` on off) is
+`docs/notes/permissions-model.md` § tabs-runtime-optin; why the data
+declarations read as they do is § data-collection-declaration there.
 
 ## Dependencies
 
