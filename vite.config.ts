@@ -39,12 +39,14 @@ export default defineConfig(({ mode }) => {
         input: {
           popup: resolve(import.meta.dirname, 'src/popup/popup.html'),
           details: resolve(import.meta.dirname, 'src/details/details.html'),
+          welcome: resolve(import.meta.dirname, 'src/welcome/welcome.html'),
           background: resolve(import.meta.dirname, 'src/background/background.ts'),
         },
         output: {
           entryFileNames: (chunk) => {
             if (chunk.name === 'background') return 'background/background.js';
             if (chunk.name === 'details') return 'details/[name].js';
+            if (chunk.name === 'welcome') return 'welcome/[name].js';
             return 'popup/[name].js';
           },
           chunkFileNames: 'chunks/[name]-[hash].js',
@@ -52,6 +54,9 @@ export default defineConfig(({ mode }) => {
             const name = asset.name ?? '';
             if (name === 'details.html' || name === 'details.css') {
               return 'details/[name][extname]';
+            }
+            if (name === 'welcome.html' || name === 'welcome.css') {
+              return 'welcome/[name][extname]';
             }
             if (name.endsWith('.html') || name.endsWith('.css')) {
               return 'popup/[name][extname]';
@@ -84,6 +89,7 @@ export default defineConfig(({ mode }) => {
           // and drop the empty dist/src tree.
           relocateHtml('src/popup/popup.html', 'popup/popup.html');
           relocateHtml('src/details/details.html', 'details/details.html');
+          relocateHtml('src/welcome/welcome.html', 'welcome/welcome.html');
           if (existsSync(resolve(dist, 'src'))) {
             rmSync(resolve(dist, 'src'), { recursive: true, force: true });
           }

@@ -162,7 +162,10 @@ export function referencedFiles(manifest) {
 // `fonts` holds the bundled Schibsted Grotesk (woff2) and its OFL.txt,
 // copied verbatim by vite.config.ts so the stylesheet's /fonts/ URL is
 // stable across builds and the licence notice ships with the font.
-export const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'chunks', 'icons', 'assets', 'fonts'];
+// `welcome` is the first-run page (welcome/welcome.html), opened once by
+// the install hook via tabs.create — a plain extension page, referenced
+// by no manifest key and needing no permission.
+export const DIST_ROOT = ['manifest.json', 'background', 'popup', 'details', 'welcome', 'chunks', 'icons', 'assets', 'fonts'];
 
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 const show = (v) => (v === undefined ? 'undefined' : JSON.stringify(v));
