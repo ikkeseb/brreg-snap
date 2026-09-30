@@ -108,6 +108,7 @@ note before reading the source file.
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
 | Trust view: answer priority, signals (deadline-aware regnskap, rekonstruksjon, NUF), merknader (påtegninger), endringer + the change feed | `src/lib/trust/*.ts`, `src/lib/brreg-endringer.ts`, `company-load.ts` | `docs/notes/trust.md`             |
 | Stores: store-status probe + verdict rules, what AMO/CWS change in a package | `scripts/store-status*.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
+| UI system (1.4): the loudness rule, tokens + type scale, font + CSP, the component inventory (module → API → markup), the a11y contract, the popup's 600 px budget, seat amendments, the panel's search view + compact head + tab landing, the badge rule, the welcome page | `src/styles/brreg.css`, `src/lib/view/{trust-view,dossier-view,copy}.ts`, `src/lib/view/components/*.ts`, `src/popup/views.ts`, `src/details/{painter,tabs}.ts`, `src/welcome/` | `docs/notes/ui.md`                |
 
 The panel is a controller (`src/details/controller.ts`, the state
 machine, tested with a fake painter) behind a painting seam
@@ -117,17 +118,22 @@ The tab content is built as data in `src/lib/view/dossier-view.ts` and
 painted by `src/lib/view/components/{oversikt,personer,okonomi,
 enheter,notes}.ts`.
 
-Frontend system (1.4, «Dossier, stamped»): tokens + every component
-live in `src/styles/brreg.css` (light + dark via `prefers-color-scheme`
-and `.theme-*`); `popup.css` / `details.css` keep layout only. One view
-model, `src/lib/view/trust-view.ts` (`buildTrustView`), feeds both
-surfaces; the components in `src/lib/view/components/` are pure DOM
-writers and every user-facing string is in `src/lib/view/copy.ts`.
-Loudness follows severity: ok is a quiet band, warn a firmer band with
-the way out inside it, danger a stamp. A signal whose fetch failed is
-OMITTED, never rendered as "not filed". Visual dev loop:
-`scripts/preview/` runs the real bundles against the live API in a
-plain browser tab (see its README for limits).
+Frontend system (1.4, «Dossier, stamped», `docs/notes/ui.md`): tokens
+and every component live in `src/styles/brreg.css` (light + dark via
+`prefers-color-scheme` and `.theme-*`); `popup.css` / `details.css` /
+`welcome.css` keep layout only. One view model,
+`src/lib/view/trust-view.ts` (`buildTrustView`, with the panel's tab
+content from `dossier-view.ts`), feeds the popup, the panel and the
+welcome page's examples; the components in `src/lib/view/components/`
+are pure DOM writers and every user-facing string is in
+`src/lib/view/copy.ts`. Loudness follows severity: ok is a quiet band,
+warn a firmer band with the way out inside it, danger a stamp. A
+signal whose fetch failed is OMITTED, never rendered as "not filed".
+No `style` attributes (CSP): state is classes and `data-*` / `aria-*`,
+computed widths go through `style.setProperty`. `src/welcome/` is the
+first-run page the install hook opens once (no network). Visual dev
+loop: `scripts/preview/` runs the real bundles against the live API in
+a plain browser tab (see its README for limits).
 
 Targeted lookups:
 
@@ -156,7 +162,7 @@ These are the product differentiator, not preferences. See
 - Only `data.brreg.no` in `host_permissions`. No new hosts.
 - Install-time permissions are `activeTab` + `storage` + `menus`.
   `tabs` lives in `optional_permissions` and is *runtime opt-in only*:
-  the user must flip "Auto-oppdater ved fane-bytte" in the sidebar and
+  the user must flip «Auto-oppdater» in the sidebar's masthead and
   confirm the inline disclosure, whose «Slå på» click calls
   `permissions.request({permissions: ['tabs']})`. Flipping off calls
   `permissions.remove`. No `<all_urls>`, no `cookies`, no

@@ -214,7 +214,7 @@ describe('formatAddress', () => {
           land: 'Norge',
         }),
       ),
-    ).toBe('Karl Johans gate 1, 0154 OSLO, Norge');
+    ).toBe('Karl Johans gate 1, 0154 Oslo, Norge');
   });
 
   it('multiple street lines are preserved in order', () => {
@@ -226,20 +226,20 @@ describe('formatAddress', () => {
           poststed: 'OSLO',
         }),
       ),
-    ).toBe('Postboks 123, Sentrum, 0101 OSLO');
+    ).toBe('Postboks 123, Sentrum, 0101 Oslo');
   });
 
   it('postnummer only (no poststed) -> "0154" line with no trailing space', () => {
     expect(formatAddress(addr({ postnummer: '0154' }))).toBe('0154');
   });
 
-  it('poststed only (no postnummer) -> "OSLO" line', () => {
-    expect(formatAddress(addr({ poststed: 'OSLO' }))).toBe('OSLO');
+  it('poststed only (no postnummer) -> the place alone, title-cased', () => {
+    expect(formatAddress(addr({ poststed: 'OSLO' }))).toBe('Oslo');
   });
 
   it('postnummer + poststed combine with a single space', () => {
     expect(formatAddress(addr({ postnummer: '0154', poststed: 'OSLO' }))).toBe(
-      '0154 OSLO',
+      '0154 Oslo',
     );
   });
 
@@ -253,18 +253,23 @@ describe('formatAddress', () => {
 
   it('empty adresse array contributes no lines', () => {
     expect(formatAddress(addr({ adresse: [], poststed: 'BERGEN' }))).toBe(
-      'BERGEN',
+      'Bergen',
     );
   });
 
   it('whitespace-only fields are dropped by the trim() filter', () => {
     // adresse entry "   " is whitespace-only -> filtered out. poststed
-    // survives, postnummer empty so the postal segment is just "BERGEN".
+    // survives, postnummer empty so the postal segment is just "Bergen".
     expect(
       formatAddress(
         addr({ adresse: ['   '], postnummer: '', poststed: 'BERGEN' }),
       ),
-    ).toBe('BERGEN');
+    ).toBe('Bergen');
+  });
+
+  it('a multi-word place and a foreign one', () => {
+    expect(formatAddress(addr({ postnummer: '8600', poststed: 'MO I RANA' }))).toBe('8600 Mo i Rana');
+    expect(formatAddress(addr({ poststed: 'DE-92711 Parkstein' }))).toBe('DE-92711 Parkstein');
   });
 
   it('all whitespace-only -> undefined', () => {

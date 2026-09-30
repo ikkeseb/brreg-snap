@@ -12,7 +12,7 @@
 
 import { aarsregnskapPdfUrl, kunngjoringerUrl } from '../aarsregnskap.js';
 import type { CompanyData } from '../company-load.js';
-import { formatDateNo, formatMoney, formatOrgnr } from '../format.js';
+import { formatDateNo, formatMoney, formatOrgnr, titleCasePlace } from '../format.js';
 import type { RememberedChoice } from '../hostname-search.js';
 import { hjemmesideDomains, hostnameLabel, registrableDomain } from '../hostname-score.js';
 import { konsernLine, type Konsern } from '../konsern.js';
@@ -186,21 +186,8 @@ export function siteName(host: string): string {
   return registrableDomain(host) ?? host.toLowerCase().replace(/\.+$/, '').replace(/^www\./, '');
 }
 
-// «STAVANGER» → «Stavanger», «MO I RANA» → «Mo i Rana». Only rewrites
-// an all-caps name; anything already mixed case is left as brreg has it.
-const SMALL_WORDS = new Set(['i', 'på', 'og', 'ved', 'under', 'over']);
-export function titleCasePlace(place: string): string {
-  if (place !== place.toUpperCase()) return place;
-  return place
-    .toLowerCase()
-    .split(' ')
-    .map((word, i) =>
-      i > 0 && SMALL_WORDS.has(word)
-        ? word
-        : word.replace(/(^|-)(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase()),
-    )
-    .join(' ');
-}
+// Re-exported: the identity line and every address share one spelling.
+export { titleCasePlace };
 
 function formCity(enhet: Enhet): string | undefined {
   const form = enhet.organisasjonsform?.beskrivelse?.trim();
@@ -241,9 +228,11 @@ export function stampOf(headline: string): StampText {
   return { word: headline };
 }
 
-// The popup has no room for the registry's quote: a merknad in the
-// answer is carried as a count («1 merknad i registeret»). The panel
-// quotes it under the ledger.
+// A merknad in the answer is carried as a count («1 merknad i
+// registeret») on both surfaces: the popup has no room for the
+// registry's quote, and the panel quotes it in full in the notes block
+// right under the ledger, so the headline must not say it twice. The
+// summary keeps the full answer (plain text has no notes block).
 function compactMerknad(answer: Answer, merknadCount: number): Answer {
   if (merknadCount === 0 || answer.tone === 'ok') return answer;
   const merknadTexts = new Set(
@@ -461,7 +450,7 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   const signals = deriveSignals(enhet, regnskap, now);
   const merknader = deriveMerknader(enhet);
   const answer = deriveAnswer({ enhet, roller, signals, kobling, merknader, now });
-  const shownAnswer = surface === 'popup' ? compactMerknad(answer, merknader.length) : answer;
+  const shownAnswer = compactMerknad(answer, merknader.length);
 
   const hostDerived = isHostDerived(method) && host !== undefined;
   const canReject = hostDerived;

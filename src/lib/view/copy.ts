@@ -84,6 +84,9 @@ export const COPY = {
   rollerNone: 'Ingen registrerte roller.',
   avregistrert: 'Avregistrert',
   entityOpen: (spaced: string) => `Org.nr ${spaced} · åpne`,
+  // A clamped free-text value (Aktivitet, Formål).
+  showMore: 'Vis mer',
+  showLess: 'Vis mindre',
   back: (name: string) => `Tilbake til ${name}`,
   backPlain: 'Tilbake',
 

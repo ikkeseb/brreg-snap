@@ -176,7 +176,7 @@ describe('orgnrFormats', () => {
       digits: '923609016',
       spaced: '923 609 016',
       mva: 'NO 923 609 016 MVA',
-      invoiceBlock: ['EQUINOR ASA', 'Org.nr. 923 609 016', 'Forusbeen 50', '4035 STAVANGER'].join(
+      invoiceBlock: ['EQUINOR ASA', 'Org.nr. 923 609 016', 'Forusbeen 50', '4035 Stavanger'].join(
         '\n',
       ),
     });
@@ -187,7 +187,7 @@ describe('orgnrFormats', () => {
     expect(konkurs.registrertIMvaregisteret).toBe(false);
     expect(formats).not.toHaveProperty('mva');
     expect(formats.invoiceBlock).toBe(
-      ['1VASK AS', 'Org.nr. 915 330 193', 'Eksempelveien 1', '6887 LÆRDAL'].join('\n'),
+      ['1VASK AS', 'Org.nr. 915 330 193', 'Eksempelveien 1', '6887 Lærdal'].join('\n'),
     );
   });
 

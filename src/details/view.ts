@@ -43,6 +43,12 @@ export interface ResultPaint {
   // that keeps the view, unlike the load token.
   isStale: () => boolean;
   focus: ResultFocus;
+  // The tab the panel follows (the one it resolved at startup or on a
+  // tab event): its toolbar badge is set from this result — the answer's
+  // tone when the company is the tab's own (host-derived, warn or
+  // danger), cleared otherwise. Undefined = no tab known; the badge is
+  // left alone.
+  tabId?: number;
 }
 
 // Refresh of how the company on screen was reached, without a repaint:
@@ -52,6 +58,7 @@ export interface ProvenancePaint {
   method: ResolutionMethod;
   host: string | undefined;
   remembered?: RememberedChoice;
+  tabId?: number;
 }
 
 export interface EmptyPaint {
@@ -63,6 +70,8 @@ export interface EmptyPaint {
   query?: string;
   // Move focus into the search box. False for a background repaint.
   focus: boolean;
+  // The followed tab: its badge is cleared (no company on screen).
+  tabId?: number;
 }
 
 export interface ErrorPaint {
@@ -70,6 +79,7 @@ export interface ErrorPaint {
   // answer (a not-found) or there is no load to re-trigger.
   retry: boolean;
   focus: boolean;
+  tabId?: number;
 }
 
 export interface PanelPainter {
@@ -79,7 +89,7 @@ export interface PanelPainter {
   provenance(paint: ProvenancePaint): void;
   // The candidates for `host`. The painter's picker persists the
   // choice (setPickerChoice) before it calls intents.pick / none.
-  picker(host: string, candidates: Candidate[], opts: { focus: boolean }): void;
+  picker(host: string, candidates: Candidate[], opts: { focus: boolean; tabId?: number }): void;
   empty(paint: EmptyPaint): void;
   error(err: unknown, paint: ErrorPaint): void;
   // «Tilbake»: only a drilled-in entity has an in-panel back to offer.

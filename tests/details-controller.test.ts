@@ -348,7 +348,7 @@ describe('«Feil bedrift?»', () => {
     await intents.reject();
     expect(deps.addRejectedChoice).toHaveBeenCalledWith('www.dnb.no', DNB);
     expect(deps.searchHost).toHaveBeenLastCalledWith('www.dnb.no', 'DNB Bank');
-    expect(painter.picker).toHaveBeenCalledWith('www.dnb.no', CANDIDATES, { focus: true });
+    expect(painter.picker).toHaveBeenCalledWith('www.dnb.no', CANDIDATES, { focus: true, tabId: 1 });
   });
 
   it('a view from a sync message has no title to offer', async () => {
@@ -535,6 +535,7 @@ describe('startup and messages', () => {
       degraded: false,
       query: 'kaffe',
       focus: true,
+      tabId: undefined,
     });
   });
 
@@ -549,8 +550,38 @@ describe('startup and messages', () => {
       degraded: false,
       query: undefined,
       focus: true,
+      tabId: undefined,
     });
     expect(url().searchParams.has('orgnr')).toBe(false);
+  });
+
+  it('every paint names the followed tab: the one read at startup or on a tab event, kept across messages', async () => {
+    const { controller, intents, painter, results } = setup({
+      activeTab: { id: 4, url: 'https://www.dnb.no/', title: 'DNB' },
+      resolveTab: async (url) =>
+        url.includes('nrk') ? { host: 'nrk.no' } : { host: 'dnb.no', orgnr: DNB, method: 'host-auto' },
+    });
+    await controller.init({ fresh: false });
+    await settle();
+    expect(results()[0]).toMatchObject({ host: 'dnb.no', tabId: 4 });
+
+    // A tab event moves the followed tab; a same-company keep names the new one.
+    await controller.followTab(5, { id: 5, url: 'https://nettbank.dnb.no/', title: '' });
+    await settle();
+    expect(painter.provenance).toHaveBeenLastCalledWith(expect.objectContaining({ tabId: 5 }));
+
+    // A message or a drill-in has no tab of its own: the followed tab stays.
+    controller.follow({ kind: 'company', orgnr: EQUINOR, method: 'host-pick', host: 'equinor.com' });
+    await settle();
+    expect(results().at(-1)).toMatchObject({ host: 'equinor.com', tabId: 5 });
+    intents.drill(DNB);
+    await settle();
+    expect(results().at(-1)).toMatchObject({ method: 'drill-in', tabId: 5 });
+
+    // Picker, empty and error paints carry it too.
+    await controller.followTab(6, { id: 6, url: 'https://www.nrk.no/', title: '' });
+    await settle();
+    expect(painter.empty).toHaveBeenLastCalledWith(expect.objectContaining({ tabId: 6 }));
   });
 
   it('a result stamps the recents and reads the stored choice for its host', async () => {

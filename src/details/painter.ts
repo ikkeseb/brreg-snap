@@ -15,7 +15,8 @@
 // swaps main for the search view (results, or «Nylig sett» while the
 // field is empty) and keeps the previous DOM aside; Escape or the back
 // bar puts it back untouched — no refetch, the open tab and a
-// half-read page survive. Any paint from the controller discards it.
+// half-read page survive (the footer's freshness row steps aside with
+// it). Any paint from the controller discards it.
 
 import { hostnameLabel } from '../lib/hostname-score.js';
 import type { Candidate, RememberedChoice } from '../lib/hostname-search.js';
@@ -48,6 +49,7 @@ import {
   buildTrustView,
   orgnrText,
   siteName,
+  type AnswerTone,
   type TrustView,
   type ViewEnv,
 } from '../lib/view/trust-view.js';
@@ -84,6 +86,8 @@ export interface PainterDeps {
   getRememberedChoice: (host: string) => Promise<RememberedChoice | undefined>;
   // The picker persists the choice before it calls intents.pick / none.
   setPickerChoice: (host: string, orgnr: string | null) => Promise<void>;
+  // setTrustBadge in the product: the followed tab's toolbar badge.
+  setBadge: (tabId: number, tone: AnswerTone | undefined) => Promise<void>;
   env: ViewEnv;
   now?: () => Date;
 }
@@ -174,6 +178,16 @@ export function createPanelPainter(
   }
   roots.back.addEventListener('click', () => intents.back());
 
+  // The followed tab's toolbar badge, same rule as the popup: the
+  // answer's tone when the company on screen is the tab's own
+  // (view.badgeTone is set only for a host-derived result) and it is
+  // worth a look (warn / danger); cleared for everything else.
+  function badge(tabId: number | undefined, view?: TrustView): void {
+    if (tabId === undefined) return;
+    const tone = view?.badgeTone;
+    void deps.setBadge(tabId, tone === 'warn' || tone === 'danger' ? tone : undefined);
+  }
+
   // --- the compact head --------------------------------------------------
 
   const observer =
@@ -249,6 +263,9 @@ export function createPanelPainter(
     main.replaceChildren(searchView);
     main.dataset.state = 'search';
     body.dataset.answer = 'empty';
+    // «Hentet … · Oppdater» describes the result kept aside, not the
+    // search on screen: the footer keeps the attribution only.
+    if (state === 'result') renderFooter(foot, {});
     const id = paintId;
     void deps.getRecent().then((entries) => {
       if (!aside || id !== paintId) return;
@@ -273,6 +290,7 @@ export function createPanelPainter(
     state = kept.state;
     answerAttr = kept.answer;
     watchIdent(shown && state === 'result' ? shown.ident : undefined);
+    if (state === 'result') paintFooter();
     roots.search.focus();
   }
 
@@ -416,15 +434,26 @@ export function createPanelPainter(
   // shows once the identity is scrolled past (so it is measured shown).
   // Measured once the bundled font is in (its swap reflows the lines
   // above the tabs) and from layout offsets, not the bounding box the
-  // reveal animation is still translating.
+  // reveal animation is still translating. The tab-panel region is
+  // told what the landing leaves it (--land, details.css: the head,
+  // the tablist and the footer) so its min-height lets even a short
+  // tab scroll that far, with the footer flush at the bottom.
   function scrollToTabs(): void {
     const doc = main.ownerDocument;
     const go = (): void => {
       const tablist = main.querySelector<HTMLElement>('[role="tablist"]');
+      const panels = main.querySelector<HTMLElement>('.tab-panels');
       const win = doc.defaultView;
       if (!tablist || !win) return;
       roots.stick.hidden = false;
-      win.scrollTo({ top: tablist.offsetTop - roots.stick.offsetHeight });
+      const head = roots.stick.offsetHeight;
+      if (panels) {
+        // Everything on screen at the landing besides the panels: the
+        // head, the tablist, and what follows the region (the footer).
+        const after = doc.body.scrollHeight - (panels.offsetTop + panels.offsetHeight);
+        panels.style.setProperty('--land', `${head + panels.offsetTop - tablist.offsetTop + after}px`);
+      }
+      win.scrollTo({ top: tablist.offsetTop - head });
     };
     const fonts = (doc as Document & { fonts?: { ready: Promise<unknown> } }).fonts;
     if (fonts) void fonts.ready.then(go);
@@ -432,7 +461,7 @@ export function createPanelPainter(
   }
 
   function paintFooter(): void {
-    if (!shown) return;
+    if (!shown || aside) return;
     renderFooter(
       foot,
       { fetchedAt: shown.view.fetchedAt, now: now().getTime(), reportHref: shown.view.reportHref },
@@ -449,7 +478,9 @@ export function createPanelPainter(
     setState('result', view.answer.tone);
     const top = buildTop(view);
     const { tablist, panels } = buildTabs(view);
-    main.replaceChildren(...top.nodes, tablist, ...panels);
+    const region = el('div', 'tab-panels');
+    region.append(...panels);
+    main.replaceChildren(...top.nodes, tablist, region);
     tabs = setupTabs(tablist, {
       initial: selectedTab,
       onSelect: (key) => {
@@ -504,6 +535,7 @@ export function createPanelPainter(
       drillFrom = undefined;
       paintBack();
       paintResult(view, paint, true);
+      badge(paint.tabId, view);
       if (landOnTab) {
         landOnTab = false;
         scrollToTabs();
@@ -517,7 +549,7 @@ export function createPanelPainter(
     // Only what depends on that is rebuilt: everything above the tabs
     // and the footer. The open tab, its scroll position and a search in
     // progress stay.
-    provenance({ method, host, remembered }): void {
+    provenance({ method, host, remembered, tabId }): void {
       if (!shown) return;
       lastHost = host;
       const view = buildTrustView({
@@ -544,9 +576,10 @@ export function createPanelPainter(
       paintStick(view);
       if (!aside) watchIdent(top.ident);
       paintFooter();
+      badge(tabId, view);
     },
 
-    picker(host, candidates, { focus }): void {
+    picker(host, candidates, { focus, tabId }): void {
       paintId += 1;
       closeSearch(false);
       shown = undefined;
@@ -555,10 +588,11 @@ export function createPanelPainter(
       setState('picker', 'pick');
       const painted = paintPicker(host, candidates);
       renderFooter(foot, { reportHref: report(undefined, host) });
+      badge(tabId);
       if (focus) focusElement(painted.firstRow);
     },
 
-    empty({ host, degraded, query, focus }): void {
+    empty({ host, degraded, query, focus, tabId }): void {
       paintId += 1;
       const id = paintId;
       closeSearch(false);
@@ -586,6 +620,7 @@ export function createPanelPainter(
       main.appendChild(list.section);
       fillRecents(list);
       renderFooter(foot, host ? { reportHref: report(undefined, host) } : {});
+      badge(tabId);
 
       // «Ingen av disse» / a stored choice for the site: say so, and
       // offer to forget it.
@@ -608,7 +643,7 @@ export function createPanelPainter(
       if (focus) roots.search.focus();
     },
 
-    error(err, { retry, focus }): void {
+    error(err, { retry, focus, tabId }): void {
       paintId += 1;
       closeSearch(false);
       shown = undefined;
@@ -629,6 +664,7 @@ export function createPanelPainter(
       main.appendChild(list.section);
       fillRecents(list);
       renderFooter(foot, lastOrgnr ? { reportHref: report(lastOrgnr, lastHost) } : {});
+      badge(tabId);
       if (focus) focusElement(answer.heading);
     },
 

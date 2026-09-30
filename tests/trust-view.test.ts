@@ -13,6 +13,7 @@ import {
   type TrustViewInput,
 } from '../src/lib/view/trust-view.js';
 import { konsernLine } from '../src/lib/konsern.js';
+import { sameText } from '../src/lib/view/dossier-view.js';
 import type {
   Enhet,
   EnhetOppdatering,
@@ -229,16 +230,21 @@ describe('buildTrustView — danger statuses', () => {
 });
 
 describe('buildTrustView — merknader', () => {
-  it('the popup carries the count, the panel the registry’s words', () => {
+  it('both surfaces head the answer with the count; only the panel quotes the registry’s words', () => {
     const c = company(enhetPaategning);
     const popup = view({ company: c });
     const panel = view({ company: c, surface: 'panel' });
     expect(popup.answer.tone).toBe('warn');
     expect(popup.answer.headline).toBe('1 merknad i registeret');
     expect(popup.merknader).toEqual([]);
-    expect(panel.answer.headline).not.toBe('1 merknad i registeret');
+    // The panel quotes the merknad in full right under the ledger, so
+    // the headline must not say it a second time.
+    expect(panel.answer.headline).toBe('1 merknad i registeret');
     expect(panel.merknader).toHaveLength(1);
+    expect(panel.merknader[0]!.text).toMatch(/^Foretaksregisteret har grunn til å anta/);
     expect(panel.merknader[0]!.since?.text).toMatch(/\d{4}$/);
+    // The plain-text summary keeps the registry's sentence: it has no notes block.
+    expect(panel.summary).toContain('Obs: Foretaksregisteret har grunn til å anta');
   });
 });
 
@@ -266,6 +272,27 @@ describe('buildTrustView — the panel dossier', () => {
     expect(labels).toContain('Næring');
     expect(labels).toContain('Formål');
     expect(d.registrering.find((r) => r.label === 'Næring')?.sub).toMatch(/^\d{2}\.\d{3}$/);
+    // Long free text is clamped by the component.
+    expect(d.registrering.find((r) => r.label === 'Formål')?.clamp).toBe(true);
+  });
+
+  it('shows Formål only when it differs from Aktivitet (case, punctuation and whitespace aside)', () => {
+    const rows = (aktivitet: string[] | undefined, formaal: string[] | undefined) =>
+      view({
+        company: company({ ...enhetEquinor, aktivitet, vedtektsfestetFormaal: formaal }),
+        surface: 'panel',
+      })
+        .dossier!.registrering.filter((r) => r.label === 'Aktivitet' || r.label === 'Formål')
+        .map((r) => [r.label, r.lines?.[0]]);
+    expect(rows(['Budbil transport.'], ['Budbil  transport'])).toEqual([['Aktivitet', 'Budbil transport.']]);
+    expect(rows(['Budbil transport.'], ['BUDBIL TRANSPORT.'])).toEqual([['Aktivitet', 'Budbil transport.']]);
+    expect(rows(['Budbil transport.'], ['Transport og lagring.'])).toEqual([
+      ['Aktivitet', 'Budbil transport.'],
+      ['Formål', 'Transport og lagring.'],
+    ]);
+    expect(rows(undefined, ['Transport og lagring.'])).toEqual([['Formål', 'Transport og lagring.']]);
+    expect(rows(['Budbil transport.'], undefined)).toEqual([['Aktivitet', 'Budbil transport.']]);
+    expect(sameText(undefined, undefined)).toBe(false);
   });
 
   it('shows the latest filing honestly, with the PDF years and kunngjøringer', () => {

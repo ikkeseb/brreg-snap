@@ -30,8 +30,22 @@ Drive the pages with URL params:
 - `popup/popup.html?taburl=https://www.dnb.no&tabtitle=DNB` — the real
   resolution cascade runs against the live API
 - `details/details.html?orgnr=984851006` — direct load
-- `details/details.html?nomatch=example.com` — empty state
+- `details/details.html?orgnr=923609016&tab=enheter` — land on a tab
+  (`oversikt` | `personer` | `okonomi` | `enheter`), as the popup's
+  konsern row does; the tablist scrolls up under the compact head
+- `details/details.html?nomatch=example.com` — empty state (a host
+  with several candidates, e.g. `nrk.no`, gives the picker)
 - `&seedrecents=1` — seed three fake entries into the recents stack
+- `welcome/welcome.html` — the first-run page; `?engine=chrome` drops
+  the Firefox-only namespaces so it renders the Chrome copy (pin
+  instruction, «Endre snarveier»), `?keys=none` unbinds every command
+  («ikke satt»)
+- `?engine=chrome` works on every page (the shim exposes both engines'
+  APIs at once by default, so `engine.ts` reads Firefox)
+
+The panel's search view has no URL: type in the masthead field on any
+state (the smoke's `search-view` state fills it with `kiwi`); Escape or
+the back bar restores the previous view.
 
 With `--fixtures`, only the requests the smoke states make are
 recorded; anything else answers 404 (see the fixtures README to add a

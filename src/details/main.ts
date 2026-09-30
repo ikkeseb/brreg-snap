@@ -26,6 +26,7 @@ import {
   parsePanelMessage,
   readPanelHint,
 } from '../lib/panel-protocol.js';
+import { setTrustBadge } from '../lib/platform/badge.js';
 import { isFirefox } from '../lib/platform/engine.js';
 import { createTabWatcher } from '../lib/tab-sync.js';
 import { getRecent, pushRecent } from '../lib/ui/recent.js';
@@ -82,7 +83,14 @@ function main(): void {
         intents,
         {
           initialTab: history.tabFromUrl(),
-          deps: { copy: writeClipboard, getRecent, getRememberedChoice, setPickerChoice, env },
+          deps: {
+            copy: writeClipboard,
+            getRecent,
+            getRememberedChoice,
+            setPickerChoice,
+            setBadge: setTrustBadge,
+            env,
+          },
         },
       ),
     history,

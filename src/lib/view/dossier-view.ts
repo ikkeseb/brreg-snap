@@ -10,6 +10,7 @@ import {
   formatCount,
   formatDateNo,
   formatPercent,
+  postalLine,
 } from '../format.js';
 import type { KonsernChild, KonsernRef } from '../konsern.js';
 import {
@@ -35,6 +36,9 @@ export interface DefRow {
   label: string;
   // Plain text, one entry per line.
   lines?: string[];
+  // A long free-text value (Aktivitet, Formål): the component clamps it
+  // to a few lines with «Vis mer» when it runs past them.
+  clamp?: boolean;
   // Lighter text after the value (the næring code, a date).
   sub?: string;
   link?: { text: string; href: string; external: boolean };
@@ -131,6 +135,27 @@ function text(label: string, value: string | undefined, sub?: string): DefRow | 
   return row;
 }
 
+function longText(label: string, value: string | undefined): DefRow | undefined {
+  const row = text(label, value);
+  if (row) row.clamp = true;
+  return row;
+}
+
+// Whether two free-text fields say the same thing: case, punctuation
+// and whitespace aside. Many companies register the same sentence as
+// both aktivitet and vedtektsfestet formål, sometimes with a trailing
+// period on one of them.
+export function sameText(a: string | undefined, b: string | undefined): boolean {
+  const norm = (t: string | undefined): string =>
+    (t ?? '')
+      .toLowerCase()
+      .replace(/[\p{P}\p{S}]+/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  const na = norm(a);
+  return na !== '' && na === norm(b);
+}
+
 function present<T>(rows: Array<T | undefined>): T[] {
   return rows.filter((r): r is T => r !== undefined);
 }
@@ -157,9 +182,12 @@ function registrering(enhet: Enhet): DefRow[] {
     naering?.beskrivelse
       ? text('Næring', naering.beskrivelse, naering.kode)
       : text('Næring', naering?.kode),
-    text('Aktivitet', enhet.aktivitet?.join(' ')),
-    text('Formål', enhet.vedtektsfestetFormaal?.join(' ')),
   );
+  // Formål only when it adds something to Aktivitet.
+  const aktivitet = enhet.aktivitet?.join(' ');
+  const formaal = enhet.vedtektsfestetFormaal?.join(' ');
+  rows.push(longText('Aktivitet', aktivitet));
+  if (!sameText(aktivitet, formaal)) rows.push(longText('Formål', formaal));
   const previous = [...(enhet.historiskeNavn ?? [])]
     .filter((h) => h.navn?.trim())
     .sort((a, b) => (b.tilDato ?? '').localeCompare(a.tilDato ?? ''))[0];
@@ -209,7 +237,7 @@ function ledelse(roller: RollerResponse | undefined): DefRow[] {
 export function addressLines(addr: Adresse | undefined): string[] {
   if (!addr) return [];
   const lines = (addr.adresse ?? []).map((l) => l.trim()).filter(Boolean);
-  const postal = [addr.postnummer, addr.poststed].map((p) => p?.trim()).filter(Boolean).join(' ');
+  const postal = postalLine(addr);
   if (postal) lines.push(postal);
   if (addr.landkode && addr.landkode !== 'NO' && addr.land) lines.push(addr.land);
   return lines;

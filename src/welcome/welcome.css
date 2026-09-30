@@ -61,7 +61,9 @@ html {
   gap: 24px;
   margin-top: 20px;
 }
-/* both cards share one height: the calm one simply has room left */
+/* both cards share one height; their content is balanced (welcome.ts:
+   the calm card carries the leaders line and a fourth row, the loud one
+   the stamp), so neither ends in a blank */
 .example {
   display: flex;
   flex-direction: column;

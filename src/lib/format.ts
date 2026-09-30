@@ -38,10 +38,35 @@ export function formatAddress(addr: Adresse | undefined): string | undefined {
   if (!addr) return undefined;
   const lines = [
     ...(addr.adresse ?? []),
-    [addr.postnummer, addr.poststed].filter(Boolean).join(' '),
+    postalLine(addr),
     addr.land,
   ].filter((s): s is string => Boolean(s && s.trim()));
   return lines.length > 0 ? lines.join(', ') : undefined;
+}
+
+// «STAVANGER» → «Stavanger», «MO I RANA» → «Mo i Rana». Only rewrites
+// an all-caps name; anything already mixed case is left as brreg has it
+// (a foreign poststed like «DE-92711 Parkstein»).
+const SMALL_WORDS = new Set(['i', 'på', 'og', 'ved', 'under', 'over']);
+export function titleCasePlace(place: string): string {
+  if (place !== place.toUpperCase()) return place;
+  return place
+    .toLowerCase()
+    .split(' ')
+    .map((word, i) =>
+      i > 0 && SMALL_WORDS.has(word)
+        ? word
+        : word.replace(/(^|-)(\p{L})/gu, (_, sep: string, ch: string) => sep + ch.toUpperCase()),
+    )
+    .join(' ');
+}
+
+// «4035 Stavanger»: the postcode as registered, the place title-cased
+// (brreg writes poststed in caps). Empty when the address has neither.
+export function postalLine(addr: Adresse): string {
+  const postnummer = addr.postnummer?.trim();
+  const poststed = addr.poststed?.trim();
+  return [postnummer, poststed ? titleCasePlace(poststed) : undefined].filter(Boolean).join(' ');
 }
 
 // Magnitude units, largest first. Two tiers get one decimal ("37,9

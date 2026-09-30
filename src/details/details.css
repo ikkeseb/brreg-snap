@@ -25,3 +25,14 @@ nav.back-nav {
 .search-view .section:first-of-type {
   margin-top: 14px;
 }
+
+/* The tab-panel region (painter.ts wraps the four panels) is at least a
+ * viewport minus what the landing shows besides it: the compact head,
+ * the tablist and the footer (--land, measured by the painter when it
+ * lands on a tab; the fallback is the design's 40 + 31 + 77 px). So a
+ * short tab can always scroll the tablist up to sit right under the
+ * head, and switching from a long tab to a short one never yanks the
+ * tablist off the top. */
+.tab-panels {
+  min-height: calc(100dvh - var(--land, 148px));
+}

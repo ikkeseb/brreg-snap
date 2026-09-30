@@ -29,6 +29,10 @@ interface Example {
   host: string;
   name: string;
   orgnr: string;
+  // The popup's leaders line — a normal company's line, never under a
+  // stamp (trust-view.ts). It also balances the two cards: the calm
+  // one carries the leaders and a fourth row, the loud one the stamp.
+  leaders?: Array<{ label: string; name: string }>;
   answer: AnswerView;
   ledger: LedgerRow[];
   caption: string;
@@ -48,10 +52,15 @@ const EXAMPLES: Example[] = [
     host: 'www.nordvik.no',
     name: 'NORDVIK ENERGI ASA',
     orgnr: '912345678',
+    leaders: [
+      { label: COPY.dagligLeder, name: 'Ingrid Solheim' },
+      { label: COPY.styreleder, name: 'Per Haugen' },
+    ],
     answer: { tone: 'ok', headline: 'Ingen varsler i registeret', actions: [] },
     ledger: [
       row('kobling', 'Kobling', 'ok', 'nordvik.no er registrert hjemmeside'),
       row('status', 'Status', 'ok', 'Aktiv'),
+      row('ansatte', 'Ansatte', 'neutral', `1${NBSP}240`),
       row('regnskap', 'Regnskap', 'ok', '2025 levert', {
         figures: [
           [{ text: `omsetning 68,0${NBSP}mrd`, nowrap: true }],
@@ -113,6 +122,16 @@ function buildExample(ex: Example): HTMLElement {
   line.appendChild(el('span', 'orgnr__label', COPY.orgnrLabel));
   line.appendChild(el('b', 'tnum', formatOrgnr(ex.orgnr).replace(/ /g, NBSP)));
   ident.appendChild(line);
+  if (ex.leaders) {
+    const leaders = el('p', 'ident__leaders');
+    for (const leader of ex.leaders) {
+      const pair = el('span');
+      pair.append(`${leader.label} `);
+      pair.appendChild(el('b', undefined, leader.name));
+      leaders.appendChild(pair);
+    }
+    ident.appendChild(leaders);
+  }
   card.appendChild(ident);
 
   const answer = buildAnswer(ex.answer).section;

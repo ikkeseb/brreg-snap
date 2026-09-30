@@ -624,6 +624,35 @@ describe('picker', () => {
     expect(handlers.onPick).not.toHaveBeenCalled();
   });
 
+  it('the keys sleep while the picker is kept aside and work again when it is put back', () => {
+    // The panel's search view moves main's children into a fragment
+    // and restores them on Escape / back.
+    const { main, handlers } = setup();
+    const aside = document.createDocumentFragment();
+    aside.append(...main.childNodes);
+    press('1');
+    expect(handlers.onPick).not.toHaveBeenCalled();
+    main.replaceChildren(aside);
+    expect(press('1').defaultPrevented).toBe(true);
+    expect(handlers.onPick).toHaveBeenCalledWith('984851006');
+    expect(press('0').defaultPrevented).toBe(true);
+    expect(handlers.onNone).toHaveBeenCalledOnce();
+  });
+
+  it('a later picker takes the keys over from the earlier one', () => {
+    const first = setup();
+    first.main.remove();
+    const second = setup();
+    press('1');
+    expect(first.handlers.onPick).not.toHaveBeenCalled();
+    expect(second.handlers.onPick).toHaveBeenCalledWith('984851006');
+    // Bringing the first back gives it no keys: only the latest listens.
+    second.main.remove();
+    document.body.appendChild(first.main);
+    press('1');
+    expect(first.handlers.onPick).not.toHaveBeenCalled();
+  });
+
   it('clicking a row or «Ingen av disse» does the same', () => {
     const { main, handlers } = setup();
     const rows = main.querySelectorAll<HTMLButtonElement>('button.pick');

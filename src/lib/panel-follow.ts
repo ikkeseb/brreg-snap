@@ -182,6 +182,7 @@ export function chooseStart(
 // --- the follower ---------------------------------------------------
 
 export interface TabFields {
+  id?: number;
   url?: string;
   title?: string;
 }
@@ -201,9 +202,12 @@ export interface FollowerDeps {
   searchHost(host: string): Promise<DetailedResult | undefined>;
   onScreen(): PanelView | undefined;
   // Paint a different view. The painters claim their own load token.
-  show(view: PanelView, origin: FollowOrigin): void;
+  // `tabId`: the tab the view was resolved from (startup, a tab event),
+  // for its toolbar badge; undefined when the view came from a message
+  // or a probe.
+  show(view: PanelView, origin: FollowOrigin, tabId?: number): void;
   // `view` is already on screen: refresh its host label / method only.
-  keep(view: PanelView, origin: FollowOrigin): void;
+  keep(view: PanelView, origin: FollowOrigin, tabId?: number): void;
 }
 
 export interface PanelFollower {
@@ -218,9 +222,9 @@ export interface PanelFollower {
 }
 
 export function createPanelFollower(deps: FollowerDeps): PanelFollower {
-  function apply(view: PanelView, origin: FollowOrigin): void {
-    if (sameView(deps.onScreen(), view)) deps.keep(view, origin);
-    else deps.show(view, origin);
+  function apply(view: PanelView, origin: FollowOrigin, tabId?: number): void {
+    if (sameView(deps.onScreen(), view)) deps.keep(view, origin, tabId);
+    else deps.show(view, origin, tabId);
   }
 
   async function probeWith(
@@ -255,8 +259,12 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
     async start(hint) {
       const run = deps.loads.begin();
       let tab: TabContext | undefined;
+      let tabId: number | undefined;
       try {
-        tab = await readTab(run, await deps.queryActiveTab());
+        const active = await deps.queryActiveTab();
+        tab = await readTab(run, active);
+        // Only a tab the panel could read is the one it resolved.
+        if (tab) tabId = active?.id;
       } catch {
         tab = undefined;
       }
@@ -266,7 +274,7 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
         await probeWith(run, plan.host, 'start');
         return;
       }
-      apply(plan, 'start');
+      apply(plan, 'start', tabId);
     },
 
     async followTab(tabId, given) {
@@ -286,7 +294,7 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
         view = { kind: 'empty' };
       }
       if (run.isStale()) return;
-      apply(view, 'tab');
+      apply(view, 'tab', tabId);
     },
 
     follow(view) {

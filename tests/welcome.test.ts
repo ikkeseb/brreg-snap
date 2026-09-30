@@ -104,7 +104,10 @@ describe('sections', () => {
     expect(document.querySelector('.answer--danger .answer__support')?.textContent).toBe(
       'Bostyrer: Adv. Kari Nordmann',
     );
-    expect(document.querySelectorAll('.ledger-row')).toHaveLength(6);
+    expect(document.querySelectorAll('.ledger-row')).toHaveLength(7);
+    // The calm card carries the leaders line; the loud one never does.
+    expect(document.querySelectorAll('.example .ident__leaders')).toHaveLength(1);
+    expect(document.querySelector('.example[data-answer="danger"] .ident__leaders')).toBeNull();
   });
 
   it('makes no request and stores nothing', async () => {

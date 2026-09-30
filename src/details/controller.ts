@@ -108,6 +108,10 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   // The title of the tab the follower last resolved, keyed by that tab's
   // host: «Feil bedrift?» re-runs the host search with its word hints.
   let lastTabTitle: { host: string; title: string } | undefined;
+  // The tab the panel follows (resolved at startup or on a tab event).
+  // Every paint names it, so the painter can set or clear its toolbar
+  // badge; a message or a probe never changes it.
+  let followedTabId: number | undefined;
   // What the panel settled on (result / picker / empty) — undefined
   // while loading or on error. Lets a sync or tab event for what's
   // already shown keep it instead of repainting through the skeleton.
@@ -213,6 +217,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         fetchedAt: company.fetchedAt,
         isStale: () => shownLoad !== run,
         focus: focus(),
+        tabId: followedTabId,
       });
       painter.setBack(history.current()?.method === 'drill-in');
     } catch (err) {
@@ -223,6 +228,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         // not-found can't.
         retry: lastLoad !== undefined && !isPermanentLoadError(err),
         focus: focus() !== 'none',
+        tabId: followedTabId,
       });
     }
   }
@@ -236,7 +242,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     currentHost = host;
     currentOrgnr = undefined;
     history.clearOrgnr();
-    painter.picker(host, candidates, { focus });
+    painter.picker(host, candidates, { focus, tabId: followedTabId });
     painter.setBack(false);
   }
 
@@ -267,6 +273,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       degraded: view.degraded === true,
       query: view.query,
       focus,
+      tabId: followedTabId,
     });
     painter.setBack(false);
   }
@@ -309,7 +316,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       const remembered =
         view.host === undefined ? undefined : await deps.getRememberedChoice(view.host);
       if (shownLoad !== load || onScreen !== view) return;
-      painter.provenance({ method: view.method, host: view.host, remembered });
+      painter.provenance({ method: view.method, host: view.host, remembered, tabId: followedTabId });
     })();
   }
 
@@ -325,8 +332,14 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     },
     searchHost: (host) => deps.searchHost(host),
     onScreen: () => onScreen,
-    show: showView,
-    keep: keepView,
+    show: (view, origin, tabId) => {
+      if (tabId !== undefined) followedTabId = tabId;
+      showView(view, origin);
+    },
+    keep: (view, origin, tabId) => {
+      if (tabId !== undefined) followedTabId = tabId;
+      keepView(view);
+    },
   });
 
   const intents: PanelIntents = {

@@ -14,7 +14,7 @@ import { createSwitchAutoSyncUi } from '../src/details/auto-sync-switch.js';
 import { createPanelPainter, type PainterRoots } from '../src/details/painter.js';
 import type { PanelIntents, ResultPaint } from '../src/details/view.js';
 import { COPY } from '../src/lib/view/copy.js';
-import { appendName } from '../src/lib/view/components/dom.js';
+import { appendName, baseName } from '../src/lib/view/components/dom.js';
 import { liveRegionOf } from '../src/lib/view/components/live.js';
 import { renderMasthead } from '../src/lib/view/components/masthead.js';
 import type { Enhet, KonsernNode } from '../src/types/brreg.js';
@@ -129,6 +129,7 @@ function setup(opts: { initialTab?: string; recents?: Array<{ orgnr: string; nav
     getRecent: vi.fn(async () => opts.recents ?? []),
     getRememberedChoice: vi.fn(async () => undefined),
     setPickerChoice: vi.fn(async () => {}),
+    setBadge: vi.fn(async () => {}),
     env: { version: '1.4.0', browser: 'Chrome' },
     now: () => NOW,
   };
@@ -299,7 +300,7 @@ describe('result: the dossier', () => {
     // Amendment c: the parent's name is a quieter prefix; the text stays whole.
     expect(first.querySelector('.unit__name')?.textContent).toBe('EQUINOR ASA AVD FORUS');
     expect(first.querySelector('.unit__name .name-prefix')?.textContent).toBe('EQUINOR ASA ');
-    expect(first.querySelector('.unit__meta')?.textContent).toBe(`Forusbeen 50, 4035 STAVANGER · 1${NBSP}840 ansatte`);
+    expect(first.querySelector('.unit__meta')?.textContent).toBe(`Forusbeen 50, 4035 Stavanger · 1${NBSP}840 ansatte`);
     expect(first.querySelector('button.orgnr--sm')?.textContent).toBe(`973${NBSP}118${NBSP}402`);
     expect(first.querySelector('.orgnr__label')).toBeNull();
     const gone = units.querySelector('.unit--gone')!;
@@ -324,6 +325,44 @@ describe('result: the dossier', () => {
     expect(tabsAt).toBeGreaterThan(notes);
     expect(q('.notes .quote p')?.textContent).toMatch(/^Foretaksregisteret har grunn til å anta/);
     expect(q('.notes .quote__date time')?.getAttribute('datetime')).toBe('2026-09-01');
+    // The answer never repeats the merknad the quote below carries.
+    expect(q('.answer--warn')?.textContent).not.toContain('Foretaksregisteret');
+    expect(q('.answer--warn')?.textContent).toContain('merknad i registeret');
+    // Aktivitet and Formål say the same thing: Formål is left out, and
+    // the one shown is a clamped value with its (measured) «Vis mer».
+    const labels = qa('#panel-oversikt .def-row dt').map((d) => d.textContent);
+    expect(labels).toContain('Aktivitet');
+    expect(labels).not.toContain('Formål');
+    const clamp = q('#panel-oversikt .clamp')!;
+    expect(clamp.textContent).toBe('Budbil transport.');
+    const more = q<HTMLButtonElement>('#panel-oversikt .clamp__btn')!;
+    expect(more.hidden).toBe(true);
+    expect(more.getAttribute('aria-controls')).toBe(clamp.id);
+    expect(more.getAttribute('aria-expanded')).toBe('false');
+    more.click();
+    expect(clamp.classList.contains('is-open')).toBe(true);
+    expect(more.getAttribute('aria-expanded')).toBe('true');
+    expect(more.textContent).toBe('Vis mindre');
+    more.click();
+    expect(clamp.classList.contains('is-open')).toBe(false);
+    expect(more.textContent).toBe('Vis mer');
+  });
+
+  it('Kontakt rows title-case the place, street lines as brreg writes them', () => {
+    const { painter } = setup();
+    painter.result(resultPaint(equinor()));
+    const kontakt = qa('#panel-oversikt .section')[2]!;
+    const address = kontakt.querySelector('.def-row dd')!;
+    expect(address.textContent).toBe('Forusbeen 504035 Stavanger');
+    expect(address.querySelector('br')).not.toBeNull();
+  });
+
+  it('the tab panels sit in one region the deep link can scroll under the head', () => {
+    const { painter } = setup();
+    painter.result(resultPaint(equinor()));
+    const region = q('.tab-panels')!;
+    expect(region.previousElementSibling?.getAttribute('role')).toBe('tablist');
+    expect([...region.children].map((c) => c.id)).toEqual(['panel-oversikt', 'panel-personer', 'panel-okonomi', 'panel-enheter']);
   });
 
   it('a tab click persists the key; a restored ?tab= only reflects it; the key survives a new company', () => {
@@ -374,6 +413,34 @@ describe('result: the dossier', () => {
     expect(q('.ledger-row[data-key="kobling"]')).toBeNull();
     expect(q('#panel-oversikt')).toBe(panel);
     expect(qa('h1')).toHaveLength(1);
+  });
+
+  it('badges the followed tab like the popup: warn/danger for the tab’s own company, cleared otherwise', () => {
+    const { painter, deps } = setup();
+    const scan: CompanyData = { ...konkurs(), enhet: enhetPaategning, roller: undefined };
+    painter.result(resultPaint(scan, { tabId: 7 }));
+    expect(deps.setBadge).toHaveBeenLastCalledWith(7, 'warn');
+    painter.result(resultPaint(konkurs(), { tabId: 7, method: 'url-param', host: 'example.no' }));
+    expect(deps.setBadge).toHaveBeenLastCalledWith(7, 'danger');
+    // An ok answer clears; so does a company that is not the tab's own.
+    painter.result(resultPaint(equinor(), { tabId: 7 }));
+    expect(deps.setBadge).toHaveBeenLastCalledWith(7, undefined);
+    painter.result(resultPaint(konkurs(), { tabId: 7, method: 'drill-in', host: undefined }));
+    expect(deps.setBadge).toHaveBeenLastCalledWith(7, undefined);
+    // A same-company keep on another tab re-judges for that tab.
+    painter.result(resultPaint(scan, { tabId: 7 }));
+    painter.provenance({ method: 'host-auto', host: 'www.equinor.com', tabId: 8 });
+    expect(deps.setBadge).toHaveBeenLastCalledWith(8, 'warn');
+    // Picker, empty and error paints clear it; no tab id, no call.
+    painter.picker('nrk.no', [], { focus: false, tabId: 7 });
+    expect(deps.setBadge).toHaveBeenLastCalledWith(7, undefined);
+    vi.mocked(deps.setBadge).mockClear();
+    painter.empty({ host: 'x.no', degraded: false, focus: false, tabId: 9 });
+    expect(deps.setBadge).toHaveBeenLastCalledWith(9, undefined);
+    painter.error(new Error('x'), { retry: false, focus: false, tabId: 9 });
+    expect(deps.setBadge).toHaveBeenCalledTimes(2);
+    painter.result(resultPaint(scan));
+    expect(deps.setBadge).toHaveBeenCalledTimes(2);
   });
 
   it('«Feil bedrift?» and «Oppdater» reach the controller; the footer carries the freshness', () => {
@@ -510,9 +577,15 @@ describe('the masthead search view', () => {
     await vi.advanceTimersByTimeAsync(250);
     await vi.waitFor(() => expect(q('.search-view .section:not([hidden]) .section__head')?.textContent).toBe('Nylig sett'));
 
+    // The footer's freshness row describes the result kept aside, not
+    // the search: only the attribution stays while the search is open.
+    expect(roots.foot.textContent).not.toContain('Hentet');
+    expect(roots.foot.textContent).toContain('NLOD 2.0');
+
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
     expect(app().dataset.state).toBe('result');
     expect(document.body.dataset.answer).toBe('ok');
+    expect(roots.foot.textContent).toContain('Hentet for 2 min siden');
     expect(q('#panel-personer')).toBe(panel);
     expect(shownPanel()).toBe('panel-personer');
     expect(roots.search.value).toBe('');
@@ -600,16 +673,34 @@ describe('the auto-sync switch and consent band', () => {
 });
 
 describe('appendName (amendment c)', () => {
-  it('mutes the parent prefix only when the name continues after it', () => {
+  const muted = (name: string, parent: string) => {
     const b = document.createElement('b');
-    appendName(b, 'NORDVIK ENERGI ASA AVD FORUS', 'NORDVIK ENERGI ASA');
-    expect(b.textContent).toBe('NORDVIK ENERGI ASA AVD FORUS');
-    expect(b.querySelector('.name-prefix')?.textContent).toBe('NORDVIK ENERGI ASA ');
-    const same = document.createElement('b');
-    appendName(same, 'NORDVIK ENERGI ASA', 'NORDVIK ENERGI ASA');
-    expect(same.querySelector('.name-prefix')).toBeNull();
-    const other = document.createElement('b');
-    appendName(other, 'NORDVIK ENERGISERVICE AS', 'NORDVIK ENERGI');
-    expect(other.querySelector('.name-prefix')).toBeNull();
+    appendName(b, name, parent);
+    expect(b.textContent).toBe(name);
+    return b.querySelector('.name-prefix')?.textContent ?? null;
+  };
+
+  it('mutes the parent prefix only when the name continues after it', () => {
+    expect(muted('NORDVIK ENERGI ASA AVD FORUS', 'NORDVIK ENERGI ASA')).toBe('NORDVIK ENERGI ASA ');
+    expect(muted('NORDVIK ENERGI ASA', 'NORDVIK ENERGI ASA')).toBeNull();
+    expect(muted('NORDVIK ENERGISERVICE AS', 'NORDVIK ENERGI')).toBeNull();
+  });
+
+  it('also mutes the parent’s base name (minus its legal form), whole words only', () => {
+    expect(muted('EQUINOR ALGERIA AS', 'EQUINOR ASA')).toBe('EQUINOR ');
+    expect(muted('EQUINOR ASA AVD BERGEN', 'EQUINOR ASA')).toBe('EQUINOR ASA ');
+    expect(muted('EQUINORSK AS', 'EQUINOR ASA')).toBeNull();
+    expect(muted('Equinor Energy AS', 'EQUINOR ASA')).toBe('Equinor ');
+    // The base name must not swallow the whole child name.
+    expect(muted('EQUINOR', 'EQUINOR ASA')).toBeNull();
+    expect(muted('EQUINOR AS', 'EQUINOR ASA')).toBeNull();
+    expect(muted('EQUINOR ASA', 'EQUINOR ASA')).toBeNull();
+    // A parent whose last word is not a legal form has no base name.
+    expect(muted('KIWI NORGE BUTIKK AS', 'KIWI NORGE')).toBe('KIWI NORGE ');
+    expect(muted('KIWI BUTIKK AS', 'KIWI NORGE')).toBeNull();
+    expect(baseName('EQUINOR ASA')).toBe('EQUINOR');
+    expect(baseName('OBOS BBL')).toBe('OBOS');
+    expect(baseName('AS')).toBe('AS');
+    expect(baseName('KIWI NORGE')).toBe('KIWI NORGE');
   });
 });

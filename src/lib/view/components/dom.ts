@@ -124,14 +124,47 @@ export function section(label: string, count?: number | string): HTMLElement {
 }
 
 // Amendment c: a branch or subsidiary named after its parent («NORDVIK
-// ENERGI ASA AVD FORUS») — the shared prefix is written in a quieter
-// span so the distinguishing part reads first. The text stays the full
-// name; only the shape of the nodes changes.
+// ENERGI ASA AVD FORUS», «EQUINOR ALGERIA AS» under «EQUINOR ASA») —
+// the shared prefix is written in a quieter span so the distinguishing
+// part reads first. The prefix is the parent's full name or its base
+// name (the name minus a legal-form suffix), matched as whole words at
+// the start and never the whole name. The text stays the full name;
+// only the shape of the nodes changes.
+const LEGAL_FORMS = new Set([
+  'AS', 'ASA', 'SA', 'DA', 'ANS', 'BA', 'NUF', 'KS', 'SE', 'IKS', 'BBL', 'SF', 'AL', 'ENK', 'FKF', 'KF', 'STI', 'SPA',
+]);
+
+export function baseName(name: string): string {
+  const words = name.trim().split(/\s+/);
+  const last = words[words.length - 1]?.toUpperCase();
+  return words.length > 1 && last && LEGAL_FORMS.has(last) ? words.slice(0, -1).join(' ') : name.trim();
+}
+
+// What is left after the prefix must say something of its own: at
+// least one word that is not a legal form («EQUINOR AS» under «EQUINOR
+// ASA» keeps its whole name).
+function distinguishes(rest: string): boolean {
+  return rest.split(/\s+/).some((w) => w !== '' && !LEGAL_FORMS.has(w.toUpperCase()));
+}
+
+function mutedPrefix(name: string, parentName: string | undefined): string | undefined {
+  const parent = parentName?.trim();
+  if (!parent) return undefined;
+  const upper = name.toUpperCase();
+  for (const candidate of [parent, baseName(parent)]) {
+    const cut = candidate.length + 1;
+    if (upper.startsWith(`${candidate.toUpperCase()} `) && distinguishes(name.slice(cut))) {
+      return name.slice(0, cut);
+    }
+  }
+  return undefined;
+}
+
 export function appendName(container: HTMLElement, name: string, parentName?: string): void {
-  const prefix = parentName?.trim();
-  if (prefix && name.length > prefix.length + 1 && name.toUpperCase().startsWith(`${prefix.toUpperCase()} `)) {
-    container.appendChild(el('span', 'name-prefix', name.slice(0, prefix.length + 1)));
-    container.append(name.slice(prefix.length + 1));
+  const prefix = mutedPrefix(name, parentName);
+  if (prefix) {
+    container.appendChild(el('span', 'name-prefix', prefix));
+    container.append(name.slice(prefix.length));
     return;
   }
   container.append(name);

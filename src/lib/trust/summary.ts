@@ -9,7 +9,7 @@
 // «Ingen». Plain text has no colour, so the tone travels as words
 // (TONE_PREFIX: «Advarsel: », «Obs: »).
 
-import { formatOrgnr } from '../format.js';
+import { formatOrgnr, postalLine } from '../format.js';
 import { findDagligLeder, findRoleHolder } from '../roller.js';
 import type { Adresse, Enhet, RollerResponse } from '../../types/brreg.js';
 import { TONE_PREFIX, type Answer, type Kobling, type Signal } from './types.js';
@@ -115,17 +115,14 @@ export interface OrgnrFormats {
   invoiceBlock: string;
 }
 
-// Street lines as registered, then «postnummer poststed», then the
-// country when it isn't Norway. A foreign address (NUF) carries no
+// Street lines as registered, then «postnummer Poststed» (the place
+// title-cased, as on screen), then the country when it isn't Norway. A foreign address (NUF) carries no
 // postnummer; its poststed already holds the postcode («DE-92711
 // Parkstein»).
 function addressLines(addr: Adresse | undefined): string[] {
   if (!addr) return [];
   const lines = (addr.adresse ?? []).map((l) => l.trim()).filter(Boolean);
-  const postal = [addr.postnummer, addr.poststed]
-    .map((p) => p?.trim())
-    .filter(Boolean)
-    .join(' ');
+  const postal = postalLine(addr);
   if (postal) lines.push(postal);
   const foreign = addr.landkode !== undefined && addr.landkode !== 'NO';
   const land = addr.land?.trim() || addr.landkode;

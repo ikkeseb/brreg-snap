@@ -1,9 +1,12 @@
 // The picker (P5): «Mulige selskaper bak <site>», up to four candidate
 // rows with a digit shortcut each, «Ingen av disse» (0), and a
 // prefilled «Eller søk selv» field. Digit keys are scoped to the picker:
-// the document listener bails unless this picker's list is still in
-// the document, and removes itself once it isn't. Persisting the choice
-// (setPickerChoice) is the controller's job, through the handlers.
+// one document listener per document, replaced by the next picker
+// rendered there, that bails while this picker's list is not in the
+// document — detached, not gone: the panel's search view keeps the
+// picker aside as live DOM and puts it back on Escape, and the keys
+// must work again then. Persisting the choice (setPickerChoice) is the
+// controller's job, through the handlers.
 
 import { formatCount } from '../../format.js';
 import type { Candidate } from '../../hostname-search.js';
@@ -13,6 +16,9 @@ import { COPY } from '../copy.js';
 import { button, el } from './dom.js';
 import { buildSearchField, buildStatusMark, statusMarkFor, buildListSection, searchPainter } from './search.js';
 import { attachManualSearch } from '../../ui/manual-search.js';
+
+// The digit-key listener of the picker last rendered in each document.
+const pickerKeys = new WeakMap<Document, (ev: KeyboardEvent) => void>();
 
 export interface PickerData {
   // The site's display name («nrk.no»).
@@ -141,10 +147,7 @@ export function renderPicker(
   // disse» is remembered for the site, and Escape is the reflex key
   // for leaving a popup, not a considered answer.
   const onKey = (ev: KeyboardEvent): void => {
-    if (!list.isConnected) {
-      document.removeEventListener('keydown', onKey);
-      return;
-    }
+    if (!list.isConnected) return;
     if (ev.altKey || ev.ctrlKey || ev.metaKey || ev.shiftKey) return;
     const target = ev.target;
     if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
@@ -160,7 +163,11 @@ export function renderPicker(
     ev.preventDefault();
     handlers.onPick(cand.organisasjonsnummer);
   };
-  document.addEventListener('keydown', onKey);
+  const doc = container.ownerDocument;
+  const previous = pickerKeys.get(doc);
+  if (previous) doc.removeEventListener('keydown', previous);
+  doc.addEventListener('keydown', onKey);
+  pickerKeys.set(doc, onKey);
 
   const firstRow = list.querySelector<HTMLButtonElement>('button.pick')!;
   return { heading, firstRow, input: field.input, search };

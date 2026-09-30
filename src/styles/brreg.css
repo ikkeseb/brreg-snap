@@ -508,6 +508,18 @@
 .ent { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
 button.ent { padding: 0; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; }
 .ent:hover { text-decoration-color: currentColor; }
+/* a long free-text value (Aktivitet, Formål): clamped to four lines, the
+   «Vis mer» text button under it only when the text runs past them
+   (oversikt.ts measures; the button is [hidden] until then) */
+.clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  overflow: hidden;
+}
+.clamp.is-open { display: block; -webkit-line-clamp: none; line-clamp: none; overflow: visible; }
+.clamp__btn { margin-top: 2px; }
 /* a section whose body is a sentence or two (a failed fetch, no filing) */
 .section__text { padding: 8px 0; color: var(--ink-2); }
 .section__text + .section__text { padding-top: 0; }
@@ -542,10 +554,12 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
   width: 100%; padding: 8px 0; border: 0; border-bottom: 1px solid var(--rule);
   background: none; text-align: left; cursor: pointer;
 }
-.entity-row b { text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+/* the chevron says «drill in»; the underline appears on hover and
+   keyboard focus (the amber ring stays) rather than on every row */
+.entity-row b { text-underline-offset: 3px; }
 .entity-row small { grid-column: 1; font: var(--t-body); color: var(--ink-2); }
 .entity-row .icon { grid-row: 1 / 3; grid-column: 2; color: var(--ink-2); }
-.entity-row:hover b { text-decoration-color: currentColor; }
+.entity-row:hover b, .entity-row:focus-visible b { text-decoration: underline; }
 .entity-row--self { cursor: default; }
 .entity-row--self b { text-decoration: none; }
 /* konsern: the path from the top down to the company, then its children */
