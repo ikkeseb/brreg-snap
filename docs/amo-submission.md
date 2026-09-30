@@ -79,51 +79,21 @@ notes for reviewers below say how consent works there.
 produktet; fjernet fra all listing-tekst 2026-07-05.)
 
 <!-- SECTION: description-nb -->
-### Description (lang beskrivelse, markdown OK)
+### Description (nb — paste as is)
 
-> **brreg-snap** henter bedriftsinfo fra Brønnøysundregistrene rett
-> i nettleseren. Klikk på verktøylinje-ikonet mens du er på et norsk
-> bedriftsnettsted, så får du opp:
+> Sjekk hvem som står bak en norsk nettbutikk eller nettside. brreg-snap slår opp bedriften i Brønnøysundregistrene og viser organisasjonsnummer, konkurs og andre registrerte varsler, styre og regnskap.
 >
-> - Firmanavn, organisasjonsnummer og status
-> - Forretningsadresse og postadresse
-> - Næringskode og antall ansatte
-> - Daglig leder, styret, revisor og regnskapsfører
-> - Siste innleverte regnskap med nøkkeltall
-> - Eventuelle underenheter (avdelinger) og overordnet enhet
+> • Se hvordan nettstedet er koblet til bedriften: registrert hjemmeside, et org.nr siden selv oppgir, eller et mulig navnetreff.
+> • Se status, alder, ansatte og siste innleverte regnskap. Ingen varsler i registeret er ingen garanti for at en nettbutikk er trygg.
+> • Åpne sidepanelet for roller, adresser, aktivitet, konsern, underenheter og lenker til årsregnskap og kunngjøringer.
+> • Søk på navn eller org.nr, slå opp markert tekst med høyreklikk, eller bruk en hurtigtast.
+> • Velg en annen bedrift ved feil treff, glem et tidligere valg, og kopier org.nr eller et sammendrag.
 >
-> **Sidebar-panel** gir samme informasjon med dypere oppslag. Slå
-> på "Auto-oppdater ved fane-bytte" for å la sidebaren slå opp siden
-> du ser på hver gang du bytter fane eller åpner en ny side, så lenge
-> den er åpen.
+> Slå på «Auto-oppdater» hvis du vil at et åpent sidepanel skal følge fanen du ser på. Du får først en forklaring og en forespørsel om tilgang til faner. Slår du bryteren av, gis tilgangen tilbake.
 >
-> **Smart oppslag**: Utvidelsen finner organisasjonsnummeret enten
-> direkte i adressen eller sidetittelen, eller ved å søke i brreg på
-> domenet til nettstedet. Hvis flere bedrifter er kandidater, viser
-> utvidelsen en «Vi fant flere mulige treff»-velger framfor å gjette. Hvis
-> ingenting matcher, kan du søke manuelt.
+> Personvern: Oppslag sendes bare til data.brreg.no, aldri til utvikleren. Utvidelsen sender nettstedets registrerbare domene, et organisasjonsnummer eller søketeksten du selv skriver eller velger å slå opp. Den har ingen content scripts og leser ikke nettsideinnhold automatisk. Ingen analytics, trackere eller telemetri. Velkomstsiden gjør ingen nettverkskall. «Rapporter feil treff» åpner e-postprogrammet ditt; du velger selv om meldingen sendes.
 >
-> **Sikkerhet og personvern**:
->
-> - For å finne bedriften sendes domenet til nettstedet du slår opp
->   (for eksempel `dnb.no` for `nettbank.dnb.no`; underdomener sendes
->   ikke), eller et organisasjonsnummer fra adressen eller
->   sidetittelen, til `data.brreg.no` — aldri til utvikleren eller
->   andre.
-> - Ingen content scripts. Utvidelsen leser ikke innholdet på
->   nettsidene du besøker.
-> - Eneste eksterne tjeneste er `data.brreg.no` —
->   Brønnøysundregistrenes åpne API.
-> - Ingen analytics, ingen tredjeparts-trackere, ingen telemetri.
-> - Null runtime-avhengigheter i den bygde utvidelsen.
-> - Auto-oppdater slår opp siden du ser på hver gang du bytter fane
->   eller åpner en ny side, så lenge et brreg-snap-panel er åpent.
->   Den krever `tabs`-tilgang, som utvidelsen ber om først når du
->   slår den på, etter en kort forklaring av hva som sendes. Slå den
->   av, eller trekk tilgangen tilbake i `about:addons`, når som helst.
->
-> Kildekoden er åpen under MIT-lisens på
-> [github.com/ikkeseb/brreg-snap](https://github.com/ikkeseb/brreg-snap).
+> Kildekode under MIT-lisens: https://github.com/ikkeseb/brreg-snap
 
 ---
 
@@ -137,51 +107,21 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 (206 chars — under the limit.)
 
 <!-- SECTION: description-en -->
-### Description
+### Description (en)
 
-> **brreg-snap** surfaces Norwegian company information from the
-> Brønnøysund Register Centre directly in your browser. Click the
-> toolbar icon while visiting a Norwegian business website to get:
+> Check which company is behind a Norwegian shop or website. brreg-snap looks up the company in the Brønnøysund Register Centre and shows its organisation number, bankruptcy and other registry warnings, board and accounts.
 >
-> - Company name, organisation number, and status flags
-> - Business and postal address
-> - Industry code and employee count
-> - CEO, board members, auditor, and accountant
-> - Latest filed accounts with key figures
-> - Sub-units (underenheter) and parent unit, where registered
+> • See how the site relates to the company: a registered website, an organisation number claimed by the site, or a possible name match.
+> • Check status, age, employees and the latest filed accounts. No registry warnings is not a guarantee that a shop is safe.
+> • Open the side panel for roles, addresses, activities, company groups, sub-units and links to annual reports and announcements.
+> • Search by name or organisation number, look up selected text from the right-click menu, or use a keyboard shortcut.
+> • Choose another company after a wrong match, forget a previous choice, and copy an organisation number or summary.
 >
-> A **sidebar panel** shows the same data in a deeper layout.
-> Enable "Auto-oppdater ved fane-bytte" to have the sidebar look up
-> the page you are on every time you switch tabs or open a new page,
-> while it is open.
+> Turn on "Auto-oppdater" to let an open side panel follow your active tab. A short explanation and a request for tab access appear first. Turning it off gives the permission back.
 >
-> **Smart resolution**: the extension finds the organisation number
-> either directly in the page address or title, or by searching
-> brreg for the site's domain. When several companies are plausible
-> candidates, it shows a "Did you mean …?" picker rather than
-> guessing. When nothing matches, you can search manually.
+> Privacy: Lookups go only to data.brreg.no, never to the developer. The extension sends the site's registrable domain, an organisation number or search text you type or choose to look up. It has no content scripts and does not read page content automatically. No analytics, trackers or telemetry. The welcome page makes no network requests. "Rapporter feil treff" opens your email app; you decide whether to send the message.
 >
-> **Security and privacy**:
->
-> - To find the company, the domain of the site you look up (for
->   example `dnb.no` for `nettbank.dnb.no`; subdomains are not sent),
->   or an organisation number from the page address or title, is sent
->   to `data.brreg.no` — never to the developer or anyone else.
-> - No content scripts. The extension never reads the DOM or text
->   of pages you visit.
-> - The only external service contacted is `data.brreg.no` — the
->   public API operated by Brønnøysundregistrene.
-> - No analytics, no third-party trackers, no telemetry.
-> - Zero runtime dependencies in the shipped bundle.
-> - Auto-sync looks up the page you are on every time you switch
->   tabs or open a new page, as long as a brreg-snap panel is open.
->   It needs the `tabs` permission, which the extension only asks
->   for when you turn it on, after a short note on what is sent.
->   Turn it off, or revoke the permission in `about:addons`, at any
->   time.
->
-> Source code under MIT licence at
-> [github.com/ikkeseb/brreg-snap](https://github.com/ikkeseb/brreg-snap).
+> Source code under the MIT licence: https://github.com/ikkeseb/brreg-snap
 
 ---
 
@@ -193,7 +133,7 @@ permission, explaining why each is necessary.
 
 - **`activeTab`** — Reads the URL and title of the active tab only
   when the user clicks the toolbar icon, the sidebar icon, or a
-  context-menu item. Used to extract a 9-digit Norwegian
+  context-menu item, or uses a keyboard shortcut. Used to extract a 9-digit Norwegian
   organisation number, or to derive the site's registrable domain
   for a brreg search query. The permission does not grant DOM access
   or background tab access.
@@ -205,9 +145,11 @@ permission, explaining why each is necessary.
   one boolean, the auto-sync toggle. Nothing is synced to a remote
   account.
 
-- **`menus`** — Registers a single right-click menu item ("Vis i
-  brreg-snap sidebar") on web pages that opens the sidebar panel and
-  triggers a lookup. This permission is on Mozilla's no-prompt list
+- **`menus`** — Registers right-click items for looking up the current
+  page and selected text. Selected text is sent only when the user
+  chooses that lookup, limited to 100 characters; if it contains an
+  organisation number, only that number is sent. This permission is on
+  Mozilla's no-prompt list
   and does not grant tab access by itself.
 
 - **`host_permissions: https://data.brreg.no/*`** — The only
@@ -217,7 +159,7 @@ permission, explaining why each is necessary.
   enforces this restriction at runtime.
 
 - **`optional_permissions: tabs`** — Off at install time. The
-  user opts in by switching on the "Auto-oppdater ved fane-bytte"
+  user opts in by switching on the "Auto-oppdater"
   toggle in the sidebar header. That first shows an inline
   disclosure: every tab switch or new page is looked up while a
   brreg-snap panel is open, the domain goes to data.brreg.no, and
@@ -244,8 +186,10 @@ permission, explaining why each is necessary.
 > add-on sends data.brreg.no an organisation number found in the page
 > address or title or, if there is none, the site's registrable
 > domain (`dnb.no` for `nettbank.dnb.no`; subdomains are not sent)
-> and a name label derived from it. Text the user types into the
-> search box is sent as a search. The manifest therefore declares
+> and a name label derived from it. Text typed in the search box or
+> explicitly selected for a right-click lookup is sent as a search.
+> Selected text is limited to 100 characters; if it contains an
+> organisation number, only that number is sent. The manifest therefore declares
 > `data_collection_permissions` with `required: ["browsingActivity"]`,
 > which Firefox 140+ shows in the install and update prompts. IP
 > addresses and reserved local names (localhost, single-label hosts,
@@ -254,8 +198,9 @@ permission, explaining why each is necessary.
 > any other party.
 >
 > Lookups run when the user clicks the toolbar button, opens the
-> sidebar, uses the context-menu item or searches, and, only if the
-> user turns on "Auto-oppdater ved fane-bytte" and grants `tabs`, on
+> sidebar, uses a keyboard shortcut or context-menu item, or searches,
+> and, only if the
+> user turns on "Auto-oppdater" and grants `tabs`, on
 > every tab switch or new page while a brreg-snap sidebar is open.
 >
 > Firefox 115–139 ignore the manifest declaration. There, each click
@@ -265,6 +210,15 @@ permission, explaining why each is necessary.
 > the only lookup not tied to a click: before it asks for `tabs`, the
 > sidebar shows its own disclosure of what is sent and to whom, and
 > its «Slå på» button is the explicit consent.
+>
+> Version 1.4 adds no permissions. Its new group-structure, recent-change
+> and annual-report-year requests use the same host, data.brreg.no.
+> Annual-report PDFs and announcements are ordinary user-clicked links.
+> A welcome page opens once on installation, not on update; it makes no
+> network requests. Schibsted Grotesk is bundled locally under the SIL
+> Open Font License, included at fonts/OFL.txt. "Rapporter feil treff"
+> is a mailto link that opens the user's email app and sends nothing
+> automatically.
 >
 > The build uses Vite's default minifier (Oxc). Source maps are
 > excluded from the package; the complete original source is the
