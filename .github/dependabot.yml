@@ -1,7 +1,7 @@
 version: 2
 updates:
   # Dev-only dependency tree (the shipped bundle has zero runtime
-  # deps — CLAUDE.md § Dependencies). Minor + patch updates arrive as
+  # deps — AGENTS.md § Dependencies). Minor + patch updates arrive as
   # one weekly PR that should stay green; majors arrive per stack (or
   # one PR per dependency), so one breaking major can't block the rest.
   - package-ecosystem: npm
@@ -35,6 +35,11 @@ updates:
       # stops below 6.1); lift this once it does.
       - dependency-name: typescript
         versions: ['>=7']
+      # @types/node follows the Node major in .node-version (CI and the
+      # release run it); newer types would pass APIs that runtime lacks.
+      # Move this bound together with .node-version.
+      - dependency-name: '@types/node'
+        versions: ['>=25']
 
   - package-ecosystem: github-actions
     directory: '/'

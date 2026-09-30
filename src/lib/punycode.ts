@@ -1,5 +1,5 @@
 // Minimal RFC 3492 punycode DECODER — decode only, no encode. Zero-dep
-// by design (see CLAUDE.md): the shipped bundle carries no npm packages.
+// by design (see AGENTS.md): the shipped bundle carries no npm packages.
 //
 // Why it exists: `new URL().hostname` returns IDN labels in ACE form
 // (blåbær.no → xn--blbr-roah.no). Feeding the raw "xn--…" label into

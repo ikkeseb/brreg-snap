@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm verify:*)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm lint)",
+      "Bash(pnpm lint:ext)",
+      "Bash(pnpm check:docs)",
+      "Bash(pnpm test)",
+      "Bash(pnpm exec vitest run:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm smoke)",
+      "Bash(pnpm preview)",
+      "Bash(pnpm store-status:*)",
+      "Bash(pnpm test:live)"
+    ]
+  }
+}

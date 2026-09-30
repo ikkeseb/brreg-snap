@@ -18,7 +18,7 @@ import type { Kobling, KoblingKind, Tone } from './types.js';
 
 // Company directories: sites whose pages show OTHER companies' orgnrs
 // by design. Generic knowledge about a handful of well-known lookup
-// sites, deliberately short — not a hostname → orgnr table (CLAUDE.md
+// sites, deliberately short — not a hostname → orgnr table (AGENTS.md
 // § No curated data). A directory's own company page still reads
 // 'registered' when brreg ties the domain to it.
 export const DIRECTORY_DOMAINS: ReadonlySet<string> = new Set([

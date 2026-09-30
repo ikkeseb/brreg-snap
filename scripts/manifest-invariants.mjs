@@ -1,4 +1,4 @@
-// The manifest security invariants, in one place (CLAUDE.md § Security
+// The manifest security invariants, in one place (AGENTS.md § Security
 // constraints). Used by tests/manifest.test.ts for the SOURCE manifests
 // and by scripts/verify-dist.mjs for the STAMPED dist manifests.
 //

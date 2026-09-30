@@ -8,7 +8,7 @@
 // drop-in for the promise-based `browser` namespace. We therefore alias
 // `globalThis.browser = chrome` on Chromium instead of pulling in
 // webextension-polyfill — keeping the shipped bundle free of any
-// third-party JavaScript (see CLAUDE.md § Dependencies).
+// third-party JavaScript (see AGENTS.md § Dependencies).
 //
 // Import this module FOR ITS SIDE EFFECT as the very first import of
 // every entry point (background, popup, details) so the global exists
@@ -16,9 +16,10 @@
 // own, so it runs to completion during its own module evaluation —
 // ahead of the importing entry's body and its sibling imports.
 //
-// The only APIs that genuinely differ between engines (the Firefox
-// sidebar vs. the Chrome side panel) are isolated behind
-// `platform/sidebar.ts`; everything else rides the aliased namespace.
+// The aliased namespace covers the shared APIs only. What still
+// differs between engines (sidebar vs. side panel, menus vs.
+// contextMenus, the tabs.onUpdated filter) is a runtime check behind
+// isFirefox or a feature test: see docs/notes/platform.md.
 
 const g = globalThis as { browser?: unknown; chrome?: unknown };
 if (g.browser === undefined && g.chrome !== undefined) {

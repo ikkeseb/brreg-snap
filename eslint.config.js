@@ -137,7 +137,7 @@ export default defineConfig(
       ],
     },
   },
-  // Extension source: security invariants as lint rules (CLAUDE.md
+  // Extension source: security invariants as lint rules (AGENTS.md
   // § Security constraints). Brreg text is written by the registrants
   // themselves, so HTML sinks are the realistic injection surface.
   {

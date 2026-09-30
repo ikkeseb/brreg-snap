@@ -33,7 +33,8 @@ export default defineConfig(({ mode }) => {
       target: target === 'chrome' ? 'chrome116' : 'firefox115',
       // Vite's default minifier (Oxc since Vite 8). Source maps are
       // emitted into dist-*/ for local debugging only — packaging excludes
-      // them (D12); AMO review uses the full-TS source zip instead.
+      // them (docs/notes/build.md § minify); AMO review uses the full-TS
+      // source zip instead.
       sourcemap: true,
       rollupOptions: {
         input: {

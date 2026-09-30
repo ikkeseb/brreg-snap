@@ -1,7 +1,7 @@
 import { ESLint } from 'eslint';
 import { beforeAll, describe, expect, it } from 'vitest';
 
-// The src security rules in eslint.config.js (CLAUDE.md § Security
+// The src security rules in eslint.config.js (AGENTS.md § Security
 // constraints), run through the REAL config: each snippet is linted as
 // if it were the content of an existing src file, so the type-aware
 // setup, the file globs and the rule options are all the ones `pnpm

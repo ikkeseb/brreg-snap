@@ -1,190 +1,134 @@
 # brreg-snap
 
-Browser extension (Firefox + Chrome/Chromium) that surfaces Norwegian
-company information from [Brønnøysundregistrene](https://data.brreg.no/)
-— status, CEO, board members, key figures and accounts — straight from
-the toolbar.
+See which Norwegian company is behind the site you are on, and whether
+the register has anything to warn you about.
 
-Click the icon while on a company website, get the brreg snapshot in a
-popup. No content scripts, no page DOM access, and the only server it
-talks to is the public registry API.
+[![Firefox Add-ons](https://img.shields.io/amo/v/brreg-snap?label=Firefox%20Add-ons)](https://addons.mozilla.org/firefox/addon/brreg-snap/)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/mccggmiialopdaaokhakeijmbafhdmli?label=Chrome%20Web%20Store)](https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokhakeijmbafhdmli)
 
-> One source tree, two targets, both live: Firefox on
-> [AMO](https://addons.mozilla.org/firefox/addon/brreg-snap/), Chrome
-> on the Chrome Web Store (since 2026-06-07) — at full feature parity,
-> including the optional tab-switch auto-update — see
-> [docs/chrome-port.md](docs/chrome-port.md). The engine differences
-> (sidebar vs. side panel, `menus` vs. `contextMenus`, event page vs.
-> service worker) are isolated in `src/lib/platform/` behind a runtime
-> feature check, with **no third-party polyfill** — the zero-runtime-
-> dependency guarantee holds on both engines.
+brreg-snap is a browser extension for Firefox and Chrome. It looks the
+site up in [Brønnøysundregistrene](https://data.brreg.no/) (the
+Brønnøysund Register Centre) and answers two questions: who is behind
+this site, and are they OK?
+
+## What it does
+
+Click the toolbar button on a shop or company website. The popup shows:
+
+- **The answer.** A quiet band when the register has no warnings
+  («Ingen varsler i registeret»), a firmer band for a warning, and a
+  stamp for bankruptcy, deletion, forced dissolution, or a site that
+  claims a company it isn't registered for. No warnings is not a
+  guarantee that a shop is safe.
+- **Kobling:** how the site relates to the company. It can be the
+  company's registered website, an organisation number found in the
+  page address or title, or only a name match.
+- **The ledger:** status, age, employees and the latest filed accounts
+  (revenue and result), plus the company's konsern (group) if it has
+  one.
+
+The sidebar (Firefox) or side panel (Chrome) goes deeper, with tabs
+for Oversikt, Personer (roles), Økonomi (latest accounts, the annual
+report PDFs and announcements) and Enheter (group structure and
+sub-units). Registry notes (påtegninger) and recent changes show above
+the tabs.
+
+Other ways in:
+
+- Search by name or organisation number from the popup or the panel.
+- Select text on a page and choose «Slå opp «…» i brreg-snap» in the
+  right-click menu.
+- Keyboard shortcuts: Alt+Shift+O opens the popup, Alt+Shift+S the
+  panel (Control+Shift on macOS). The browser lets you rebind them.
+
+When several companies fit the site equally well, a picker lets you
+choose instead of the extension guessing. A wrong match can be
+replaced and the choice forgotten. The toolbar button shows «!» for a
+warning and «✕» for a stamp on the tab you looked up. «Auto-oppdater»
+(off by default) lets an open panel follow your active tab.
+
+On install, a welcome page opens once to show how to use it. It makes
+no network request.
 
 ![brreg-snap sidebar showing ORKLA ASA overview, opened on orkla.com](docs/screenshots/01-sidebar-overview.png)
 
 ## Security model
 
-Popup-only architecture. The extension never injects code into the
-pages you browse and never reads their DOM.
+The extension never injects code into the pages you browse and never
+reads their DOM: it has no content scripts. The only server it talks
+to is `data.brreg.no`.
 
 | Permission | Why |
 |---|---|
-| `activeTab` | Read URL + title of the current tab **only when you click the icon, the sidebar icon, or a context-menu item** |
-| `storage` | Cache brreg responses and domain lookups locally (`storage.session`, 24h TTL, gone when the browser closes), keep the 5 most recent companies, and persist the "Auto-oppdater" toggle (`storage.local`) |
-| `menus` | Register the "Vis i brreg-snap sidebar" right-click item. On Mozilla's no-prompt list — silent at install, does not grant tab snooping (activeTab still required, granted per click). |
-| `host_permissions: https://data.brreg.no/*` | Fetch from the public brreg API. Only domain we contact. |
-| `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater" in the sidebar. Switching it on first shows a notice of what is sent; its «Slå på» button requests `tabs` via the browser's permission prompt. Flipping the toggle off gives it back (`permissions.remove`); on Firefox it can also be revoked in `about:addons`. `tabs` is not in the install dialog. |
+| `activeTab` | Read the current tab's address and title, **only when you click the button or the sidebar icon, use a right-click item or press a shortcut** |
+| `storage` | Cache brreg responses for 24 hours in `storage.session` (cleared when the browser closes), keep your 5 most recent companies there, and store the «Auto-oppdater» setting in `storage.local` |
+| `menus` (Firefox) / `contextMenus` + `sidePanel` (Chrome) | The right-click items, and the side panel on Chrome |
+| `host_permissions: https://data.brreg.no/*` | The public brreg API. The only host |
+| `optional_permissions: tabs` | **Off by default and not in the install dialog.** Requested only when you turn on «Auto-oppdater» in the panel and confirm the notice about what will be sent. Turning it off gives the permission back |
 
-On Chrome the equivalent install set is `activeTab` + `storage` +
-`contextMenus` + `sidePanel` + the same `data.brreg.no` host. Only the
-host permission shows an install warning (for data.brreg.no); the
-other four carry none. `tabs` is the same runtime opt-in on both
-engines: it sits in `optional_permissions` and is requested only when
-the user enables "Auto-oppdater" in the side panel
-(Chrome words that prompt "Read your browsing history").
+On Chrome, only the `data.brreg.no` host permission shows an install
+warning. `tabs` appears as "Read your browsing history" when you opt
+in.
 
 What this rules out:
 
-- No `<all_urls>` host permission
-- No content scripts
-- No `eval` or remote-loaded code
-- No third-party analytics or telemetry
-- No DOM access on the pages you visit
+- No `<all_urls>`, `cookies` or `webRequest`
+- No content scripts and no DOM access on the pages you visit
+- No `eval`, no `Function()`, no remote code, and a strict CSP
+  (`default-src 'self'`, `connect-src https://data.brreg.no`)
+- No runtime dependencies: the package holds only the extension's own
+  code
+- No analytics, trackers or telemetry
 
-The optional `tabs` permission grants nothing by itself: the extension
-only reads `tab.url` and `tab.title` on switch/update events to resolve
-an org-number, and only while the toggle is on and the sidebar / side
-panel is open. There is no `cookies`, `webRequest`, or `<all_urls>`
-access — the security posture stays "no DOM, no network beyond
-data.brreg.no".
-
-What does leave the browser, to find the company: the site's
-registrable domain (`dnb.no` for `nettbank.dnb.no`; subdomains are
-not sent) and a name label derived from it (`dnb`), an orgnr found in
-the page address or title, and text typed into the search box. IP
-addresses and reserved local names (`localhost`, `.local`, `.lan` …)
-are never sent. It all goes only to data.brreg.no, never to the
-developer. Firefox declares this as `browsingActivity` data
-collection, the Chrome Web Store as "Web history" — see
-[PRIVACY.md](PRIVACY.md).
-
-Total reviewable surface is intentionally small: `src/` is a few
-thousand lines of TypeScript with zero runtime dependencies — no
-content scripts, no third-party JS, one API host.
-
-## Install — development
-
-Requires Node 18+, [pnpm](https://pnpm.io/) 10.33+, and Firefox and/or
-Chrome.
-
-```bash
-pnpm install
-pnpm dev             # builds + launches a Firefox dev profile with the extension loaded
-pnpm dev:chrome      # builds the Chrome target + web-ext run -t chromium
-```
-
-To produce distributable packages:
-
-```bash
-pnpm package          # Firefox -> web-ext-artifacts/brreg-snap-X.Y.Z.zip (.xpi)
-pnpm package:chrome   # Chrome  -> web-ext-artifacts/brreg-snap-chrome-X.Y.Z.zip
-```
-
-**Firefox:** load the `.xpi` via `about:debugging` → "This Firefox" →
-"Load Temporary Add-on". For permanent install you need the AMO-signed
-build (see [Distribution](#distribution)).
-
-**Chrome:** `pnpm build:chrome`, then `chrome://extensions` → enable
-"Developer mode" → "Load unpacked" → select `dist-chrome/`.
-
-## How it works
-
-When you click the toolbar icon:
-
-1. Popup opens and reads the current tab's URL + title (`activeTab`).
-2. Extract an organisation number using:
-   - **Org-nr regex** — 9-digit pattern in URL path/query or title
-   - **Hostname → brreg search** — multi-query pipeline (hjemmeside
-     field + Nordic-folded name search) with confidence scoring
-     (`src/lib/hostname-search.ts`, `src/lib/hostname-score.ts`).
-     Sends only the registrable domain (`nettbank.dnb.no` → `dnb.no`)
-     and its main label to brreg, never the full URL or the title.
-     Auto-resolves only when one candidate is clearly ahead; popup
-     and sidebar show a «Vi fant flere mulige treff» picker when several plausible
-     companies tie, and refuse rather than guess wrong.
-   - **Free-text search fallback** — if nothing else matches, popup
-     and sidebar show a search box that hits brreg's search endpoint.
-3. Fetch the entity from `data.brreg.no/enhetsregisteret/api/enheter/<orgnr>`.
-4. Render the result in the popup. Nothing else is touched.
-
-Responses are cached in `storage.session` for 24 hours, so repeated
-lookups don't hammer the API.
-
-A sidebar panel (toolbar sidebar icon or "Vis i brreg-snap sidebar"
-from the page right-click menu) renders the same data with a deeper
-layout — board members, regnskap, underenheter. Turning on
-"Auto-oppdater" shows what will be sent, then requests
-the `tabs` permission; from then on the panel looks up the page you
-are on every time you switch tabs or open a new page, as long as a
-brreg-snap panel is open.
-
-## Project layout
-
-```
-src/
-  background/   FF event page / Chrome service worker (context menu)
-  popup/        toolbar popup
-  details/      side panel (FF sidebar_action / Chrome side_panel):
-                controller (state machine) + painter (the markup)
-  lib/          brreg API client, orgnr + hostname resolution, session
-                cache, formatters, the trust derivations
-    platform/   engine differences (browser alias, sidebar vs side
-                panel, menus vs contextMenus); no polyfill
-    ui/         resolution pieces shared by popup and panel (manual
-                search, reject flow, recents, tab resolution)
-    view/       the view model (trust-view, dossier-view), the copy,
-                and the pure DOM components both surfaces paint
-  styles/       brreg.css: design tokens + every component
-  types/        brreg response types
-public/         manifest.firefox.json, manifest.chrome.json, icons/
-tests/          Vitest unit tests
-```
-
-## Distribution
-
-- **[addons.mozilla.org](https://addons.mozilla.org/firefox/addon/brreg-snap/)**
-  — Firefox. Auto-updates via Firefox.
-- **[Chrome Web Store](https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokhakeijmbafhdmli)**
-  — Chrome, live since 2026-06-07. Auto-updates via Chrome.
-- **[GitHub releases](https://github.com/ikkeseb/brreg-snap/releases)**
-  — the unsigned build artifacts CI makes from each tag, plus the
-  source zip AMO reviews. Not an install channel: release Firefox only
-  installs add-ons signed by AMO, so install from the stores.
-
-For AMO reviewers: see [BUILD.md](BUILD.md) for reproducible build
-instructions.
+`tests/manifest.test.ts` pins the permissions, hosts, CSP and data
+declarations, so a change that adds a host, a content script or a
+permission fails `pnpm verify`.
 
 ## Privacy
 
-The extension only contacts `data.brreg.no` (the public API of the
-Norwegian Brønnøysund Register Centre). To find the company it sends
-the site's domain there — never to the developer or anyone else. No
-content scripts, no analytics, no telemetry. See
-[PRIVACY.md](PRIVACY.md) for exactly what is sent and when, what is
-stored locally, and what permissions are used for.
+To find the company, the extension sends data.brreg.no the site's
+registrable domain (`dnb.no` on `nettbank.dnb.no`) and its main word,
+an organisation number, or text you search for or select and look up.
+It never sends the full page address, the page title or cookies. IP
+addresses and reserved local names (`localhost`, names without a dot,
+endings like `.local` or `.lan`) are never sent; other names that only
+work on a private network are looked up like any other site. Nothing
+goes to the developer. Firefox declares this as `browsingActivity`
+data collection, the Chrome Web Store as web history.
+
+[PRIVACY.md](PRIVACY.md) has the details: what is sent and when, and
+what is stored on your device.
 
 Support: [sebastian@nuez.no](mailto:sebastian@nuez.no) or a GitHub
 issue.
 
-## Contributing
+## Develop
 
-Open an issue first for non-trivial changes. The popup-only security
-model is non-negotiable — PRs that add content scripts, third-party
-hosts, or relax CSP will be closed.
+Requires Node (version range in `package.json` `engines`),
+[pnpm](https://pnpm.io/), and Firefox and/or Chrome.
+
+```bash
+pnpm install
+pnpm dev        # build + launch a Firefox profile with the extension
+pnpm verify     # the full gate: typecheck, lint, tests, both builds
+```
+
+- [BUILD.md](BUILD.md): reproducible builds, for store reviewers too
+- [docs/release.md](docs/release.md): releasing and store publishing
+- [docs/notes/platform.md](docs/notes/platform.md): Firefox and Chrome
+  differences
+- [AGENTS.md](AGENTS.md): guidance for coding agents
+
+Open an issue before a non-trivial change. PRs that add content
+scripts, add hosts or relax the CSP will be closed.
+
+GitHub Releases carry the unsigned build artifacts and the source zip
+for each tag. They are not an install channel: install from the
+stores.
 
 ## License
 
 [MIT](LICENSE).
 
-Third-party: the bundled typeface Schibsted Grotesk (Bakken & Bæck /
-Schibsted) is licensed under the [SIL Open Font License 1.1](public/fonts/OFL.txt)
-and ships with its notice in `fonts/OFL.txt`.
+The bundled typeface Schibsted Grotesk (Bakken & Bæck / Schibsted) is
+licensed under the [SIL Open Font License 1.1](public/fonts/OFL.txt).

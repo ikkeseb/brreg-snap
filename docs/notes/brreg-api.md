@@ -9,12 +9,12 @@ Enhetsregisteret lives at `data.brreg.no/enhetsregisteret/api`, but
 Regnskapsregisteret is on
 `data.brreg.no/regnskapsregisteret/regnskap/<orgnr>` (no `/api/`,
 different sub-host). Response is an array; the code defensively sorts by
-`regnskapsperiode.tilDato` before picking "latest" and supports up to 3
-rows for the trend table. 404 is normal: many small AS-er don't file
+`regnskapsperiode.tilDato` before picking "latest"
+(`sortRegnskapDesc`). 404 is normal: many small AS-er don't file
 separately. Cache the empty array so refresh doesn't re-hit.
 
 <!-- SECTION: regnskap-single-year-only -->
-## The open endpoint returns ONLY the latest year (multi-year trend is dormant)
+## The open endpoint returns ONLY the latest year
 
 Empirically (verified 2026-06 across ~294 live companies plus the
 `år` / `regnskapstype` / `size` params and the published OpenAPI spec)
@@ -25,16 +25,14 @@ not select history), and there is no structured-JSON path to prior
 years (only the per-year PDF `kopi/{aar}` document endpoint, see
 § aarsregnskap-kopi).
 
-Consequence: `renderNokkeltall`'s `figures.length >= 2` branch — the
-multi-year trend table and its year-over-year deltas — is effectively
-**unreachable in production**; every company falls through to the
-single-year detail view (which still renders the new Gjeld /
-Egenkapitalandel rows and red loss/negative-equity flagging). The
-trend/YoY code is correct — unit tests and the preview harness exercise
-it with synthetic multi-year data — but dormant against the live API.
-This is NOT a bug to "fix" by probing harder; the data is simply not
-exposed. Decided 2026-06-22: keep the dormant code as future-proofing
-(the note above long assumed brreg returns one entry *per year*).
+Consequence: the Økonomi tab shows the latest filing only, says so,
+and points at the annual-report copies for older years
+(`src/lib/view/dossier-view.ts`, `src/lib/view/components/okonomi.ts`;
+§ aarsregnskap-kopi). There is no multi-year trend view. This is NOT a
+bug to "fix" by probing harder; the data is simply not exposed. The
+live canary's tripwire (`tests/live/contracts.test.ts`) fails if brreg
+starts serving more than one filing, which would make a trend view
+possible.
 
 <!-- SECTION: regnskap-500-unsupported-plan -->
 ## 500 from regnskap = "not in the open API", not a network failure
@@ -249,8 +247,8 @@ The hostname resolver never sends a dot: it searches the label
 (`finn`), not the host. When a brand's legal name differs from its
 domain, as with finn.no, brreg can't bridge it, and the sidebar's
 manual search box is the fallback. The extension does not carry a
-curated override table to paper over this. See CLAUDE.md § "No
-curated data".
+curated override table to paper over this. See `AGENTS.md` § No
+curated data.
 
 <!-- SECTION: docs-links -->
 ## Check the docs before curling

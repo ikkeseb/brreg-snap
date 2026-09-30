@@ -24,13 +24,10 @@ digests. Never a local build. The flow and the manual fallback:
 
 ## Categories
 
-- **Firefox**: `Search Tools` (primary) — the extension exists to
-  look up companies in a public registry, which is fundamentally a
-  search/lookup workflow. Secondary candidate: `Other` or
-  `Privacy & Security` if we want to lean on the no-tracking angle.
-- **Firefox for Android**: not applicable. The extension uses
-  `sidebar_action`, which is desktop-only. We will not list for
-  Android.
+- **Firefox**: `Search Tools` — a company lookup in a public
+  registry.
+- **Firefox for Android**: not listed. The extension uses
+  `sidebar_action`, which is desktop-only.
 
 ## License
 
@@ -38,8 +35,7 @@ MIT (matches `LICENSE` in the repo).
 
 ## Support contact
 
-- **Email**: `sebastian@nuez.no` (decided 2026-07-04 — the one durable
-  support address for AMO, CWS, and everything user-facing)
+- **Email**: `sebastian@nuez.no`
 - **Website**: `https://github.com/ikkeseb/brreg-snap`
 - **Support site**: `https://github.com/ikkeseb/brreg-snap/issues`
 
@@ -234,13 +230,9 @@ permission, explaining why each is necessary.
 
 ## Screenshots
 
-Upload the five `v1.4-*.png` files in numerical order. They show the
-1.4 UI with captions: company lookup, registry warnings, accounts,
-group navigation and search. Each is 1280×800, RGB PNG.
-
-The source is the preview harness in fixture mode. Person names are
-fictional. See `docs/screenshots/README.md` for source captures and
-crop details. The older screenshots remain as historical assets.
+Upload the five `docs/screenshots/v1.4-*.png` files in numerical
+order (1280×800, RGB PNG). What they show and how they were made:
+`docs/screenshots/README.md`.
 
 ## Distribution choice
 

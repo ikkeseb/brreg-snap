@@ -9,7 +9,7 @@ import {
   referencedFiles,
 } from '../scripts/manifest-invariants.mjs';
 
-// The security model IS the product differentiator (CLAUDE.md
+// The security model IS the product differentiator (AGENTS.md
 // § Security constraints): no content scripts, data.brreg.no as the
 // only host, install-time permissions limited to activeTab/storage/
 // menus (+ Chrome's contextMenus/sidePanel equivalents), `tabs` as
