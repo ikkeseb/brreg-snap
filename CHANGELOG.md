@@ -6,6 +6,8 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+## [1.4.0] — 2026-09-30
+
 ### Changed — the 1.4 design («Dossier, stamped») on both surfaces
 
 - Loudness follows severity. When nothing is wrong the popup and the
