@@ -121,7 +121,9 @@ function fakeIntents(): PanelIntents {
   };
 }
 
-function setup(opts: { initialTab?: string; recents?: Array<{ orgnr: string; navn: string; ts: number }> } = {}) {
+function setup(
+  opts: { initialTab?: string; recents?: Array<{ orgnr: string; navn: string; ts: number }>; now?: () => Date } = {},
+) {
   const mounted = mount();
   const intents = fakeIntents();
   const deps = {
@@ -131,7 +133,7 @@ function setup(opts: { initialTab?: string; recents?: Array<{ orgnr: string; nav
     setPickerChoice: vi.fn(async () => {}),
     setBadge: vi.fn(async () => {}),
     env: { version: '1.4.0', browser: 'Chrome' },
-    now: () => NOW,
+    now: opts.now ?? (() => NOW),
   };
   const painter = createPanelPainter(mounted.roots, intents, {
     ...(opts.initialTab ? { initialTab: opts.initialTab } : {}),
@@ -348,6 +350,25 @@ describe('result: the dossier', () => {
     expect(more.textContent).toBe('Vis mer');
   });
 
+  it('a failed konsern tree and change feed are said, not shown as absent', () => {
+    const { painter } = setup({ initialTab: 'enheter' });
+    const company: CompanyData = { ...equinor(), konsern: undefined, konsernTree: undefined, endringer: undefined };
+    painter.result(resultPaint(company));
+    const sections = qa('#panel-enheter > .section');
+    expect(sections.map((s) => s.querySelector('.section__head')?.firstChild?.textContent)).toEqual(['Konsern', 'Underenheter']);
+    expect(sections[0]!.querySelector('.section__text')?.textContent).toBe(COPY.konsernFailed);
+    expect(q('.notes .note-head')?.textContent).toBe('Endret nylig');
+    expect(q('.notes .section__text')?.textContent).toBe(COPY.endringerFailed);
+    // What the roller still tell (a board change) is listed under it.
+    expect(q('.notes .changes li b')?.textContent).toBe('Endret styre');
+    // The panel's band stays clean: the tabs carry the messages.
+    expect(q('.answer__note')).toBeNull();
+    // A company in no group, with the feed in hand: neither line.
+    painter.result(resultPaint({ ...equinor(), konsern: null, konsernTree: undefined }));
+    expect(qa('#panel-enheter > .section')).toHaveLength(1);
+    expect(q('.notes .section__text')).toBeNull();
+  });
+
   it('Kontakt rows title-case the place, street lines as brreg writes them', () => {
     const { painter } = setup();
     painter.result(resultPaint(equinor()));
@@ -443,6 +464,46 @@ describe('result: the dossier', () => {
     expect(deps.setBadge).toHaveBeenCalledTimes(2);
   });
 
+  it('the freshness tick moves the footer text on in place: focus on «Oppdater» survives', async () => {
+    vi.useFakeTimers();
+    let current = NOW.getTime();
+    const { painter } = setup({ now: () => new Date(current) });
+    painter.result(resultPaint(equinor(), { focus: 'refresh' }));
+    const refresh = byText('Oppdater')!;
+    expect(document.activeElement).toBe(refresh);
+    expect(q('.foot')?.textContent).toContain('Hentet for 2 min siden');
+    current += 60_000;
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(q('.foot')?.textContent).toContain('Hentet for 3 min siden');
+    expect(document.activeElement).toBe(refresh);
+    expect(byText('Oppdater')).toBe(refresh);
+  });
+
+  it('a same-view keep puts focus back on the equivalent control it rebuilt, or leaves it alone', () => {
+    const { painter } = setup();
+    painter.result(resultPaint(equinor()));
+    const reject = byText('Feil bedrift?')!;
+    reject.focus();
+    expect(document.activeElement).toBe(reject);
+    painter.provenance({ method: 'host-auto', host: 'nettbank.equinor.com' });
+    const again = byText('Feil bedrift?')!;
+    expect(again).not.toBe(reject);
+    expect(document.activeElement).toBe(again);
+    // The footer is rebuilt too (its report link changes with the host).
+    byText('Oppdater')!.focus();
+    painter.provenance({ method: 'host-auto', host: 'www.equinor.com' });
+    expect(document.activeElement).toBe(byText('Oppdater'));
+    // Focus outside the rebuilt blocks is not touched…
+    q<HTMLButtonElement>('#tab-personer')!.focus();
+    painter.provenance({ method: 'host-auto', host: 'www.equinor.com' });
+    expect(document.activeElement).toBe(q('#tab-personer'));
+    // …and a control that is gone (no «Feil bedrift?» on a manual pick) drops focus to the body.
+    byText('Feil bedrift?')!.focus();
+    painter.provenance({ method: 'manual', host: undefined });
+    expect(byText('Feil bedrift?')).toBeUndefined();
+    expect(document.activeElement).toBe(document.body);
+  });
+
   it('«Feil bedrift?» and «Oppdater» reach the controller; the footer carries the freshness', () => {
     const { painter, intents } = setup();
     painter.result(resultPaint(equinor()));
@@ -519,6 +580,31 @@ describe('loading, error, empty, picker', () => {
     expect(q('.empty h1')?.textContent).toBe('Du valgte «Ingen av disse» for nrk.no');
     byText('Glem valget for nrk.no')!.click();
     expect(intents.forget).toHaveBeenCalledOnce();
+  });
+
+  it('picker: the first row clicked wins while its choice is being stored', async () => {
+    const { painter, intents, deps } = setup();
+    const candidates = [
+      { ...(enhetEquinor as Enhet), evidence: 'navn' as const },
+      { ...(enhetKonkurs as Enhet), evidence: 'navn' as const },
+    ];
+    let stored!: () => void;
+    deps.setPickerChoice.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        stored = resolve;
+      }),
+    );
+    painter.picker('www.nrk.no', candidates, { focus: false });
+    const rows = qa('button.pick');
+    rows[0]!.click();
+    rows[1]!.click();
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: '0', bubbles: true, cancelable: true }));
+    expect(deps.setPickerChoice).toHaveBeenCalledTimes(1);
+    expect(deps.setPickerChoice).toHaveBeenCalledWith('www.nrk.no', '923609016');
+    stored();
+    await vi.waitFor(() => expect(intents.pick).toHaveBeenCalledWith('www.nrk.no', '923609016'));
+    expect(intents.none).not.toHaveBeenCalled();
+    expect(intents.pick).toHaveBeenCalledTimes(1);
   });
 
   it('picker: the choice is persisted before the controller hears of it', async () => {
@@ -607,6 +693,24 @@ describe('the masthead search view', () => {
     painter.loading('923609016');
     expect(app().dataset.state).toBe('loading');
     expect(roots.search.value).toBe('');
+  });
+
+  it('a search opened over a load is operable: inert and busy step aside with the skeleton', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const { painter, roots } = setup();
+    painter.loading('923609016');
+    expect(app().hasAttribute('inert')).toBe(true);
+    roots.search.value = 'equinor';
+    roots.search.dispatchEvent(new Event('input'));
+    await vi.advanceTimersByTimeAsync(250);
+    expect(app().dataset.state).toBe('search');
+    expect(app().hasAttribute('inert')).toBe(false);
+    expect(app().getAttribute('aria-busy')).toBe('false');
+    await vi.waitFor(() => expect(q('.results button.recent')).not.toBeNull());
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    expect(app().dataset.state).toBe('loading');
+    expect(app().hasAttribute('inert')).toBe(true);
+    expect(app().getAttribute('aria-busy')).toBe('true');
   });
 
   it('a search intent prefills the field and runs it over the empty state', async () => {

@@ -117,7 +117,23 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+}
+
+// loadCompany by orgnr, so two companies can be told apart on screen.
+function loadByOrgnr(): void {
+  mocks.loadCompany.mockImplementation(async (orgnr: string) =>
+    orgnr === '915330193' ? company(enhetKonkurs, rollerKonkurs) : company(enhetDnb),
+  );
+}
 
 describe('popup controller — result', () => {
   it('paints a host-derived ok result with «Feil bedrift?» and clears the badge', async () => {
@@ -128,6 +144,10 @@ describe('popup controller — result', () => {
     expect(app().getAttribute('aria-busy')).toBe('false');
     expect(document.querySelector('h1')?.textContent).toBe('DNB BANK ASA');
     expect(document.querySelector('.answer--ok')).not.toBeNull();
+    // Roller, regnskap and the konsern tree failed here: the band says so.
+    expect(document.querySelector('.answer--ok .answer__note')?.textContent).toBe(
+      'Noe kunne ikke hentes: roller, regnskapstall, konsern',
+    );
     expect(byText('Feil bedrift?')).toBeDefined();
     expect(byText('Glem valget for dnb.no')).toBeUndefined();
     expect(mocks.loadCompany).toHaveBeenCalledWith('984851006', { konsern: true });
@@ -204,7 +224,7 @@ describe('popup controller — result', () => {
     await waitState('result');
     byText('Feil bedrift?')!.click();
     await waitState('picker');
-    expect(mocks.rejectChoice).toHaveBeenCalledWith('www.dnb.no', '984851006', 'DNB', expect.any(Function));
+    expect(mocks.rejectChoice).toHaveBeenCalledWith('www.dnb.no', ['984851006'], 'DNB', expect.any(Function));
     expect(document.body.dataset.answer).toBe('pick');
     const first = document.querySelector<HTMLButtonElement>('button.pick')!;
     expect(document.activeElement).toBe(first);
@@ -299,5 +319,148 @@ describe('popup controller — search view, error, refresh', () => {
     expect(document.querySelector('h1')?.textContent).toBe('Ingen nettside å slå opp');
     expect(document.querySelector('.mast__site')?.textContent).toBe('Ingen nettside');
     expect(document.body.dataset.answer).toBe('empty');
+  });
+});
+
+describe('popup controller — races', () => {
+  it('«Feil bedrift?» on an underenhet URL rejects the orgnr the site gave and the parent shown', async () => {
+    mocks.resolveTabContext.mockResolvedValue({ orgnr: '973160834', host: 'www.dnb.no', method: 'url-param' });
+    mocks.loadCompany.mockResolvedValue({
+      ...company(enhetDnb),
+      avdeling: { organisasjonsnummer: '973160834', navn: 'DNB BANK ASA AVD ALTA', overordnetEnhet: '984851006' },
+    });
+    mocks.rejectChoice.mockResolvedValue({ kind: 'empty' });
+    await boot({ ...DNB_TAB, url: 'https://www.dnb.no/?orgnr=973160834' });
+    await waitState('result');
+    byText('Feil bedrift?')!.click();
+    await waitState('empty');
+    expect(mocks.rejectChoice).toHaveBeenCalledWith(
+      'www.dnb.no',
+      ['973160834', '984851006'],
+      'DNB',
+      expect.any(Function),
+    );
+  });
+
+  it('a pick made while «Tilbake til treffet» resolves the tab wins over the host\'s late answer', async () => {
+    loadByOrgnr();
+    mocks.getRecent.mockResolvedValue([
+      { orgnr: '915330193', navn: enhetKonkurs.navn, ts: 2, status: 'Konkurs' },
+      { orgnr: '984851006', navn: 'DNB BANK ASA', ts: 1 },
+    ]);
+    mocks.resolveTabContext.mockResolvedValueOnce({ host: 'www.dnb.no' });
+    await boot();
+    await waitState('empty');
+    document.querySelector<HTMLButtonElement>('button.recent')!.click();
+    await waitState('result');
+    expect(document.querySelector('h1')?.textContent).toBe(enhetKonkurs.navn);
+
+    // Back to the site: the host lookup hangs.
+    const tab = deferred<unknown>();
+    mocks.resolveTabContext.mockReturnValueOnce(tab.promise);
+    byText('Tilbake til treffet for dnb.no')!.click();
+    await vi.waitFor(() => expect(mocks.resolveTabContext).toHaveBeenCalledTimes(2));
+    // Meanwhile: open the search and pick DNB from the recents.
+    document.querySelector<HTMLButtonElement>('.mast .icon-btn')!.click();
+    await vi.waitFor(() => expect(document.querySelector('button.back')).not.toBeNull());
+    document.querySelectorAll<HTMLButtonElement>('button.recent')[1]!.click();
+    await vi.waitFor(() => expect(document.querySelector('h1')?.textContent).toBe('DNB BANK ASA'));
+
+    // The host's answer lands late: it must not replace the pick.
+    tab.resolve({ orgnr: '915330193', host: 'www.dnb.no', method: 'host-auto' });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(document.querySelector('h1')?.textContent).toBe('DNB BANK ASA');
+    expect(mocks.loadCompany.mock.calls.filter(([o]) => o === '915330193')).toHaveLength(1);
+  });
+
+  it('the search view opened over a load keeps the load from painting over it; Escape re-runs the load', async () => {
+    const load = deferred<CompanyData>();
+    mocks.loadCompany.mockReturnValueOnce(load.promise);
+    const recents = deferred<never[]>();
+    mocks.getRecent.mockReturnValueOnce(recents.promise);
+    await boot();
+    await waitState('loading');
+    document.querySelector<HTMLButtonElement>('.mast .icon-btn')!.click();
+    await vi.waitFor(() => expect(mocks.getRecent).toHaveBeenCalled());
+
+    // The load lands while the search view waits for storage.
+    load.resolve(company(enhetDnb));
+    await new Promise((r) => setTimeout(r, 10));
+    expect(state()).toBe('loading');
+
+    recents.resolve([]);
+    await waitState('empty');
+    expect(document.activeElement).toBe(document.querySelector('input[type="search"]'));
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    // Escape returns to the load, which is re-run (the cache makes it instant).
+    await waitState('result');
+    expect(document.querySelector('h1')?.textContent).toBe('DNB BANK ASA');
+    expect(mocks.loadCompany).toHaveBeenCalledTimes(2);
+  });
+
+  it('a picker choice still being stored yields to a newer pick', async () => {
+    loadByOrgnr();
+    mocks.resolveTabContext.mockResolvedValue({
+      host: 'www.nrk.no',
+      pickerCandidates: [
+        { ...(enhetDnb as Enhet), evidence: 'navn' },
+        { ...(enhetKonkurs as Enhet), evidence: 'navn' },
+      ],
+    });
+    await boot({ ...DNB_TAB, url: 'https://www.nrk.no/' });
+    await waitState('picker');
+    const write = deferred<void>();
+    mocks.setPickerChoice.mockReturnValueOnce(write.promise);
+    const rows = document.querySelectorAll<HTMLButtonElement>('button.pick');
+    rows[0]!.click();
+    rows[1]!.click();
+    await waitState('result');
+    expect(document.querySelector('h1')?.textContent).toBe(enhetKonkurs.navn);
+    write.resolve();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(document.querySelector('h1')?.textContent).toBe(enhetKonkurs.navn);
+    expect(mocks.loadCompany).toHaveBeenCalledTimes(1);
+    expect(mocks.loadCompany).toHaveBeenCalledWith('915330193', { konsern: true });
+  });
+
+  it('opening and closing the search keeps a danger badge on the tab', async () => {
+    mocks.resolveTabContext.mockResolvedValue({ orgnr: '915330193', host: 'example.no', method: 'url-param' });
+    mocks.loadCompany.mockResolvedValue(company(enhetKonkurs, rollerKonkurs));
+    await boot({ ...DNB_TAB, url: 'https://example.no/?orgnr=915330193' });
+    await waitState('result');
+    expect(mocks.setTrustBadge).toHaveBeenLastCalledWith(7, 'danger');
+    mocks.setTrustBadge.mockClear();
+    document.querySelector<HTMLButtonElement>('.mast .icon-btn')!.click();
+    await waitState('empty');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    await waitState('result');
+    expect((mocks.setTrustBadge.mock.calls as unknown[][]).filter((c) => c[1] === undefined)).toEqual([]);
+  });
+
+  it('a search closed before its response lands announces nothing', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const response = deferred<Response>();
+    vi.stubGlobal('fetch', vi.fn(() => response.promise));
+    await boot();
+    await waitState('result');
+    document.querySelector<HTMLButtonElement>('.mast .icon-btn')!.click();
+    await waitState('empty');
+    const input = document.querySelector<HTMLInputElement>('input[type="search"]')!;
+    input.value = 'equinor';
+    input.dispatchEvent(new Event('input'));
+    await vi.advanceTimersByTimeAsync(250);
+    await vi.waitFor(() => expect(fetch).toHaveBeenCalled());
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    await waitState('result');
+    response.resolve(
+      new Response(JSON.stringify({ _embedded: { enheter: [enhetDnb] } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    );
+    await vi.advanceTimersByTimeAsync(50);
+    expect(document.getElementById('live')?.textContent).toBe('');
+    expect(document.querySelector('.results button.recent')).toBeNull();
   });
 });

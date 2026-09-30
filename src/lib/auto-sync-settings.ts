@@ -1,4 +1,4 @@
-// Settings persistence for the "Auto-oppdater ved fane-bytte" toggle.
+// Settings persistence for the "Auto-oppdater" toggle.
 // storage.local (not storage.session) — settings survive browser
 // restarts; the cache module's storage.session is in-memory only.
 

@@ -90,8 +90,8 @@ None of this is synced or sent anywhere.
   deleted company, that status as it stood), shown when the popup or
   sidebar has nothing else to show. Cleared when you close the
   browser.
-- **One setting** (`storage.local`): on or off for «Auto-oppdater ved
-  fane-bytte». Kept until you change it.
+- **One setting** (`storage.local`): on or off for «Auto-oppdater».
+  Kept until you change it.
 
 Removing the extension deletes all of it.
 

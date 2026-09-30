@@ -13,6 +13,7 @@ import type {
   RememberedChoice,
 } from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
+import { primaryStatusFlag } from '../lib/ui/flags.js';
 import {
   createLoadSequence,
   createPanelFollower,
@@ -54,7 +55,8 @@ export interface ControllerDeps {
   // drill-in within the same konsern).
   loadCompany: (orgnr: string, opts: LoadCompanyOptions) => Promise<CompanyData>;
   invalidateCache: (orgnr: string) => Promise<void>;
-  pushRecent: (orgnr: string, navn: string) => Promise<void>;
+  // `status`: a danger status worth a mark in the list («Konkurs»).
+  pushRecent: (orgnr: string, navn: string, status?: string) => Promise<void>;
   addRejectedChoice: (host: string, orgnr: string) => Promise<void>;
   forgetHost: (host: string) => Promise<void>;
   getRememberedChoice: (host: string) => Promise<RememberedChoice | undefined>;
@@ -199,8 +201,14 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       lastTree = company.konsernTree;
 
       // Stamp the recent stack now that the Enhet is confirmed — same
-      // rule as the popup: never persist orgnrs that failed to fetch.
-      void deps.pushRecent(enhet.organisasjonsnummer, enhet.navn);
+      // rule as the popup: never persist orgnrs that failed to fetch,
+      // and carry a danger status so the list can mark it.
+      const flag = primaryStatusFlag(enhet);
+      void deps.pushRecent(
+        enhet.organisasjonsnummer,
+        enhet.navn,
+        flag.severity === 'danger' ? flag.label : undefined,
+      );
       shownEnhetOrgnr = enhet.organisasjonsnummer;
       shownLoad = run;
       onScreen = {
@@ -367,9 +375,13 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       const host = currentHost;
       const orgnr = currentOrgnr;
       if (!host || !orgnr) return;
+      // Both the orgnr the site gave and, for an underenhet, the parent
+      // shown: resolve-tab checks rejections against the site's orgnr,
+      // the host search against the candidates.
+      const orgnrs = [...new Set([orgnr, shownEnhetOrgnr])].filter((o): o is string => o !== undefined);
       const run = loads.begin();
-      // The rejection is stored either way; only the paint is dropped.
-      await deps.addRejectedChoice(host, orgnr);
+      // The rejections are stored either way; only the paint is dropped.
+      for (const o of orgnrs) await deps.addRejectedChoice(host, o);
       if (run.isStale()) return;
       // Only the title of a tab on this very host: a view that came
       // from a sync message or a probe has none to offer.

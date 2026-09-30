@@ -35,6 +35,10 @@ export const COPY = {
   searchRightCompany: 'Søk etter riktig selskap',
   gotoSite: (domain: string) => `Gå til ${domain}`,
   merknadCount: (n: number) => (n === 1 ? '1 merknad i registeret' : `${n} merknader i registeret`),
+  // Parts of the lookup that failed, named under the answer (popup):
+  // a failed fetch is never shown as an empty registry.
+  couldNotFetch: (parts: string) => `Noe kunne ikke hentes: ${parts}`,
+  partName: { roller: 'roller', regnskap: 'regnskapstall', konsern: 'konsern', endringer: 'endringer' },
 
   // ledger
   toneSr: { ok: ', ok', warn: ', advarsel', danger: ', alvorlig', neutral: '' },
@@ -80,6 +84,7 @@ export const COPY = {
   merknadHead: (n: number) => (n === 1 ? 'Merknad i registeret' : 'Merknader i registeret'),
   innfort: 'Innført ',
   endretNylig: 'Endret nylig',
+  endringerFailed: 'Endringer kunne ikke hentes.',
   rollerFailed: 'Kunne ikke hente roller. Prøv igjen senere.',
   rollerNone: 'Ingen registrerte roller.',
   avregistrert: 'Avregistrert',
@@ -118,6 +123,7 @@ export const COPY = {
 
   // enheter
   konsern: 'Konsern',
+  konsernFailed: 'Konsernet kunne ikke hentes. Trykk «Oppdater» for å prøve igjen.',
   datterselskaper: 'Datterselskaper',
   topCompany: 'Toppselskap',
   ownerStake: (stake: string) => `eier ${stake}`,

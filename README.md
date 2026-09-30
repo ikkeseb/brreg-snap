@@ -32,14 +32,14 @@ pages you browse and never reads their DOM.
 | `storage` | Cache brreg responses and domain lookups locally (`storage.session`, 24h TTL, gone when the browser closes), keep the 5 most recent companies, and persist the "Auto-oppdater" toggle (`storage.local`) |
 | `menus` | Register the "Vis i brreg-snap sidebar" right-click item. On Mozilla's no-prompt list — silent at install, does not grant tab snooping (activeTab still required, granted per click). |
 | `host_permissions: https://data.brreg.no/*` | Fetch from the public brreg API. Only domain we contact. |
-| `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater ved fane-bytte" in the sidebar. Switching it on first shows a notice of what is sent; its «Slå på» button requests `tabs` via the browser's permission prompt. Flipping the toggle off gives it back (`permissions.remove`); on Firefox it can also be revoked in `about:addons`. `tabs` is not in the install dialog. |
+| `optional_permissions: tabs` | **Off by default.** Required only if the user opts into "Auto-oppdater" in the sidebar. Switching it on first shows a notice of what is sent; its «Slå på» button requests `tabs` via the browser's permission prompt. Flipping the toggle off gives it back (`permissions.remove`); on Firefox it can also be revoked in `about:addons`. `tabs` is not in the install dialog. |
 
 On Chrome the equivalent install set is `activeTab` + `storage` +
 `contextMenus` + `sidePanel` + the same `data.brreg.no` host. Only the
 host permission shows an install warning (for data.brreg.no); the
 other four carry none. `tabs` is the same runtime opt-in on both
 engines: it sits in `optional_permissions` and is requested only when
-the user enables "Auto-oppdater ved fane-bytte" in the side panel
+the user enables "Auto-oppdater" in the side panel
 (Chrome words that prompt "Read your browsing history").
 
 What this rules out:
@@ -122,7 +122,7 @@ lookups don't hammer the API.
 A sidebar panel (toolbar sidebar icon or "Vis i brreg-snap sidebar"
 from the page right-click menu) renders the same data with a deeper
 layout — board members, regnskap, underenheter. Turning on
-"Auto-oppdater ved fane-bytte" shows what will be sent, then requests
+"Auto-oppdater" shows what will be sent, then requests
 the `tabs` permission; from then on the panel looks up the page you
 are on every time you switch tabs or open a new page, as long as a
 brreg-snap panel is open.

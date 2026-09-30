@@ -119,4 +119,11 @@ sidebar-sync.md § load-race-guards), so a sync or tab event that lands
 while an older load is still fetching can't be overwritten by the
 older response; `src/popup/popup.ts` with `loadRunId`, so rapid clicks
 (manual hit → recent entry) can't paint the first-clicked, stale
-company. Keep both.
+company. In the popup every flow that awaits before it paints claims
+it (`claim()` / `stale(id)`): a load, `init` before the tab resolves,
+`reject`, `forget`, the picker's `pick` / `none` (claimed on the click,
+before the stored choice lands), and `showEmpty` / `showError` before
+their storage reads — so opening the search view over a load keeps the
+load from painting over it (Escape then re-runs the load), and a pick
+made from the search wins over a host lookup that lands late. Keep
+both.

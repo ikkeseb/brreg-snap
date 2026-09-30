@@ -28,7 +28,7 @@ import { buildAnswer, buildErrorAnswer, type Answer } from '../lib/view/componen
 import { attachCopy, type CopyHandlers } from '../lib/view/components/copy-feedback.js';
 import { button, el, glyph, icon, section } from '../lib/view/components/dom.js';
 import { buildEnheter } from '../lib/view/components/enheter.js';
-import { renderFooter } from '../lib/view/components/footer.js';
+import { renderFooter, type FooterHandle } from '../lib/view/components/footer.js';
 import { renderIdentity } from '../lib/view/components/identity.js';
 import { buildKonsernRow } from '../lib/view/components/konsern.js';
 import { buildFacts, buildLedger } from '../lib/view/components/ledger.js';
@@ -156,15 +156,41 @@ export function createPanelPainter(
 
   // --- roots ------------------------------------------------------------
 
+  function setBusy(loading: boolean): void {
+    main.toggleAttribute('inert', loading);
+    main.setAttribute('aria-busy', String(loading));
+  }
+
   function setState(next: PanelState, answer: AnswerAttr): void {
     state = next;
     answerAttr = answer;
     main.dataset.state = next;
     body.dataset.answer = answer;
-    const loading = next === 'loading';
-    main.toggleAttribute('inert', loading);
-    main.setAttribute('aria-busy', String(loading));
+    setBusy(next === 'loading');
     main.classList.remove('reveal');
+  }
+
+  // A rebuilt block drops the control a keyboard user was on. Find the
+  // equivalent in the new markup — same tag, same accessible text — and
+  // put focus back there; with no equivalent (the action is gone), focus
+  // is left where the browser dropped it.
+  function focusKeyOf(el: Element): string {
+    return `${el.tagName}|${el.getAttribute('aria-label') ?? el.textContent?.trim() ?? ''}`;
+  }
+
+  function rebuildKeepingFocus(blocks: () => Element[], rebuild: () => void): void {
+    const active = main.ownerDocument.activeElement;
+    const key = active && blocks().some((b) => b.contains(active)) ? focusKeyOf(active) : undefined;
+    rebuild();
+    if (key === undefined) return;
+    for (const block of blocks()) {
+      for (const el of [block, ...block.querySelectorAll('h1, button, a[href], [tabindex]')]) {
+        if (focusKeyOf(el) === key) {
+          focusElement(el);
+          return;
+        }
+      }
+    }
   }
 
   function paintBack(): void {
@@ -263,6 +289,9 @@ export function createPanelPainter(
     main.replaceChildren(searchView);
     main.dataset.state = 'search';
     body.dataset.answer = 'empty';
+    // Opened over a load: the results must be operable, so main's
+    // inert/busy step aside with the skeleton and come back with it.
+    setBusy(false);
     // «Hentet … · Oppdater» describes the result kept aside, not the
     // search on screen: the footer keeps the attribution only.
     if (state === 'result') renderFooter(foot, {});
@@ -289,6 +318,7 @@ export function createPanelPainter(
     roots.back.hidden = kept.backHidden;
     state = kept.state;
     answerAttr = kept.answer;
+    setBusy(kept.state === 'loading');
     watchIdent(shown && state === 'result' ? shown.ident : undefined);
     if (state === 'result') paintFooter();
     roots.search.focus();
@@ -347,7 +377,7 @@ export function createPanelPainter(
     }
     if (undo.childElementCount > 0) nodes.push(undo);
 
-    const notes = buildNotes(view.merknader, view.endringer);
+    const notes = buildNotes(view.merknader, view.endringer, view.failed.includes('endringer'));
     if (notes) nodes.push(notes);
 
     return { nodes, heading, ident };
@@ -460,18 +490,20 @@ export function createPanelPainter(
     else go();
   }
 
+  let footer: FooterHandle | undefined;
   function paintFooter(): void {
     if (!shown || aside) return;
-    renderFooter(
+    footer = renderFooter(
       foot,
       { fetchedAt: shown.view.fetchedAt, now: now().getTime(), reportHref: shown.view.reportHref },
       { onRefresh: () => intents.refresh() },
     );
   }
 
-  // «Hentet for 2 min siden» moves on while the panel sits open.
+  // «Hentet for 2 min siden» moves on while the panel sits open — in
+  // place, so focus on «Oppdater» or a footer link survives the tick.
   setInterval(() => {
-    if (state === 'result' && !aside) paintFooter();
+    if (state === 'result' && !aside) footer?.tick(now().getTime());
   }, FRESHNESS_TICK_MS);
 
   function paintResult(view: TrustView, paint: Pick<ResultPaint, 'company' | 'method' | 'host' | 'remembered'>, reveal: boolean): void {
@@ -551,9 +583,10 @@ export function createPanelPainter(
     // progress stay.
     provenance({ method, host, remembered, tabId }): void {
       if (!shown) return;
+      const kept = shown;
       lastHost = host;
       const view = buildTrustView({
-        company: shown.company,
+        company: kept.company,
         method,
         host,
         now: now(),
@@ -561,21 +594,27 @@ export function createPanelPainter(
         ...(remembered ? { remembered } : {}),
         env: deps.env,
       });
-      const top = buildTop(view);
-      const first = shown.top[0];
-      if (!first) return;
-      const parent = first.parentNode;
-      if (!parent) return;
-      for (const node of top.nodes) parent.insertBefore(node, first);
-      for (const old of shown.top) old.remove();
-      shown = { ...shown, method, host, remembered, view, top: top.nodes, heading: top.heading, ident: top.ident };
-      const answer = view.answer.tone;
-      answerAttr = answer;
-      if (aside) aside.answer = answer;
-      else body.dataset.answer = answer;
-      paintStick(view);
-      if (!aside) watchIdent(top.ident);
-      paintFooter();
+      // The top and the footer are rebuilt; a focused control in them
+      // (a copy button, «Feil bedrift?», «Oppdater») is found again.
+      rebuildKeepingFocus(
+        () => [...(shown?.top ?? []), foot],
+        () => {
+          const top = buildTop(view);
+          const first = kept.top[0];
+          const parent = first?.parentNode;
+          if (!first || !parent) return;
+          for (const node of top.nodes) parent.insertBefore(node, first);
+          for (const old of kept.top) old.remove();
+          shown = { ...kept, method, host, remembered, view, top: top.nodes, heading: top.heading, ident: top.ident };
+          const answer = view.answer.tone;
+          answerAttr = answer;
+          if (aside) aside.answer = answer;
+          else body.dataset.answer = answer;
+          paintStick(view);
+          if (!aside) watchIdent(top.ident);
+          paintFooter();
+        },
+      );
       badge(tabId, view);
     },
 
@@ -682,12 +721,23 @@ export function createPanelPainter(
   };
 
   function paintPicker(host: string, candidates: Candidate[]) {
+    // The first row (or «Ingen av disse») clicked wins: a second click
+    // while the first choice is still being stored is ignored, so the
+    // company stored is the company loaded.
+    let picking = false;
+    const choose = (orgnr: string | null, then: () => void): void => {
+      if (picking) return;
+      picking = true;
+      void deps.setPickerChoice(host, orgnr).then(then).finally(() => {
+        picking = false;
+      });
+    };
     return renderPicker(
       main,
       { site: siteName(host), candidates, query: hostnameLabel(host) ?? siteName(host) },
       {
-        onPick: (orgnr) => void deps.setPickerChoice(host, orgnr).then(() => intents.pick(host, orgnr)),
-        onNone: () => void deps.setPickerChoice(host, null).then(() => intents.none(host)),
+        onPick: (orgnr) => choose(orgnr, () => intents.pick(host, orgnr)),
+        onNone: () => choose(null, () => intents.none(host)),
         onSearchSelect: (orgnr) => intents.manual(orgnr),
         announce: live.announce,
       },

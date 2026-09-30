@@ -26,7 +26,7 @@ focus events; they all need `tabs` or content scripts.
 <!-- SECTION: tabs-runtime-optin -->
 ## Tab-sync via runtime `tabs` opt-in is the supported path
 
-The sidebar exposes an "Auto-oppdater ved fane-bytte" toggle that
+The sidebar exposes an "Auto-oppdater" toggle that
 requests `tabs` at runtime. Switching it on first shows an inline
 disclosure: the page you are on is looked up every time you switch
 tabs or open a new page, as long as a brreg-snap panel is open in any

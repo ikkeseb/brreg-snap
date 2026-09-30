@@ -107,9 +107,16 @@ function buildUnderenheter(view: EnheterView['underenheter'], parentName: string
   return sec;
 }
 
+function buildKonsernFailed(): HTMLElement {
+  const sec = section(COPY.konsern);
+  sec.appendChild(el('p', 'section__text', COPY.konsernFailed));
+  return sec;
+}
+
 export function buildEnheter(view: EnheterView, parentName: string, handlers: EnheterHandlers): HTMLElement[] {
   const out: HTMLElement[] = [];
   if (view.konsern) out.push(buildKonsern(view.konsern, parentName, handlers));
+  else if (view.konsernFailed) out.push(buildKonsernFailed());
   out.push(buildUnderenheter(view.underenheter, parentName, handlers));
   return out;
 }

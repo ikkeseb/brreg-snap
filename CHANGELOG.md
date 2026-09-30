@@ -105,6 +105,29 @@ shipped, and several facts on screen had quietly become wrong.
 - Konkurs, avvikling and slettet show their date where brreg has one;
   a deleted entity no longer gets a guessed employee count; the
   bostyrer's name shows for bankruptcies.
+- A part that couldn't be fetched is never shown as absent: the
+  popup's ok and warn bands say «Noe kunne ikke hentes: roller,
+  regnskapstall, konsern»; the panel's Konsern section says the tree
+  couldn't be fetched (retry via «Oppdater») and «Endret nylig» says
+  when the change feed failed.
+- «Feil bedrift?» on a page that carries an underenhet's org.nr now
+  rejects that org.nr, not only the parent shown, so the site is not
+  matched to the same company again. It is also offered under a
+  KONKURS / SLETTET stamp when the site isn't the company's registered
+  website.
+- The panel stamps a bankrupt company's status into «Nylig sett» like
+  the popup does, so the mark no longer disappears after a panel visit.
+- Races: a company picked from the popup's search while «Tilbake til
+  treffet» or a picker choice was still resolving is no longer replaced
+  by the late answer; the search view opened over a load is not torn
+  down by it; a closed search can't announce its late result; a picker
+  row clicked while the previous choice was being stored is ignored
+  (the company stored is the company loaded). Opening and closing the
+  popup's search keeps the tab's badge.
+- Keyboard focus survives the panel's background rebuilds: the 30 s
+  «Hentet for …» tick updates the text in place, and a same-company
+  sync puts focus back on the equivalent control. The panel's search
+  view opened during a load is operable (main is no longer inert).
 - Confident wrong matches: sbanken.no → Tidsbanken, obos.no → OBOS
   Felleskost (now OBOS BBL), medium.com / bbc.* → unrelated Norwegian
   namesakes. An automatic match now needs the company's registered

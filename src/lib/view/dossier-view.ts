@@ -103,6 +103,9 @@ export interface UnitView {
 
 export interface EnheterView {
   konsern?: KonsernSection;
+  // The company is in a group (erIKonsern) but the tree couldn't be
+  // fetched: the section says so instead of vanishing.
+  konsernFailed?: true;
   underenheter:
     | { kind: 'failed' }
     | { kind: 'list'; items: UnitView[]; shown: number; total: number; allHref: string };
@@ -454,6 +457,7 @@ function enheter(company: CompanyData): EnheterView {
         }
       : { kind: 'failed' },
   };
+  if (konsern === undefined && enhet.erIKonsern === true) view.konsernFailed = true;
   if (konsern) {
     const parentOrgnr = konsern.parent?.orgnr;
     view.konsern = {

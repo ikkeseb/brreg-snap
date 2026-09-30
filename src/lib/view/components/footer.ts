@@ -21,13 +21,21 @@ export interface FooterHandlers {
   onRefresh?: () => void;
 }
 
+export interface FooterHandle {
+  // Move «Hentet for 2 min siden» on without rebuilding the footer, so
+  // focus on «Oppdater» or a link survives the tick. A no-op without a
+  // freshness row.
+  tick(now: number): void;
+}
+
 export function renderFooter(
   container: HTMLElement,
   data: FooterData,
   handlers: FooterHandlers = {},
-): void {
+): FooterHandle {
   container.replaceChildren();
   const report = data.reportHref ? link(COPY.report, data.reportHref, { className: '' }) : undefined;
+  let tick: FooterHandle['tick'] = () => {};
 
   if (data.loading || data.fetchedAt !== undefined) {
     const row = el('div', 'foot__row');
@@ -35,7 +43,13 @@ export function renderFooter(
     if (data.loading) {
       left.textContent = COPY.loadingFoot;
     } else if (data.fetchedAt !== undefined) {
-      left.append(`${COPY.fetched(formatRelativeTime(data.fetchedAt, data.now ?? Date.now()))} · `);
+      const fetchedAt = data.fetchedAt;
+      const when = (now: number): string => `${COPY.fetched(formatRelativeTime(fetchedAt, now))} · `;
+      const text = document.createTextNode(when(data.now ?? Date.now()));
+      left.appendChild(text);
+      tick = (now) => {
+        text.data = when(now);
+      };
       const refresh = button('', COPY.refresh);
       refresh.title = COPY.refreshTitle;
       refresh.addEventListener('click', () => handlers.onRefresh?.());
@@ -57,4 +71,5 @@ export function renderFooter(
   // With no freshness row the report link shares the attribution row.
   if (report && !(data.loading || data.fetchedAt !== undefined)) attribution.appendChild(report);
   container.appendChild(attribution);
+  return { tick };
 }

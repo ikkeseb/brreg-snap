@@ -8,6 +8,7 @@
 //       <p class="quote__date">Innført <time>…</time></p></figure>
 //     <section><h3 class="note-head">Endret nylig</h3>
 //       <ul class="changes"><li><time>…</time><span><b>…</b><br>…</span></li>
+//       <p class="section__text">Endringer kunne ikke hentes.</p>  (feed failed)
 
 import { COPY } from '../copy.js';
 import type { EndringView, MerknadView } from '../trust-view.js';
@@ -16,8 +17,11 @@ import { el, glyph } from './dom.js';
 export function buildNotes(
   merknader: readonly MerknadView[],
   endringer: readonly EndringView[],
+  // The change feed couldn't be fetched: «Endret nylig» says so rather
+  // than reading as «nothing changed».
+  endringerFailed = false,
 ): HTMLDivElement | undefined {
-  if (merknader.length === 0 && endringer.length === 0) return undefined;
+  if (merknader.length === 0 && endringer.length === 0 && !endringerFailed) return undefined;
   const notes = el('div', 'notes');
   notes.dataset.tone = 'warn';
 
@@ -40,12 +44,13 @@ export function buildNotes(
     notes.appendChild(fig);
   }
 
-  if (endringer.length > 0) {
+  if (endringer.length > 0 || endringerFailed) {
     const sec = el('section');
     const head = el('h3', 'note-head');
     head.appendChild(glyph('warn'));
     head.append(COPY.endretNylig);
     sec.appendChild(head);
+    if (endringerFailed) sec.appendChild(el('p', 'section__text', COPY.endringerFailed));
     const list = el('ul', 'changes');
     for (const e of endringer) {
       const li = el('li');
@@ -61,7 +66,7 @@ export function buildNotes(
       li.appendChild(text);
       list.appendChild(li);
     }
-    sec.appendChild(list);
+    if (endringer.length > 0) sec.appendChild(list);
     notes.appendChild(sec);
   }
   return notes;

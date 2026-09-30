@@ -50,7 +50,7 @@ describe('«Feil bedrift?» reject flow', () => {
     });
     // Always the picker, even when one candidate now wins outright: the
     // user just expressed doubt.
-    await expect(rejectChoice('dnb.no', enhetDnb.organisasjonsnummer, undefined)).resolves.toEqual({
+    await expect(rejectChoice('dnb.no', [enhetDnb.organisasjonsnummer], undefined)).resolves.toEqual({
       kind: 'picker',
       candidates: [candidates[1]],
     });
@@ -61,7 +61,7 @@ describe('«Feil bedrift?» reject flow', () => {
     const { rejectChoice, search } = await setup();
     search.mockResolvedValue({ band: 'none', candidates: [], complete: true });
     await expect(
-      rejectChoice('dnb.no', enhetDnb.organisasjonsnummer, 'DNB Bank | Privat'),
+      rejectChoice('dnb.no', [enhetDnb.organisasjonsnummer], 'DNB Bank | Privat'),
     ).resolves.toEqual({ kind: 'empty' });
     expect(search).toHaveBeenCalledWith('dnb.no', 'DNB Bank | Privat');
   });
@@ -69,7 +69,7 @@ describe('«Feil bedrift?» reject flow', () => {
   it('without a title the host search runs on the host alone', async () => {
     const { rejectChoice, search } = await setup();
     search.mockResolvedValue({ band: 'none', candidates: [], complete: true });
-    await rejectChoice('dnb.no', enhetDnb.organisasjonsnummer, undefined);
+    await rejectChoice('dnb.no', [enhetDnb.organisasjonsnummer], undefined);
     expect(search).toHaveBeenCalledWith('dnb.no', undefined);
   });
 
@@ -82,7 +82,7 @@ describe('«Feil bedrift?» reject flow', () => {
       }),
     );
     const run = loads.begin();
-    const outcome = rejectChoice('dnb.no', enhetDnb.organisasjonsnummer, undefined, () => run.isStale());
+    const outcome = rejectChoice('dnb.no', [enhetDnb.organisasjonsnummer], undefined, () => run.isStale());
     await vi.waitFor(() => expect(search).toHaveBeenCalled());
     loads.begin(); // e.g. a tab event or a sync message
     answer({ band: 'none', candidates: [], complete: true });

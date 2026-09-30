@@ -58,6 +58,9 @@ export function buildAnswer(answer: AnswerView, handlers: AnswerHandlers = {}): 
   if (answer.supporting) {
     sec.appendChild(buildSupport(answer.supporting));
   }
+  if (answer.note) {
+    sec.appendChild(el('p', 'answer__support answer__note', answer.note));
+  }
 
   if (answer.actions.length > 0) {
     const actions = el('div', 'answer__actions');

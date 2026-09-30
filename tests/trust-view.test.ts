@@ -206,6 +206,20 @@ describe('buildTrustView — danger statuses', () => {
     expect(v.backToSite).toBe('example.com');
   });
 
+  it('a konkurs on a site the company is not registered for still offers «Feil bedrift?»', () => {
+    const v = view({
+      company: company({ ...enhetKonkurs, hjemmeside: 'www.annet-sted.no' }, { roller: rollerKonkurs }),
+      method: 'url-param',
+      host: 'example.no',
+    });
+    expect(v.answer.stamp?.word).toBe('Konkurs');
+    expect(v.canReject).toBe(true);
+    expect(v.answer.actions).toEqual([]);
+    const kobling = v.ledger.find((r) => r.key === 'kobling')!;
+    expect(kobling.tone).toBe('danger');
+    expect(kobling.actions).toEqual([{ kind: 'reject' }, { kind: 'report' }]);
+  });
+
   it('stamps a deleted entity «Slettet»', () => {
     const v = view({ company: company(enhetSlettet), method: 'manual', host: undefined });
     expect(v.answer.tone).toBe('danger');
@@ -229,6 +243,42 @@ describe('buildTrustView — danger statuses', () => {
   });
 });
 
+describe('buildTrustView — what could not be fetched is named, never absent', () => {
+  it('lists the failed parts and puts the line under the popup\'s ok band', () => {
+    const v = view({ company: company(enhetDnb), method: 'host-auto', host: 'www.dnb.no' });
+    expect(v.failed).toEqual(['roller', 'regnskap', 'konsern']);
+    expect(v.answer.tone).toBe('ok');
+    expect(v.answer.note).toBe('Noe kunne ikke hentes: roller, regnskapstall, konsern');
+    // Nothing failed: no list, no line.
+    const ok = view({ company: equinor(), method: 'host-auto', host: 'www.equinor.com' });
+    expect(ok.failed).toEqual([]);
+    expect(ok.answer.note).toBeUndefined();
+  });
+
+  it('konsern counts as failed only when the company is in a group; endringer only on the panel', () => {
+    const noGroup = view({ company: company(enhetKonkurs, { roller: rollerKonkurs, konsern: null }) });
+    expect(noGroup.failed).toEqual(['regnskap']);
+    const asked = view({ company: company(enhetDnb, { konsern: null }) });
+    expect(asked.failed).toEqual(['roller', 'regnskap']);
+    const panel = view({ company: company(enhetDnb, { konsern: null }), surface: 'panel' });
+    expect(panel.failed).toEqual(['roller', 'regnskap', 'endringer']);
+    expect(panel.answer.note).toBeUndefined();
+    expect(panel.dossier!.enheter.konsernFailed).toBeUndefined();
+    const tree = view({ company: company(enhetDnb), surface: 'panel' });
+    expect(tree.dossier!.enheter.konsernFailed).toBe(true);
+  });
+
+  it('the warn band carries the line; a stamp has no room for it', () => {
+    const warn = view({ company: company(enhetBbc), method: 'host-auto', host: 'www.bbc.co.uk' });
+    expect(warn.answer.tone).toBe('warn');
+    expect(warn.answer.note).toMatch(/^Noe kunne ikke hentes: /);
+    const danger = view({ company: company(enhetKonkurs), method: 'url-param', host: 'example.no' });
+    expect(danger.answer.tone).toBe('danger');
+    expect(danger.failed).toContain('roller');
+    expect(danger.answer.note).toBeUndefined();
+  });
+});
+
 describe('buildTrustView — merknader', () => {
   it('both surfaces head the answer with the count; only the panel quotes the registry’s words', () => {
     const c = company(enhetPaategning);
@@ -245,6 +295,25 @@ describe('buildTrustView — merknader', () => {
     expect(panel.merknader[0]!.since?.text).toMatch(/\d{4}$/);
     // The plain-text summary keeps the registry's sentence: it has no notes block.
     expect(panel.summary).toContain('Obs: Foretaksregisteret har grunn til å anta');
+  });
+});
+
+describe('buildTrustView — money under the regnskap row', () => {
+  // Equinor with the påtegning of the warn fixture: a warn answer over a
+  // company whose accounts carry figures.
+  const warned = () =>
+    company(
+      { ...enhetEquinor, paategninger: (enhetPaategning as { paategninger: unknown }).paategninger },
+      { roller: rollerEquinor, regnskap: { items: regnskapEquinor } as unknown as RegnskapResponse },
+    );
+  const regnskapRow = (v: ReturnType<typeof view>) => v.ledger.find((r) => r.key === 'regnskap')!;
+
+  it('the popup shows it only in the calm state; the panel keeps it under a warn band', () => {
+    expect(regnskapRow(view({ company: equinor() })).figures).toBeDefined();
+    const popup = view({ company: warned() });
+    expect(popup.answer.tone).toBe('warn');
+    expect(regnskapRow(popup).figures).toBeUndefined();
+    expect(regnskapRow(view({ company: warned(), surface: 'panel' })).figures).toBeDefined();
   });
 });
 

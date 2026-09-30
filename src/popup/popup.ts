@@ -35,6 +35,7 @@ import { isFirefox } from '../lib/platform/engine.js';
 import { sidebar } from '../lib/platform/sidebar.js';
 import { describeLoadFailure } from '../lib/ui/error-message.js';
 import { primaryStatusFlag } from '../lib/ui/flags.js';
+import type { ManualSearchController } from '../lib/ui/manual-search.js';
 import { rejectChoice } from '../lib/ui/picker.js';
 import { getRecent, pushRecent } from '../lib/ui/recent.js';
 import {
@@ -86,20 +87,39 @@ let tabTitle: string | undefined;
 let tabId: number | undefined;
 let windowId: number | undefined;
 
+// The enhet on screen (for an underenhet: its parent) …
 let currentOrgnr: string | undefined;
+// … and the orgnr the load was asked for (the one the site gave).
+// «Feil bedrift?» rejects both when they differ: resolve-tab checks
+// rejections against the site's orgnr, the host search against the
+// candidates.
+let requestedOrgnr: string | undefined;
 let currentMethod: ResolutionMethod | undefined;
 let currentView: TrustView | undefined;
-// Monotonic guard for loadAndRender — from the empty state the user
-// can click a search result then a recent entry in quick succession;
-// without this the last-to-RESOLVE fetch chain paints, which can be
-// the stale one.
+// Monotonic guard for every flow that awaits before it paints (a load,
+// a reject, the picker's stored choice, the empty state's recents):
+// each claims an id when it starts and drops its paint once a newer
+// flow has claimed one — from the empty state the user can click a
+// search result then a recent entry in quick succession; without this
+// the last-to-RESOLVE chain paints, which can be the stale one.
 let loadRunId = 0;
+const claim = (): number => ++loadRunId;
+const stale = (id: number): boolean => id !== loadRunId;
 // «Prøv igjen» in the error state re-runs the last load.
 let lastLoad: (() => void) | undefined;
 // Re-paints the state on screen without fetching: what the search view
 // (opened from the masthead over any state) returns to.
 let repaint: (() => void) | undefined;
 let searchOpen = false;
+// The manual search on screen (the search view's, the empty state's,
+// the picker's «Eller søk selv»): reset when another state paints, so
+// a late response can't paint or announce into it.
+let liveSearch: ManualSearchController | undefined;
+
+function dropSearch(): void {
+  liveSearch?.reset();
+  liveSearch = undefined;
+}
 
 const site = (): string | undefined => (host ? siteName(host) : undefined);
 const report = (): string =>
@@ -177,12 +197,16 @@ function badge(view: TrustView | undefined): void {
 const onSearch = (): void => openSearch();
 
 function showLoading(orgnr: string): void {
-  repaint = undefined;
+  dropSearch();
+  searchOpen = false;
+  // The search view opened over a load returns to the load itself.
+  repaint = lastLoad;
   paintLoading(roots, host, { onSearch });
   roots.live.announce(COPY.loadingOrgnr(orgnrText(orgnr).spaced));
 }
 
 function showResult(view: TrustView, opts: { focus: boolean; reveal: boolean }): void {
+  dropSearch();
   currentView = view;
   searchOpen = false;
   const target = panelTarget();
@@ -211,11 +235,12 @@ function showResult(view: TrustView, opts: { focus: boolean; reveal: boolean }):
 function showPicker(candidates: Candidate[], opts: { focus: boolean }): void {
   if (!host) return;
   const h = host;
+  dropSearch();
   currentOrgnr = undefined;
   currentView = undefined;
   searchOpen = false;
-  const paint = (): ReturnType<typeof paintPicker> =>
-    paintPicker(
+  const paint = (): ReturnType<typeof paintPicker> => {
+    const picker = paintPicker(
       roots,
       {
         host: h,
@@ -231,6 +256,9 @@ function showPicker(candidates: Candidate[], opts: { focus: boolean }): void {
         onSearchSelect: (orgnr) => void loadAndRender(orgnr, 'manual', { focus: true }),
       },
     );
+    liveSearch = picker.search;
+    return picker;
+  };
   const picker = paint();
   repaint = paint;
   badge(undefined);
@@ -238,6 +266,11 @@ function showPicker(candidates: Candidate[], opts: { focus: boolean }): void {
 }
 
 async function showEmpty(kind: EmptyKind, opts: { focus: boolean }): Promise<void> {
+  // Claimed before the storage reads: a load that lands meanwhile must
+  // not paint over the search view (or tear it down under the user),
+  // and a newer flow drops this paint.
+  const myRunId = claim();
+  dropSearch();
   if (kind.kind !== 'search') {
     currentOrgnr = undefined;
     currentView = undefined;
@@ -248,9 +281,10 @@ async function showEmpty(kind: EmptyKind, opts: { focus: boolean }): Promise<voi
     getRecent(),
     host ? getRememberedChoice(host) : undefined,
   ]);
+  if (stale(myRunId)) return;
   const returnTo = repaint;
-  const paint = (): ReturnType<typeof paintEmpty> =>
-    paintEmpty(
+  const paint = (): ReturnType<typeof paintEmpty> => {
+    const view = paintEmpty(
       roots,
       {
         kind,
@@ -267,16 +301,24 @@ async function showEmpty(kind: EmptyKind, opts: { focus: boolean }): Promise<voi
         onBack: () => closeSearch(returnTo),
       },
     );
+    liveSearch = view.search;
+    return view;
+  };
   const view = paint();
   if (kind.kind !== 'search') repaint = paint;
-  badge(undefined);
+  // The search view is an overlay: the badge belongs to the state it
+  // returns to.
+  if (kind.kind !== 'search') badge(undefined);
   if (opts.focus) focusElement(kind.kind === 'search' ? view.input : view.heading);
 }
 
 async function showError(err: unknown): Promise<void> {
+  const myRunId = claim();
+  dropSearch();
   currentView = undefined;
   searchOpen = false;
   const recents = await getRecent();
+  if (stale(myRunId)) return;
   const error = describeLoadFailure(err);
   // «Prøv igjen» only when there is a load to re-run and asking again
   // could change the answer: a not-found can't.
@@ -319,6 +361,8 @@ function openSearch(): void {
 
 function closeSearch(returnTo: (() => void) | undefined): void {
   searchOpen = false;
+  // A search still in flight must not announce into the restored view.
+  dropSearch();
   if (returnTo) {
     returnTo();
     repaint = returnTo;
@@ -343,8 +387,9 @@ async function loadAndRender(
   method: ResolutionMethod | undefined,
   opts: { focus: boolean },
 ): Promise<void> {
-  const myRunId = ++loadRunId;
+  const myRunId = claim();
   currentOrgnr = orgnr;
+  requestedOrgnr = orgnr;
   if (method !== undefined) currentMethod = method;
   lastLoad = () => void loadAndRender(orgnr, method, opts);
   showLoading(orgnr);
@@ -358,7 +403,7 @@ async function loadAndRender(
       loadCompany(orgnr, { konsern: true }),
       host ? getRememberedChoice(host) : undefined,
     ]);
-    if (myRunId !== loadRunId) return;
+    if (stale(myRunId)) return;
     currentOrgnr = company.enhet.organisasjonsnummer;
     const view = buildTrustView({
       company,
@@ -372,7 +417,7 @@ async function loadAndRender(
     remember(company);
     showResult(view, { focus: opts.focus, reveal: true });
   } catch (err) {
-    if (myRunId !== loadRunId) return;
+    if (stale(myRunId)) return;
     await showError(err);
   }
 }
@@ -388,13 +433,20 @@ function remember(company: CompanyData): void {
   );
 }
 
+// A picker row / «Ingen av disse»: the choice is stored first. Claimed
+// on the click, so a pick made meanwhile (a hit from «Eller søk selv»,
+// another row) wins over this one's late load.
 async function pick(h: string, orgnr: string): Promise<void> {
+  const myRunId = claim();
   await setPickerChoice(h, orgnr);
+  if (stale(myRunId)) return;
   await loadAndRender(orgnr, 'host-pick', { focus: true });
 }
 
 async function none(h: string): Promise<void> {
+  const myRunId = claim();
   await setPickerChoice(h, null);
+  if (stale(myRunId)) return;
   syncSidebarNoMatch();
   await showEmpty({ kind: 'none', host: h }, { focus: true });
 }
@@ -404,8 +456,9 @@ async function none(h: string): Promise<void> {
 async function reject(): Promise<void> {
   if (!host || !currentOrgnr) return;
   const h = host;
-  const myRunId = ++loadRunId;
-  const outcome = await rejectChoice(h, currentOrgnr, tabTitle, () => myRunId !== loadRunId);
+  const orgnrs = [...new Set([requestedOrgnr, currentOrgnr])].filter((o): o is string => o !== undefined);
+  const myRunId = claim();
+  const outcome = await rejectChoice(h, orgnrs, tabTitle, () => stale(myRunId));
   if (!outcome) return;
   if (outcome.kind === 'picker') showPicker(outcome.candidates, { focus: true });
   else await showEmpty({ kind: 'no-match', host: h }, { focus: true });
@@ -415,13 +468,18 @@ async function reject(): Promise<void> {
 // and resolve it from scratch.
 async function forget(): Promise<void> {
   if (!host) return;
+  const myRunId = claim();
   await forgetHost(host);
+  if (stale(myRunId)) return;
   await init({ focus: true });
 }
 
 async function refresh(): Promise<void> {
   if (!currentOrgnr) return;
-  await invalidateCache(currentOrgnr);
+  // Both the orgnr the site gave (an underenhet's own entry) and the
+  // enhet shown, like the panel's «Oppdater».
+  const orgnrs = [...new Set([requestedOrgnr, currentOrgnr])].filter((o): o is string => o !== undefined);
+  await Promise.all(orgnrs.map((o) => invalidateCache(o)));
   lastLoad?.();
 }
 
@@ -439,9 +497,13 @@ async function resolveFromActiveTab(): Promise<TabContext> {
 }
 
 async function init(opts: { focus: boolean }): Promise<void> {
-  loadRunId += 1;
+  // Claimed before the tab is resolved: a pick made from the search
+  // meanwhile («Tilbake til treffet», then a recent) must not be
+  // replaced by the host's late answer.
+  const myRunId = claim();
   try {
     const ctx = await resolveFromActiveTab();
+    if (stale(myRunId)) return;
     if (ctx.orgnr) {
       await loadAndRender(ctx.orgnr, ctx.method, opts);
       return;
@@ -461,6 +523,7 @@ async function init(opts: { focus: boolean }): Promise<void> {
       opts,
     );
   } catch (err) {
+    if (stale(myRunId)) return;
     await showError(err);
   }
 }

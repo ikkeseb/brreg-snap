@@ -34,6 +34,17 @@ Errors are always a warn band, never a stamp: a failed lookup says
 nothing about the company. The tone comes from `deriveAnswer`
 (docs/notes/trust.md § answer-priority); the surfaces only paint it.
 
+A part whose fetch failed is named, never presented as absent.
+`buildTrustView` carries a typed `failed` list (roller, regnskap,
+konsern when the Enhet says erIKonsern, endringer on the panel). The
+popup's ok and warn bands get one quiet line under the headline,
+«Noe kunne ikke hentes: roller, regnskapstall» (`answer.note`,
+`.answer__note`); a stamp has no room for it (§ popup-budget). The
+panel says it where the part lives: «Kunne ikke hente roller» /
+«… regnskapstallene» in their tabs, «Konsernet kunne ikke hentes.
+Trykk «Oppdater» …» as the Konsern section, «Endringer kunne ikke
+hentes.» under «Endret nylig».
+
 <!-- SECTION: tokens -->
 ## Tokens and the type scale
 
@@ -140,6 +151,13 @@ search): the smoke and the tests key on those, not on classes.
   a background repaint (auto-sync) never moves it. One focus style
   everywhere: the amber ring on `:focus-visible`; the search box
   carries it for its input.
+- A background rebuild must not drop focus either: the panel's 30 s
+  freshness tick rewrites the footer's text node in place
+  (`renderFooter(...).tick`), and a same-view keep (provenance) that
+  rebuilds the top and the footer puts focus back on the equivalent
+  control — same tag, same accessible text (`rebuildKeepingFocus` in
+  painter.ts) — or leaves it where the browser dropped it when the
+  control is gone.
 - The stamp's DOM stays one sentence («Nettstedet er ikke koblet til
   selskapet») so a screen reader hears it, whatever the caps say.
 - The tablist is a real tablist (roving tabindex, arrow keys); the
@@ -153,6 +171,12 @@ search): the smoke and the tests key on those, not on classes.
   to the browser (a reflex key must not be remembered as «Ingen av
   disse»). Digit keys are off while typing in a field and with any
   modifier.
+- A search view that closes (Escape, the back bar) resets its search
+  controller, so a response still in flight can neither paint nor
+  announce into the restored view; the popup does the same to the
+  search on screen whenever another state paints. In the panel the
+  search view opened over a load lifts `inert`/`aria-busy` from main
+  (the results must be operable) and puts them back with the skeleton.
 
 <!-- SECTION: popup-budget -->
 ## The popup's 600 px budget
@@ -161,8 +185,11 @@ Firefox caps a popup at 600 px; the design fixes the width at 380 px
 and measures every state against the cap (`node measure.mjs` in the
 design folder; the harness re-measures with `document.body` height).
 Measured 2026-09-30 against the live API: dnb 562, spoof 588, nrk
-picker 592, konkurs 597, no-site 387 — all under 600. What keeps them
-there:
+picker 592, konkurs 596, no-site 386 — all under 600. With the
+«Noe kunne ikke hentes» line (a failed part drops a row too): dnb with
+roller + regnskap + konsern failed 506, equinor with only konsern
+failed 586; a stamp gets no line, because konkurs (596) or the spoof
+(588) plus a line would pass the cap. What keeps them there:
 
 - Identity uses one compact leaders line («Daglig leder X · Styreleder
   Y», wrapping whole pairs) instead of a two-column block.
@@ -171,6 +198,11 @@ there:
   the panel's Økonomi tab), and the Kobling row is short («Registrert
   hjemmeside»: the host is already in the masthead, the date already
   in the stamp).
+- Under a warn band the popup's regnskap row names the year only too
+  (`signalRow`'s `roomForMoney`): a url-param company with a merknad,
+  a provenance line and two leaders measured 610 px with the money.
+  The panel keeps the money under a warn band; only a stamp drops it
+  there.
 - On a spoof the company's ledger becomes one prose line under «Om
   selskapet — sier ingenting om dette nettstedet» (`.facts`); four
   rows put P4 at 660 px.

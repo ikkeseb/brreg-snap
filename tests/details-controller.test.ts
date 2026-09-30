@@ -13,6 +13,7 @@ import { createPanelHistory, type HistoryWindow } from '../src/details/history.j
 import type { PanelPainter } from '../src/details/view.js';
 import dnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import equinor from './fixtures/brreg/enhet-923609016-equinor.json';
+import konkurs from './fixtures/brreg/enhet-915330193-konkurs.json';
 
 const DNB = dnb.organisasjonsnummer;
 const EQUINOR = equinor.organisasjonsnummer;
@@ -390,6 +391,23 @@ describe('«Feil bedrift?»', () => {
     await intents.reject();
     expect(deps.addRejectedChoice).not.toHaveBeenCalled();
   });
+
+  it('an underenhet orgnr: rejects the orgnr the site gave and the parent shown', async () => {
+    const { controller, intents, deps } = setup({
+      searchHost: async () => ({ band: 'none', candidates: [], complete: true }),
+    });
+    vi.mocked(deps.loadCompany).mockResolvedValueOnce({
+      ...company(DNB),
+      avdeling: { organisasjonsnummer: '973160834', navn: 'DNB BANK ASA AVD ALTA', overordnetEnhet: DNB },
+    });
+    controller.follow({ kind: 'company', orgnr: '973160834', method: 'url-param', host: 'www.dnb.no' });
+    await settle();
+    await intents.reject();
+    expect(vi.mocked(deps.addRejectedChoice).mock.calls).toEqual([
+      ['www.dnb.no', '973160834'],
+      ['www.dnb.no', DNB],
+    ]);
+  });
 });
 
 describe('«Glem valget»', () => {
@@ -589,7 +607,15 @@ describe('startup and messages', () => {
     vi.mocked(deps.getRememberedChoice).mockResolvedValueOnce({ kind: 'choice', orgnr: DNB });
     controller.follow({ kind: 'company', orgnr: DNB, method: 'host-pick', host: 'dnb.no' });
     await settle();
-    expect(deps.pushRecent).toHaveBeenCalledWith(DNB, dnb.navn);
+    expect(deps.pushRecent).toHaveBeenCalledWith(DNB, dnb.navn, undefined);
     expect(results()[0]!.remembered).toEqual({ kind: 'choice', orgnr: DNB });
+  });
+
+  it('a danger company is stamped with its status, like the popup does', async () => {
+    const { controller, deps } = setup();
+    vi.mocked(deps.loadCompany).mockResolvedValueOnce({ ...company(DNB), enhet: konkurs });
+    controller.follow(companyView(konkurs.organisasjonsnummer));
+    await settle();
+    expect(deps.pushRecent).toHaveBeenCalledWith(konkurs.organisasjonsnummer, konkurs.navn, 'Konkurs');
   });
 });

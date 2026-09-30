@@ -87,8 +87,15 @@ export interface AnswerView {
   supporting?: string;
   // Danger only: the headline split around the stamp word.
   stamp?: StampText;
+  // Popup: «Noe kunne ikke hentes: roller, regnskap» — the parts whose
+  // fetch failed, so an answer built on less is never read as complete.
+  note?: string;
   actions: AnswerAction[];
 }
+
+// A soft part of the lookup whose fetch failed (company-load.ts maps
+// each to undefined). Endringer only on the panel, which asks for it.
+export type FailedPart = 'roller' | 'regnskap' | 'konsern' | 'endringer';
 
 export type RowAction =
   | { kind: 'reject' }
@@ -141,6 +148,9 @@ export interface TrustView {
   konsern?: KonsernView;
   merknader: MerknadView[];
   endringer: EndringView[];
+  // What couldn't be fetched, in display order. The honesty rule: a
+  // failed part is named, never presented as absent.
+  failed: FailedPart[];
   // «Feil bedrift?»: the result was derived from the site.
   canReject: boolean;
   // «Glem valget for <site>»: the user told us something about it.
@@ -291,7 +301,10 @@ function koblingRow(
     default:
       break;
   }
-  if (opts.canReject && !opts.rejectInBand && kobling.kind !== 'mismatch') {
+  // Every host-derived result offers the way out. On a spoof it sits in
+  // the stamp (rejectInBand); a mismatch under a status stamp (konkurs
+  // on a site the company isn't registered for) keeps it in the row.
+  if (opts.canReject && !opts.rejectInBand) {
     row.actions.push({ kind: 'reject' });
   }
   if (opts.forget) row.actions.push({ kind: 'forget' });
@@ -332,6 +345,7 @@ function signalRow(
   company: CompanyData,
   kunngjoringer: string,
   answerTone: AnswerTone,
+  surface: Surface,
 ): LedgerRow {
   const row: LedgerRow = {
     key: signal.key,
@@ -363,10 +377,13 @@ function signalRow(
       if (signal.detail === 'levert') row.value = `${signal.value} levert`;
       else if (signal.detail) row.aux = `· ${signal.detail}`;
       // Under a stamp the row names the year only (P2): the money
-      // lives in the panel's Økonomi tab, and the popup keeps its
-      // 600 px.
+      // lives in the panel's Økonomi tab. The popup shows it only in
+      // the calm state: a warn band, a provenance line and two leaders
+      // already fill its 600 px (a url-param company with a merknad
+      // measured 610 with the money).
+      const roomForMoney = surface === 'panel' ? answerTone !== 'danger' : answerTone === 'ok';
       const figures =
-        answerTone !== 'danger' && /^\d{4}$/.test(signal.value)
+        roomForMoney && /^\d{4}$/.test(signal.value)
           ? regnskapFigures(company.regnskap, signal.value)
           : undefined;
       if (figures) row.figures = figures;
@@ -441,10 +458,26 @@ function registeredHref(domain: string): string {
   return `https://${domain}`;
 }
 
+// The popup names failed parts under the answer. Measured against the
+// 600 px cap (docs/notes/ui.md § popup-budget): the ok and warn bands
+// have room for the line; a stamp does not.
+const NOTE_TONES: ReadonlySet<AnswerTone> = new Set(['ok', 'warn']);
+
+function failedParts(company: CompanyData, surface: Surface): FailedPart[] {
+  const failed: FailedPart[] = [];
+  if (!company.roller) failed.push('roller');
+  if (!company.regnskap) failed.push('regnskap');
+  // Both surfaces ask for konsern; null is «asked, in no group».
+  if (company.konsern === undefined && company.enhet.erIKonsern === true) failed.push('konsern');
+  if (surface === 'panel' && !company.endringer) failed.push('endringer');
+  return failed;
+}
+
 export function buildTrustView(input: TrustViewInput): TrustView {
   const { company, method, host, now, surface, remembered, env } = input;
   const { enhet, roller, regnskap } = company;
   const orgnr = enhet.organisasjonsnummer;
+  const failed = failedParts(company, surface);
 
   const kobling = deriveKobling({ method, host, enhet });
   const signals = deriveSignals(enhet, regnskap, now);
@@ -478,6 +511,9 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   };
   if (shownAnswer.supporting) answerView.supporting = shownAnswer.supporting;
   if (shownAnswer.tone === 'danger') answerView.stamp = stampOf(shownAnswer.headline);
+  if (surface === 'popup' && failed.length > 0 && NOTE_TONES.has(shownAnswer.tone)) {
+    answerView.note = COPY.couldNotFetch(failed.map((p) => COPY.partName[p]).join(', '));
+  }
 
   // --- ledger
   const kunngjoringer = kunngjoringerUrl(orgnr);
@@ -495,7 +531,7 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   if (spoof) {
     facts = factsLine(signals);
   } else {
-    for (const s of signals) ledger.push(signalRow(s, company, kunngjoringer, shownAnswer.tone));
+    for (const s of signals) ledger.push(signalRow(s, company, kunngjoringer, shownAnswer.tone, surface));
     // The popup keeps five rows: when a signal was omitted, næring
     // fills the gap (the panel has it under Registrering).
     const naering = enhet.naeringskode1?.beskrivelse?.trim();
@@ -576,6 +612,7 @@ export function buildTrustView(input: TrustViewInput): TrustView {
     ledger,
     merknader: surface === 'panel' ? merknadViews : [],
     endringer,
+    failed,
     canReject,
     fetchedAt: company.fetchedAt,
     reportHref: reportHref({

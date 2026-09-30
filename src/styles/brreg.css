@@ -343,6 +343,7 @@
 .answer--warn .answer__head { font-weight: 800; }
 .answer__support { grid-column: 2; margin-top: 3px; color: var(--ink-2); }
 .answer__support b { color: var(--ink); }
+.answer__note { color: var(--ink-3); }   /* «Noe kunne ikke hentes: …», quieter than a finding */
 .answer__actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
 /* danger: the stamp. An object placed on the page, not a band across it. */
