@@ -7,7 +7,7 @@
 // and helpers (deriveSignals, findRoleHolder, regnskapGap, isValidOrgnr)
 // wherever they exist, so a shape change fails here the way it would
 // fail in the extension. Raw requests are used only for endpoints the
-// code doesn't call yet (the 1.4 contracts at the bottom).
+// code does not expose, or when checking the raw API response shape.
 //
 // Politeness: every request is sequential with a pause (helpers/live.ts),
 // shared between tests with once(), and the last test caps the total.
@@ -24,6 +24,8 @@ import {
   searchEnheter,
   searchEnheterWithParams,
 } from '../../src/lib/brreg.js';
+import { deriveKonsern, fetchKonsernstruktur } from '../../src/lib/konsern.js';
+import type { KonsernNode } from '../../src/types/brreg.js';
 import { isValidOrgnr } from '../../src/lib/mod11.js';
 import { keyFigures, regnskapGap } from '../../src/lib/regnskap.js';
 import { findRoleHolder, isResigned } from '../../src/lib/roller.js';
@@ -111,7 +113,7 @@ afterAll(() => {
   jobSummary(`contracts: ${requestLog.length} requests to brreg`);
 });
 
-// One test per `<!-- SECTION: … -->` anchor, named after it.
+// One test per live API `<!-- SECTION: … -->` anchor, named after it.
 const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
   'regnskap-base-url': async () => {
     const r = await equinorRegnskap();
@@ -201,6 +203,60 @@ const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
     await expect(searchEnheter('FINN.no')).resolves.toEqual([]);
   },
 
+  'konsernstruktur': async () => {
+    const top = await getJson<KonsernNode>(`${ER_API}/konsernstruktur/${EQUINOR}`);
+    expect(top.status).toBe(200);
+    const root = top.body!;
+    expect(root.organisasjonsnummer).toBe(EQUINOR);
+    expect(root.children?.length).toBeGreaterThan(0);
+    const child = root.children![0]!;
+    expect(typeof child.nivaa).toBe('number');
+    expect(typeof child.knytningsform?.kode).toBe('string');
+    expect(typeof child.knytningsform?.beskrivelse).toBe('string');
+    expect(typeof child.grunnlag).toBe('string');
+    expect(child.parentOrganisasjonsnummer).toBe(EQUINOR);
+    // Asking from a subsidiary returns the same tree from the top.
+    const fromChild = await getJson<KonsernNode>(
+      `${ER_API}/konsernstruktur/${child.organisasjonsnummer}`,
+    );
+    expect(fromChild.body?.organisasjonsnummer).toBe(EQUINOR);
+    // Not in a group → 404.
+    const e = await enk();
+    const outside = await getJson(`${ER_API}/konsernstruktur/${e.organisasjonsnummer}`);
+    expect(outside.status).toBe(404);
+  },
+
+  'aarsregnskap-kopi': async () => {
+    const { status, body } = await getJson<unknown[]>(
+      `${REGNSKAP_API}/aarsregnskap/kopi/${EQUINOR}/aar`,
+    );
+    expect(status).toBe(200);
+    expect(Array.isArray(body)).toBe(true);
+    expect(body!.every((y) => typeof y === 'string' && /^\d{4}$/.test(y))).toBe(true);
+    // PDF copies go back further than the single JSON year.
+    expect(body!.length).toBeGreaterThan(1);
+    const latest = (await equinorRegnskap()).items[0]!.regnskapsperiode?.tilDato?.slice(0, 4);
+    expect(body).toContain(latest);
+  },
+
+  'konsernstruktur-duplicates': async () => {
+    const root = await fetchKonsernstruktur('886581432'); // AKER ASA
+    expect(root).toBeDefined();
+    const nodes: KonsernNode[] = [];
+    const walk = (node: KonsernNode): void => {
+      nodes.push(node);
+      for (const child of node.children ?? []) walk(child);
+    };
+    walk(root!);
+    const unique = new Set(nodes.map((node) => node.organisasjonsnummer));
+    expect(nodes.length).toBeGreaterThan(unique.size);
+    const group = deriveKonsern(root!, '886581432');
+    expect(group?.groupSize).toBe(unique.size - 1);
+    expect(group?.path.at(-2)?.orgnr).toBe(group?.parent?.orgnr);
+    const children = group?.children ?? [];
+    expect(new Set(children.map((child) => child.orgnr)).size).toBe(children.length);
+  },
+
   'docs-links': async () => {
     expect((await docsNo()).status).toBe(200);
     expect((await getText(DOCS_EN)).status).toBe(200);
@@ -214,7 +270,9 @@ describe('docs/notes/brreg-api.md anchors', () => {
     const note = readFileSync(new URL('../../docs/notes/brreg-api.md', import.meta.url), 'utf8');
     const anchors = [...note.matchAll(/<!-- SECTION: ([\w-]+) -->/g)]
       .map((m) => m[1]!)
-      .filter((a) => a !== 'live-canary'); // describes this suite itself
+      // Rate limiting is tested with synthetic 429s in tests/brreg.test.ts;
+      // deliberately provoking throttling would abuse the public API.
+      .filter((a) => a !== 'live-canary' && a !== 'rate-limit');
     expect(Object.keys(ANCHOR_TESTS).sort()).toEqual(anchors.sort());
   });
 });
@@ -340,42 +398,8 @@ describe('search semantics the resolver depends on', () => {
   });
 });
 
-// Contracts the 1.4 work will build on (verified live 2026-09-24). No
-// shipped code calls these yet, so they are checked raw.
+// Additional response-shape contracts used by the 1.4 features.
 describe('1.4 contracts', () => {
-  interface KonsernNode {
-    organisasjonsnummer: string;
-    navn?: string;
-    nivaa?: number;
-    knytningsform?: { kode?: string; beskrivelse?: string };
-    grunnlag?: string;
-    parentOrganisasjonsnummer?: string;
-    children?: KonsernNode[];
-  }
-
-  it('konsernstruktur: the whole group rooted at the top, 404 outside a group', async () => {
-    const top = await getJson<KonsernNode>(`${ER_API}/konsernstruktur/${EQUINOR}`);
-    expect(top.status).toBe(200);
-    const root = top.body!;
-    expect(root.organisasjonsnummer).toBe(EQUINOR);
-    expect(root.children?.length).toBeGreaterThan(0);
-    const child = root.children![0]!;
-    expect(typeof child.nivaa).toBe('number');
-    expect(typeof child.knytningsform?.kode).toBe('string');
-    expect(typeof child.knytningsform?.beskrivelse).toBe('string');
-    expect(typeof child.grunnlag).toBe('string');
-    expect(child.parentOrganisasjonsnummer).toBe(EQUINOR);
-    // Asking from a subsidiary returns the same tree from the top.
-    const fromChild = await getJson<KonsernNode>(
-      `${ER_API}/konsernstruktur/${child.organisasjonsnummer}`,
-    );
-    expect(fromChild.body?.organisasjonsnummer).toBe(EQUINOR);
-    // Not in a group → 404.
-    const e = await enk();
-    const outside = await getJson(`${ER_API}/konsernstruktur/${e.organisasjonsnummer}`);
-    expect(outside.status).toBe(404);
-  });
-
   it('oppdateringer/enheter: JSON-Patch endringer with includeChanges', async () => {
     // dato format yyyy-MM-ddTHH:mm:ss.SSSZ is exactly toISOString().
     const since = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString();
@@ -412,19 +436,6 @@ describe('1.4 contracts', () => {
       expect(['add', 'remove', 'replace', 'move', 'copy', 'test']).toContain(p.op);
       expect(p.path).toMatch(/^\//);
     }
-  });
-
-  it('regnskap kopi/{orgnr}/aar: a list of year strings', async () => {
-    const { status, body } = await getJson<unknown[]>(
-      `${REGNSKAP_API}/aarsregnskap/kopi/${EQUINOR}/aar`,
-    );
-    expect(status).toBe(200);
-    expect(Array.isArray(body)).toBe(true);
-    expect(body!.every((y) => typeof y === 'string' && /^\d{4}$/.test(y))).toBe(true);
-    // PDF copies go back further than the single JSON year.
-    expect(body!.length).toBeGreaterThan(1);
-    const latest = (await equinorRegnskap()).items[0]!.regnskapsperiode?.tilDato?.slice(0, 4);
-    expect(body).toContain(latest);
   });
 
   it('Enhet fields: paategninger, historiskeNavn, erIKonsern, underRekonstruksjonsforhandlingDato', async () => {
