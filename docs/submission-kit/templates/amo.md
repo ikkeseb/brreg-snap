@@ -89,4 +89,9 @@ renders no headings or tables. Paste as is.
 ## Unchanged fields (verify, don't edit)
 
 Slug, categories, license, support contact, permission justifications
-and screenshots: `docs/amo-submission.md`.
+are documented in `docs/amo-submission.md`.
+
+## Screenshots (by hand when updated)
+
+Use the current set and upload order in `docs/amo-submission.md`
+§ Screenshots.

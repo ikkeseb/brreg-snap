@@ -36,8 +36,9 @@ dashboard after submission — get it right in the zip.
 - **Store icon:** 128×128 PNG (reuse `public/icons/icon-128.png` —
   artwork ~96px centered in the 128 canvas, reads on light & dark).
 - **Screenshots:** 1–5, **1280×800** (preferred) or 640×400, PNG/JPEG,
-  square corners, full-bleed, showing the real UI (`docs/screenshots/
-  cws-*.png`).
+  square corners, full-bleed, showing the real UI. Upload the five `docs/screenshots/v1.4-*.png`
+  files in numerical order. Fixture data and provenance:
+  `docs/screenshots/README.md`.
 - **Description:** plain text. CWS does not render Markdown, so no
   `**bold**`, no backticks, no `[text](url)` links: they show up
   literally. Paste the Norwegian text below; the English one is for an

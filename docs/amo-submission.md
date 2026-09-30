@@ -241,25 +241,13 @@ permission, explaining why each is necessary.
 
 ## Screenshots
 
-Upload in this order — AMO displays them in the listing in the
-order they're uploaded, and the story should go from "what is
-this" → "depth available" → "lightweight use".
+Upload the five `v1.4-*.png` files in numerical order. They show the
+1.4 UI with captions: company lookup, registry warnings, accounts,
+group navigation and search. Each is 1280×800, RGB PNG.
 
-1. **`docs/screenshots/01-sidebar-overview.png`** —
-   sidebar open on `orkla.com`, showing ORKLA ASA's overview tab
-   (organisation form, registration date, NACE code, employee
-   count, CEO, addresses). Demonstrates the core lookup.
-2. **`docs/screenshots/02-popup-and-sidebar.png`** —
-   `telenor.no` with both popup and sidebar visible. Sidebar is on
-   the Enheter (sub-units) tab listing TELENOR ASA's three
-   registered sub-units. Demonstrates that the extension has two
-   surfaces and surfaces deeper data on the sidebar.
-3. **`docs/screenshots/03-popup-only.png`** —
-   popup over `tomra.com` showing TOMRA SYSTEMS ASA. Demonstrates
-   the lightweight one-click flow without opening the sidebar.
-
-All three are 2562×1602 (2× retina capture of 1281×801, 1.6:1
-aspect ratio — AMO's recommended display ratio). PNG.
+The source is the preview harness in fixture mode. Person names are
+fictional. See `docs/screenshots/README.md` for source captures and
+crop details. The older screenshots remain as historical assets.
 
 ## Distribution choice
 
