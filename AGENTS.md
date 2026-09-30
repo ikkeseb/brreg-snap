@@ -27,7 +27,8 @@ packages with the Release).
 
 ## Definition of done
 
-The verification rungs, lowest first:
+The verification rungs, lowest first; they are the surfaces to name
+when reporting a change as done:
 
 1. **`pnpm verify` is green.** It is the gate CI, the release workflow
    and the pre-push hook all run.
@@ -104,7 +105,8 @@ failed is omitted, never rendered as "not filed".
   `<!-- SECTION: slug -->` anchor in the target; `pnpm check:docs`
   (in `pnpm verify`) fails when a backticked repo path or an anchor
   doesn't resolve.
-- Cite files, symbols or tags, never short commit hashes.
+- Cite files, symbols or tags, never short commit hashes. History
+  lives in git and `CHANGELOG.md`.
 - Tracked docs are public: name the maintainer's role, not their
   machines, profiles or accounts (those go in `MAINTAINER.md`).
 
