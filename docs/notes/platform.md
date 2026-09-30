@@ -124,9 +124,11 @@ the filter only spares Firefox the wakeups. Pinned:
 
 Firefox runs the background as a non-persistent event page, Chrome
 as a module service worker. Both unload when idle, so the background
-keeps no state: only the panel-opening entry points and the install
-hook, no tabs, permissions or storage API (pinned in
-`tests/background-module.test.ts`). Listeners register synchronously
+keeps no state and holds only the panel-opening entry points and the
+install hook. Module evaluation touches no tabs, permissions or
+storage API; the one tabs call is `tabs.create` for the welcome page
+in the install hook (both pinned in `tests/background-module.test.ts`).
+Tab listeners and auto-sync belong to the panel. Listeners register synchronously
 at the top level (`docs/notes/permissions-model.md`
 § event-page-wakeup). The smoke's real Chromium load checks that the
 worker evaluates to completion (`tests/e2e/extension.spec.ts`).

@@ -14,6 +14,13 @@ out of here when it ships or is dropped.
   popup has no height to spare (`docs/notes/ui.md` § popup-budget).
   Revisit when the resolver corpus or a user report shows the right
   company in the pool but ranked below four.
+- **Last-used company first in the picker.** The picker orders
+  candidates by score only (`src/lib/hostname-search.ts`,
+  `src/lib/view/components/picker.ts`); a remembered choice for the
+  site skips the picker instead of reordering it, and the recents list
+  lives in the empty states. Not now: no evidence the score order
+  hides the company people pick. Revisit on a user report or a corpus
+  host where the right company sits below a stranger.
 - **`@types/chrome`.** Chrome-only APIs are typed inline
   (`ChromeSidePanel` in `src/lib/platform/sidebar.ts`, the one cast).
   Not now: that typing is a few lines. Revisit when Chrome-only casts

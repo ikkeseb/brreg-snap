@@ -90,7 +90,9 @@ To find the company, the extension sends data.brreg.no the site's
 registrable domain (`dnb.no` on `nettbank.dnb.no`) and its main word,
 an organisation number, or text you search for or select and look up.
 It never sends the full page address, the page title or cookies. IP
-addresses and local names like `localhost` are never sent. Nothing
+addresses and reserved local names (`localhost`, names without a dot,
+endings like `.local` or `.lan`) are never sent; other names that only
+work on a private network are looked up like any other site. Nothing
 goes to the developer. Firefox declares this as `browsingActivity`
 data collection, the Chrome Web Store as web history.
 

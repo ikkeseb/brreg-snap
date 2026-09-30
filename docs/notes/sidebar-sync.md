@@ -127,9 +127,10 @@ the view, so an older tab event can't paint over it. Arrival order,
 not network order, decides what ends up on screen. There are no manual
 bumps to forget. Races pinned in `tests/panel-follow.test.ts` and
 `tests/picker.test.ts`. A picker choice is applied only while that picker is
-still on screen. `renderParent`'s late name upgrade checks that its
-load's result is still the one shown (`shownLoad`), not the token, so
-a sync that keeps the same company doesn't cut it off.
+still on screen. A painter that fetches after painting checks its
+result's `isStale()`, which compares with the load on screen
+(`shownLoad`), not the token, so a sync that keeps the same company
+doesn't cut it off.
 
 The popup's `loadAndRender` keeps its own `loadRunId` (manual result
 then a recent entry in quick succession must paint the second). Stale

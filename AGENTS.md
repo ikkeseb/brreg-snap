@@ -35,7 +35,9 @@ Say which rung you reached; "done" without one means rung 1 only.
 3. **Real extension load:** `pnpm dev` (Firefox) or `dist-chrome/`
    loaded unpacked.
 4. **Seb only:** permission prompts, the gesture-gated side panel open,
-   store uploads and listings.
+   store credentials, and approving each `publish.yml` run. Store
+   listing edits happen in his logged-in browser on the Mac
+   (`docs/release.md` § What stays manual).
 
 ## Commands
 
