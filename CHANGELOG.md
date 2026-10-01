@@ -6,6 +6,8 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+## [1.4.1] — 2026-10-01
+
 ### Fixed
 
 - Picker rows: the hover fill ran flush against the digit key on the
