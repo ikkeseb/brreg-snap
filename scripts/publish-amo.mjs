@@ -14,9 +14,8 @@ import { parseArgs } from 'node:util';
 
 import { publishAmo } from './lib/amo.mjs';
 import { setOutputs } from './lib/publish.mjs';
-import { findTodos, kitFields, reflowForAmo } from './lib/release.mjs';
+import { assetNames, findTodos, kitFields, reflowForAmo } from './lib/release.mjs';
 import { readZip } from './lib/zip.mjs';
-import { assetNames } from './verify-package.mjs';
 
 const { values: opts, positionals } = parseArgs({
   options: { kit: { type: 'string' }, 'dry-run': { type: 'boolean', default: false } },

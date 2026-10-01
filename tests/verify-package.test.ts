@@ -3,8 +3,9 @@ import { crc32, deflateRawSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 
 import { referencedFiles } from '../scripts/manifest-invariants.mjs';
+import { assetNames } from '../scripts/lib/release.mjs';
 import { readZip } from '../scripts/lib/zip.mjs';
-import { assetNames, checkExtensionZip, checkSourceZip } from '../scripts/verify-package.mjs';
+import { checkExtensionZip, checkSourceZip } from '../scripts/verify-package.mjs';
 
 // The packaged-zip gate (release.yml before the Release exists, publish.yml
 // on the downloaded assets). The zips are written here by a minimal zip

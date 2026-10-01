@@ -8,7 +8,7 @@ import { parseArgs } from 'node:util';
 
 import { publishCws } from './lib/cws.mjs';
 import { setOutputs } from './lib/publish.mjs';
-import { assetNames } from './verify-package.mjs';
+import { assetNames } from './lib/release.mjs';
 
 const { values: opts, positionals } = parseArgs({
   options: { 'dry-run': { type: 'boolean', default: false } },

@@ -17,18 +17,10 @@ import { join, resolve } from 'node:path';
 
 import { findCodegen } from './codegen-scan.mjs';
 import { check, DIST_ROOT, referencedFiles } from './manifest-invariants.mjs';
+import { assetNames } from './lib/release.mjs';
 import { readZip } from './lib/zip.mjs';
 
 /** @typedef {import('./lib/zip.mjs').ZipEntry} ZipEntry */
-
-/** Release asset names for a version, keyed by what they are. */
-export function assetNames(version) {
-  return {
-    firefox: `brreg-snap-${version}.zip`,
-    chrome: `brreg-snap-chrome-${version}.zip`,
-    source: `brreg-snap-source-${version}.zip`,
-  };
-}
 
 /**
  * @param {ZipEntry[]} entries

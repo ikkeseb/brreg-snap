@@ -1,4 +1,9 @@
+import { spawnSync } from 'node:child_process';
 import { createHmac, createVerify, generateKeyPairSync } from 'node:crypto';
+import { cpSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { AMO_API, publishAmo } from '../scripts/lib/amo.mjs';
@@ -274,4 +279,21 @@ describe('publishCws', () => {
     expect(plan).toContain(`v2/${item}:publish`);
     expect(plan).not.toContain('PRIVATE KEY');
   });
+});
+
+// publish.yml's `publish` job holds the store keys and installs no
+// dependencies, so the publishers may import only node: builtins and
+// scripts that do the same. ESM links every import before the first line
+// runs: run without arguments from a copy outside the repo (no
+// node_modules to find), a clean graph prints the usage and exits 2.
+it.each(['publish-amo.mjs', 'publish-cws.mjs'])('%s loads without node_modules', (script) => {
+  const dir = mkdtempSync(join(tmpdir(), 'brreg-snap-publish-'));
+  try {
+    cpSync(fileURLToPath(new URL('../scripts', import.meta.url)), join(dir, 'scripts'), { recursive: true });
+    const r = spawnSync(process.execPath, [join(dir, 'scripts', script)], { encoding: 'utf8' });
+    expect(r.stderr).toMatch(/^usage:/);
+    expect(r.status).toBe(2);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });

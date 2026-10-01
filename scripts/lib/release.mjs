@@ -1,7 +1,9 @@
 // Pure helpers for `pnpm release` (scripts/release.mjs), the release
-// workflow's notes step (scripts/release-notes.mjs) and the store
-// publisher (scripts/lib/amo.mjs). No I/O here: everything takes and
+// workflow's notes step (scripts/release-notes.mjs), the package check
+// (scripts/verify-package.mjs) and the store publishers
+// (scripts/publish-{amo,cws}.mjs). No I/O here: everything takes and
 // returns strings, so tests/release.test.ts covers it without a repo.
+// No imports either: the publishers run where no dependency is installed.
 
 /** The marker `pnpm release --tag` refuses to tag over. */
 export const STORE_NOTES_TODO = 'TODO(store-notes)';
@@ -11,6 +13,15 @@ const VERSION_RE = /^(\d+)\.(\d+)\.(\d+)$/;
 /** @param {string} v */
 export function isVersion(v) {
   return VERSION_RE.test(v);
+}
+
+/** Release asset names for a version, keyed by what they are. */
+export function assetNames(/** @type {string} */ version) {
+  return {
+    firefox: `brreg-snap-${version}.zip`,
+    chrome: `brreg-snap-chrome-${version}.zip`,
+    source: `brreg-snap-source-${version}.zip`,
+  };
 }
 
 /**
