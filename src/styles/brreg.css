@@ -656,11 +656,15 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .picker { margin: 12px var(--gut) 0; border-top: 1px solid var(--ink); }
 .pick {
   display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 0 10px; align-items: start;
-  width: 100%; padding: 8px 6px 9px 0; border: 0; border-bottom: 1px solid var(--rule);
+  width: 100%; padding: 8px 0 9px; border: 0; border-bottom: 1px solid var(--rule);
   background: none; text-align: left; cursor: pointer;
 }
-.pick:hover { background: color-mix(in oklab, var(--ink) 4%, var(--paper)); }
-.pick:focus-visible { outline-offset: -2px; }
+/* amendment: no fill on hover. A row filled edge to edge put the key
+   flush against the fill's edge. Hover and keyboard focus underline
+   the name, like every other list row, and invert the key («press 1»);
+   the focus ring keeps the global outward offset, clear of the key. */
+.pick:is(:hover, :focus-visible) .kbd { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.pick:is(:hover, :focus-visible) :is(.pick__name, .pick__label) { text-decoration: underline; text-underline-offset: 3px; }
 .pick__name { display: block; font-weight: 600; }
 .pick__sub { display: block; margin-top: 1px; color: var(--ink-2); }
 .pick__right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; color: var(--ink-2); white-space: nowrap; }

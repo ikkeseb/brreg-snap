@@ -6,6 +6,13 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Fixed
+
+- Picker rows: the hover fill ran flush against the digit key on the
+  left and the keyboard focus ring covered it. Hover and focus now
+  underline the name and invert the key, and the ring sits outside the
+  row like on every other list row.
+
 ## [1.4.0] — 2026-09-30
 
 ### Changed — the 1.4 design («Dossier, stamped») on both surfaces

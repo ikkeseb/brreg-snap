@@ -112,7 +112,7 @@ export function renderPicker(
   const none = button('pick pick--none');
   none.setAttribute('aria-keyshortcuts', '0');
   none.appendChild(el('span', 'kbd', '0'));
-  none.appendChild(el('span', undefined, COPY.none));
+  none.appendChild(el('span', 'pick__label', COPY.none));
   none.appendChild(el('span'));
   none.addEventListener('click', () => handlers.onNone());
   noneLi.appendChild(none);

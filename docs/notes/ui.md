@@ -119,7 +119,7 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 | `personer.ts` | `buildPersoner(groups \| 'failed', {onDrill})`, `buildEntityRow(name, note, onOpen, {nameNode})` | `section > div.person(--gone) > b + span.person__role`; `button.entity-row > b + small + svg.icon` |
 | `okonomi.ts` | `buildOkonomi(OkonomiView)` | `section[data-tone] > div.fig-head > h2 + span.cap` · `p.fig-status` · `div.figs > h3.fig-group + dl > div.fig-row(--total)[data-tone] > dt + dd > span.fig-row__unit` · `div.equity > .equity__track > .equity__fill` (`--share`) + `.equity__legend` · `p.honest` · Dokumenter: `div.doc-row > .years`, `div.ext-row` |
 | `enheter.ts` | `buildEnheter(EnheterView, parentName, {onDrill, copy, announce})`, `KONSERN_CHILDREN_SHOWN` = 20 | Konsern: `ul.konsern-path > li` (`--depth`) with `.entity-row(--self)`; `p.konsern-sub.cap` + `ul > li > button.entity-row` (hidden past 20, `p.show-all`). Underenheter: `p.units-count`, `ul > li.unit(--gone) > span > .unit__name + .unit__meta` + `button.orgnr.orgnr--sm` |
-| `picker.ts` | `renderPicker(container, {site, candidates, query}, {onPick, onNone, onSearchSelect, announce})` → `{heading, firstRow, input, search}` | `div.pick-head > h1 + p`; `ol.picker > li > button.pick[aria-keyshortcuts] > span.kbd + span > .pick__name + .pick__sub + span.pick__right > (.status-mark \| «N ansatte») + span.evidence(--strong hjemmeside \| --weak underside / navnetreff)`; `button.pick.pick--none`; `div.pick-search > label.field-label + label.search--lg`. Digit keys 1–4 / 0 on one document listener per document (§ lifecycle below) |
+| `picker.ts` | `renderPicker(container, {site, candidates, query}, {onPick, onNone, onSearchSelect, announce})` → `{heading, firstRow, input, search}` | `div.pick-head > h1 + p`; `ol.picker > li > button.pick[aria-keyshortcuts] > span.kbd + span > .pick__name + .pick__sub + span.pick__right > (.status-mark \| «N ansatte») + span.evidence(--strong hjemmeside \| --weak underside / navnetreff)`; `button.pick.pick--none > span.kbd + span.pick__label`; `div.pick-search > label.field-label + label.search--lg`. Digit keys 1–4 / 0 on one document listener per document (§ lifecycle below) |
 | `search.ts` | `buildSearchField`, `buildEntryRow`, `searchPainter`, `buildListSection(head)`, `renderRecents`, `renderSearchView(container, data, handlers)` | `div.empty > h1 + p + label.search--lg + p.hint`; `section.section > h3.section__head + ul.results \| ul > li > button.recent > span.recent__name > b (+ .status-mark, .recent__sub) + span.recent__on`; `li.results__note`; `button.back > svg.icon + b` |
 | `skeleton.ts` | `buildSkeleton(surface)`, `renderSkeleton` | the loaded geometry with real labels and `.sk.sk--*` values, `aria-hidden`; `main` is `inert` + `aria-busy` meanwhile |
 | `live.ts` | `liveRegionOf(el)` → `{el, announce}`, `focusElement(target)` | the one `p.sr-only[aria-live=polite]` per document; `focusElement` gives a heading `tabindex=-1` |
@@ -240,6 +240,9 @@ failed 586; a stamp gets no line, because konkurs (596) or the spoof
 - **Konsern rows are not underlined by default.** The chevron already
   says «drill in»; the underline appears on hover and keyboard focus,
   and the focus ring stays.
+- **Picker rows have no hover fill.** Hover and keyboard focus underline
+  the name and invert the digit key, and the focus ring keeps the global
+  outward offset: a fill or an inset ring ran flush against the key.
 - **Place names are title-cased everywhere.** brreg writes poststed in
   caps («4035 STAVANGER»); `titleCasePlace` (format.ts, re-exported by
   trust-view.ts) renders «Stavanger», «Mo i Rana» in the identity line,
