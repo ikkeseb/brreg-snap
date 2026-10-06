@@ -57,7 +57,7 @@ export function setState(roots: Roots, state: PopupState, answer: AnswerAttr): v
 // A browser caps a popup at 600 px (docs/notes/ui.md § popup-budget),
 // and names, leaders and parent companies are as long as the registry
 // has them. A state that would pass the cap sheds secondary detail, one
-// step at a time, until it fits; brreg.css says what each step hides.
+// step at a time, until it fits.
 const POPUP_CAP = 600;
 const SHED_STEPS = ['shed-1', 'shed-2', 'shed-3'] as const;
 

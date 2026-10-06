@@ -470,14 +470,8 @@
 .app--popup .foot { position: sticky; bottom: 0; background: var(--paper); }
 
 /* ---------- popup budget sheds -------------------------------------------
-   fitBudget (popup/views.ts) adds these to <body>, in order, while the
-   state passes the 600 px cap; the panel keeps everything.
-   1  the regnskap row names the year only; a picker row's activity
-      keeps one line
-   2  the provenance eyebrow: the Kobling row's verdict stays
-   3  a neutral Kobling row's note («ingen hjemmeside registrert»); its
-      way out stays. A warn or danger row keeps its note: «ikke vg.no»
-      is the finding */
+   fitBudget (popup/views.ts) adds these to <body> in order while the
+   popup passes 600 px: docs/notes/ui.md § popup-budget */
 .shed-1 .ledger-row[data-key="regnskap"] .ledger-row__detail { display: none; }
 .shed-1 .pick__sub { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .shed-2 .ident__eyebrow { display: none; }

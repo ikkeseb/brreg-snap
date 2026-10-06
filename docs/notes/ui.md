@@ -197,18 +197,15 @@ spoof (588) plus a line would pass the cap.
 
 The design rules below keep the common states under the cap. Names,
 leaders and parent companies are as long as the registry has them, so
-the popup also fits itself: after every paint (and after the font
-swap) `fitBudget` (`src/popup/views.ts`) measures the body and, while
-it passes 600 px, adds the next shed step to `<body>`; the «popup
-budget sheds» block in `src/styles/brreg.css` says what each hides. In order: (1) the regnskap
-row's money and a picker row's activity past one line, (2) the
-provenance eyebrow, (3) a neutral Kobling row's note («ingen
-hjemmeside registrert»). A warn or danger Kobling note is the finding
-and never sheds. Measured before → after: vg.no 618 → 581 (step 1),
-bunnpris picker 667 → 525 (step 1), a tvangsavvikling with a two-line
-name and an org.nr from the URL 623 → 582 (all three). A state that
-fits sheds nothing; the panel never sheds. The smoke asserts every
-popup state within 600 px and every stamp word inside its stamp.
+the popup also fits itself: after every paint and the font swap,
+`fitBudget` (`src/popup/views.ts`) measures the body and, while it
+passes 600 px, adds the next shed class to `<body>` (CSS in
+`src/styles/brreg.css`). The order: (1) the regnskap row's money and a
+picker row's activity past one line, (2) the provenance eyebrow, (3) a
+neutral Kobling row's note («ingen hjemmeside registrert»). A warn or
+danger Kobling note is the finding and never sheds. A state that fits
+sheds nothing; the panel never sheds. The smoke asserts every popup
+state within 600 px and every stamp word inside its stamp.
 
 - Identity uses one compact leaders line («Daglig leder X · Styreleder
   Y», wrapping whole pairs) instead of a two-column block; one person
