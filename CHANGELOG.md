@@ -6,6 +6,8 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+## [1.4.2] — 2026-10-06
+
 ### Fixed
 
 - A parent company's Økonomi figures and the popup's omsetning/resultat
