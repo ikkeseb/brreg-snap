@@ -1,8 +1,9 @@
 // Merknader + «Endret nylig» (panel Oversikt, after the ledger): the
 // registry's own annotation quoted verbatim with its date, then the
-// recent changes as a dated list. Warn tone: both are things to notice,
-// neither is a verdict.
-//   <div class="notes" data-tone="warn">
+// recent changes as a dated list. A merknad is a thing to notice (warn
+// tone); changes are neutral information and never raise the tone
+// (docs/notes/trust.md § answer-priority).
+//   <div class="notes" data-tone="warn">  (neutral without a merknad)
 //     <figure class="merknad"><figcaption class="note-head">…</figcaption>
 //       <blockquote class="quote"><p>…</p></blockquote>
 //       <p class="quote__date">Innført <time>…</time></p></figure>
@@ -23,7 +24,7 @@ export function buildNotes(
 ): HTMLDivElement | undefined {
   if (merknader.length === 0 && endringer.length === 0 && !endringerFailed) return undefined;
   const notes = el('div', 'notes');
-  notes.dataset.tone = 'warn';
+  notes.dataset.tone = merknader.length > 0 ? 'warn' : 'neutral';
 
   for (const m of merknader) {
     const fig = el('figure', 'merknad');
@@ -47,7 +48,7 @@ export function buildNotes(
   if (endringer.length > 0 || endringerFailed) {
     const sec = el('section');
     const head = el('h3', 'note-head');
-    head.appendChild(glyph('warn'));
+    head.appendChild(glyph('neutral'));
     head.append(COPY.endretNylig);
     sec.appendChild(head);
     if (endringerFailed) sec.appendChild(el('p', 'section__text', COPY.endringerFailed));

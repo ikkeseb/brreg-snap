@@ -2,8 +2,8 @@
 
 Work order under `docs/plans/2026-09-23-plan.md`. It came out of the
 real-extension check of 1.4.2 and a survey of the real popup on live
-sites. Three parts: the resolver (§ resolver) and the UX fixes (§ ux)
-are not built; the smoke (§ smoke) has landed. Delete
+sites. Three parts: the resolver (§ resolver) is not built; the UX
+fixes (§ ux) and the smoke (§ smoke) have landed. Delete
 this file when its parts have shipped; `CHANGELOG.md` and the notes
 under `docs/notes/` carry what remains true.
 
@@ -175,6 +175,15 @@ holders are satellites rather than the site's own organisation.
 
 <!-- SECTION: ux -->
 ## UX fixes
+
+Landed, all eleven; `CHANGELOG.md` lists them. Measured against the
+live API in the preview harness: no popup state grew (DNB and Telenor
+581 px with the new line, Equinor still 600), the test Chromium
+hyphenates Norwegian, and item 2's new sentence is the network
+failure's only (a 5xx keeps its own). Open, found while measuring and
+not from these changes: a tvangsavvikling with a bostyrer, a two-line
+name and an org.nr from the URL measures 623 px in the popup
+(`docs/notes/ui.md` § popup-budget lists konkurs at 596).
 
 Found by five independent readers of the smoke and live screenshots
 plus the maintainer session's own read; each was checked against the

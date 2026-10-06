@@ -495,7 +495,11 @@ export function createPanelPainter(
     if (!shown || aside) return;
     footer = renderFooter(
       foot,
-      { fetchedAt: shown.view.fetchedAt, now: now().getTime(), reportHref: shown.view.reportHref },
+      {
+        fetchedAt: shown.view.fetchedAt,
+        now: now().getTime(),
+        ...(shown.view.footReportHref ? { reportHref: shown.view.footReportHref } : {}),
+      },
       { onRefresh: () => intents.refresh() },
     );
   }
@@ -702,7 +706,8 @@ export function createPanelPainter(
       list.section.hidden = true;
       main.appendChild(list.section);
       fillRecents(list);
-      renderFooter(foot, lastOrgnr ? { reportHref: report(lastOrgnr, lastHost) } : {});
+      // A failed lookup has no match to report.
+      renderFooter(foot, {});
       badge(tabId);
       if (focus) focusElement(answer.heading);
     },

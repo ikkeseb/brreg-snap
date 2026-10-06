@@ -6,6 +6,34 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Changed
+
+- The picker says what it found: «Fant ikke selskapet bak …» when no
+  row has the site as registered hjemmeside, «Står dette selskapet bak
+  …?» when the one row has it, and a line of its own when several
+  companies share the site. Every evidence tag explains itself on
+  hover.
+- Late accounts name the year that is missing («2025 ikke levert ·
+  siste er 2023», «Regnskap for 2025 er ikke levert») instead of only
+  the last year filed.
+- A filed year without figures says why («tall ikke i åpne data»), and
+  Økonomi no longer calls an older year «Siste innsendte» beside a
+  newer filed one.
+- A failed lookup says what to do instead of repeating its headline,
+  and no longer offers «Rapporter feil treff».
+- «Org.nr funnet i nettadressen» (was «adressen»); one person as daglig
+  leder and styreleder is one line; the group's list is headed «N
+  direkte datterselskaper».
+
+### Fixed
+
+- «Endret nylig» carried the amber warning mark under «Ingen varsler i
+  registeret». Changes are information, not a warning.
+- Long words in the panel broke mid-word at Chrome's side panel width;
+  they now hyphenate.
+- The panel's footer floated under short states; it sits at the bottom.
+- «Rapporter feil treff» appeared twice on a mismatched site.
+
 ## [1.4.2] — 2026-10-06
 
 ### Fixed

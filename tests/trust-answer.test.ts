@@ -235,7 +235,7 @@ describe('deriveAnswer — headline and tone', () => {
     [
       'latest filing older than the deadline allows',
       { enhet: { ...PLAIN, sisteInnsendteAarsregnskap: '2023' } },
-      { tone: 'warn', headline: 'Siste innsendte regnskap er fra 2023' },
+      { tone: 'warn', headline: 'Regnskap for 2025 er ikke levert' },
     ],
     [
       'an old AS with nothing filed',
@@ -298,7 +298,7 @@ describe('deriveAnswer — findings', () => {
       },
       { tone: 'warn', source: 'kobling', text: 'Usikker kobling til eksempel.no' },
       { tone: 'warn', source: 'alder', text: 'Stiftet for 5 måneder siden' },
-      { tone: 'warn', source: 'regnskap', text: 'Siste innsendte regnskap er fra 2023' },
+      { tone: 'warn', source: 'regnskap', text: 'Regnskap for 2025 er ikke levert' },
     ]);
   });
 

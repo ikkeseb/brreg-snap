@@ -1,4 +1,4 @@
-// The picker (P5): «Mulige selskaper bak <site>», up to four candidate
+// The picker (P5): a head that says what the rows are, up to four candidate
 // rows with a digit shortcut each, «Ingen av disse» (0), and a
 // prefilled «Eller søk selv» field. Digit keys are scoped to the picker:
 // one document listener per document, replaced by the next picker
@@ -77,12 +77,29 @@ function buildRow(
         ? COPY.evidencePage
         : COPY.evidenceWeak,
   );
-  if (cand.evidence === 'side') tag.title = COPY.evidencePageTitle(site);
+  tag.title = strong
+    ? COPY.evidenceStrongTitle(site)
+    : cand.evidence === 'side'
+      ? COPY.evidencePageTitle(site)
+      : COPY.evidenceWeakTitle(site);
   right.appendChild(tag);
   btn.appendChild(right);
   btn.addEventListener('click', onPick);
   li.appendChild(btn);
   return li;
+}
+
+// What the picker has, said in its head: holders are the rows with the
+// site itself as registered hjemmeside.
+export function pickerHead(
+  site: string,
+  candidates: readonly Candidate[],
+): { head: string; sub: string } {
+  const holders = candidates.filter((c) => c.evidence === 'hjemmeside').length;
+  if (holders === 0) return { head: COPY.pickHeadNone(site), sub: COPY.pickSubNone(site) };
+  if (candidates.length === 1) return { head: COPY.pickHeadOne(site), sub: COPY.pickSubOne(site) };
+  if (holders > 1) return { head: COPY.pickHead(site), sub: COPY.pickSubSeveral(site) };
+  return { head: COPY.pickHead(site), sub: COPY.pickSubStrong };
 }
 
 export function renderPicker(
@@ -94,12 +111,10 @@ export function renderPicker(
   const candidates = data.candidates.slice(0, MAX_PICKER_CANDIDATES);
 
   const head = el('div', 'pick-head');
-  const heading = el('h1', undefined, COPY.pickHead(data.site));
+  const text = pickerHead(data.site, candidates);
+  const heading = el('h1', undefined, text.head);
   head.appendChild(heading);
-  // «Ingen har <site> som registrert hjemmeside» is only true when no
-  // row has the site itself registered.
-  const anyExact = candidates.some((c) => c.evidence === 'hjemmeside');
-  head.appendChild(el('p', undefined, anyExact ? COPY.pickSubStrong : COPY.pickSub(data.site)));
+  head.appendChild(el('p', undefined, text.sub));
   container.appendChild(head);
 
   const list = el('ol', 'picker');

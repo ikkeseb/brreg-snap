@@ -38,9 +38,7 @@ function buildKonsern(k: KonsernSection, parentName: string, handlers: EnheterHa
   sec.appendChild(path);
 
   if (k.children.length > 0) {
-    const sub = el('p', 'konsern-sub cap', COPY.datterselskaper);
-    sub.appendChild(el('span', 'tab__count', String(k.children.length)));
-    sec.appendChild(sub);
+    sec.appendChild(el('p', 'konsern-sub cap', COPY.directChildren(k.children.length)));
     const list = el('ul');
     const hidden: HTMLLIElement[] = [];
     k.children.forEach((child, i) => {

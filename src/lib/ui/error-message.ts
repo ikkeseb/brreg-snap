@@ -80,9 +80,12 @@ export function describeLoadFailure(err: unknown): LoadFailure {
   if (/returned 429\./.test(message)) {
     return { head: 'For mange oppslag på kort tid', support: text, retry: true };
   }
+  // A network failure's own sentence only repeats the headline: say
+  // what to do instead.
+  const what = err instanceof TypeError ? 'Sjekk nettverkstilkoblingen og prøv igjen.' : text;
   return {
     head: NO_ANSWER_HEAD,
-    support: `${text} Det sier ingenting om selskapet.`,
+    support: `${what} Det sier ingenting om selskapet.`,
     retry: true,
   };
 }

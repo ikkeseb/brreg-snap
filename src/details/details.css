@@ -7,6 +7,17 @@ html {
   overflow-x: hidden;
 }
 
+/* The footer sits at the bottom of the panel under a short state
+ * (empty, error) instead of floating under it: main takes the room
+ * the body's min-height leaves. */
+body {
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1 0 auto;
+}
+
 /* The skeleton is not for interaction: inert removes it from the tab
  * order and the accessibility tree while the live region says «Henter». */
 main[inert] {

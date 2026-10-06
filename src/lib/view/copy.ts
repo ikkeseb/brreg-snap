@@ -22,10 +22,11 @@ export const COPY = {
   copyFailed: 'Kunne ikke kopiere',
   copyFailedLive: 'Kunne ikke kopiere til utklippstavlen',
   brregLink: 'brreg.no',
-  eyebrowUrl: 'Org.nr funnet i adressen',
+  eyebrowUrl: 'Org.nr funnet i nettadressen',
   eyebrowTitle: 'Org.nr funnet i sidetittelen',
   dagligLeder: 'Daglig leder',
   styreleder: 'Styreleder',
+  dagligLederOgStyreleder: 'Daglig leder og styreleder',
   avdeling: (navn: string, spaced: string) => `Avdeling: ${navn} (${spaced})`,
   copySummary: 'Kopier sammendrag',
   summaryCopied: 'Sammendrag kopiert',
@@ -52,6 +53,11 @@ export const COPY = {
   foundViaName: 'Funnet via navnet',
   notRegisteredFor: (site: string) => `${site} er ikke registrert`,
   naering: 'Næring',
+  // A late filing names the year that is missing, not just the last one.
+  regnskapLate: (expected: string) => `${expected} ikke levert`,
+  regnskapLateLast: (year: string) => `· siste er ${year}`,
+  // A filed year whose figures the open API doesn't carry.
+  figuresNotOpen: 'tall ikke i åpne data',
   omsetning: 'omsetning ',
   resultat: 'resultat ',
   aboutCompany: 'Om selskapet',
@@ -106,6 +112,10 @@ export const COPY = {
   gjeldLegend: (amount: string) => `Gjeld ${amount}`,
   honestSingleYear: 'Viser bare siste års tall.',
   honestPdf: ' Eldre år finnes som PDF.',
+  // The Enhet names a newer filed year than the figures the API gave.
+  filedNewer: (year: string) => `${year} er levert. Tallene er ikke i åpne data ennå.`,
+  honestShowingYear: (year: string) => `Viser tallene for ${year}.`,
+  honestOtherPdf: ' Andre år finnes som PDF.',
   regnskapFailed: 'Kunne ikke hente regnskapstallene. Prøv igjen senere.',
   regnskapNone: 'Ingen årsregnskap er registrert.',
   regnskapNoFigures: 'Regnskap registrert, men uten utdrag.',
@@ -124,7 +134,8 @@ export const COPY = {
   // enheter
   konsern: 'Konsern',
   konsernFailed: 'Konsernet kunne ikke hentes. Trykk «Oppdater» for å prøve igjen.',
-  datterselskaper: 'Datterselskaper',
+  // The konsern count covers the whole group; this list is one level.
+  directChildren: (n: number) => (n === 1 ? '1 direkte datterselskap' : `${n} direkte datterselskaper`),
   topCompany: 'Toppselskap',
   ownerStake: (stake: string) => `eier ${stake}`,
   childCount: (n: number) => (n === 1 ? '1 datterselskap' : `${n} datterselskaper`),
@@ -140,13 +151,24 @@ export const COPY = {
   slettet: (date: string) => `Slettet ${date}`,
 
   // picker
+  // The head says what the rows are (pickerHead in components/picker.ts):
+  // no row has the site registered, the one row has it, several have it,
+  // or one has it among name matches.
   pickHead: (site: string) => `Mulige selskaper bak ${site}`,
-  pickSub: (site: string) => `Ingen har ${site} som registrert hjemmeside. Velg den som stemmer.`,
+  pickHeadNone: (site: string) => `Fant ikke selskapet bak ${site}`,
+  pickHeadOne: (site: string) => `Står dette selskapet bak ${site}?`,
+  pickSubNone: (site: string) =>
+    `Ingen har ${site} som registrert hjemmeside. Dette er de nærmeste treffene.`,
+  pickSubOne: (site: string) => `Det har ${site} som registrert hjemmeside.`,
+  pickSubSeveral: (site: string) =>
+    `Flere selskaper har ${site} som registrert hjemmeside. Velg den som stemmer.`,
   pickSubStrong: 'Velg den som stemmer.',
   evidenceStrong: 'hjemmeside',
+  evidenceStrongTitle: (site: string) => `Har ${site} som registrert hjemmeside`,
   evidencePage: 'underside',
   evidencePageTitle: (site: string) => `Registrert hjemmeside er en underside på ${site}`,
   evidenceWeak: 'navnetreff',
+  evidenceWeakTitle: (site: string) => `Navnet ligner. ${site} er ikke selskapets registrerte hjemmeside`,
   none: 'Ingen av disse',
   searchYourself: 'Eller søk selv',
   pickAnsatte: (n: string) => `${n} ansatte`,

@@ -339,6 +339,15 @@ function amountText(value: number | undefined): string | undefined {
   return p ? `${p.amount}${p.unit ? ` ${p.unit}` : ''}` : undefined;
 }
 
+// The Enhet names a filed year newer than the latest figures the open
+// API gave (it can lag a year behind): that year, else undefined.
+function newerFiledYear(latest: KeyFigures, regnskapSignal: Signal | undefined): string | undefined {
+  const year = regnskapSignal?.value;
+  return year && /^\d{4}$/.test(year) && /^\d{4}$/.test(latest.year) && year > latest.year
+    ? year
+    : undefined;
+}
+
 function figuresOf(latest: KeyFigures, regnskapSignal: Signal | undefined): OkonomiFigures {
   const resultat = present([
     figRow('Driftsinntekter', latest.driftsinntekter),
@@ -369,6 +378,7 @@ function figuresOf(latest: KeyFigures, regnskapSignal: Signal | undefined): Okon
   ].filter((g) => g.rows.length > 0);
   if (groups.length === 0) return { kind: 'text', lines: [COPY.regnskapNoFigures] };
   const filedOk = regnskapSignal?.tone === 'ok' || regnskapSignal?.tone === 'neutral';
+  const newer = newerFiledYear(latest, regnskapSignal);
   const out: OkonomiFigures = {
     kind: 'figures',
     title: COPY.aarsregnskap(latest.year),
@@ -376,7 +386,11 @@ function figuresOf(latest: KeyFigures, regnskapSignal: Signal | undefined): Okon
     status:
       regnskapSignal && regnskapSignal.value === latest.year && regnskapSignal.detail === 'levert'
         ? { tone: 'ok', text: COPY.filedOk }
-        : { tone: filedOk ? 'neutral' : (regnskapSignal?.tone ?? 'neutral'), text: COPY.filedLatest },
+        : {
+            tone: filedOk ? 'neutral' : (regnskapSignal?.tone ?? 'neutral'),
+            // «Siste innsendte» would contradict the ledger's newer year.
+            text: newer ? COPY.filedNewer(newer) : COPY.filedLatest,
+          },
     groups,
   };
   const eq = amountText(latest.egenkapital);
@@ -411,10 +425,13 @@ function okonomi(input: DossierInput): OkonomiView {
     if (!latest) {
       figures = { kind: 'text', lines: [COPY.regnskapNone] };
     } else {
-      figures = figuresOf(keyFigures(latest), regnskapSignal);
-      // The view shows the latest year only: say so, and point at
-      // the copies where older years live.
-      honest = `${COPY.honestSingleYear}${pdfNote}`;
+      const key = keyFigures(latest);
+      figures = figuresOf(key, regnskapSignal);
+      // The view shows one year only: say so (and which, when a newer
+      // one is filed), and point at the copies where the others live.
+      honest = newerFiledYear(key, regnskapSignal)
+        ? `${COPY.honestShowingYear(key.year)}${years && years.length > 0 ? COPY.honestOtherPdf : ''}`
+        : `${COPY.honestSingleYear}${pdfNote}`;
     }
   }
   const view: OkonomiView = { figures, kunngjoringer };

@@ -329,6 +329,7 @@ describe('result: the dossier', () => {
     expect(tabsAt).toBeGreaterThan(notes);
     expect(q('.notes .quote p')?.textContent).toMatch(/^Foretaksregisteret har grunn til å anta/);
     expect(q('.notes .quote__date time')?.getAttribute('datetime')).toBe('2026-09-01');
+    expect(q<HTMLElement>('.notes')?.dataset.tone).toBe('warn');
     // The answer never repeats the merknad the quote below carries.
     expect(q('.answer--warn')?.textContent).not.toContain('Foretaksregisteret');
     expect(q('.answer--warn')?.textContent).toContain('merknad i registeret');
@@ -360,6 +361,9 @@ describe('result: the dossier', () => {
     expect(sections.map((s) => s.querySelector('.section__head')?.firstChild?.textContent)).toEqual(['Konsern', 'Underenheter']);
     expect(sections[0]!.querySelector('.section__text')?.textContent).toBe(COPY.konsernFailed);
     expect(q('.notes .note-head')?.textContent).toBe('Endret nylig');
+    // Changes are information, not a warning: no amber «!» without a merknad.
+    expect(q<HTMLElement>('.notes')?.dataset.tone).toBe('neutral');
+    expect(q('.notes .note-head use')?.getAttribute('href')).toBe('#g-dot');
     expect(q('.notes .section__text')?.textContent).toBe(COPY.endringerFailed);
     // What the roller still tell (a board change) is listed under it.
     expect(q('.notes .changes li b')?.textContent).toBe('Endret styre');
@@ -545,6 +549,9 @@ describe('loading, error, empty, picker', () => {
     expect(q('.context')?.textContent).toBe(`Oppslag på org.nr 984${NBSP}851${NBSP}006`);
     expect(q('.answer--warn h2')?.textContent).toBe('Fikk ikke svar fra Brønnøysundregistrene');
     expect(document.activeElement).toBe(q('.answer--warn h2'));
+    expect(q('.answer--warn')?.textContent).toContain('Sjekk nettverkstilkoblingen og prøv igjen.');
+    // A failed lookup has no match to report.
+    expect(byText(COPY.report)).toBeUndefined();
     byText('Prøv igjen')!.click();
     expect(intents.retry).toHaveBeenCalledOnce();
     painter.error(new Error('No entity found for orgnr 984851006.'), { retry: false, focus: false });
@@ -615,7 +622,7 @@ describe('loading, error, empty, picker', () => {
     painter.picker('www.nrk.no', candidates, { focus: true });
     expect(app().dataset.state).toBe('picker');
     expect(document.body.dataset.answer).toBe('pick');
-    expect(q('.pick-head h1')?.textContent).toBe('Mulige selskaper bak nrk.no');
+    expect(q('.pick-head h1')?.textContent).toBe('Fant ikke selskapet bak nrk.no');
     const first = q<HTMLButtonElement>('button.pick')!;
     expect(document.activeElement).toBe(first);
     first.click();

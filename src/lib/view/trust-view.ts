@@ -16,14 +16,14 @@ import { formatDateNo, formatMoney, formatOrgnr, titleCasePlace } from '../forma
 import type { RememberedChoice } from '../hostname-search.js';
 import { hjemmesideDomains, hostnameLabel, registrableDomain } from '../hostname-score.js';
 import { konsernLine, type Konsern } from '../konsern.js';
-import { keyFigures, latestRegnskap } from '../regnskap.js';
+import { keyFigures, latestRegnskap, regnskapGap } from '../regnskap.js';
 import { isHostDerived, type ResolutionMethod } from '../resolution-method.js';
 import { findRoleHolder } from '../roller.js';
 import { deriveAnswer, MISMATCH_HEADLINE } from '../trust/answer.js';
 import { deriveEndringer } from '../trust/endringer.js';
 import { deriveKobling } from '../trust/kobling.js';
 import { deriveMerknader } from '../trust/merknader.js';
-import { deriveSignals } from '../trust/signals.js';
+import { deriveSignals, expectedLatestFiledYear } from '../trust/signals.js';
 import { brregUrl, buildSummary } from '../trust/summary.js';
 import type { Answer, Kobling, Signal, Tone } from '../trust/types.js';
 import { deriveRegistryFlags, deriveStatusFlags, primaryStatusFlag } from '../ui/flags.js';
@@ -160,6 +160,9 @@ export interface TrustView {
   backToSite?: string;
   fetchedAt: number;
   reportHref: string;
+  // The footer's «Rapporter feil treff»: absent when the kobling row
+  // already carries the link, so it is never on screen twice.
+  footReportHref?: string;
   summary: string;
   // The tone to set on the resolved tab's toolbar button, only when the
   // company on screen is the tab's own (host-derived).
@@ -340,12 +343,21 @@ function regnskapFigures(
   return groups.length > 0 ? groups : undefined;
 }
 
+// The regnskap lookup gave an answer to read: a list (possibly empty),
+// or the 500 brreg gives for special accounts (a bank, an insurer). A
+// failed fetch and any other 500 are not answers.
+function openDataAnswered(regnskap: RegnskapResponse | undefined, naeringskode: string | undefined): boolean {
+  if (!regnskap) return false;
+  return !regnskap.unavailable || regnskapGap(naeringskode, regnskap.unsupportedPlan) === 'special-accounts';
+}
+
 function signalRow(
   signal: Signal,
   company: CompanyData,
   kunngjoringer: string,
   answerTone: AnswerTone,
   surface: Surface,
+  now: Date,
 ): LedgerRow {
   const row: LedgerRow = {
     key: signal.key,
@@ -374,8 +386,17 @@ function signalRow(
       else if (signal.detail) row.aux = `· ${signal.detail}`;
       break;
     case 'regnskap': {
-      if (signal.detail === 'levert') row.value = `${signal.value} levert`;
-      else if (signal.detail) row.aux = `· ${signal.detail}`;
+      const year = /^\d{4}$/.test(signal.value);
+      if (signal.detail === 'levert') {
+        row.value = `${signal.value} levert`;
+      } else if (signal.tone === 'warn' && year) {
+        // Late: the row says which year is missing (the neutral row, a
+        // form without an unconditional duty, keeps «siste innsendte»).
+        row.value = COPY.regnskapLate(String(expectedLatestFiledYear(now)));
+        row.aux = COPY.regnskapLateLast(signal.value);
+      } else if (signal.detail) {
+        row.aux = `· ${signal.detail}`;
+      }
       // Under a stamp the row names the year only (P2): the money
       // lives in the panel's Økonomi tab. The popup shows it only in
       // the calm state: a warn band, a provenance line and two leaders
@@ -383,10 +404,15 @@ function signalRow(
       // measured 610 with the money).
       const roomForMoney = surface === 'panel' ? answerTone !== 'danger' : answerTone === 'ok';
       const figures =
-        roomForMoney && /^\d{4}$/.test(signal.value)
-          ? regnskapFigures(company.regnskap, signal.value)
-          : undefined;
-      if (figures) row.figures = figures;
+        roomForMoney && year ? regnskapFigures(company.regnskap, signal.value) : undefined;
+      if (figures) {
+        row.figures = figures;
+      } else if (roomForMoney && signal.detail === 'levert' && openDataAnswered(company.regnskap, company.enhet.naeringskode1?.kode)) {
+        // Filed, and the regnskap lookup answered without that year's
+        // money (special accounts, or the open API a year behind): say
+        // why the row is bare. A failed lookup says nothing.
+        row.detail = COPY.figuresNotOpen;
+      }
       break;
     }
     default:
@@ -531,7 +557,7 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   if (spoof) {
     facts = factsLine(signals);
   } else {
-    for (const s of signals) ledger.push(signalRow(s, company, kunngjoringer, shownAnswer.tone, surface));
+    for (const s of signals) ledger.push(signalRow(s, company, kunngjoringer, shownAnswer.tone, surface, now));
     // The popup keeps five rows: when a signal was omitted, næring
     // fills the gap (the panel has it under Registrering).
     const naering = enhet.naeringskode1?.beskrivelse?.trim();
@@ -564,8 +590,13 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   if (surface === 'popup' && roller && answerView.tone !== 'danger') {
     const dagl = findRoleHolder(roller, 'DAGL');
     const lede = findRoleHolder(roller, 'LEDE');
-    if (dagl) identity.leaders.push({ label: COPY.dagligLeder, name: dagl });
-    if (lede) identity.leaders.push({ label: COPY.styreleder, name: lede });
+    // One person in both roles gets one line, not the name twice.
+    if (dagl && dagl === lede) {
+      identity.leaders.push({ label: COPY.dagligLederOgStyreleder, name: dagl });
+    } else {
+      if (dagl) identity.leaders.push({ label: COPY.dagligLeder, name: dagl });
+      if (lede) identity.leaders.push({ label: COPY.styreleder, name: lede });
+    }
   }
   if (surface === 'panel') {
     const primary = primaryStatusFlag(enhet);
@@ -631,6 +662,9 @@ export function buildTrustView(input: TrustViewInput): TrustView {
       fetchedAt: company.fetchedAt,
     }),
   };
+  if (!ledger.some((row) => row.actions.some((a) => a.kind === 'report'))) {
+    view.footReportHref = view.reportHref;
+  }
   if (facts) view.facts = facts;
   if (konsern) view.konsern = konsern;
   if (forgetSite) view.forgetSite = forgetSite;

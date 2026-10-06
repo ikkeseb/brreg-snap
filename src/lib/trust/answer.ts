@@ -19,7 +19,7 @@ import { findRoleHolder } from '../roller.js';
 import { primaryStatusFlag, type FlagSpec } from '../ui/flags.js';
 import type { Enhet, RollerResponse } from '../../types/brreg.js';
 import { firstSentence } from './merknader.js';
-import { ageBasis, monthsSince } from './signals.js';
+import { ageBasis, expectedLatestFiledYear, monthsSince } from './signals.js';
 import type { Answer, Finding, Kobling, Merknad, Signal } from './types.js';
 
 export const NO_WARNINGS_HEADLINE = 'Ingen varsler i registeret';
@@ -104,12 +104,13 @@ function alderFinding(
 }
 
 // The regnskap signal is either a stale year («2023 · siste innsendte»)
-// or «Mangler» when it warns.
-function regnskapFinding(signals: Signal[]): Finding | undefined {
+// or «Mangler» when it warns. A stale year names the year the deadline
+// has passed for: what is missing, not what was last seen.
+function regnskapFinding(signals: Signal[], now: Date): Finding | undefined {
   const s = signals.find((x) => x.key === 'regnskap');
   if (s?.tone !== 'warn') return undefined;
   const text = /^\d{4}$/.test(s.value)
-    ? `Siste innsendte regnskap er fra ${s.value}`
+    ? `Regnskap for ${expectedLatestFiledYear(now)} er ikke levert`
     : 'Ingen årsregnskap er sendt inn';
   return { tone: 'warn', source: 'regnskap', text };
 }
@@ -144,7 +145,7 @@ export function deriveAnswer({
     ...merknadFindings(merknader),
     uncertainKoblingFinding(kobling),
     alderFinding(enhet, signals, now),
-    regnskapFinding(signals),
+    regnskapFinding(signals, now),
   ].filter((f): f is Finding => f !== undefined);
   const findings = [danger, mismatch, ...warns].filter(
     (f): f is Finding => f !== undefined,

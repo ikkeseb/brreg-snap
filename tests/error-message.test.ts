@@ -72,8 +72,17 @@ describe('describeLoadFailure', () => {
     const { describeLoadFailure, NO_ANSWER_HEAD } = await import('../src/lib/ui/error-message.js');
     const f = describeLoadFailure(new TypeError('Failed to fetch'));
     expect(f.head).toBe(NO_ANSWER_HEAD);
-    expect(f.support).toMatch(/Det sier ingenting om selskapet\.$/);
+    // What to do, not the headline once more.
+    expect(f.support).toBe('Sjekk nettverkstilkoblingen og prøv igjen. Det sier ingenting om selskapet.');
     expect(f.retry).toBe(true);
+  });
+
+  it('a registry failure keeps its own sentence under the headline', async () => {
+    const { describeLoadFailure } = await import('../src/lib/ui/error-message.js');
+    const f = describeLoadFailure(new Error('brreg API returned 503.'));
+    expect(f.support).toBe(
+      'Brønnøysundregistrene har tekniske problemer akkurat nå. Prøv igjen om litt. Det sier ingenting om selskapet.',
+    );
   });
 
   it('a not-found is permanent: no retry', async () => {

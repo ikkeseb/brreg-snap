@@ -498,7 +498,9 @@
 .section__head .tab__count { margin: 0; letter-spacing: 0; }
 .def-row { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 0 12px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
 .def-row dt { color: var(--ink-2); }
-.def-row dd { min-width: 0; overflow-wrap: anywhere; }
+/* a long compound breaks at a syllable where the browser has the
+   Norwegian dictionary (the pages are lang="nb"), mid-word elsewhere */
+.def-row dd { min-width: 0; overflow-wrap: anywhere; hyphens: auto; }
 .def-row__sub { color: var(--ink-3); white-space: nowrap; }
 .section :is(.def-row, .person, .entity-row, .ext-row, .recent, .unit):last-child { border-bottom: 0; }
 @container (max-width: 340px) {

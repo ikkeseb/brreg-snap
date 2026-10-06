@@ -31,8 +31,9 @@ returns one headline, in this order of precedence:
    stays in `deriveMerknader`), kobling `name-guess` («Usikker kobling
    til <host>») / `other-site` («Registrert hjemmeside er <domene>»),
    alder under a year («Stiftet for 5 måneder siden», «Registrert for
-   …» without a stiftelsesdato), regnskap warn («Siste innsendte
-   regnskap er fra 2023», «Ingen årsregnskap er sendt inn»). One →
+   …» without a stiftelsesdato), regnskap warn («Regnskap for 2025 er
+   ikke levert»: the year whose deadline has passed, not the last one
+   seen; «Ingen årsregnskap er sendt inn»). One →
    it is the headline. Two or more → «<n> ting å merke seg», with the
    first as the supporting line.
 4. Otherwise **ok**: «Ingen varsler i registeret», `findings: []`.
@@ -72,10 +73,14 @@ the ledger (`src/lib/view/components/ledger.ts`).
 - **Regnskap**: latest year from `Enhet.sisteInnsendteAarsregnskap` or
   the regnskap response, whichever is newer. **Deadline-aware**: annual
   accounts are due 31 July the year after, so the expected latest year
-  is `month >= August ? year − 1 : year − 2`; an older latest year is
-  «2023 · siste innsendte», a warn only for the forms with an
-  unconditional duty (AS, ASA, SE, ASV, SPA) — for the rest the duty
-  depends on size, so it stays neutral. Assumes a calendar accounting
+  is `month >= August ? year − 1 : year − 2`; an older latest year is a
+  warn only for the forms with an unconditional duty (AS, ASA, SE, ASV,
+  SPA), and the row then names what is missing («2025 ikke levert ·
+  siste er 2023», worded in `signalRow`). For the rest the duty
+  depends on size, so it stays neutral («2023 · siste innsendte»).
+  A filed year whose money the open API doesn't carry (special
+  accounts, or the API a year behind the Enhet) gets «tall ikke i åpne
+  data» under it; a failed lookup and any other 500 get no line. Assumes a calendar accounting
   year. With nothing filed: an ENK with at most 20 registered employees
   (or none) → neutral «Ikke pliktig · enkeltpersonforetak»; an ENK files
   only above 20 MNOK in assets or 20 årsverk (regnskapsloven § 1-2

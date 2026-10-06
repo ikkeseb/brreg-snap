@@ -23,7 +23,7 @@ import { buildKonsernRow } from '../src/lib/view/components/konsern.js';
 import { buildFacts, buildLedger, buildLedgerRow } from '../src/lib/view/components/ledger.js';
 import { focusElement, liveRegionOf } from '../src/lib/view/components/live.js';
 import { appendSiteLabel, renderMasthead } from '../src/lib/view/components/masthead.js';
-import { renderPicker } from '../src/lib/view/components/picker.js';
+import { pickerHead, renderPicker } from '../src/lib/view/components/picker.js';
 import {
   buildEntryRow,
   renderRecents,
@@ -570,7 +570,7 @@ describe('picker', () => {
     expect(main.querySelector<HTMLLabelElement>('label.field-label')?.htmlFor).toBe(picker.input.id);
   });
 
-  it('labels a page on the site «underside» (weak) and keeps «Ingen har …» true without an exact row', () => {
+  it('labels a page on the site «underside» (weak) and says no row has the site registered', () => {
     const main = document.createElement('main');
     document.body.appendChild(main);
     renderPicker(
@@ -585,12 +585,42 @@ describe('picker', () => {
       },
       { onPick: vi.fn(), onNone: vi.fn(), onSearchSelect: vi.fn(), announce: vi.fn() },
     );
-    expect(main.querySelector('.pick-head p')?.textContent).toBe(COPY.pickSub('nrk.no'));
+    expect(main.querySelector('.pick-head h1')?.textContent).toBe('Fant ikke selskapet bak nrk.no');
+    expect(main.querySelector('.pick-head p')?.textContent).toBe(COPY.pickSubNone('nrk.no'));
     const tags = [...main.querySelectorAll<HTMLElement>('.evidence')];
     expect(tags.map((t) => t.textContent)).toEqual([COPY.evidenceWeak, COPY.evidencePage]);
     expect(tags[1]!.className).toBe('evidence evidence--weak');
-    expect(tags[1]!.title).toBe(COPY.evidencePageTitle('nrk.no'));
+    expect(tags.map((t) => t.title)).toEqual([
+      COPY.evidenceWeakTitle('nrk.no'),
+      COPY.evidencePageTitle('nrk.no'),
+    ]);
     main.remove();
+  });
+
+  it('the head says what the rows are', () => {
+    const holder = { ...(enhetDnb as unknown as Candidate), evidence: 'hjemmeside' as const };
+    const name = { ...(enhetKonkurs as unknown as Candidate), evidence: 'navn' as const };
+    const page = { ...(enhetKonkurs as unknown as Candidate), evidence: 'side' as const };
+    // No row has the site registered: never «Mulige selskaper».
+    expect(pickerHead('sbanken.no', [name, page])).toEqual({
+      head: 'Fant ikke selskapet bak sbanken.no',
+      sub: 'Ingen har sbanken.no som registrert hjemmeside. Dette er de nærmeste treffene.',
+    });
+    // One row, and it holds the site: a yes/no question.
+    expect(pickerHead('alnaregnskap.no', [holder])).toEqual({
+      head: 'Står dette selskapet bak alnaregnskap.no?',
+      sub: 'Det har alnaregnskap.no som registrert hjemmeside.',
+    });
+    expect(pickerHead('bunnpris.no', [holder, holder, name])).toEqual({
+      head: 'Mulige selskaper bak bunnpris.no',
+      sub: 'Flere selskaper har bunnpris.no som registrert hjemmeside. Velg den som stemmer.',
+    });
+    expect(pickerHead('dnb.no', [holder, name])).toEqual({
+      head: 'Mulige selskaper bak dnb.no',
+      sub: COPY.pickSubStrong,
+    });
+    // One row that only matches on the name is not a holder.
+    expect(pickerHead('nrk.no', [name]).head).toBe('Fant ikke selskapet bak nrk.no');
   });
 
   it('digit keys pick a row and 0 is «Ingen av disse»; Escape and inputs are left alone', () => {

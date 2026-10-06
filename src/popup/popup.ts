@@ -336,7 +336,6 @@ async function showError(err: unknown): Promise<void> {
         error,
         recents,
         ...(context ? { context } : {}),
-        ...(host || currentOrgnr ? { reportHref: report() } : {}),
       },
       {
         onSearch,

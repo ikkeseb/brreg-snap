@@ -147,7 +147,11 @@ export function paintResult(roots: Roots, view: TrustView, handlers: ResultHandl
 
   renderFooter(
     roots.foot,
-    { fetchedAt: view.fetchedAt, now: handlers.now, reportHref: view.reportHref },
+    {
+      fetchedAt: view.fetchedAt,
+      now: handlers.now,
+      ...(view.footReportHref ? { reportHref: view.footReportHref } : {}),
+    },
     { onRefresh: handlers.onRefresh },
   );
   return { heading, answer };
@@ -285,7 +289,6 @@ export interface ErrorPaint {
   context?: { label: string; strong: string };
   error: ErrorAnswer;
   recents: readonly RecentEntry[];
-  reportHref?: string;
 }
 
 export interface ErrorHandlers extends MastHandlers {
@@ -309,6 +312,7 @@ export function paintError(roots: Roots, data: ErrorPaint, handlers: ErrorHandle
   const recents = buildListSection(COPY.recents);
   renderRecents(recents, data.recents, (entry) => handlers.onSelect(entry.orgnr));
   main.appendChild(recents.section);
-  renderFooter(roots.foot, data.reportHref ? { reportHref: data.reportHref } : {});
+  // A failed lookup has no match to report.
+  renderFooter(roots.foot, {});
   return answer;
 }

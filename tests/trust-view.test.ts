@@ -178,6 +178,10 @@ describe('buildTrustView — a name guess (P3)', () => {
       tone: 'warn',
       actions: [{ kind: 'report' }],
     });
+    // The row carries «Rapporter feil treff», so the footer does not.
+    expect(v.footReportHref).toBeUndefined();
+    const calm = view({ company: equinor(), method: 'host-auto', host: 'www.equinor.com' });
+    expect(calm.footReportHref).toBe(calm.reportHref);
   });
 
   it('fills the popup’s fifth row with næring when a signal is missing', () => {
@@ -316,6 +320,104 @@ describe('buildTrustView — money under the regnskap row', () => {
     expect(popup.answer.tone).toBe('warn');
     expect(regnskapRow(popup).figures).toBeUndefined();
     expect(regnskapRow(view({ company: warned(), surface: 'panel' })).figures).toBeDefined();
+  });
+});
+
+describe('buildTrustView — the regnskap row says what is and is not there', () => {
+  const regnskapRow = (v: ReturnType<typeof view>) => v.ledger.find((r) => r.key === 'regnskap')!;
+  // The open API a year behind the Enhet: figures for 2024, 2025 filed.
+  const behind = (regnskapEquinor as Array<{ regnskapsperiode: { tilDato: string } }>).filter(
+    (r) => r.regnskapsperiode.tilDato < '2025',
+  );
+
+  it('a late filing names the year that is missing; the headline does too', () => {
+    const late = view({
+      company: company({ ...enhetEquinor, sisteInnsendteAarsregnskap: '2023' }, { regnskap: { items: [] } }),
+    });
+    expect(late.answer).toMatchObject({ tone: 'warn', headline: 'Regnskap for 2025 er ikke levert' });
+    expect(regnskapRow(late)).toMatchObject({
+      tone: 'warn',
+      value: '2025 ikke levert',
+      aux: '· siste er 2023',
+    });
+  });
+
+  it('a form without an unconditional duty keeps the neutral «siste innsendte»', () => {
+    const enk = view({
+      company: company({
+        ...enhetEquinor,
+        organisasjonsform: { kode: 'ENK', beskrivelse: 'Enkeltpersonforetak' },
+        sisteInnsendteAarsregnskap: '2023',
+      }),
+    });
+    expect(regnskapRow(enk)).toMatchObject({ tone: 'neutral', value: '2023', aux: '· siste innsendte' });
+  });
+
+  it('a filed year without figures says the figures are not in the open data', () => {
+    const bank = view({
+      // A bank's 500: special accounts, known from its næringskode.
+      company: company(enhetDnb, { regnskap: { items: [], unavailable: true } }),
+    });
+    expect(regnskapRow(bank)).toMatchObject({ value: '2025 levert', detail: 'tall ikke i åpne data' });
+    const lagging = view({
+      company: company(enhetEquinor, { regnskap: { items: behind } as unknown as RegnskapResponse }),
+    });
+    expect(regnskapRow(lagging)).toMatchObject({ value: '2025 levert', detail: 'tall ikke i åpne data' });
+    expect(regnskapRow(lagging).figures).toBeUndefined();
+  });
+
+  it('a failed lookup and a 500 outside special accounts say nothing about the figures', () => {
+    expect(regnskapRow(view({ company: company(enhetDnb) })).detail).toBeUndefined();
+    const bare = view({ company: company(enhetEquinor, { regnskap: { items: [], unavailable: true } }) });
+    expect(regnskapRow(bare).detail).toBeUndefined();
+    // With the money on the row there is nothing to explain.
+    expect(regnskapRow(view({ company: equinor() })).detail).toBeUndefined();
+  });
+
+  it('Økonomi names the newer filed year over older figures, and which year it shows', () => {
+    const d = view({
+      company: company(enhetEquinor, {
+        regnskap: { items: behind } as unknown as RegnskapResponse,
+        aarsregnskapYears: ['2025', '2024'],
+      }),
+      surface: 'panel',
+    }).dossier!;
+    const f = d.okonomi.figures;
+    expect(f.kind).toBe('figures');
+    if (f.kind !== 'figures') return;
+    expect(f.title).toBe('Årsregnskap 2024');
+    expect(f.status).toEqual({
+      tone: 'neutral',
+      text: '2025 er levert. Tallene er ikke i åpne data ennå.',
+    });
+    expect(d.okonomi.honest).toBe('Viser tallene for 2024. Andre år finnes som PDF.');
+    const noCopies = view({
+      company: company(enhetEquinor, {
+        regnskap: { items: behind } as unknown as RegnskapResponse,
+        aarsregnskapYears: [],
+      }),
+      surface: 'panel',
+    }).dossier!;
+    expect(noCopies.okonomi.honest).toBe('Viser tallene for 2024.');
+  });
+});
+
+describe('buildTrustView — one person in both roles', () => {
+  const roller = (dagl: string, lede: string) =>
+    ({
+      rollegrupper: [
+        { type: { kode: 'DAGL' }, roller: [{ type: { kode: 'DAGL' }, person: { navn: { fornavn: dagl, etternavn: 'Moe' } } }] },
+        { type: { kode: 'STYR' }, roller: [{ type: { kode: 'LEDE' }, person: { navn: { fornavn: lede, etternavn: 'Moe' } } }] },
+      ],
+    }) as unknown as CompanyData['roller'];
+
+  it('gets one line, not the name twice', () => {
+    expect(view({ company: company(enhetEquinor, { roller: roller('Ola', 'Ola') }) }).identity.leaders).toEqual([
+      { label: 'Daglig leder og styreleder', name: 'Ola Moe' },
+    ]);
+    expect(
+      view({ company: company(enhetEquinor, { roller: roller('Ola', 'Kari') }) }).identity.leaders.map((l) => l.label),
+    ).toEqual(['Daglig leder', 'Styreleder']);
   });
 });
 
