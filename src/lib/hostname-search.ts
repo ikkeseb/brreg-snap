@@ -23,7 +23,7 @@
 
 import { searchEnheterWithParams } from './brreg.js';
 import {
-  decideBand,
+  bandScored,
   generateNordicVariants,
   hostnameLabel,
   registrableDomain,
@@ -315,19 +315,13 @@ function decide(
   rejected: string[],
 ): HostnameResult {
   const rejSet = new Set(rejected);
-  const scored = dedupeByOrgnr(hits)
-    .filter((c) => !rejSet.has(c.organisasjonsnummer))
-    .map((c) => ({ cand: c, ...bestScore(c, labels, domain) }))
-    .filter((s) => s.score > 0)
-    .sort((a, b) => b.score - a.score);
-
-  const top = scored[0];
-  const band = decideBand(
-    top?.score ?? 0,
-    scored[1]?.score,
-    top?.hjemmesideTie ?? false,
+  const { band, ranked } = bandScored(
+    dedupeByOrgnr(hits)
+      .filter((c) => !rejSet.has(c.organisasjonsnummer))
+      .map((c) => ({ cand: c, ...bestScore(c, labels, domain) })),
   );
-  const candidates = scored
+  const top = ranked[0];
+  const candidates = ranked
     .slice(0, MAX_PICKER_CANDIDATES)
     .map((s) => toCandidate(s.cand, s.hjemmesideKind));
   if (band === 'auto' && top) {

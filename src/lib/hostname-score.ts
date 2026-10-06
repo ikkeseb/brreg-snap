@@ -511,3 +511,30 @@ export function decideBand(
   if (topScore >= PICKER_THRESHOLD) return 'picker';
   return 'none';
 }
+
+// A search hit with its score, as banding sees it.
+export interface ScoredHit extends ScoreResult {
+  cand: SearchHit;
+}
+
+export interface BandDecision {
+  band: ResolutionBand;
+  // The candidates still in play, best first. The caller caps the list
+  // for the picker; on 'auto' the answer is ranked[0].
+  ranked: ScoredHit[];
+}
+
+// Band a scored candidate set. Pure: the caller scores, dedupes and
+// drops rejected orgnrs first.
+export function bandScored(scored: ScoredHit[]): BandDecision {
+  const ranked = scored
+    .filter((s) => s.score > 0)
+    .sort((a, b) => b.score - a.score);
+  const top = ranked[0];
+  const band = decideBand(
+    top?.score ?? 0,
+    ranked[1]?.score,
+    top?.hjemmesideTie ?? false,
+  );
+  return { band, ranked: band === 'none' ? [] : ranked };
+}

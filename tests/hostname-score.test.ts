@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  bandScored,
   decideBand,
   foldNordic,
   generateNordicVariants,
@@ -10,6 +11,7 @@ import {
   registrableDomain,
   scoreCandidate,
   titleSegmentations,
+  type ScoredHit,
 } from '../src/lib/hostname-score.js';
 import type { SearchHit } from '../src/types/brreg.js';
 
@@ -570,6 +572,102 @@ describe('decideBand', () => {
   it('treats missing runner-up as score 0 for the margin check', () => {
     expect(decideBand(80, undefined, true)).toBe('auto');
     expect(decideBand(70, undefined, true)).toBe('picker');
+  });
+});
+
+describe('bandScored — banding over a scored candidate set', () => {
+  const scored = (
+    label: string,
+    host: string,
+    ...hits: SearchHit[]
+  ): ScoredHit[] =>
+    hits.map((c) => ({ cand: c, ...scoreCandidate(c, label, host) }));
+  const names = (ranked: ScoredHit[]) => ranked.map((s) => s.cand.navn);
+
+  it('ranks best first and answers with the clear holder', () => {
+    const { band, ranked } = bandScored(
+      scored(
+        'dnb',
+        'dnb.no',
+        cand({ navn: 'DNB LIVSFORSIKRING AS', organisasjonsnummer: '2' }),
+        cand({
+          navn: 'DNB BANK ASA',
+          organisasjonsnummer: '1',
+          organisasjonsform: { kode: 'ASA' },
+          hjemmeside: 'www.dnb.no',
+          antallAnsatte: 9000,
+        }),
+      ),
+    );
+    expect(band).toBe('auto');
+    expect(names(ranked)).toEqual(['DNB BANK ASA', 'DNB LIVSFORSIKRING AS']);
+  });
+
+  it('two holders within the margin are a picker', () => {
+    const { band, ranked } = bandScored(
+      scored(
+        'elkjop',
+        'elkjop.no',
+        cand({ navn: 'ELKJØP LEKNES AS', organisasjonsnummer: '1', hjemmeside: 'elkjop.no' }),
+        cand({ navn: 'ELKJØP SVOLVÆR AS', organisasjonsnummer: '2', hjemmeside: 'elkjop.no' }),
+      ),
+    );
+    expect(band).toBe('picker');
+    expect(ranked).toHaveLength(2);
+  });
+
+  it('a clear name-only winner is a picker, never an answer', () => {
+    const { band } = bandScored(
+      scored(
+        'medium',
+        'medium.com',
+        cand({ navn: 'MEDIUM AS', antallAnsatte: 600, registrertIForetaksregisteret: true }),
+      ),
+    );
+    expect(band).toBe('picker');
+  });
+
+  it('drops candidates with no relation or a non-positive score', () => {
+    const { band, ranked } = bandScored(
+      scored(
+        'shell',
+        'shell.no',
+        cand({ navn: 'NORDAN AS', organisasjonsnummer: '3' }),
+        cand({
+          navn: 'SHELL VETERANENE',
+          organisasjonsnummer: '2',
+          organisasjonsform: { kode: 'FLI' },
+        }),
+        cand({
+          navn: 'A/S NORSKE SHELL',
+          organisasjonsnummer: '1',
+          hjemmeside: 'www.shell.no',
+          antallAnsatte: 700,
+          registrertIForetaksregisteret: true,
+        }),
+      ),
+    );
+    expect(band).toBe('auto');
+    expect(names(ranked)).toEqual(['A/S NORSKE SHELL']);
+  });
+
+  it('nothing plausible is none, with no rows', () => {
+    expect(bandScored([])).toEqual({ band: 'none', ranked: [] });
+    // An ENK holding the site, no name match: 22, under the picker
+    // threshold.
+    const { band, ranked } = bandScored(
+      scored(
+        'alnaregnskap',
+        'alnaregnskap.no',
+        cand({
+          navn: 'KARI NORDMANN',
+          organisasjonsform: { kode: 'ENK' },
+          hjemmeside: 'alnaregnskap.no',
+        }),
+      ),
+    );
+    expect(band).toBe('none');
+    expect(ranked).toEqual([]);
   });
 });
 
