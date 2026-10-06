@@ -326,7 +326,25 @@ describe('answer', () => {
     });
     expect(heading.textContent).toBe('Konkurs siden 26. aug. 2026');
     expect(heading.querySelector('.stamp-pre')).toBeNull();
+    expect(heading.querySelector('.stamp-word--long')).toBeNull();
     expect(section.querySelector('.answer__support b')?.textContent).toBe('Adv. Kari Nordmann');
+  });
+
+  it('a stamp word too long for the stamp is set to fit it', () => {
+    const { heading } = buildAnswer({
+      tone: 'danger',
+      headline: 'Tvangsavvikling – mangler regnskap',
+      stamp: { word: 'Tvangsavvikling', rest: '– mangler regnskap' },
+      actions: [],
+    });
+    expect(heading.querySelector('.stamp-word--long')?.textContent).toBe('Tvangsavvikling');
+    const spoof = buildAnswer({
+      tone: 'danger',
+      headline: 'Nettstedet er ikke koblet til selskapet',
+      stamp: { pre: 'Nettstedet er', word: 'ikke koblet', rest: 'til selskapet' },
+      actions: [],
+    });
+    expect(spoof.heading.querySelector('.stamp-word--long')).toBeNull();
   });
 
   it('the error band is warn with «Prøv igjen», never an alert or a stamp', () => {
@@ -416,6 +434,8 @@ describe('ledger', () => {
       }),
       { onForget, reportHref: 'mailto:sebastian@nuez.no?subject=x' },
     );
+    // The note is its own node: the popup's budget can shed it alone.
+    expect(div.querySelector('.ledger-row__note')?.textContent).toBe('ingen hjemmeside registrert');
     const acts = [...div.querySelectorAll('.ledger-row__act')];
     expect(acts.map((a) => a.textContent)).toEqual(['Feil bedrift?', 'Glem valget', 'Rapporter feil treff', 'Kunngjøringer ↗']);
     (acts[1]!.firstElementChild as HTMLButtonElement).click();

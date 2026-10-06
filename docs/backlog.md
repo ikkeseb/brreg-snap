@@ -32,14 +32,6 @@ out of here when it ships or is dropped.
   possible without a new request. Not now: the view shows the latest
   year by design, and how many years brreg keeps serving is unknown.
   Revisit as a product decision once the shape has held for a while.
-- **Popup states over 600 px.** Measured in the real popup against the
-  live API (2026-10-06): VERDENS GANG AS on vg.no is 618 px (the
-  omsetning line and the konsern row both wrap), and a tvangsavvikling
-  with a bostyrer, a two-line name and an org.nr from the URL is
-  623 px; the actions then sit under the sticky footer. The smoke does
-  not measure the budget (`docs/notes/ui.md` § popup-budget). Revisit
-  with the next popup change: vg.no is now a direct answer, so this is
-  a first screen.
 - **An answer from an incomplete run.** When a constituent query fails
   the band is still decided from what came back and may be `auto`
   (uncached, `docs/notes/cache.md` § failure-no-cache); a rival
@@ -57,8 +49,9 @@ out of here when it ships or is dropped.
   stores reviewed); manual search follows brreg's own order
   (BOLIGSAMEIET KIWI TAU above KIWI NORGE AS; sorting by headcount
   would bury small exact matches); the ledger says «omsetning» where
-  Økonomi says «Driftsinntekter» (the longer word wraps the popup past
-  600 px); a popup with about 500 px of room under the toolbar is
+  Økonomi says «Driftsinntekter» (the longer word wraps the money
+  line, so the popup would shed it more often, `docs/notes/ui.md`
+  § popup-budget); a popup with about 500 px of room under the toolbar is
   clipped by the browser, seen only in a headless 800×600 run.
 
 <!-- SECTION: rejected -->

@@ -33,6 +33,17 @@ for (const s of STATES) {
       }
     }
 
+    // A browser caps a popup at 600 px (docs/notes/ui.md § popup-budget),
+    // and a stamp word never runs out of its stamp.
+    if (s.surface === 'popup') {
+      const height = await page.evaluate(() => document.body.getBoundingClientRect().height);
+      expect.soft(height, 'popup within the 600 px budget').toBeLessThanOrEqual(600);
+    }
+    const stampOverflow = await page.evaluate(() =>
+      [...document.querySelectorAll('.stamp-word')].some((w) => w.scrollWidth > w.clientWidth),
+    );
+    expect.soft(stampOverflow, 'stamp word inside its stamp').toBe(false);
+
     await page.screenshot({
       path: join(testInfo.project.outputDir, 'screenshots', testInfo.project.name, `${s.name}.png`),
       fullPage: true,

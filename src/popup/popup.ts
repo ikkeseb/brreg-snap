@@ -53,6 +53,7 @@ import {
   type TrustView,
 } from '../lib/view/trust-view.js';
 import {
+  fitBudget,
   paintEmpty,
   paintError,
   paintLoading,
@@ -69,6 +70,11 @@ const roots: Roots = {
   foot: document.getElementById('foot') as HTMLElement,
   live: liveRegionOf(document.getElementById('live') as HTMLElement),
 };
+
+// A paint measures its budget with whatever font has loaded; the swap
+// to the brand font reflows it, so measure again (happy-dom has no
+// FontFaceSet).
+if ('fonts' in document) document.fonts.addEventListener('loadingdone', () => fitBudget(roots.body));
 
 // What «Rapporter feil treff» reports about this install. getManifest
 // is optional-called: the preview harness's shim has none.

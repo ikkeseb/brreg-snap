@@ -40,6 +40,9 @@ export function buildAnswer(answer: AnswerView, handlers: AnswerHandlers = {}): 
       head.append(' ');
     }
     const word = el('strong', 'stamp-word');
+    // A word too long for the stamp's set size (TVANGSAVVIKLING) takes
+    // the size that fits the stamp instead of running out of it.
+    if (stamp.word.split(' ').some((w) => w.length > 10)) word.classList.add('stamp-word--long');
     word.appendChild(glyph('danger'));
     word.append(stamp.word);
     head.appendChild(word);

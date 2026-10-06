@@ -366,6 +366,10 @@
   font-size: var(--stamp-size); line-height: .98; font-weight: 900;
   letter-spacing: -.02em; text-transform: uppercase; text-wrap: balance;
 }
+/* a single word wider than the stamp at --stamp-size: TVANGSAVVIKLING and
+   its glyph are 11 em in this font, so the size is the stamp's inner
+   width (the surface minus both gutters and the 15 px paddings) / 11.5 */
+.stamp-word--long { font-size: min(var(--stamp-size), calc((100cqi - 2 * var(--gut) - 30px) / 11.5)); }
 .stamp-word .glyph { width: .62em; height: .62em; color: inherit; stroke-width: 3.4; }
 .answer--danger .answer__support {
   margin-top: 10px; padding-top: 9px; color: var(--on-danger);
@@ -464,6 +468,20 @@
   font: var(--t-cap); font-weight: 400; color: var(--ink-3);
 }
 .app--popup .foot { position: sticky; bottom: 0; background: var(--paper); }
+
+/* ---------- popup budget sheds -------------------------------------------
+   fitBudget (popup/views.ts) adds these to <body>, in order, while the
+   state passes the 600 px cap; the panel keeps everything.
+   1  the regnskap row names the year only; a picker row's activity
+      keeps one line
+   2  the provenance eyebrow: the Kobling row's verdict stays
+   3  a neutral Kobling row's note («ingen hjemmeside registrert»); its
+      way out stays. A warn or danger row keeps its note: «ikke vg.no»
+      is the finding */
+.shed-1 .ledger-row[data-key="regnskap"] .ledger-row__detail { display: none; }
+.shed-1 .pick__sub { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.shed-2 .ident__eyebrow { display: none; }
+.shed-3 .ledger-row[data-key="kobling"][data-tone="neutral"] .ledger-row__note { display: none; }
 .foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; }
 .foot__row + .foot__row { margin-top: 3px; }
 .foot :is(a, button) {

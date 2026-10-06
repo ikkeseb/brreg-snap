@@ -43,6 +43,13 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   they now hyphenate.
 - The panel's footer floated under short states; it sits at the bottom.
 - «Rapporter feil treff» appeared twice on a mismatched site.
+- The popup stays within the 600 px a browser gives it. A state that
+  would pass it sheds detail in a fixed order until it fits: the year's
+  money, a picker row's second line of activity, then where the org.nr
+  was found. vg.no, bunnpris.no and a company in tvangsavvikling with a
+  long name had their buttons under the footer.
+- «TVANGSAVVIKLING» ran out of its stamp in both the popup and the
+  panel; it is now set to fit.
 
 ## [1.4.2] — 2026-10-06
 

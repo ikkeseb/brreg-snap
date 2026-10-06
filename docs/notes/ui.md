@@ -66,7 +66,8 @@ Type: four steps and the stamp word, nothing else — `--t-cap` (600
 `--t-body` (400 13px, everything readable), `--t-lead` (700 16px, the
 answer, empty-state heads), `--t-name` (800 26px, the company name;
 23px below 340 px), `--stamp-size` (30px popup, `clamp(26px, 9cqi,
-36px)` panel). Space is a 4 px grid (`--s1`…`--s5`); `--gut` is 20 px
+36px)` panel; a word longer than ten letters, TVANGSAVVIKLING, is
+`.stamp-word--long`, sized to the stamp's inner width). Space is a 4 px grid (`--s1`…`--s5`); `--gut` is 20 px
 in the popup, 16 px in the panel. Shape: no elevation anywhere, rules
 separate and fills escalate; `--r` 2 px for inputs, buttons, kbd and
 tags, `--r-stamp` 3 px for the stamp only. Motion: `--ease`,
@@ -183,15 +184,31 @@ search): the smoke and the tests key on those, not on classes.
 <!-- SECTION: popup-budget -->
 ## The popup's 600 px budget
 
-Firefox caps a popup at 600 px; the design fixes the width at 380 px
-and measures every state against the cap (`node measure.mjs` in the
-design folder; the harness re-measures with `document.body` height).
-Measured 2026-09-30 against the live API: dnb 562, spoof 588, nrk
-picker 592, konkurs 596, no-site 386 — all under 600. With the
-«Noe kunne ikke hentes» line (a failed part drops a row too): dnb with
-roller + regnskap + konsern failed 506, equinor with only konsern
-failed 586; a stamp gets no line, because konkurs (596) or the spoof
-(588) plus a line would pass the cap. What keeps them there:
+Firefox and Chrome cap a popup at 600 px; the design fixes the width at
+380 px and measures every state against the cap (the harness measures
+`document.body` height; the real popup's viewport reads 1 px under its
+content, a rounding, not an overflow). Measured 2026-10-06 against the
+live API, Chromium and Gecko alike: dnb 581, equinor 600 (no line to
+spare), spoof 588, konkurs 596, nrk picker 592, sbanken picker 559.
+With the «Noe kunne ikke hentes» line (a failed part drops a row too):
+dnb with roller + regnskap + konsern failed 506, equinor with only
+konsern failed 586; a stamp gets no line, because konkurs (596) or the
+spoof (588) plus a line would pass the cap.
+
+The design rules below keep the common states under the cap. Names,
+leaders and parent companies are as long as the registry has them, so
+the popup also fits itself: after every paint (and after the font
+swap) `fitBudget` (`src/popup/views.ts`) measures the body and, while
+it passes 600 px, adds the next shed step to `<body>`; the «popup
+budget sheds» block in `src/styles/brreg.css` says what each hides. In order: (1) the regnskap
+row's money and a picker row's activity past one line, (2) the
+provenance eyebrow, (3) a neutral Kobling row's note («ingen
+hjemmeside registrert»). A warn or danger Kobling note is the finding
+and never sheds. Measured before → after: vg.no 618 → 581 (step 1),
+bunnpris picker 667 → 525 (step 1), a tvangsavvikling with a two-line
+name and an org.nr from the URL 623 → 582 (all three). A state that
+fits sheds nothing; the panel never sheds. The smoke asserts every
+popup state within 600 px and every stamp word inside its stamp.
 
 - Identity uses one compact leaders line («Daglig leder X · Styreleder
   Y», wrapping whole pairs) instead of a two-column block; one person

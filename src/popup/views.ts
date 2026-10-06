@@ -52,6 +52,23 @@ export function setState(roots: Roots, state: PopupState, answer: AnswerAttr): v
   roots.main.classList.remove('reveal');
 }
 
+// --- the 600 px budget ---------------------------------------------------
+
+// A browser caps a popup at 600 px (docs/notes/ui.md § popup-budget),
+// and names, leaders and parent companies are as long as the registry
+// has them. A state that would pass the cap sheds secondary detail, one
+// step at a time, until it fits; brreg.css says what each step hides.
+const POPUP_CAP = 600;
+const SHED_STEPS = ['shed-1', 'shed-2', 'shed-3'] as const;
+
+export function fitBudget(body: HTMLElement): void {
+  body.classList.remove(...SHED_STEPS);
+  for (const step of SHED_STEPS) {
+    if (body.getBoundingClientRect().height <= POPUP_CAP) return;
+    body.classList.add(step);
+  }
+}
+
 export interface MastHandlers {
   onSearch: () => void;
 }
@@ -67,6 +84,7 @@ export function paintLoading(roots: Roots, host: string | undefined, handlers: M
   setState(roots, 'loading', 'loading');
   renderSkeleton(roots.main, 'popup');
   renderFooter(roots.foot, { loading: true });
+  fitBudget(roots.body);
 }
 
 // --- result ---------------------------------------------------------------
@@ -154,6 +172,7 @@ export function paintResult(roots: Roots, view: TrustView, handlers: ResultHandl
     },
     { onRefresh: handlers.onRefresh },
   );
+  fitBudget(roots.body);
   return { heading, answer };
 }
 
@@ -187,6 +206,7 @@ export function paintPicker(roots: Roots, data: PickerPaint, handlers: PickerHan
     },
   );
   renderFooter(roots.foot, { reportHref: data.reportHref });
+  fitBudget(roots.body);
   return picker;
 }
 
@@ -278,6 +298,7 @@ export function paintEmpty(roots: Roots, data: EmptyPaint, handlers: EmptyHandle
     },
   );
   renderFooter(roots.foot, data.reportHref ? { reportHref: data.reportHref } : {});
+  fitBudget(roots.body);
   return view;
 }
 
@@ -314,5 +335,6 @@ export function paintError(roots: Roots, data: ErrorPaint, handlers: ErrorHandle
   main.appendChild(recents.section);
   // A failed lookup has no match to report.
   renderFooter(roots.foot, {});
+  fitBudget(roots.body);
   return answer;
 }

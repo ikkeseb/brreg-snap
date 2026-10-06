@@ -70,7 +70,7 @@ export function buildLedgerRow(row: LedgerRow, handlers: LedgerHandlers = {}): H
   if (hasDetail) {
     if (!row.inline) dd.append(' ');
     const detail = el('span', 'ledger-row__detail');
-    if (row.detail) detail.append(row.detail);
+    if (row.detail) detail.appendChild(el('span', 'ledger-row__note', row.detail));
     if (row.figures) {
       row.figures.forEach((group, i) => {
         if (i > 0 || row.detail) detail.append(' · ');
