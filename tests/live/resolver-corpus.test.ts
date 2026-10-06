@@ -42,7 +42,7 @@ const CORPUS: { host: string; expect: Expectation; why: string }[] = [
   { host: 'zalando.no', expect: NONE, why: 'no Norwegian entity' },
   { host: 'norden.org', expect: NONE, why: 'intergovernmental, not in brreg' },
   { host: 'detnorsketeatret.no', expect: auto('921196164'), why: 'LL DET NORSKE TEATRET' },
-  { host: 'lieoverflate.no', expect: auto('918178147'), why: 'LIE OVERFLATE AS' },
+  { host: 'lieoverflate.no', expect: pickerOk('918178147'), why: 'LIE OVERFLATE AS no longer registers the site; the lone holder LIE KOMPETANSE AS must not auto' },
   { host: 'equinor.no', expect: auto('923609016'), why: 'EQUINOR ASA' },
   { host: 'dnb.no', expect: auto('984851006'), why: 'DNB BANK ASA, hjemmeside www.dnb.no' },
   { host: 'nrk.no', expect: pickerOk('976390512'), why: 'NORSK RIKSKRINGKASTING AS; the NRK label also matches NRK-named namesakes' },
@@ -72,6 +72,23 @@ const CORPUS: { host: string; expect: Expectation; why: string }[] = [
   { host: 'evoelsykler.no', expect: auto('912413608'), why: 'EVO ELSYKLER AS' },
   { host: 'hillesland.no', expect: auto('945882034'), why: 'HILLESLAND AS' },
   { host: 'hvitevareteknikk.no', expect: auto('988573450'), why: 'HVITEVARETEKNIKK AS' },
+
+  // The two-signal rule (docs/notes/resolution.md § bands), verified
+  // against brreg 2026-10-06.
+  { host: 'vg.no', expect: auto('950588063'), why: 'VERDENS GANG AS: the only holder, and vg is its initials' },
+  { host: 'uio.no', expect: auto('971035854'), why: 'UNIVERSITETET I OSLO: holder, initials' },
+  { host: 'danskebank.no', expect: auto('977074010'), why: 'DANSKE BANK A/S NUF: holder, named after the site' },
+  { host: 'alnaregnskap.no', expect: auto('994204327'), why: 'ALNA REGNSKAP AS: holder, the name run together' },
+  { host: 'craftinghouse.no', expect: auto('995135086'), why: 'CRAFTING HOUSE AS: holder, run together' },
+  { host: 'theplayer.no', expect: auto('978643000'), why: 'THE PLAYER AS, beside CLASSIC SPORTSWEAR AS on the same site' },
+  { host: 'clemenskraft.no', expect: auto('912511480'), why: 'CLEMENS KRAFT AS among the group\'s power companies on the site' },
+  { host: 'if.no', expect: pickerOk('981290666'), why: 'IF SKADEFORSIKRING NUF has no hjemmeside; the lone holder AKERSHUS FORSIKRINGSSENTER AS must not auto' },
+  { host: 'adressa.no', expect: pickerOk('992664568'), why: 'ADRESSEAVISEN AS has no hjemmeside; the lone holder is its redaksjonsklubb' },
+  { host: 'sparebank1.no', expect: NONE, why: 'nine holders, a factoring company and property SPVs, none of them the bank' },
+  { host: 'brekke-eiendom.no', expect: NONE, why: 'seven property SPVs hold it; four BREKKE EIENDOM AS exist, none with a hjemmeside' },
+  { host: 'bunnpris.no', expect: NONE, why: 'two local grocers hold it; neither is the chain' },
+  { host: 'xxl.no', expect: pickerOk('881932792'), why: 'XXL SPORT & VILLMARK AS (1 955 ansatte) and the shell XXL AS both hold it' },
+  { host: 'vitusapotek.no', expect: pickerOk('965336796'), why: 'NORSK MEDISINALDEPOT AS (3 777 ansatte) beside two single pharmacies' },
 ];
 
 type Verdict =

@@ -8,6 +8,16 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ### Changed
 
+- More sites answer directly. A company that has the site registered
+  and is named after it is the answer even when the domain runs the
+  name together (alnaregnskap.no → ALNA REGNSKAP AS) or abbreviates it
+  (vg.no → VERDENS GANG AS), and for sole proprietors and associations
+  too.
+- A company with the site registered is never «Fant ikke selskapet»:
+  when nothing else supports it, it is a one-row picker to confirm.
+- Fewer arbitrary answers: when several companies share a site and none
+  carries its name, a shorter company name no longer decides
+  (bunnpris.no is a picker).
 - The picker says what it found: «Fant ikke selskapet bak …» when no
   row has the site as registered hjemmeside, «Står dette selskapet bak
   …?» when the one row has it, and a line of its own when several

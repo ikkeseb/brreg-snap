@@ -47,11 +47,17 @@ registrable domain (`siteKey`: `www.dnb.no`, `dnb.no` and
 `nettbank.dnb.no` are all `dnb.no`; `docs/notes/resolution.md`
 § undo):
 
-- `hostname:<site>` → `HostnameResult` = `{band: 'auto' | 'picker' |
+- `band:<site>` → `HostnameResult` = `{band: 'auto' | 'picker' |
   'none', candidates: Candidate[]}` (orgnr is included on the auto
-  variant; each candidate carries its `evidence`). A read that fails
-  the shape guard (an older build's entry) is a miss. The title
-  segmentation run caches under `hostname:<site>[:rej:…]:seg:<queries>`.
+  variant; each candidate carries its `evidence`; a picker whose rows
+  were capped carries `cut`). A read that fails the shape guard (an
+  older build's entry) is a miss. A new banding rule moves the prefix
+  (`hostname:` until 1.4.2): Chrome clears `storage.session` when the
+  extension updates, but Firefox documents clearing only when the
+  browser stops or the extension is disabled, so an old build's band
+  could otherwise answer for up to 24h. Entries under an old prefix
+  are never read and age out. The title
+  segmentation run caches under `band:<site>[:rej:…]:seg:<queries>`.
 - `picker-choice:<site>` → `string | null` (null = "Ingen av disse").
   Set by the picker (either surface) when the user resolves it. Wins
   over the band cache: if a choice is cached,
@@ -60,7 +66,7 @@ registrable domain (`siteKey`: `www.dnb.no`, `dnb.no` and
 - `rejected:<site>` → `string[]`. Orgnrs the user said "Feil bedrift?"
   on for this site. The pipeline filters these out before scoring,
   and the band cache key folds the sorted set in
-  (`hostname:<site>:rej:<a>|<b>`) so a fresh rejection doesn't serve
+  (`band:<site>:rej:<a>|<b>`) so a fresh rejection doesn't serve
   the stale pre-rejection result. `addRejectedChoice` also clears the
   positive `picker-choice:<site>` if it equals the rejected orgnr —
   otherwise the choice would keep short-circuiting future

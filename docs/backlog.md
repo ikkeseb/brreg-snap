@@ -32,6 +32,34 @@ out of here when it ships or is dropped.
   possible without a new request. Not now: the view shows the latest
   year by design, and how many years brreg keeps serving is unknown.
   Revisit as a product decision once the shape has held for a while.
+- **Popup states over 600 px.** Measured in the real popup against the
+  live API (2026-10-06): VERDENS GANG AS on vg.no is 618 px (the
+  omsetning line and the konsern row both wrap), and a tvangsavvikling
+  with a bostyrer, a two-line name and an org.nr from the URL is
+  623 px; the actions then sit under the sticky footer. The smoke does
+  not measure the budget (`docs/notes/ui.md` § popup-budget). Revisit
+  with the next popup change: vg.no is now a direct answer, so this is
+  a first screen.
+- **An answer from an incomplete run.** When a constituent query fails
+  the band is still decided from what came back and may be `auto`
+  (uncached, `docs/notes/cache.md` § failure-no-cache); a rival
+  the failed query would have returned is then missing. Unchanged by
+  the two-signal rule. Not now: no report of it. Revisit if a wrong
+  answer is traced to a failed query.
+- **The title pass sees only the picker's rows.** The spaced run
+  re-decides from at most four first-pass candidates
+  (`docs/notes/resolution.md` § title-segmentation), so after a capped
+  first pass it may add rows but not answer. Carrying the whole pool
+  would lift that; the band cache would grow with it.
+- **Wording and order, the maintainer's call** (from the 2026-10-06
+  screenshot review): «Auto-oppdater» was read as a data refresh by two
+  readers («Følg fanen» was suggested; it is also the consent text the
+  stores reviewed); manual search follows brreg's own order
+  (BOLIGSAMEIET KIWI TAU above KIWI NORGE AS; sorting by headcount
+  would bury small exact matches); the ledger says «omsetning» where
+  Økonomi says «Driftsinntekter» (the longer word wraps the popup past
+  600 px); a popup with about 500 px of room under the toolbar is
+  clipped by the browser, seen only in a headless 800×600 run.
 
 <!-- SECTION: rejected -->
 ## Rejected
@@ -53,8 +81,10 @@ out of here when it ships or is dropped.
   covers the case (`docs/notes/permissions-model.md`
   § tabs-runtime-optin). Reopen only if `tabs`
   itself has to go.
-- **Domain match via `epostadresse` or acronyms** (nrk.no → NORSK
-  RIKSKRINGKASTING AS). brreg refuses an `epostadresse` filter
+- **Domain match via `epostadresse` or acronyms alone** (nrk.no →
+  NORSK RIKSKRINGKASTING AS). Initials do confirm a company that holds
+  the site (vg.no, `docs/notes/resolution.md` § bands); they never put
+  one in the pool. brreg refuses an `epostadresse` filter
   (checked 2026-05-16), and NRK has no `hjemmeside` (live, 2026-09-30),
   so no query puts it in the pool by domain; scoring can't promote a
   candidate that isn't there. The live corpus expects it in the picker

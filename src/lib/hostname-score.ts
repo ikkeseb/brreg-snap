@@ -239,6 +239,11 @@ export interface ScoreResult {
   // on it (an artist page on nrk.no, a fund under storebrand.no). The
   // picker labels the two differently; banding treats them alike.
   hjemmesideKind?: 'exact' | 'page' | 'subdomain';
+  // True when the label is a whole word of the name (the prefix and
+  // word classes), not just a run of letters inside one.
+  wholeWord: boolean;
+  // The points the name's word count added or took (short / long).
+  nameLength: number;
 }
 
 // Brreg's hjemmeside field is free text — "http://www.equinor.com",
@@ -382,12 +387,20 @@ export function scoreCandidate(
   }
   if (hjemReason) reasons.push(hjemReason);
   const hjemmesideTie = hjemScore > 0;
+  const wholeWord = nameScore >= 28;
 
   // Hard gate: no name AND no hjemmeside relation → drop. Kills
   // unrelated candidates that happen to share org form / employee
   // count (norden.org → NORDAN AS).
   if (nameScore === 0 && hjemScore === 0) {
-    return { score: 0, reasons: ['no-relation'], hjemmesideTie, hjemmesideKind };
+    return {
+      score: 0,
+      reasons: ['no-relation'],
+      hjemmesideTie,
+      hjemmesideKind,
+      wholeWord,
+      nameLength: 0,
+    };
   }
 
   let score = nameScore + hjemScore;
@@ -447,16 +460,18 @@ export function scoreCandidate(
     reasons.push(`noise=${matchedNoise}(-40)`);
   }
 
+  let nameLength = 0;
   if (wordCount >= 5) {
-    score -= 10;
+    nameLength = -10;
     reasons.push(`long(${wordCount}w)(-10)`);
   } else if (wordCount === 2) {
-    score += 10;
+    nameLength = 10;
     reasons.push('short(2w)(+10)');
   } else if (wordCount === 1) {
-    score += 5;
+    nameLength = 5;
     reasons.push('short(1w)(+5)');
   }
+  score += nameLength;
 
   // The penalty demotes name lookalikes that are winding down. It must
   // not touch an exact hjemmeside tie: then the registry itself says
@@ -469,7 +484,14 @@ export function scoreCandidate(
     reasons.push('inactive(-30)');
   }
 
-  return { score, reasons, hjemmesideTie, hjemmesideKind };
+  return {
+    score,
+    reasons,
+    hjemmesideTie,
+    hjemmesideKind,
+    wholeWord,
+    nameLength,
+  };
 }
 
 // Thresholds — tuned against the hostname benchmark, now the live resolver corpus
@@ -512,6 +534,49 @@ export function decideBand(
   return 'none';
 }
 
+// Legal forms as they stand first or last in a registered name
+// (AS BACKE, A/S NORSKE SHELL, DANSKE BANK A/S NUF, LL DET NORSKE
+// TEATRET). Only one is stripped at each end: inside a name they are
+// words.
+const LEGAL_FORMS = new Set([
+  'AS', 'A/S', 'ASA', 'SA', 'BA', 'AL', 'LL', 'DA', 'ANS', 'KS', 'NUF',
+  'SE', 'SF', 'KF', 'IKS', 'BBL', 'BRL', 'SPA', 'STI',
+]);
+// The foreign company's own form, which a branch carries before NUF.
+const FOREIGN_FORMS = new Set([
+  'AB', 'APS', 'A/S', 'AG', 'BV', 'NV', 'OY', 'OYJ', 'GMBH', 'LTD',
+  'LIMITED', 'PLC', 'LLC', 'INC', 'SA', 'SE',
+]);
+
+const compact = (s: string): string =>
+  foldNordic(s.toUpperCase()).replace(/[^\p{L}\p{N}]/gu, '');
+
+// Whether a company is named after the site: its name without the
+// legal form, run together and folded, IS the label (ALNA REGNSKAP AS
+// for alnaregnskap, TV 2 AS for tv2, A-MØBLER AS for a-mobler), or the
+// label is the initials of that name's words (VERDENS GANG for vg,
+// UNIVERSITETET I OSLO for uio). Stricter than any scoreCandidate name
+// class: nothing of the name may be left over.
+export function namedAfterSite(navn: string, label: string): boolean {
+  const target = compact(label);
+  if (target.length < 2) return false;
+  // Forms are recognised before folding: ÅS is a place, not AS.
+  const words = navn.toUpperCase().split(/\s+/).filter(Boolean);
+  const strip = (at: number, forms: Set<string>): boolean => {
+    const i = at < 0 ? words.length + at : at;
+    if (words.length < 2 || !forms.has(words[i]!)) return false;
+    words.splice(i, 1);
+    return true;
+  };
+  strip(0, LEGAL_FORMS);
+  const branch = words[words.length - 1] === 'NUF';
+  strip(-1, LEGAL_FORMS);
+  if (branch) strip(-1, FOREIGN_FORMS);
+  const base = words.map(compact).filter(Boolean);
+  if (base.join('') === target) return true;
+  return base.length >= 2 && base.map((w) => w[0]).join('') === target;
+}
+
 // A search hit with its score, as banding sees it.
 export interface ScoredHit extends ScoreResult {
   cand: SearchHit;
@@ -519,22 +584,80 @@ export interface ScoredHit extends ScoreResult {
 
 export interface BandDecision {
   band: ResolutionBand;
-  // The candidates still in play, best first. The caller caps the list
-  // for the picker; on 'auto' the answer is ranked[0].
+  // The candidates still in play: on 'auto' the answer, then the rest
+  // best first; on 'picker' best first. pickerRows caps the list.
   ranked: ScoredHit[];
 }
 
+// A holder: the registry ties the site itself to this candidate.
+const isHolder = (s: ScoredHit): boolean => s.hjemmesideKind === 'exact';
+
 // Band a scored candidate set. Pure: the caller scores, dedupes and
-// drops rejected orgnrs first.
-export function bandScored(scored: ScoredHit[]): BandDecision {
+// drops rejected orgnrs first. `labels` are the forms of the hostname
+// label the names were scored against.
+//
+// An answer needs two signals that agree, the registry's tie and the
+// name; one alone is a row for the user to confirm:
+//
+//   1. A holder named after the site is the answer, whatever its
+//      score, unless the name is contested. Any other candidate whose
+//      name matches the site (a whole word, or named after it) is a
+//      rival, in play or not: a rival holder must trail by the margin,
+//      a rival without the tie must simply score lower. Contested
+//      means picker.
+//   2. No holder is named after the site: decideBand on the scores.
+//      Among several holders with no whole-word name match, the answer
+//      must also stand without the name-length points; otherwise the
+//      top one is just whoever has the shorter name.
+//   3. A holder is never dropped: it stays in play with a zero or
+//      negative score, and any holder makes the band at least 'picker'.
+export function bandScored(scored: ScoredHit[], labels: string[]): BandDecision {
   const ranked = scored
-    .filter((s) => s.score > 0)
+    .filter((s) => s.score > 0 || isHolder(s))
     .sort((a, b) => b.score - a.score);
-  const top = ranked[0];
-  const band = decideBand(
+  const holders = ranked.filter(isHolder);
+  const named = (s: ScoredHit): boolean =>
+    labels.some((label) => namedAfterSite(s.cand.navn, label));
+
+  const own = holders.find(named);
+  if (own) {
+    const contested = scored.some(
+      (s) =>
+        s !== own &&
+        (s.wholeWord || named(s)) &&
+        (isHolder(s)
+          ? s.score > own.score - AUTO_MARGIN
+          : s.score >= own.score),
+    );
+    return contested
+      ? { band: 'picker', ranked }
+      : { band: 'auto', ranked: [own, ...ranked.filter((s) => s !== own)] };
+  }
+
+  const scoring = ranked.filter((s) => s.score > 0);
+  const top = scoring[0];
+  let band = decideBand(
     top?.score ?? 0,
-    ranked[1]?.score,
+    scoring[1]?.score,
     top?.hjemmesideTie ?? false,
   );
+  if (band === 'auto' && top && holders.length > 1 && !top.wholeWord) {
+    const plain = (s: ScoredHit): number => s.score - s.nameLength;
+    const rest = scoring.filter((s) => s !== top).map(plain);
+    band = decideBand(plain(top), Math.max(0, ...rest), true);
+    if (band !== 'auto') band = 'picker';
+  }
+  if (band === 'none' && holders.length > 0) band = 'picker';
   return { band, ranked: band === 'none' ? [] : ranked };
+}
+
+// The rows a picker shows: the best `max`, and always a holder among
+// them when there is one, in place of the weakest row.
+export function pickerRows(ranked: ScoredHit[], max: number): ScoredHit[] {
+  const rows = ranked.slice(0, max);
+  const holder = ranked.find(isHolder);
+  if (holder && rows.length > 0 && !rows.some(isHolder)) {
+    rows[rows.length - 1] = holder;
+  }
+  return rows;
 }

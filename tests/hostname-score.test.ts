@@ -7,7 +7,9 @@ import {
   generateNordicVariants,
   hjemmesideDomains,
   hostnameLabel,
+  namedAfterSite,
   normalizeHjemmeside,
+  pickerRows,
   registrableDomain,
   scoreCandidate,
   titleSegmentations,
@@ -575,18 +577,281 @@ describe('decideBand', () => {
   });
 });
 
-describe('bandScored — banding over a scored candidate set', () => {
+describe('namedAfterSite — the name IS the label, or its initials', () => {
+  it('run together, folded, without the legal form at either end', () => {
+    expect(namedAfterSite('ALNA REGNSKAP AS', 'alnaregnskap')).toBe(true);
+    expect(namedAfterSite('TV 2 AS', 'tv2')).toBe(true);
+    expect(namedAfterSite('A-MØBLER AS', 'a-mobler')).toBe(true);
+    expect(namedAfterSite('AS BACKE', 'backe')).toBe(true);
+    expect(namedAfterSite('DANSKE BANK A/S NUF', 'danskebank')).toBe(true);
+    expect(namedAfterSite('LL DET NORSKE TEATRET', 'detnorsketeatret')).toBe(true);
+    expect(namedAfterSite('ACME LTD NUF', 'acme')).toBe(true);
+  });
+
+  it('the initials of two or more words', () => {
+    expect(namedAfterSite('VERDENS GANG AS', 'vg')).toBe(true);
+    expect(namedAfterSite('UNIVERSITETET I OSLO', 'uio')).toBe(true);
+    expect(namedAfterSite('FESTSPILLENE I BERGEN STI', 'fib')).toBe(true);
+  });
+
+  it('nothing of the name may be left over', () => {
+    expect(namedAfterSite('XXL SPORT & VILLMARK AS', 'xxl')).toBe(false);
+    expect(namedAfterSite('VG CONSULT AS', 'vg')).toBe(false);
+    expect(namedAfterSite('AKERSHUS FORSIKRINGSSENTER AS', 'if')).toBe(false);
+    // A legal form inside the name is a word of it.
+    expect(namedAfterSite('ACME SE AS', 'acme')).toBe(false);
+    // Letters outside a–z are kept, not deleted into a false match.
+    expect(namedAfterSite('CAF AS', 'café')).toBe(false);
+    expect(namedAfterSite('X AS', 'x')).toBe(false);
+    // ÅS is a place; only the folded form looks like AS.
+    expect(namedAfterSite('ÅS REGNSKAP', 'regnskap')).toBe(false);
+    expect(namedAfterSite('ACME LTD', 'acme')).toBe(false);
+  });
+});
+
+describe('bandScored — an answer needs the tie and the name to agree', () => {
   const scored = (
     label: string,
     host: string,
     ...hits: SearchHit[]
   ): ScoredHit[] =>
     hits.map((c) => ({ cand: c, ...scoreCandidate(c, label, host) }));
-  const names = (ranked: ScoredHit[]) => ranked.map((s) => s.cand.navn);
+  const band = (label: string, host: string, ...hits: SearchHit[]) => {
+    const { band, ranked } = bandScored(scored(label, host, ...hits), [label]);
+    return { band, names: ranked.map((s) => s.cand.navn) };
+  };
+  const firm = { registrertIForetaksregisteret: true };
 
-  it('ranks best first and answers with the clear holder', () => {
-    const { band, ranked } = bandScored(
+  it('a holder with a run-together name is the answer', () => {
+    // 68 on the score alone: the label is no whole word of the name.
+    expect(
+      band(
+        'alnaregnskap',
+        'alnaregnskap.no',
+        cand({ navn: 'ALNA REGNSKAP AS', hjemmeside: 'alnaregnskap.no', ...firm }),
+      ),
+    ).toEqual({ band: 'auto', names: ['ALNA REGNSKAP AS'] });
+  });
+
+  it('a holder whose initials are the label beats lower name look-alikes', () => {
+    expect(
+      band(
+        'vg',
+        'vg.no',
+        cand({ navn: 'VG CONSULT AS', organisasjonsnummer: '2', antallAnsatte: 13, ...firm }),
+        cand({
+          navn: 'VERDENS GANG AS',
+          organisasjonsnummer: '1',
+          hjemmeside: 'www.vg.no',
+          antallAnsatte: 327,
+          ...firm,
+        }),
+      ),
+    ).toEqual({ band: 'auto', names: ['VERDENS GANG AS', 'VG CONSULT AS'] });
+  });
+
+  it('a named holder answers even with a negative score', () => {
+    expect(
+      band(
+        'bak',
+        'bak.no',
+        cand({ navn: 'BAKER HUGHES NORGE AS', organisasjonsnummer: '2', antallAnsatte: 900, ...firm }),
+        cand({
+          navn: 'BERGEN AERO KLUBB',
+          organisasjonsnummer: '1',
+          organisasjonsform: { kode: 'FLI' },
+          hjemmeside: 'bak.no',
+        }),
+      ),
+    ).toMatchObject({ band: 'auto', names: ['BERGEN AERO KLUBB', 'BAKER HUGHES NORGE AS'] });
+  });
+
+  it('a named holder is contested by a name match that scores as high', () => {
+    // An association holds the site and its initials are the label; the
+    // company people mean has no site registered.
+    expect(
+      band(
+        'if',
+        'if.no',
+        cand({
+          navn: 'INTERESSENES FORENING',
+          organisasjonsnummer: '1',
+          organisasjonsform: { kode: 'FLI' },
+          hjemmeside: 'if.no',
+        }),
+        cand({ navn: 'IF NORGE AS', organisasjonsnummer: '2', antallAnsatte: 1700, ...firm }),
+      ),
+    ).toEqual({ band: 'picker', names: ['IF NORGE AS', 'INTERESSENES FORENING'] });
+  });
+
+  it('a name match without the tie contests at an equal score too', () => {
+    const same = { antallAnsatte: 10, ...firm };
+    const rows = scored(
+      'vg',
+      'vg.no',
+      cand({ navn: 'VERDENS GANG AS', organisasjonsnummer: '1', hjemmeside: 'vg.no', ...same }),
+      cand({ navn: 'VG CONSULT AS', organisasjonsnummer: '2', ...same }),
+    );
+    expect(rows[0]?.score).toBe(rows[1]?.score);
+    expect(bandScored(rows, ['vg']).band).toBe('picker');
+  });
+
+  it('a rival counts even when its own score keeps it out of play', () => {
+    const rows = scored(
+      'bak',
+      'bak.no',
+      cand({
+        navn: 'BERGEN AERO KLUBB',
+        organisasjonsnummer: '1',
+        organisasjonsform: { kode: 'FLI' },
+        hjemmeside: 'bak.no',
+      }),
+      cand({
+        navn: 'BAK KLUBB',
+        organisasjonsnummer: '2',
+        organisasjonsform: { kode: 'FLI' },
+        hjemmeside: 'bak.no/klubb',
+      }),
+    );
+    expect(rows.map((s) => s.score)).toEqual([-28, -3]);
+    expect(bandScored(rows, ['bak'])).toMatchObject({
+      band: 'picker',
+      ranked: [{ cand: { navn: 'BERGEN AERO KLUBB' } }],
+    });
+  });
+
+  it('two holders that both carry the name need the margin', () => {
+    const xxl = (navn: string, nr: string, antallAnsatte?: number) =>
+      cand({ navn, organisasjonsnummer: nr, hjemmeside: 'www.xxl.no', antallAnsatte, ...firm });
+    // The shell and the operating company, six points apart.
+    expect(
+      band('xxl', 'xxl.no', xxl('XXL AS', '1'), xxl('XXL SPORT & VILLMARK AS', '2', 1955)).band,
+    ).toBe('picker');
+    const kleins = (navn: string, nr: string, antallAnsatte: number) =>
+      cand({ navn, organisasjonsnummer: nr, hjemmeside: 'www.kleins.no', antallAnsatte, ...firm });
+    expect(
+      band('kleins', 'kleins.no', kleins('KLEINS CITY SYD AS', '2', 16), kleins('KLEINS AS', '1', 34)),
+    ).toEqual({ band: 'auto', names: ['KLEINS AS', 'KLEINS CITY SYD AS'] });
+  });
+
+  it('the answer leads the ranking even when another holder scores higher', () => {
+    const af = (navn: string, nr: string, kode: string, antallAnsatte: number) =>
+      cand({
+        navn,
+        organisasjonsnummer: nr,
+        organisasjonsform: { kode },
+        hjemmeside: 'www.afgruppen.no',
+        antallAnsatte,
+        ...firm,
+      });
+    const { band: b, ranked } = bandScored(
       scored(
+        'afgruppen',
+        'afgruppen.no',
+        af('AF GRUPPEN NORGE AS', '2', 'AS', 1492),
+        { ...af('AF GRUPPEN ASA', '1', 'ASA', 5), overordnetEnhet: undefined },
+      ),
+      ['afgruppen'],
+    );
+    expect(b).toBe('auto');
+    expect(ranked[0]?.cand.navn).toBe('AF GRUPPEN ASA');
+  });
+
+  it('a lone holder without the name is a row, not an answer, beside name matches', () => {
+    expect(
+      band(
+        'if',
+        'if.no',
+        cand({ navn: 'IF BYGG AS', organisasjonsnummer: '2', ...firm }),
+        cand({
+          navn: 'AKERSHUS FORSIKRINGSSENTER AS',
+          organisasjonsnummer: '1',
+          hjemmeside: 'www.if.no',
+          antallAnsatte: 23,
+          ...firm,
+        }),
+      ),
+    ).toEqual({ band: 'picker', names: ['AKERSHUS FORSIKRINGSSENTER AS', 'IF BYGG AS'] });
+  });
+
+  it('several holders without the name: never the one with the shorter name', () => {
+    const grocer = (navn: string, nr: string, antallAnsatte: number) =>
+      cand({ navn, organisasjonsnummer: nr, hjemmeside: 'www.bunnpris.no', antallAnsatte, ...firm });
+    // 86 against 76 only because NÆR-MAT AS is two words.
+    expect(
+      band('bunnpris', 'bunnpris.no', grocer('NÆR-MAT AS', '1', 17), grocer('SKJERVØY MATGLEDE AS', '2', 23)).band,
+    ).toBe('picker');
+  });
+
+  it('several holders, the top one a whole-word match: the scores decide as before', () => {
+    const shop = (navn: string, nr: string, antallAnsatte: number) =>
+      cand({ navn, organisasjonsnummer: nr, hjemmeside: 'www.elkjop.no', antallAnsatte, ...firm });
+    expect(
+      band('elkjop', 'elkjop.no', shop('ELKJØP NORGE AS', '1', 5000), shop('LEFDAL ELEKTROMARKED AS', '2', 20)),
+    ).toMatchObject({ band: 'auto', names: { 0: 'ELKJØP NORGE AS' } });
+  });
+
+  it('several holders without the name: one that leads on substance still answers', () => {
+    const apotek = (navn: string, nr: string, antallAnsatte: number) =>
+      cand({ navn, organisasjonsnummer: nr, hjemmeside: 'www.vitusapotek.no', antallAnsatte, ...firm });
+    expect(
+      band(
+        'vitusapotek',
+        'vitusapotek.no',
+        apotek('APOTEK MORENEN AS', '2', 6),
+        apotek('NORSK MEDISINALDEPOT AS', '1', 3777),
+        apotek('APOTEK KIELLANDS HUS AS', '3', 5),
+      ),
+    ).toMatchObject({ band: 'auto', names: { 0: 'NORSK MEDISINALDEPOT AS' } });
+  });
+
+  it('a holder is never dropped: under the threshold or below zero it is a picker row', () => {
+    // An ENK with no name match scores 22; today's thresholds say none.
+    expect(
+      band(
+        'alnaregnskap',
+        'alnaregnskap.no',
+        cand({ navn: 'KARI NORDMANN', organisasjonsform: { kode: 'ENK' }, hjemmeside: 'alnaregnskap.no' }),
+      ),
+    ).toEqual({ band: 'picker', names: ['KARI NORDMANN'] });
+    expect(
+      band(
+        'adressa',
+        'adressa.no',
+        cand({
+          navn: 'REDAKSJONSKLUBBEN ADRESSEAVISEN',
+          organisasjonsform: { kode: 'FLI' },
+          hjemmeside: 'adressa.no',
+        }),
+      ),
+    ).toEqual({ band: 'picker', names: ['REDAKSJONSKLUBBEN ADRESSEAVISEN'] });
+  });
+
+  it('a name-only company outranks the association holding the site: picker', () => {
+    expect(
+      band(
+        'ikea',
+        'ikea.no',
+        cand({
+          navn: 'IKEA KUNSTFORENING',
+          organisasjonsnummer: '2',
+          organisasjonsform: { kode: 'FLI' },
+          hjemmeside: 'www.ikea.no',
+        }),
+        cand({ navn: 'IKEA AS', organisasjonsnummer: '1', antallAnsatte: 2842, ...firm }),
+      ),
+    ).toEqual({ band: 'picker', names: ['IKEA AS', 'IKEA KUNSTFORENING'] });
+  });
+
+  it('a clear name-only winner is a picker, never an answer', () => {
+    expect(
+      band('medium', 'medium.com', cand({ navn: 'MEDIUM AS', antallAnsatte: 600, ...firm })).band,
+    ).toBe('picker');
+  });
+
+  it('a clear holder with a whole-word name answers on the score, as before', () => {
+    expect(
+      band(
         'dnb',
         'dnb.no',
         cand({ navn: 'DNB LIVSFORSIKRING AS', organisasjonsnummer: '2' }),
@@ -598,76 +863,39 @@ describe('bandScored — banding over a scored candidate set', () => {
           antallAnsatte: 9000,
         }),
       ),
-    );
-    expect(band).toBe('auto');
-    expect(names(ranked)).toEqual(['DNB BANK ASA', 'DNB LIVSFORSIKRING AS']);
+    ).toEqual({ band: 'auto', names: ['DNB BANK ASA', 'DNB LIVSFORSIKRING AS'] });
   });
 
-  it('two holders within the margin are a picker', () => {
-    const { band, ranked } = bandScored(
-      scored(
-        'elkjop',
-        'elkjop.no',
-        cand({ navn: 'ELKJØP LEKNES AS', organisasjonsnummer: '1', hjemmeside: 'elkjop.no' }),
-        cand({ navn: 'ELKJØP SVOLVÆR AS', organisasjonsnummer: '2', hjemmeside: 'elkjop.no' }),
-      ),
-    );
-    expect(band).toBe('picker');
-    expect(ranked).toHaveLength(2);
+  it('nothing related is none, with no rows', () => {
+    expect(bandScored([], ['shell'])).toEqual({ band: 'none', ranked: [] });
+    expect(band('shell', 'shell.no', cand({ navn: 'NORDAN AS' }))).toEqual({
+      band: 'none',
+      names: [],
+    });
+    // A positive score under the picker threshold, and no holder.
+    const weak = cand({ navn: 'SHELL AS', organisasjonsform: { kode: 'ENK' } });
+    expect(scoreCandidate(weak, 'shell', 'shell.no').score).toBe(35);
+    expect(band('shell', 'shell.no', weak)).toEqual({ band: 'none', names: [] });
+  });
+});
+
+describe('pickerRows — the cap keeps a holder in sight', () => {
+  const row = (navn: string, score: number, holder = false): ScoredHit => ({
+    cand: cand({ navn }),
+    score,
+    reasons: [],
+    hjemmesideTie: holder,
+    hjemmesideKind: holder ? 'exact' : undefined,
+    wholeWord: !holder,
+    nameLength: 0,
   });
 
-  it('a clear name-only winner is a picker, never an answer', () => {
-    const { band } = bandScored(
-      scored(
-        'medium',
-        'medium.com',
-        cand({ navn: 'MEDIUM AS', antallAnsatte: 600, registrertIForetaksregisteret: true }),
-      ),
-    );
-    expect(band).toBe('picker');
-  });
-
-  it('drops candidates with no relation or a non-positive score', () => {
-    const { band, ranked } = bandScored(
-      scored(
-        'shell',
-        'shell.no',
-        cand({ navn: 'NORDAN AS', organisasjonsnummer: '3' }),
-        cand({
-          navn: 'SHELL VETERANENE',
-          organisasjonsnummer: '2',
-          organisasjonsform: { kode: 'FLI' },
-        }),
-        cand({
-          navn: 'A/S NORSKE SHELL',
-          organisasjonsnummer: '1',
-          hjemmeside: 'www.shell.no',
-          antallAnsatte: 700,
-          registrertIForetaksregisteret: true,
-        }),
-      ),
-    );
-    expect(band).toBe('auto');
-    expect(names(ranked)).toEqual(['A/S NORSKE SHELL']);
-  });
-
-  it('nothing plausible is none, with no rows', () => {
-    expect(bandScored([])).toEqual({ band: 'none', ranked: [] });
-    // An ENK holding the site, no name match: 22, under the picker
-    // threshold.
-    const { band, ranked } = bandScored(
-      scored(
-        'alnaregnskap',
-        'alnaregnskap.no',
-        cand({
-          navn: 'KARI NORDMANN',
-          organisasjonsform: { kode: 'ENK' },
-          hjemmeside: 'alnaregnskap.no',
-        }),
-      ),
-    );
-    expect(band).toBe('none');
-    expect(ranked).toEqual([]);
+  it('takes the best rows, and swaps the weakest for a holder that was cut', () => {
+    const ranked = [row('A', 90), row('B', 80), row('C', 70), row('D', 60), row('H', -18, true)];
+    expect(pickerRows(ranked, 4).map((s) => s.cand.navn)).toEqual(['A', 'B', 'C', 'H']);
+    expect(pickerRows(ranked.slice(0, 3), 4).map((s) => s.cand.navn)).toEqual(['A', 'B', 'C']);
+    const withHolder = [row('H', 95, true), ...ranked.slice(0, 4)];
+    expect(pickerRows(withHolder, 4).map((s) => s.cand.navn)).toEqual(['H', 'A', 'B', 'C']);
   });
 });
 

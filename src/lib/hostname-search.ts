@@ -26,6 +26,7 @@ import {
   bandScored,
   generateNordicVariants,
   hostnameLabel,
+  pickerRows,
   registrableDomain,
   scoreCandidate,
   titleSegmentations,
@@ -35,7 +36,9 @@ import {
 import { cacheGet, cacheSet } from './session-cache.js';
 import type { SearchHit } from '../types/brreg.js';
 
-const KEY_PREFIX = 'hostname:';
+// 'band:' since the two-signal banding rule; entries a previous build
+// wrote under 'hostname:' are never read and age out with their TTL.
+const KEY_PREFIX = 'band:';
 const CHOICE_KEY_PREFIX = 'picker-choice:';
 const REJECTED_KEY_PREFIX = 'rejected:';
 // Single source of truth for the picker-candidate cap. Tied to the
@@ -56,7 +59,8 @@ export interface Candidate extends SearchHit {
 
 export type HostnameResult =
   | { band: 'auto'; orgnr: string; candidates: Candidate[] }
-  | { band: 'picker'; candidates: Candidate[] }
+  // `cut`: more candidates were in play than the rows hold.
+  | { band: 'picker'; candidates: Candidate[]; cut?: boolean }
   | { band: 'none'; candidates: [] };
 
 export interface DetailedResult {
@@ -319,15 +323,20 @@ function decide(
     dedupeByOrgnr(hits)
       .filter((c) => !rejSet.has(c.organisasjonsnummer))
       .map((c) => ({ cand: c, ...bestScore(c, labels, domain) })),
+    labels,
   );
   const top = ranked[0];
-  const candidates = ranked
-    .slice(0, MAX_PICKER_CANDIDATES)
-    .map((s) => toCandidate(s.cand, s.hjemmesideKind));
+  const candidates = pickerRows(ranked, MAX_PICKER_CANDIDATES).map((s) =>
+    toCandidate(s.cand, s.hjemmesideKind),
+  );
   if (band === 'auto' && top) {
     return { band: 'auto', orgnr: top.cand.organisasjonsnummer, candidates };
   }
-  if (band === 'picker') return { band: 'picker', candidates };
+  if (band === 'picker') {
+    return ranked.length > candidates.length
+      ? { band: 'picker', candidates, cut: true }
+      : { band: 'picker', candidates };
+  }
   return { band: 'none', candidates: [] };
 }
 
@@ -481,13 +490,21 @@ export async function searchByHostnameDetailed(
   const queries = title ? titleSegmentations(label, title) : [];
   if (queries.length > 0 && worthSegmenting(result)) {
     const previous = result.candidates;
+    // Only the picker's rows carry over, so when the plain run cut rows
+    // a rival may be missing from the spaced one: it can then add rows,
+    // never an answer.
+    const cut = result.band === 'picker' && result.cut === true;
     const seg = await cachedRun(`${key}:seg:${queries.join('|')}`, () =>
       runSegmented(domain, queries, previous, rejected),
     );
     // A failed spaced query means "couldn't check", even when the
     // plain result stands.
     complete = complete && seg.complete;
-    if (seg.result.band !== 'none') result = seg.result;
+    if (seg.result.band === 'auto' && cut) {
+      result = { band: 'picker', candidates: seg.result.candidates, cut };
+    } else if (seg.result.band !== 'none') {
+      result = seg.result;
+    }
   }
 
   if (result.band === 'auto') {

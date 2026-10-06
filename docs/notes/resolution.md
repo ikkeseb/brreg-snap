@@ -188,9 +188,45 @@ entry point. It returns `{band, candidates, choice?, complete}`, so
 both surfaces can render the picker for the `'picker'` band and
 tell a failed search (`complete: false`) from a real miss.
 
-Bands are decided in `hostname-score.ts:decideBand`:
+Bands are decided by `bandScored` in `hostname-score.ts`, a pure
+function over the scored candidates. Its principle: **an answer needs
+two signals that agree, the registry's tie and the name.** One alone is
+a row for the user to confirm, because a confident wrong company is the
+one outcome the user cannot see through.
 
-| Band | Condition | Outcome |
+Terms. A *holder* is a candidate whose registered hjemmeside is the
+site itself (`hjemmesideKind` `exact`). A candidate is *named after the
+site* (`namedAfterSite`) when its name, minus one legal form at each
+end, run together and folded, equals the label (ALNA REGNSKAP AS for
+alnaregnskap, TV 2 AS for tv2, AS BACKE for backe), or the label is the
+initials of the name's words (VERDENS GANG for vg, UNIVERSITETET I
+OSLO for uio). Nothing of the name may be left over: XXL SPORT &
+VILLMARK AS is not named after xxl.
+
+1. **A holder named after the site is the answer, whatever its score,
+   unless the name is contested.** Any other candidate whose name
+   matches the site (a whole word of it, or named after it) is a rival.
+   A rival holder must trail by the margin (10); a rival without the
+   tie must simply score lower. Contested means picker: xxl.no has the
+   shell XXL AS and the operating XXL SPORT & VILLMARK AS six points
+   apart, and an association holding if.no would not answer over a
+   higher-scoring IF company.
+2. **No holder is named after the site: the scores decide**
+   (`decideBand`, the table below). One restriction: among several
+   holders with no whole-word name match, the answer must also stand
+   without the name-length points. bunnpris.no is held by two local
+   grocers, and the one with the two-word name led by exactly those ten
+   points; NORSK MEDISINALDEPOT AS leads vitusapotek.no on headcount
+   and still answers.
+3. **A holder is never dropped.** It stays in play with a zero or
+   negative score (an ENK or a forening with no name match), any holder
+   makes the band at least `picker`, and `pickerRows` keeps a holder
+   among the capped rows. The registry ties the site to it, so «Fant
+   ikke selskapet» would be false; a one-row picker asks instead
+   (`pickerHead`, `docs/notes/ui.md` § components). Rejected orgnrs are
+   removed before banding and stay out.
+
+| Band | Condition (`decideBand`) | Outcome |
 |---|---|---|
 | `auto` | top ≥ 75 AND top − runner-up ≥ 10 AND top has a hjemmeside tie | resolve to top candidate |
 | `picker` | top ≥ 45 | popup + sidebar show top-N + "Ingen av disse" |
@@ -200,15 +236,30 @@ The AUTO margin requirement is what prevents kjedebutikker (ELKJØP
 LEKNES vs ELKJØP SVOLVÆR, both 111 via hjemmeside-exact) from
 auto-resolving.
 
-**AUTO needs a hjemmeside tie.** The top candidate's registered
-hjemmeside must be the visited site, a page on it or a subdomain of
-it (`ScoreResult.hjemmesideTie`, see § hjemmeside-normalization). A
+**AUTO needs a hjemmeside tie**, under either rule. For rule 1 it is
+the site itself; for rule 2 the top candidate's registered hjemmeside
+must be the visited site, a page on it or a subdomain of it
+(`ScoreResult.hjemmesideTie`, see § hjemmeside-normalization). A
 name match alone is a guess: medium.com and bbc.co.uk scored 81 on
 unrelated Norwegian namesakes, and the UI renders an AUTO result like
 a verified one. So name-only winners go to the picker, even well-known
 ones whose registered site is elsewhere (orkla.com: no hjemmeside;
 equinor.no: equinor.com; komplett.no: komplettgroup.com) — the right
 answer is then the picker's first row.
+
+**What the rule rests on.** hjemmeside is self-reported, so rule 1
+trusts an entity that both registered the site and carries its name. A
+lone holder *without* the name is not trusted on that alone when name
+matches sit near it: Akershus Forsikringssenter AS is the only holder
+of if.no, Redaksjonsklubben Adresseavisen of adressa.no, and nine
+unrelated companies hold sparebank1.no. Measured on recorded candidate
+pools (400 entities on their own registered site, 164 well-known
+sites): the share answered directly rose from 50 % to 69 % for AS, 2 %
+to 11 % for ENK, 0 % to 33 % for FLI, and «Fant ikke» on a registered
+site went from 66 % (ENK) and 90 % (FLI) to none. A second draw of
+400 that the rule was not shaped on moved the same way (AS 67 % to
+77 %, ENK 5 % to 12 %, FLI 0 % to 18 %), and every new answer there
+that was not the sampled entity was a holder named after the site.
 
 The picker row count is `MAX_PICKER_CANDIDATES` exported from
 `hostname-search.ts` — currently 4. The constant is tied to the
@@ -373,7 +424,7 @@ panel only has one when it resolved that tab itself, not for a sync
 message or probe), so the title word hints (§ title-segmentation)
 survive a rejection. It reads the rejected list, passes it through `runPipeline` which filters rejected candidates before
 scoring, and stores the result under
-`hostname:<site>:rej:<sorted>` so the pre-rejection cache entry
+`band:<site>:rej:<sorted>` so the pre-rejection cache entry
 isn't served. `resolveTabContext` also skips a URL/title orgnr that
 is on the site's rejection list, so a reload doesn't bring the
 rejected company back. The context menu resolves synchronously
@@ -419,7 +470,10 @@ the label has no hyphen. The spaced queries run like Q2/Q3 (org-form
 filter, unfiltered fallback on zero hits); the site's earlier
 candidates are re-scored with them against the spaced names, and the
 result replaces the plain one unless it is `none`. It can reach AUTO
-only through a hjemmeside tie, like any other run.
+only through a hjemmeside tie, like any other run. Only the plain run's
+picker rows carry over, so when that run had more candidates than rows
+(`cut` on the cached picker result) a rival may be missing: the spaced
+run can then add rows, never an answer.
 
 Live-recorded replays (`tests/hostname-regressions.test.ts`):
 rema1000.no → picker with REMA 1000 NORGE AS first above the
