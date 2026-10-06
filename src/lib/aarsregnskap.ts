@@ -1,6 +1,6 @@
 // Links to the official annual-report copies (årsregnskap) and to the
-// company's kunngjøringer: the multi-year history the JSON regnskap
-// endpoint won't give. The only fetch is the small year list on
+// company's kunngjøringer: the multi-year history the Økonomi tab
+// doesn't show. The only fetch is the small year list on
 // data.brreg.no; the PDFs and the announcement page are plain links the
 // user clicks. See docs/notes/brreg-api.md § aarsregnskap-kopi.
 

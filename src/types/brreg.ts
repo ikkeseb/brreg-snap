@@ -226,6 +226,9 @@ export interface Regnskap {
   id?: number;
   journalnr?: string;
   regnskapsperiode?: { fraDato?: string; tilDato?: string };
+  // 'SELSKAP' (the company's own accounts) or 'KONSERN' (the group's
+  // consolidated accounts, filed by a parent under the same orgnr).
+  regnskapstype?: string;
   regnkapsprinsipper?: { smaaForetak?: boolean; regnskapsregler?: string };
   valuta?: string;
   resultatregnskapResultat?: {
@@ -244,7 +247,8 @@ export interface Regnskap {
 }
 
 // What brreg answered for an orgnr's regnskap (see fetchRegnskap):
-//   2xx → items: the filings (order not guaranteed — sort by tilDato)
+//   2xx → items: the filings, several years and both regnskapstyper
+//         in no guaranteed order — pick with latestRegnskap
 //   404 → items: [] — nothing filed
 //   500 → items: [], unavailable: true — the open API can't serve this
 //         filing. Banks and insurers hit this every time (specialised

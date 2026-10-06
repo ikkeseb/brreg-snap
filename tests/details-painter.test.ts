@@ -257,10 +257,12 @@ describe('result: the dossier', () => {
     const rows = [...document.querySelectorAll('#panel-okonomi .fig-row dt')].map((d) => d.textContent);
     expect(rows).toEqual(expect.arrayContaining(['Driftsinntekter', 'Årsresultat', 'Sum eiendeler', 'Egenkapitalandel']));
     expect(q('#panel-okonomi .fig-row--total dd')?.querySelector('.fig-row__unit')?.textContent).toBe('mrd');
+    // The company's own 68,0 mrd, not the group's 106,5 from the rows before it.
+    expect(q('#panel-okonomi .fig-row dd')?.textContent).toBe('68,0mrd');
     const fill = q('#panel-okonomi .equity__fill')!;
     expect(fill.getAttribute('style')).toMatch(/--share:\s*\d+%/);
     expect(q('#panel-okonomi .honest')?.textContent).toBe(
-      'Registeret deler bare siste års tall som åpne data. Eldre år finnes som PDF.',
+      'Viser bare siste års tall. Eldre år finnes som PDF.',
     );
     const years = qa('#panel-okonomi .years a');
     expect(years.map((a) => a.textContent)).toEqual(['2025', '2024', '2023', '2022', '2021', '2020', '2019']);

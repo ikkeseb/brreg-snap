@@ -580,7 +580,7 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 
 
 /* ---------- økonomi -------------------------------------------------------
-   One year of figures exists (open API). No trend chart, no sparkline. */
+   One year of figures is shown. No trend chart, no sparkline. */
 .fig-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .fig-head h2 { font: var(--t-lead); }
 .fig-status { display: flex; align-items: center; gap: 8px; margin-top: 4px; color: var(--ink-2); }

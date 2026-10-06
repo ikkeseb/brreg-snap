@@ -4,8 +4,8 @@ import {
   EGENKAPITALANDEL_WARN_BELOW,
   egenkapitalandelTone,
   keyFigures,
+  latestRegnskap,
   regnskapGap,
-  sortRegnskapDesc,
 } from '../src/lib/regnskap.js';
 import type { Regnskap } from '../src/types/brreg.js';
 
@@ -37,25 +37,71 @@ function filing(
   };
 }
 
-describe('sortRegnskapDesc', () => {
-  it('sorts by tilDato descending (most recent first)', () => {
+function typed(tilDato: string | undefined, regnskapstype: string, driftsinntekter: number): Regnskap {
+  return { ...filing(tilDato, { driftsinntekter }), regnskapstype };
+}
+
+describe('latestRegnskap', () => {
+  it('picks the most recent tilDato whatever the order', () => {
     const items = [
       filing('2022-12-31'),
       filing('2024-12-31'),
       filing('2023-12-31'),
     ];
-    expect(sortRegnskapDesc(items).map((r) => r.regnskapsperiode?.tilDato)).toEqual(
-      ['2024-12-31', '2023-12-31', '2022-12-31'],
-    );
+    expect(latestRegnskap(items)?.regnskapsperiode?.tilDato).toBe('2024-12-31');
   });
 
-  it('drops filings with no tilDato (cannot place on the timeline)', () => {
-    const items = [filing('2023-12-31'), filing(undefined)];
-    expect(sortRegnskapDesc(items)).toHaveLength(1);
+  // The live shape for a parent (Telenor ASA, 2026-10): the group's
+  // consolidated rows come first, then the company's own, three years
+  // each. The group's 81 bn must never be shown as the company's 678 m.
+  it("picks the company's own accounts, never the group's consolidated ones", () => {
+    const items = [
+      typed('2022-12-31', 'KONSERN', 100_957_000_000),
+      typed('2023-12-31', 'KONSERN', 80_537_000_000),
+      typed('2024-12-31', 'KONSERN', 81_413_000_000),
+      typed('2022-12-31', 'SELSKAP', 871_000_000),
+      typed('2023-12-31', 'SELSKAP', 477_000_000),
+      typed('2024-12-31', 'SELSKAP', 678_000_000),
+    ];
+    const latest = latestRegnskap(items);
+    expect(latest?.regnskapstype).toBe('SELSKAP');
+    expect(keyFigures(latest!).driftsinntekter).toBe(678_000_000);
+    expect(keyFigures(latestRegnskap([...items].reverse())!).driftsinntekter).toBe(678_000_000);
   });
 
-  it('returns empty for an empty input', () => {
-    expect(sortRegnskapDesc([])).toEqual([]);
+  it('skips a consolidated filing even when it is the newest row', () => {
+    const items = [
+      typed('2025-12-31', 'KONSERN', 9),
+      typed('2024-12-31', 'SELSKAP', 1),
+    ];
+    expect(latestRegnskap(items)?.regnskapsperiode?.tilDato).toBe('2024-12-31');
+  });
+
+  it('has no answer when only consolidated accounts came back', () => {
+    expect(latestRegnskap([typed('2024-12-31', 'KONSERN', 9)])).toBeUndefined();
+  });
+
+  it('skips filings with no tilDato (cannot place on the timeline)', () => {
+    const items = [filing(undefined), filing('2023-12-31'), filing(undefined)];
+    expect(latestRegnskap(items)?.regnskapsperiode?.tilDato).toBe('2023-12-31');
+    expect(latestRegnskap([filing(undefined)])).toBeUndefined();
+  });
+
+  it('reads the type whatever its case or padding', () => {
+    const items = [typed('2024-12-31', ' konsern ', 9), typed('2024-12-31', 'selskap', 1)];
+    expect(keyFigures(latestRegnskap(items)!).driftsinntekter).toBe(1);
+  });
+
+  it('skips rows whose tilDato is not an ISO date, before or after a valid one', () => {
+    const bad = (tilDato: unknown) =>
+      ({ regnskapsperiode: { tilDato } }) as unknown as Regnskap;
+    const good = filing('2023-12-31');
+    expect(latestRegnskap([bad(2025), bad('zzzz'), good, bad(2026), bad('i fjor')])).toBe(good);
+    expect(latestRegnskap([bad(2025)])).toBeUndefined();
+  });
+
+  it('returns undefined for an empty input', () => {
+    expect(latestRegnskap([])).toBeUndefined();
   });
 });
 

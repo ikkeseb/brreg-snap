@@ -2,7 +2,7 @@
 // the equity share as a proportion bar (width through the CSSOM, never
 // a style attribute), the honest single-year note, then Dokumenter:
 // the annual-report PDF years and the kunngjøringer link. One year of
-// figures exists in the open API — no trend, no chart.
+// figures is shown — no trend, no chart.
 
 import { COPY } from '../copy.js';
 import type { FigRow, OkonomiView } from '../dossier-view.js';

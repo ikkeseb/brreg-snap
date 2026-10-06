@@ -8,31 +8,38 @@ Source: `src/lib/brreg.ts`, `konsern.ts`, `aarsregnskap.ts`.
 Enhetsregisteret lives at `data.brreg.no/enhetsregisteret/api`, but
 Regnskapsregisteret is on
 `data.brreg.no/regnskapsregisteret/regnskap/<orgnr>` (no `/api/`,
-different sub-host). Response is an array; the code defensively sorts by
-`regnskapsperiode.tilDato` before picking "latest"
-(`sortRegnskapDesc`). 404 is normal: many small AS-er don't file
+different sub-host). Response is an array in no guaranteed order;
+`latestRegnskap` picks from it (§ regnskap-years-and-types). 404 is normal: many small AS-er don't file
 separately. Cache the empty array so refresh doesn't re-hit.
 
-<!-- SECTION: regnskap-single-year-only -->
-## The open endpoint returns ONLY the latest year
+<!-- SECTION: regnskap-years-and-types -->
+## Several years, and a parent's group accounts beside its own
 
-Empirically (verified 2026-06 across ~294 live companies plus the
-`år` / `regnskapstype` / `size` params and the published OpenAPI spec)
-the public endpoint returns exactly **one** filing per orgnr — the
-latest accounting year, `regnskapstype: SELSKAP`. It never returns a
-second year: `?år=2023` still returns the 2024 filing (the param does
-not select history), and there is no structured-JSON path to prior
-years (only the per-year PDF `kopi/{aar}` document endpoint, see
-§ aarsregnskap-kopi).
+The endpoint returns one row per filed year and `regnskapstype`. A
+parent that files consolidated accounts gets them under its own orgnr
+as `regnskapstype: KONSERN`, beside its own `SELSKAP` rows. Observed
+2026-10-06: three years each, `KONSERN` rows first (Equinor 923609016,
+Telenor 982463718, OBOS 937052766); a company without consolidated
+accounts gets `SELSKAP` rows only. Telenor ASA's own 2024
+driftsinntekter are 678 m NOK, the group's 81 bn.
 
-Consequence: the Økonomi tab shows the latest filing only, says so,
-and points at the annual-report copies for older years
+`latestRegnskap` (`src/lib/regnskap.ts`) is the one place a filing is
+chosen: the newest `tilDato` among rows that are not `KONSERN`. Group
+figures are never shown as the company's; a response with only
+`KONSERN` rows reads as no filing. Never take `items[0]`.
+
+Until at least 2026-09 the endpoint returned exactly one row, the
+latest `SELSKAP` year, and `år` selected nothing; when that changed is
+unknown. 1.4.1 and earlier picked the newest year with no regard for
+type, so they showed a parent's group figures as its own. `år` and
+`regnskapstype` now filter the response (observed 2026-10-06); the
+code filters on the client and depends on neither.
+
+The Økonomi tab still shows the latest year only, says so, and points
+at the annual-report copies for older years
 (`src/lib/view/dossier-view.ts`, `src/lib/view/components/okonomi.ts`;
-§ aarsregnskap-kopi). There is no multi-year trend view. This is NOT a
-bug to "fix" by probing harder; the data is simply not exposed. The
-live canary's tripwire (`tests/live/contracts.test.ts`) fails if brreg
-starts serving more than one filing, which would make a trend view
-possible.
+§ aarsregnskap-kopi). A multi-year trend view is now possible from
+this data and is an open idea in `docs/backlog.md`.
 
 <!-- SECTION: regnskap-500-unsupported-plan -->
 ## 500 from regnskap = "not in the open API", not a network failure
@@ -279,8 +286,9 @@ It has two files:
   `fratraadt`), the search semantics the resolver depends on (no Nordic
   folding, hjemmeside substring, `organisasjonsnummer=`), and the 1.4
   endpoints (konsernstruktur, oppdateringer, `kopi/{orgnr}/aar`). Two
-  tests are deliberate tripwires. `regnskap-single-year-only` fails when
-  Equinor's regnskap returns more than one year. The Endringslogg test
+  tests are deliberate tripwires. `regnskap-years-and-types` fails when
+  Equinor's regnskap carries a `regnskapstype` other than `SELSKAP` or
+  `KONSERN`. The Endringslogg test
   fails when brreg adds a changelog entry: read the entry, then bump
   `ENDRINGSLOGG_NEWEST`. Responses go through the shipped fetchers and
   helpers. About 40 requests, sequential, with a 250 ms pause.

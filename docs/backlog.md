@@ -26,6 +26,13 @@ out of here when it ships or is dropped.
   Not now: that typing is a few lines. Revisit when Chrome-only casts
   spread beyond that module.
 
+- **Multi-year trend in Økonomi.** brreg's open API now returns
+  several years of accounts (`docs/notes/brreg-api.md`
+  § regnskap-years-and-types), so omsetning and resultat over time are
+  possible without a new request. Not now: the view shows the latest
+  year by design, and how many years brreg keeps serving is unknown.
+  Revisit as a product decision once the shape has held for a while.
+
 <!-- SECTION: rejected -->
 ## Rejected
 

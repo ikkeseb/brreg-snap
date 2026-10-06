@@ -6,6 +6,17 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Fixed
+
+- A parent company's Økonomi figures and the popup's omsetning/resultat
+  were the whole group's. brreg's open API now returns the group's
+  consolidated accounts beside the company's own (and several years of
+  each); the extension took the first row of the newest year, which was
+  the consolidated one. It now always shows the company's own accounts
+  (Telenor ASA: 678 mill. kr, not the group's 81 mrd.).
+- The Økonomi note no longer claims the registry shares only the latest
+  year as open data; it says the view shows the latest year.
+
 ## [1.4.1] — 2026-10-01
 
 ### Fixed

@@ -10,7 +10,9 @@ mobile numbers and small-company street addresses are replaced with
 fictitious values, in a change feed too (the same fictitious value as
 in the enhet). A company named after a person also gets a fictitious
 orgnr (999999999, 999999998): its real orgnr leads straight back to the
-name.
+name. `regnskap-923609016-usd.json` is a full capture from 2026-10-06:
+three years of the group's consolidated rows (`KONSERN`) before the
+company's own (`SELSKAP`), the order the callers must not trust.
 Tests import these so a brreg shape change shows up as a fixture diff,
 not a silent UI bug. Re-capture (and re-anonymize) when brreg changes a
 response.

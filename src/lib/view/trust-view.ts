@@ -16,7 +16,7 @@ import { formatDateNo, formatMoney, formatOrgnr, titleCasePlace } from '../forma
 import type { RememberedChoice } from '../hostname-search.js';
 import { hjemmesideDomains, hostnameLabel, registrableDomain } from '../hostname-score.js';
 import { konsernLine, type Konsern } from '../konsern.js';
-import { keyFigures, sortRegnskapDesc } from '../regnskap.js';
+import { keyFigures, latestRegnskap } from '../regnskap.js';
 import { isHostDerived, type ResolutionMethod } from '../resolution-method.js';
 import { findRoleHolder } from '../roller.js';
 import { deriveAnswer, MISMATCH_HEADLINE } from '../trust/answer.js';
@@ -329,7 +329,7 @@ function regnskapFigures(
   year: string,
 ): TextPart[][] | undefined {
   if (!regnskap || regnskap.unavailable) return undefined;
-  const latest = sortRegnskapDesc(regnskap.items)[0];
+  const latest = latestRegnskap(regnskap.items);
   if (!latest) return undefined;
   const f = keyFigures(latest);
   if (f.year !== year) return undefined;

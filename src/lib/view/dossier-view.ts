@@ -17,7 +17,7 @@ import {
   egenkapitalandelTone,
   keyFigures,
   regnskapGap,
-  sortRegnskapDesc,
+  latestRegnskap,
   type KeyFigures,
 } from '../regnskap.js';
 import { isResigned, roleSubjectName } from '../roller.js';
@@ -407,13 +407,13 @@ function okonomi(input: DossierInput): OkonomiView {
     if (enhet.sisteInnsendteAarsregnskap) lines.push(COPY.lastFiled(enhet.sisteInnsendteAarsregnskap));
     figures = { kind: 'text', lines };
   } else {
-    const latest = sortRegnskapDesc(regnskap.items)[0];
+    const latest = latestRegnskap(regnskap.items);
     if (!latest) {
       figures = { kind: 'text', lines: [COPY.regnskapNone] };
     } else {
       figures = figuresOf(keyFigures(latest), regnskapSignal);
-      // brreg's open API returns the latest year only: say so, and
-      // point at the copies where older years live.
+      // The view shows the latest year only: say so, and point at
+      // the copies where older years live.
       honest = `${COPY.honestSingleYear}${pdfNote}`;
     }
   }

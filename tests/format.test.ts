@@ -11,7 +11,7 @@ import {
   formatRelativeTime,
   parseIsoDate,
 } from '../src/lib/format.js';
-import { keyFigures } from '../src/lib/regnskap.js';
+import { keyFigures, latestRegnskap } from '../src/lib/regnskap.js';
 import type { Regnskap } from '../src/types/brreg.js';
 import equinorRegnskap from './fixtures/brreg/regnskap-923609016-usd.json';
 import mowiRegnskap from './fixtures/brreg/regnskap-964118191-eur.json';
@@ -283,7 +283,7 @@ describe('formatMoney with a foreign valuta', () => {
   // Live shapes: Equinor files in USD, Mowi in EUR. Printing "kr" here
   // understated Equinor's revenue roughly tenfold.
   it('labels Equinor (USD) figures with the currency code, not kr', () => {
-    const f = keyFigures(EQUINOR_USD[0]!);
+    const f = keyFigures(latestRegnskap(EQUINOR_USD)!);
     expect(f.valuta).toBe('USD');
     expect(formatMoney(f.driftsinntekter, f.valuta)).toBe('68,0 mrd USD');
     expect(formatMoney(f.aarsresultat, f.valuta)).toBe('5,7 mrd USD');

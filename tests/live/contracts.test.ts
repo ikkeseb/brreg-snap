@@ -27,7 +27,7 @@ import {
 import { deriveKonsern, fetchKonsernstruktur } from '../../src/lib/konsern.js';
 import type { KonsernNode } from '../../src/types/brreg.js';
 import { isValidOrgnr } from '../../src/lib/mod11.js';
-import { keyFigures, regnskapGap } from '../../src/lib/regnskap.js';
+import { keyFigures, latestRegnskap, regnskapGap } from '../../src/lib/regnskap.js';
 import { findRoleHolder, isResigned } from '../../src/lib/roller.js';
 import { deriveSignals } from '../../src/lib/trust/signals.js';
 import type { Enhet, Rolle, RollerResponse, SearchHit } from '../../src/types/brreg.js';
@@ -126,27 +126,21 @@ const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
     expect(none).toEqual({ items: [] });
   },
 
-  'regnskap-single-year-only': async () => {
-    // TRIPWIRE. Two or more filings means brreg now serves history:
-    // the Økonomi tab shows the latest year only by design
-    // (docs/notes/brreg-api.md § regnskap-single-year-only), so revisit
-    // that decision against this data.
+  'regnskap-years-and-types': async () => {
+    // A parent's response carries the group's consolidated accounts
+    // beside its own, over several years. latestRegnskap skips rows
+    // typed KONSERN, so a row with neither type would slip through as
+    // the company's own: read the new type, then decide.
     const r = await equinorRegnskap();
-    expect(
-      r.items.length,
-      'Equinor regnskap returned more than one year: a trend view is now possible',
-    ).toBe(1);
-    const [latest] = r.items;
-    expect((latest as { regnskapstype?: string }).regnskapstype).toBe('SELSKAP');
-    // `år` does not select an older year: still the latest filing.
-    const { status, body } = await getJson<unknown[]>(
-      `${REGNSKAP_API}/${EQUINOR}?${new URLSearchParams({ år: '2022' })}`,
-    );
-    expect(status).toBe(200);
-    expect(body).toHaveLength(1);
-    expect(
-      (body![0] as { regnskapsperiode?: { tilDato?: string } }).regnskapsperiode?.tilDato,
-    ).toBe(latest!.regnskapsperiode?.tilDato);
+    const types = r.items.map((i) => i.regnskapstype);
+    expect(new Set(types)).toEqual(new Set(['SELSKAP', 'KONSERN']));
+    const years = new Set(r.items.map((i) => i.regnskapsperiode?.tilDato?.slice(0, 4)));
+    expect(years.size).toBeGreaterThan(1);
+    const latest = latestRegnskap(r.items);
+    expect(latest?.regnskapstype).toBe('SELSKAP');
+    const own = r.items.filter((i) => i.regnskapstype === 'SELSKAP');
+    const tilDato = latest?.regnskapsperiode?.tilDato;
+    expect(own.every((i) => (i.regnskapsperiode?.tilDato ?? '') <= tilDato!)).toBe(true);
   },
 
   'regnskap-500-unsupported-plan': async () => {
@@ -233,9 +227,9 @@ const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
     expect(status).toBe(200);
     expect(Array.isArray(body)).toBe(true);
     expect(body!.every((y) => typeof y === 'string' && /^\d{4}$/.test(y))).toBe(true);
-    // PDF copies go back further than the single JSON year.
+    // PDF copies go back further than the JSON years.
     expect(body!.length).toBeGreaterThan(1);
-    const latest = (await equinorRegnskap()).items[0]!.regnskapsperiode?.tilDato?.slice(0, 4);
+    const latest = latestRegnskap((await equinorRegnskap()).items)!.regnskapsperiode?.tilDato?.slice(0, 4);
     expect(body).toContain(latest);
   },
 
@@ -291,7 +285,7 @@ describe('entity shapes', () => {
     expect(e.respons_klasse).toBe('Enhet');
     expect(statusOf(e)).toBe('Aktiv');
     const r = await equinorRegnskap();
-    const figures = keyFigures(r.items[0]!);
+    const figures = keyFigures(latestRegnskap(r.items)!);
     expect(figures.valuta).toBe('USD');
     expect(figures.year).toMatch(/^\d{4}$/);
     expect(typeof figures.driftsinntekter).toBe('number');

@@ -91,7 +91,9 @@ describe('buildTrustView — a company on its own registered site (P1)', () => {
     const regnskap = v.ledger.find((r) => r.key === 'regnskap')!;
     expect(regnskap.value).toBe('2025 levert');
     const text = regnskap.figures!.map((g) => g.map((p) => p.text).join('')).join(' · ');
-    expect(text).toMatch(/^omsetning [\d,]+ mrd USD · resultat [\d,]+ mrd USD$/);
+    // The fixture is the live shape: the group's consolidated rows come
+    // first (106,5 mrd), the company's own after. Only the latter shows.
+    expect(text).toBe('omsetning 68,0 mrd USD · resultat 5,7 mrd USD');
   });
 
   it('puts form · city over the name and the leaders under it', () => {

@@ -104,7 +104,7 @@ export const COPY = {
   balanseGroup: 'Balanse',
   egenkapitalLegend: (amount: string) => `Egenkapital ${amount}`,
   gjeldLegend: (amount: string) => `Gjeld ${amount}`,
-  honestSingleYear: 'Registeret deler bare siste års tall som åpne data.',
+  honestSingleYear: 'Viser bare siste års tall.',
   honestPdf: ' Eldre år finnes som PDF.',
   regnskapFailed: 'Kunne ikke hente regnskapstallene. Prøv igjen senere.',
   regnskapNone: 'Ingen årsregnskap er registrert.',

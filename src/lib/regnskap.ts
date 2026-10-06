@@ -28,18 +28,33 @@ export interface KeyFigures {
   egenkapitalandel?: number;
 }
 
-// brreg's regnskapsregisteret returns filings in arbitrary order. Sort
-// by period end (tilDato) descending so index 0 is the most recent.
-// Filings without a tilDato can't be placed on the timeline and are
-// dropped — the UI has nothing to label them with anyway.
-export function sortRegnskapDesc(items: Regnskap[]): Regnskap[] {
-  return items
-    .filter((r) => r.regnskapsperiode?.tilDato)
-    .sort((a, b) =>
-      (b.regnskapsperiode!.tilDato ?? '').localeCompare(
-        a.regnskapsperiode!.tilDato ?? '',
-      ),
-    );
+// The company's own most recent filing. brreg returns several years
+// and, for a parent, the group's consolidated accounts (KONSERN) beside
+// the company's own under the same orgnr, in no guaranteed order.
+// Consolidated rows are never the answer: their figures belong to the
+// whole group, not to the company the view names. Filings without an
+// ISO tilDato can't be placed on the timeline and are skipped (the
+// rows are unvalidated JSON).
+// docs/notes/brreg-api.md § regnskap-years-and-types.
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}/;
+
+function isKonsern(type: unknown): boolean {
+  return typeof type === 'string' && type.trim().toUpperCase() === 'KONSERN';
+}
+
+export function latestRegnskap(items: Regnskap[]): Regnskap | undefined {
+  let latest: Regnskap | undefined;
+  let latestDato = '';
+  for (const r of items) {
+    const tilDato: unknown = r.regnskapsperiode?.tilDato;
+    if (typeof tilDato !== 'string' || !ISO_DATE.test(tilDato)) continue;
+    if (isKonsern(r.regnskapstype)) continue;
+    if (tilDato > latestDato) {
+      latest = r;
+      latestDato = tilDato;
+    }
+  }
+  return latest;
 }
 
 // A non-negative egenkapitalandel below this (percent) is a thin-equity

@@ -15,7 +15,7 @@
 // as "not filed". See docs/notes/trust.md § signals.
 
 import { formatCount, formatDateNumeric, parseIsoDate } from '../format.js';
-import { sortRegnskapDesc } from '../regnskap.js';
+import { latestRegnskap } from '../regnskap.js';
 import { primaryStatusFlag, type FlagSpec } from '../ui/flags.js';
 import type { Enhet, RegnskapResponse } from '../../types/brreg.js';
 import type { Signal, Tone } from './types.js';
@@ -216,7 +216,7 @@ function latestFiledYear(
   regnskap: RegnskapResponse | undefined,
 ): string | undefined {
   const fromEnhet = enhet.sisteInnsendteAarsregnskap?.trim();
-  const fromRegnskap = sortRegnskapDesc(regnskap?.items ?? [])[0]
+  const fromRegnskap = latestRegnskap(regnskap?.items ?? [])
     ?.regnskapsperiode?.tilDato?.slice(0, 4);
   const years = [fromEnhet, fromRegnskap].filter(
     (y): y is string => y !== undefined && YEAR.test(y),
