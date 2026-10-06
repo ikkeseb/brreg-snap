@@ -6,6 +6,8 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+## [1.5.0] — 2026-10-06
+
 ### Changed
 
 - More sites answer directly. A company that has the site registered
