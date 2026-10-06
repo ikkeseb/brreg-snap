@@ -40,8 +40,9 @@ when reporting a change as done:
    `data.brreg.no`.
 3. **Real extension load:** `pnpm dev` (Firefox) or `dist-chrome/`
    loaded unpacked.
-4. **Maintainer only:** real permission prompts, the gesture-gated side
-   panel open, store credentials and listings, approving each
+4. **Maintainer only:** real permission prompts, the gesture-gated
+   panel open anywhere but the popup's button in Chromium (the smoke
+   clicks that one), store credentials and listings, approving each
    `publish.yml` run.
 
 ## Commands
@@ -54,7 +55,7 @@ when reporting a change as done:
 pnpm verify                     # the gate (~12 s): typecheck, lint, test, check:docs, both builds, verify:dist, lint:ext
 pnpm exec vitest run tests/orgnr.test.ts                                 # one file
 pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # one test
-pnpm smoke                      # Playwright: harness states x widths x themes + a real Chromium load; not in the gate (CI runs it); once: pnpm exec playwright install chromium
+pnpm smoke                      # Playwright: harness states x widths x themes + a real Chromium load (toolbar click, popup, side panel); not in the gate (CI runs it); once: pnpm exec playwright install chromium
 pnpm smoke:record               # re-record tests/e2e/fixtures/ from the live API; review the diff
 pnpm test:live                  # live brreg canary: API contracts + resolver corpus (network; not in the gate)
 pnpm preview                    # the built pages in a plain tab against the live API (scripts/preview/README.md)

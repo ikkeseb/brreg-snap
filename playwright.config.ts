@@ -35,8 +35,11 @@ export default defineConfig({
   projects: [
     ...harness('popup', '@popup', 380, 600),
     ...harness('panel-320', '@panel', 320, 800),
+    // The width Chrome opens its side panel at.
+    ...harness('panel-360', '@panel', 360, 800),
     ...harness('panel-400', '@panel', 400, 800),
-    // Real unpacked load of dist-chrome (own persistent context).
+    // Real unpacked load of dist-chrome (own persistent context): the
+    // pages, then a toolbar click through the popup to the side panel.
     { name: 'extension', testMatch: 'extension.spec.ts' },
   ],
   webServer: {

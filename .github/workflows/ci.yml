@@ -30,8 +30,9 @@ jobs:
       - run: pnpm verify
 
   # Browser smoke (tests/e2e/, playwright.config.ts): the preview harness
-  # on recorded fixtures plus one real unpacked Chromium load. Its own job
-  # because it needs a browser; not part of `pnpm verify`.
+  # on recorded fixtures plus one real unpacked Chromium load (toolbar
+  # click, popup, side panel). Its own job because it needs a browser;
+  # not part of `pnpm verify`.
   smoke:
     needs: ci
     runs-on: ubuntu-latest

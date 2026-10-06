@@ -5,6 +5,9 @@ one file per request (`{ request, status, body }`; `request` is the path
 and query the extension sends). `scripts/preview/serve.mjs --fixtures`
 and the real-extension spec answer from these files; a request with no
 file answers 404 with `x-fixture-miss`, and the smoke fails naming it.
+The spec's toolbar-click test is not a state: it rides on the requests
+the `popup-dnb` and `dnb-bank` states recorded, so dropping either
+state fails it with a named miss.
 
 A new state goes into `../states.mjs`; then re-record. Re-record from
 the live API (the git diff is the drift report):

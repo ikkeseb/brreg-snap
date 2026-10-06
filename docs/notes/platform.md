@@ -131,7 +131,10 @@ in the install hook (both pinned in `tests/background-module.test.ts`).
 Tab listeners and auto-sync belong to the panel. Listeners register synchronously
 at the top level (`docs/notes/permissions-model.md`
 § event-page-wakeup). The smoke's real Chromium load checks that the
-worker evaluates to completion (`tests/e2e/extension.spec.ts`).
+worker evaluates to completion, and runs the flow end to end: a toolbar
+click on a site tab, the popup resolving it, «Åpne i sidepanel» opening
+the side panel on a trusted click (`tests/e2e/extension.spec.ts`; the
+popup and the panel are driven over raw CDP in `tests/e2e/native.ts`).
 
 <!-- SECTION: web-ext-lint-firefox-only -->
 ## `lint:ext` lints the Firefox build only

@@ -2,8 +2,8 @@
 
 Work order under `docs/plans/2026-09-23-plan.md`. It came out of the
 real-extension check of 1.4.2 and a survey of the real popup on live
-sites. Nothing here is built yet. Three parts, in this order: the
-resolver (§ resolver), the UX fixes (§ ux), the smoke (§ smoke). Delete
+sites. Three parts: the resolver (§ resolver) and the UX fixes (§ ux)
+are not built; the smoke (§ smoke) has landed. Delete
 this file when its parts have shipped; `CHANGELOG.md` and the notes
 under `docs/notes/` carry what remains true.
 
@@ -254,25 +254,13 @@ the live API.
 <!-- SECTION: smoke -->
 ## Smoke
 
-1. **The real flow.** A test in `tests/e2e/extension.spec.ts` that
-   triggers the toolbar action on a stubbed dnb.no tab (CDP
-   `Extensions.triggerAction`), asserts the popup's result from the
-   recorded fixtures, clicks «Åpne i sidepanel» with a trusted input
-   event and asserts the side panel. Written by a delegated worker,
-   reported green; not reviewed and not landed. It ran on the Windows
-   build of the test Chromium only, and CI is Linux: run it there
-   before trusting it. Reviewing it includes reading the helper that
-   answers brreg requests over CDP and proving the test fails without
-   a fixture. Once landed, these lines understate the smoke: the
-   «Maintainer only» rung and the `pnpm smoke` comment in `AGENTS.md`,
-   the smoke comment in `.github/workflows/ci.yml` and
-   `playwright.config.ts`, the smoke sentence in
-   `docs/notes/platform.md`, and `tests/e2e/fixtures/README.md` (the
-   test leans on the `popup-dnb` and `dnb-bank` fixtures without being
-   a state).
-2. **360 px.** A third panel width in `playwright.config.ts`: it is
-   the width Chrome's side panel opens at, and item 6 above only shows
-   there.
+Landed. `tests/e2e/extension.spec.ts` triggers the toolbar action on a
+stubbed dnb.no tab, asserts the popup from the recorded fixtures,
+clicks «Åpne i sidepanel» with a trusted input event and asserts the
+side panel (`tests/e2e/native.ts` holds the raw-CDP plumbing). It runs
+on the Linux and the Windows build of the test Chromium, and fails
+naming the requests when no fixture answers. The harness has a third
+panel width, 360 px, the width Chrome opens its side panel at.
 
 <!-- SECTION: parked -->
 ## Parked and rejected
