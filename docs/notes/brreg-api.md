@@ -39,7 +39,7 @@ The Økonomi tab still shows the latest year only, says so, and points
 at the annual-report copies for older years
 (`src/lib/view/dossier-view.ts`, `src/lib/view/components/okonomi.ts`;
 § aarsregnskap-kopi). A multi-year trend view is now possible from
-this data and is an open idea in `docs/backlog.md`.
+this data.
 
 <!-- SECTION: regnskap-500-unsupported-plan -->
 ## 500 from regnskap = "not in the open API", not a network failure

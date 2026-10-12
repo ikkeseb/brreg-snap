@@ -7,10 +7,8 @@ at the repo root: read it when it exists.
 
 ## Active work + release rules
 
-Active work is driven by `docs/plans/2026-09-23-plan.md` — read its
-Decisions and Progress first; evidence per item is in
-`docs/plans/2026-09-23-findings.md`. Unscheduled ideas and the rejected
-list live in `docs/backlog.md`. Release state lives in git tags (`v*` =
+The plan for active work and the backlog are local, gitignored files;
+`MAINTAINER.md` names them. Release state lives in git tags (`v*` =
 tagged release, `amo-submission-*` / `cws-submission-*` = what was
 uploaded to each store) and GitHub Releases. Store state is never
 written down; run `pnpm store-status` (`--deep` compares the served
