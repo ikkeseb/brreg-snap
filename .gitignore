@@ -33,5 +33,6 @@ docs/plans/
 docs/backlog.md
 docs/logo/
 
-# Maintainer-only local rules (AGENTS.md points here)
+# Maintainer-only local files (AGENTS.md points here)
+maintainer/
 MAINTAINER.md
