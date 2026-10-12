@@ -3,12 +3,12 @@
 Guidance for coding agents in this repository. `CLAUDE.md` only imports
 this file; edit this one. Machine- and account-specific rules for the
 maintainer's own sessions live in a local, gitignored
-`maintainer/MAINTAINER.md`: read it when it exists.
+`maintainer/AGENTS.md`: read it when it exists.
 
 ## Active work + release rules
 
 The plan for active work and the backlog are local, gitignored files;
-`maintainer/MAINTAINER.md` names them. Release state lives in git tags
+`maintainer/AGENTS.md` names them. Release state lives in git tags
 (`v*` = tagged release, `amo-submission-*` / `cws-submission-*` = what
 was uploaded to each store) and GitHub Releases. Store state is never
 written down; run `pnpm store-status` (`--deep` compares the served
@@ -107,7 +107,7 @@ failed is omitted, never rendered as "not filed".
 - Cite files, symbols or tags, never short commit hashes. History
   lives in git and `CHANGELOG.md`.
 - Tracked docs are public: name the maintainer's role, not their
-  machines, profiles or accounts (those go in `maintainer/MAINTAINER.md`).
+  machines, profiles or accounts (those go in `maintainer/AGENTS.md`).
 
 ## No curated data
 
