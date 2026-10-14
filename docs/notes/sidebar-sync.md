@@ -164,10 +164,12 @@ is working in the page. The rules, in `controller.ts` and `painter.ts` unless no
 - The stamp is the data's age (`loadCompany`'s `fetchedAt`, the
   oldest cached part), never the paint time: a cache hit can be a
   day old. See `docs/notes/cache.md` § 24h-session.
-- "Synket fra `<host>`" appears only for a company resolved from the
-  page. A drill-in, a manual-search pick and a recents pick clear the
-  label (the `drill` intent, `loadPick`), and the popup sends no host
-  with a manual pick (`syncSidebar` in `popup.ts`).
+- The site travels with a view only when the company was resolved
+  from the page: it drives the Kobling row, the eyebrow and «Feil
+  bedrift?» (`docs/notes/resolution.md` § kobling). A drill-in, a
+  manual-search pick and a recents pick clear it (the `drill` intent,
+  `loadPick`), and the popup sends no host with a manual pick
+  (`syncSidebar` in `popup.ts`).
 
 <!-- SECTION: shared-ui-modules -->
 ## Popup and sidebar share their resolution UX via `src/lib/ui/` and `src/lib/view/`

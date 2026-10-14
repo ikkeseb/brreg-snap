@@ -109,7 +109,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   // currentOrgnr is an underenhet. «Oppdater» drops both from the cache.
   let shownEnhetOrgnr: string | undefined;
   let currentMethod: ResolutionMethod | undefined;
-  // The site the view on screen came from («Synket fra <host>»), also
+  // The site the view on screen came from (its Kobling row), also
   // snapshotted into every history entry written. Cleared by a
   // drill-in and a manual / recents pick: those have nothing to do
   // with the site.
@@ -361,8 +361,8 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   const intents: PanelIntents = {
     // Pushes a history entry so the browser Back button returns to the
     // entity the user came from. Drilled-in entities aren't
-    // host-resolved — the source host is cleared first so the footer
-    // doesn't keep claiming «Synket fra <host>» (and so the snapshot in
+    // host-resolved — the source host is cleared first so no Kobling
+    // row ties the entity to that site (and so the snapshot in
     // the new entry is host-less), and the load is 'drill-in' so «Feil
     // bedrift?» stays hidden.
     drill(orgnr): void {
@@ -443,8 +443,8 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     // A company picked from the manual search or the recents list. The
     // empty state it came from may name a host («Ingen bedrift
     // identifisert på example.com»), but the pick has nothing to do
-    // with that site: the source host is cleared so the footer doesn't
-    // claim «Synket fra example.com».
+    // with that site: the source host is cleared so no Kobling row
+    // ties the company to example.com.
     manual(orgnr): void {
       loadPick(orgnr);
     },

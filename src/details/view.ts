@@ -28,7 +28,7 @@ export interface ResultPaint {
   company: CompanyData;
   // How the orgnr was reached; drives «Feil bedrift?» (isHostDerived).
   method: ResolutionMethod | undefined;
-  // The site the company was resolved from («Synket fra <host>»).
+  // The site the company was resolved from (the Kobling row).
   // Undefined after a drill-in, a manual pick or a recents pick.
   host: string | undefined;
   // What the user has stored for `host` (picker choice, «Ingen av

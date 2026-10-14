@@ -143,7 +143,7 @@ function openOnPage(tab: GestureTab | undefined): void {
 
 // «Slå opp «…» i brreg-snap» on selected text. An orgnr in it (any
 // printed form, the single valid one) opens that company as the user's
-// own choice ('manual': no «synket fra», no «Feil bedrift?»). Any other
+// own choice ('manual': no Kobling row, no «Feil bedrift?»). Any other
 // text opens the panel's search on it. Only the orgnr or the text
 // itself ever leaves the browser — and only because the user chose
 // this item.
