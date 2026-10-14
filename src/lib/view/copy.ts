@@ -114,7 +114,21 @@ export const COPY = {
   egenkapitalLegend: (amount: string) => `Egenkapital ${amount}`,
   gjeldLegend: (amount: string) => `Gjeld ${amount}`,
   honestSingleYear: 'Viser bare siste års tall.',
+  honestYears: (from: string, to: string) => `Åpne data dekker ${from}–${to}.`,
   honestPdf: ' Eldre år finnes som PDF.',
+  // The trend: the company's own figures over the years brreg served.
+  trendTitle: (from: string, to: string) => `Utvikling ${from}–${to}`,
+  driftsinntekter: 'Driftsinntekter',
+  aarsresultat: 'Årsresultat',
+  trendMissing: '–',
+  trendMoved: (label: string, dir: 'up' | 'down' | 'flat', pct?: string) =>
+    dir === 'flat'
+      ? `${label} omtrent uendret.`
+      : `${label} ${dir === 'up' ? 'opp' : 'ned'}${pct ? ` ${pct}` : ''}.`,
+  trendTurned: (label: string, toLoss: boolean) =>
+    `${label} snudde ${toLoss ? 'fra overskudd til underskudd' : 'fra underskudd til overskudd'}.`,
+  trendLoss: (label: string, deeper: boolean) =>
+    `${label} i underskudd begge år, ${deeper ? 'større' : 'mindre'} sist.`,
   // The Enhet names a newer filed year than the figures the API gave.
   filedNewer: (year: string) => `${year} er levert. Tallene er ikke i åpne data ennå.`,
   honestShowingYear: (year: string) => `Viser tallene for ${year}.`,

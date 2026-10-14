@@ -15,9 +15,9 @@ import {
 import type { KonsernChild, KonsernRef } from '../konsern.js';
 import {
   egenkapitalandelTone,
+  companyRegnskapByYear,
   keyFigures,
   regnskapGap,
-  latestRegnskap,
   type KeyFigures,
 } from '../regnskap.js';
 import { isResigned, roleSubjectName } from '../roller.js';
@@ -65,6 +65,19 @@ export interface FigRow {
   tone?: 'warn';
 }
 
+export type FigCell = Pick<FigRow, 'amount' | 'unit' | 'negative'>;
+
+// Driftsinntekter and årsresultat over the years brreg served, oldest
+// first, with one plain sentence per row reading the direction (first
+// year to last) and a sign change. Absent with fewer than two years.
+export interface TrendView {
+  title: string;
+  years: string[];
+  // A cell is undefined when that year lacks the figure.
+  rows: Array<{ label: string; cells: Array<FigCell | undefined> }>;
+  read: string[];
+}
+
 export type OkonomiFigures =
   | { kind: 'failed'; text: string }
   | { kind: 'text'; lines: string[] }
@@ -76,6 +89,7 @@ export type OkonomiFigures =
       groups: Array<{ title: string; rows: FigRow[] }>;
       // Egenkapitalandel as a bar: 0–100, and the legend under it.
       equity?: { share: number; left: string; right: string };
+      trend?: TrendView;
     };
 
 export interface OkonomiView {
@@ -348,7 +362,59 @@ function newerFiledYear(latest: KeyFigures, regnskapSignal: Signal | undefined):
     : undefined;
 }
 
-function figuresOf(latest: KeyFigures, regnskapSignal: Signal | undefined): OkonomiFigures {
+// How a figure moved from the first held year to the last, in words.
+// Driftsinntekter is never negative in practice, so it reads as a
+// percentage; årsresultat also names a sign change, which is what a
+// reader wants from three years (a loss turned to profit, or the
+// reverse). Under one percent either way is «omtrent uendret».
+function trendRead(label: string, first: number, last: number, signed: boolean): string {
+  if (signed && first < 0 !== last < 0 && first !== 0 && last !== 0) {
+    return COPY.trendTurned(label, last < 0);
+  }
+  if (signed && first < 0 && last < 0) {
+    return COPY.trendLoss(label, Math.abs(last) > Math.abs(first));
+  }
+  if (first === 0) return COPY.trendMoved(label, last > 0 ? 'up' : last < 0 ? 'down' : 'flat');
+  const pct = ((last - first) / Math.abs(first)) * 100;
+  if (Math.abs(pct) < 1) return COPY.trendMoved(label, 'flat');
+  return COPY.trendMoved(label, pct > 0 ? 'up' : 'down', formatPercent(Math.abs(pct)));
+}
+
+function trendOf(years: KeyFigures[]): TrendView | undefined {
+  if (years.length < 2) return undefined;
+  const rows: TrendView['rows'] = [];
+  const read: string[] = [];
+  const series: Array<[string, (k: KeyFigures) => number | undefined, boolean]> = [
+    [COPY.driftsinntekter, (k) => k.driftsinntekter, false],
+    [COPY.aarsresultat, (k) => k.aarsresultat, true],
+  ];
+  for (const [label, pick, signed] of series) {
+    const values = years.map(pick);
+    const held = values.filter((v): v is number => typeof v === 'number');
+    if (held.length < 2) continue;
+    rows.push({
+      label,
+      cells: values.map((v) => {
+        const parts = formatAmountParts(v);
+        if (!parts) return undefined;
+        const cell: FigCell = { amount: parts.amount, unit: parts.unit };
+        if (typeof v === 'number' && v < 0) cell.negative = true;
+        return cell;
+      }),
+    });
+    read.push(trendRead(label, held[0]!, held[held.length - 1]!, signed));
+  }
+  if (rows.length === 0) return undefined;
+  const from = years[0]!.year;
+  const to = years[years.length - 1]!.year;
+  return { title: COPY.trendTitle(from, to), years: years.map((k) => k.year), rows, read };
+}
+
+function figuresOf(
+  years: KeyFigures[],
+  regnskapSignal: Signal | undefined,
+): OkonomiFigures {
+  const latest = years[years.length - 1]!;
   const resultat = present([
     figRow('Driftsinntekter', latest.driftsinntekter),
     figRow('Driftsresultat', latest.driftsresultat),
@@ -402,6 +468,10 @@ function figuresOf(latest: KeyFigures, regnskapSignal: Signal | undefined): Okon
       right: COPY.gjeldLegend(debt),
     };
   }
+  // Only years in the latest filing's currency sit on one line.
+  const sameCurrency = years.filter((k) => (k.valuta ?? 'NOK').toUpperCase() === (latest.valuta ?? 'NOK').toUpperCase());
+  const trend = trendOf(sameCurrency);
+  if (trend) out.trend = trend;
   return out;
 }
 
@@ -421,17 +491,21 @@ function okonomi(input: DossierInput): OkonomiView {
     if (enhet.sisteInnsendteAarsregnskap) lines.push(COPY.lastFiled(enhet.sisteInnsendteAarsregnskap));
     figures = { kind: 'text', lines };
   } else {
-    const latest = latestRegnskap(regnskap.items);
-    if (!latest) {
+    const held = companyRegnskapByYear(regnskap.items).map(keyFigures);
+    const key = held[held.length - 1];
+    if (!key) {
       figures = { kind: 'text', lines: [COPY.regnskapNone] };
     } else {
-      const key = keyFigures(latest);
-      figures = figuresOf(key, regnskapSignal);
-      // The view shows one year only: say so (and which, when a newer
-      // one is filed), and point at the copies where the others live.
+      figures = figuresOf(held, regnskapSignal);
+      // Say which years the view holds (one, or the span the trend
+      // reads; and which, when a newer one is filed), and point at the
+      // copies where the others live.
+      const trend = figures.kind === 'figures' ? figures.trend : undefined;
       honest = newerFiledYear(key, regnskapSignal)
         ? `${COPY.honestShowingYear(key.year)}${years && years.length > 0 ? COPY.honestOtherPdf : ''}`
-        : `${COPY.honestSingleYear}${pdfNote}`;
+        : trend
+          ? `${COPY.honestYears(trend.years[0]!, key.year)}${pdfNote}`
+          : `${COPY.honestSingleYear}${pdfNote}`;
     }
   }
   const view: OkonomiView = { figures, kunngjoringer };

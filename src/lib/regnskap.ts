@@ -43,18 +43,24 @@ function isKonsern(type: unknown): boolean {
 }
 
 export function latestRegnskap(items: Regnskap[]): Regnskap | undefined {
-  let latest: Regnskap | undefined;
-  let latestDato = '';
+  return companyRegnskapByYear(items).at(-1);
+}
+
+// The company's own filings, oldest first, one per year (two rows
+// ending in the same year keep the later tilDato). Same rules as
+// latestRegnskap: never KONSERN, never a row without an ISO tilDato.
+// The Økonomi trend reads this; its last element is the latest filing.
+export function companyRegnskapByYear(items: Regnskap[]): Regnskap[] {
+  const byYear = new Map<string, Regnskap>();
   for (const r of items) {
     const tilDato: unknown = r.regnskapsperiode?.tilDato;
     if (typeof tilDato !== 'string' || !ISO_DATE.test(tilDato)) continue;
     if (isKonsern(r.regnskapstype)) continue;
-    if (tilDato > latestDato) {
-      latest = r;
-      latestDato = tilDato;
-    }
+    const year = tilDato.slice(0, 4);
+    const held = byYear.get(year)?.regnskapsperiode?.tilDato ?? '';
+    if (tilDato > held) byYear.set(year, r);
   }
-  return latest;
+  return [...byYear.entries()].sort(([a], [b]) => (a < b ? -1 : 1)).map(([, r]) => r);
 }
 
 // A non-negative egenkapitalandel below this (percent) is a thin-equity

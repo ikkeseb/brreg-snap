@@ -269,8 +269,19 @@ describe('result: the dossier', () => {
     const legend = q('#panel-okonomi .equity__legend')!;
     expect(legend.closest('[aria-hidden]')).toBeNull();
     expect(legend.textContent).toMatch(/^Egenkapital .+Gjeld .+/);
+    // The trend: the company's own three years, oldest first, as a
+    // labelled table read in a sentence; the group's rows never enter.
+    const trend = q('#panel-okonomi .trend__table')!;
+    expect(trend.getAttribute('aria-labelledby')).toBe(q('#panel-okonomi .trend h3')?.id);
+    expect(q('#panel-okonomi .trend h3')?.textContent).toBe('Utvikling 2023–2025');
+    expect(qa('#panel-okonomi .trend__table thead th').map((t) => t.textContent)).toEqual(['2023', '2024', '2025']);
+    expect(qa('#panel-okonomi .trend__table tbody tr')[0]?.textContent).toBe('Driftsinntekter72,4mrd72,5mrd68,0mrd');
+    expect(qa('#panel-okonomi .trend__read').map((p) => p.textContent)).toEqual([
+      'Driftsinntekter ned 6\u00a0%.',
+      'Årsresultat ned 51\u00a0%.',
+    ]);
     expect(q('#panel-okonomi .honest')?.textContent).toBe(
-      'Viser bare siste års tall. Eldre år finnes som PDF.',
+      'Åpne data dekker 2023–2025. Eldre år finnes som PDF.',
     );
     const years = qa('#panel-okonomi .years a');
     expect(years.map((a) => a.textContent)).toEqual(['2025', '2024', '2023', '2022', '2021', '2020', '2019']);

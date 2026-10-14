@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   EGENKAPITALANDEL_WARN_BELOW,
+  companyRegnskapByYear,
   egenkapitalandelTone,
   keyFigures,
   latestRegnskap,
@@ -40,6 +41,39 @@ function filing(
 function typed(tilDato: string | undefined, regnskapstype: string, driftsinntekter: number): Regnskap {
   return { ...filing(tilDato, { driftsinntekter }), regnskapstype };
 }
+
+describe('companyRegnskapByYear', () => {
+  it("orders the company's own filings oldest first and drops the group's", () => {
+    const items = [
+      typed('2024-12-31', 'KONSERN', 81_413_000_000),
+      typed('2024-12-31', 'SELSKAP', 678_000_000),
+      typed('2022-12-31', 'SELSKAP', 871_000_000),
+      typed('2023-12-31', 'konsern', 80_537_000_000),
+      typed('2023-12-31', 'SELSKAP', 477_000_000),
+    ];
+    const years = companyRegnskapByYear(items);
+    expect(years.map((r) => r.regnskapsperiode?.tilDato)).toEqual([
+      '2022-12-31',
+      '2023-12-31',
+      '2024-12-31',
+    ]);
+    expect(years.map((r) => keyFigures(r).driftsinntekter)).toEqual([871_000_000, 477_000_000, 678_000_000]);
+  });
+
+  it('keeps one row per year (the later period end) and skips rows without a date', () => {
+    const items = [
+      filing('2024-06-30', { driftsinntekter: 1 }),
+      filing('2024-12-31', { driftsinntekter: 2 }),
+      filing(undefined, { driftsinntekter: 3 }),
+      { ...filing('2023-12-31', { driftsinntekter: 4 }), regnskapsperiode: { tilDato: 'i fjor' } },
+    ];
+    expect(companyRegnskapByYear(items).map((r) => keyFigures(r).driftsinntekter)).toEqual([2]);
+  });
+
+  it('is empty when only consolidated accounts came back', () => {
+    expect(companyRegnskapByYear([typed('2024-12-31', 'KONSERN', 9)])).toEqual([]);
+  });
+});
 
 describe('latestRegnskap', () => {
   it('picks the most recent tilDato whatever the order', () => {

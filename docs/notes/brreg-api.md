@@ -35,11 +35,14 @@ type, so they showed a parent's group figures as its own. `år` and
 `regnskapstype` now filter the response (observed 2026-10-06); the
 code filters on the client and depends on neither.
 
-The Økonomi tab still shows the latest year only, says so, and points
-at the annual-report copies for older years
+The Økonomi tab leads with the latest year, then reads the company's
+own years as a trend (`companyRegnskapByYear`; driftsinntekter and
+årsresultat, oldest first) when the response holds two or more; one
+year is the plain view, and the honest line says which years the open
+data covers and points at the annual-report copies for the rest
 (`src/lib/view/dossier-view.ts`, `src/lib/view/components/okonomi.ts`;
-§ aarsregnskap-kopi). A multi-year trend view is now possible from
-this data.
+§ aarsregnskap-kopi). How many years brreg keeps serving is unknown:
+a return to one row degrades to the plain view.
 
 <!-- SECTION: regnskap-500-unsupported-plan -->
 ## 500 from regnskap = "not in the open API", not a network failure

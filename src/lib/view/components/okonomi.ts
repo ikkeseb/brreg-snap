@@ -1,12 +1,13 @@
 // The Økonomi tab: the latest filing's figures with their currency,
 // the equity share as a proportion bar (width through the CSSOM, never
-// a style attribute), the honest single-year note, then Dokumenter:
-// the annual-report PDF years and the kunngjøringer link. One year of
-// figures is shown — no trend, no chart.
+// a style attribute), the trend (driftsinntekter and årsresultat over
+// the years brreg served, as a plain table read in a sentence; no
+// chart), the honest years note, then Dokumenter: the annual-report
+// PDF years and the kunngjøringer link.
 
 import { COPY } from '../copy.js';
-import type { FigRow, OkonomiView } from '../dossier-view.js';
-import { button, el, glyph, link, section } from './dom.js';
+import type { FigCell, FigRow, OkonomiView, TrendView } from '../dossier-view.js';
+import { button, el, glyph, link, section, uniqueId } from './dom.js';
 
 const YEARS_SHOWN = 5;
 
@@ -18,6 +19,47 @@ function buildFigRow(row: FigRow): HTMLDivElement {
   if (row.unit) dd.appendChild(el('span', 'fig-row__unit', row.unit));
   div.appendChild(dd);
   return div;
+}
+
+function buildCell(cell: FigCell | undefined): HTMLTableCellElement {
+  const td = el('td', cell?.negative ? 'num--neg' : undefined, cell ? cell.amount : COPY.trendMissing);
+  if (cell?.unit) td.appendChild(el('span', 'fig-row__unit', cell.unit));
+  return td;
+}
+
+// Years across, the two figures down, the latest year in the weight
+// the rows above use; a sentence per row says the direction so no one
+// has to subtract. The table is the data, the sentence the reading.
+function buildTrend(trend: TrendView): HTMLElement {
+  const wrap = el('div', 'trend');
+  const head = el('h3', 'fig-group cap', trend.title);
+  head.id = uniqueId('trend');
+  wrap.appendChild(head);
+  const table = el('table', 'trend__table');
+  table.setAttribute('aria-labelledby', head.id);
+  const thead = el('thead');
+  const hr = el('tr');
+  hr.appendChild(el('td'));
+  for (const year of trend.years) {
+    const th = el('th', undefined, year);
+    th.scope = 'col';
+    hr.appendChild(th);
+  }
+  thead.appendChild(hr);
+  table.appendChild(thead);
+  const tbody = el('tbody');
+  for (const row of trend.rows) {
+    const tr = el('tr');
+    const th = el('th', undefined, row.label);
+    th.scope = 'row';
+    tr.appendChild(th);
+    for (const cell of row.cells) tr.appendChild(buildCell(cell));
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  for (const line of trend.read) wrap.appendChild(el('p', 'trend__read', line));
+  return wrap;
 }
 
 function buildFigures(view: OkonomiView): HTMLElement {
@@ -64,6 +106,8 @@ function buildFigures(view: OkonomiView): HTMLElement {
     equity.appendChild(legend);
     sec.appendChild(equity);
   }
+
+  if (figures.trend) sec.appendChild(buildTrend(figures.trend));
 
   if (view.honest) {
     const honest = el('p', 'honest');

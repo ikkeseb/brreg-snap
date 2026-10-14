@@ -564,7 +564,8 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 
 
 /* ---------- økonomi -------------------------------------------------------
-   One year of figures is shown. No trend chart, no sparkline. */
+   The latest year's figures, then the trend as a plain table (years
+   across, two figures down) read in a sentence. No chart, no sparkline. */
 .fig-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .fig-head h2 { font: var(--t-lead); }
 .fig-status { display: flex; align-items: center; gap: 8px; margin-top: 4px; color: var(--ink-2); }
@@ -583,6 +584,26 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .equity__fill { width: var(--share, 0%); background: var(--ink); }  /* --share set via el.style.setProperty */
 .fig-row[data-tone="warn"] dd { color: var(--tone); }
 .equity__legend { display: flex; justify-content: space-between; margin-top: 5px; font: var(--t-cap); font-weight: 400; color: var(--ink-3); }
+/* the trend: a registry table, hairlines only; the latest column carries
+   the weight the rows above use, older years sit lighter */
+.trend { margin-top: 18px; }
+.trend .fig-group { padding-top: 0; }
+.trend__table { width: 100%; border-collapse: collapse; }
+.trend__table th, .trend__table td { padding: 7px 0 7px 10px; border-bottom: 1px solid var(--rule); text-align: right; vertical-align: baseline; }
+.trend__table th:first-child, .trend__table td:first-child { padding-left: 0; text-align: left; color: var(--ink-2); font-weight: 400; }
+.trend__table thead th { font: var(--t-cap); letter-spacing: var(--track-cap); color: var(--ink-3); }
+.trend__table tbody td { font-weight: 400; color: var(--ink-2); white-space: nowrap; }
+.trend__table tbody td:last-child { font-weight: 600; color: var(--ink); }
+.trend__table tbody td.num--neg { color: var(--danger); }
+.trend__table tbody tr:last-child th, .trend__table tbody tr:last-child td { border-bottom-color: var(--ink); }
+.trend__read { margin-top: 8px; color: var(--ink-2); }
+.trend__read + .trend__read { margin-top: 2px; }
+/* below 340 px three money cells and a label don't share a line: the
+   unit word drops under its number, the way def-row columns stack */
+@container (max-width: 340px) {
+  .trend__table th, .trend__table td { padding-left: 6px; }
+  .trend__table tbody td .fig-row__unit { display: block; margin-left: 0; }
+}
 .honest { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 0 10px; margin-top: 14px; color: var(--ink-2); }
 .honest .glyph { margin-top: 2.5px; }
 .doc-row { padding: 8px 0 9px; border-bottom: 1px solid var(--rule); }
