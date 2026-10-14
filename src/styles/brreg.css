@@ -6,7 +6,8 @@
 
    Principle: loudness is proportional to severity. When nothing is wrong
    the view is a calm registry extract (paper, ink, hairlines). A warning
-   gets a firmer band. Danger is stamped: a solid seal-like block.
+   gets a firmer band. Danger is a stamped verdict: one framed field on
+   the page, the statement in the largest type, the key word in red.
 
    Order: font · tokens (light, dark via media, .theme-* overrides) ·
    base · layout shells · components (one commented block each) ·
@@ -47,12 +48,13 @@
 :root {
   --font: 'Schibsted Grotesk', 'Schibsted Fallback', system-ui, sans-serif;
 
-  /* type: four steps + the stamp word. Nothing else. */
+  /* type: four steps + the verdict. Nothing else. */
   --t-cap:  600 11px/1.35 var(--font);   /* section heads, micro labels (uppercase +.07em) */
   --t-body: 400 13px/1.45 var(--font);   /* everything readable */
   --t-lead: 700 16px/1.28 var(--font);   /* the answer, empty-state heads */
   --t-name: 800 26px/1.02 var(--font);   /* the company name */
-  --stamp-size: 30px;                    /* danger stamp word; panel overrides with clamp() */
+  --t-verdict: 800 22px/1.1 var(--font); /* the danger statement; the panel sets --verdict-size */
+  --verdict-size: 22px;
   --track-cap: .07em;
 
   /* space: 4 px grid */
@@ -61,7 +63,6 @@
 
   /* shape: no elevation anywhere. Rules separate, fills escalate. */
   --r: 2px;                              /* inputs, buttons, kbd, tags */
-  --r-stamp: 3px;                        /* the danger stamp only */
 
   /* motion */
   --ease: cubic-bezier(.2, .7, .2, 1);
@@ -81,9 +82,7 @@
   --rule-strong: #8C8476;  /*  3.3  UI boundaries: inputs, buttons, kbd */
   --ok: #1D6A3A;           /*  5.9 */
   --warn: #8A5200;         /*  5.7  (4.8 on its own 12 % tint) */
-  --danger: #AE2A1E;       /*  6.0  text tone, negative figures */
-  --danger-fill: #A8281C;  /*  stamp fill; --on-danger on it 6.7 */
-  --on-danger: #FFF8F2;
+  --danger: #AE2A1E;       /*  6.0  text tone, the verdict's frame + word (5.4 on its own 7 % tint), negative figures */
   --amber: #8A5A12;        /*  5.3  focus ring only */
   --brand: #A5711F;        /*  the mark only (graphic, 3.8) */
   --skel: #E4DED1;
@@ -104,8 +103,6 @@
     --ok: #7CC592;           /*  9.1 */
     --warn: #E6AC4C;         /*  9.2 */
     --danger: #F2836F;       /*  7.4 */
-    --danger-fill: #B53A2C;  /*  --on-danger on it 5.4; fill vs paper 3.2 */
-    --on-danger: #FFF4EC;
     --amber: #D9A866;        /*  8.7 */
     --brand: #D4A574;
     --skel: #221F1A;
@@ -127,7 +124,7 @@
   overflow-wrap: break-word;
 }
 .app--popup { --gut: 20px; width: 380px; }
-.app--panel { --gut: 16px; min-height: 100vh; --stamp-size: clamp(26px, 9cqi, 36px); }
+.app--panel { --gut: 16px; min-height: 100vh; --verdict-size: clamp(22px, 6cqi, 24px); }
 
 .app *, .app *::before, .app *::after { box-sizing: border-box; }
 /* `hidden` wins over every component's display value (the smoke asserts
@@ -299,8 +296,10 @@
    .answer--ok      quiet band: 3 px rule, 5 % tint, seal, no support line
    .answer--warn    firmer band: 4 px rule, 12 % tint, 800 head, support
                     line, the way-out action inside the band
-   .answer--danger  the stamp: solid fill, inset seal rule, key word in
-                    900 caps (.stamp-word) — DOM stays plain prose
+   .answer--danger  the stamped verdict: a field inset by the gutter, 2 px
+                    red frame, 7 % tint, a red kicker («✕ ALVORLIG»), the
+                    sentence in the largest type in ink with the key word
+                    in red (.stamp-word) — DOM stays plain prose
    <section class="answer answer--warn" aria-labelledby="…"> */
 .answer {
   --tint: 5%;
@@ -323,42 +322,36 @@
 .answer__note { color: var(--ink-3); }   /* «Noe kunne ikke hentes: …», quieter than a finding */
 .answer__actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
-/* danger: the stamp. An object placed on the page, not a band across it. */
+/* danger: the stamped verdict. Not a band across the page but a field
+   placed on it, inset by the gutter: a 2 px frame in the danger red and
+   a faint tint hold it as one object, while inside it the voice is a
+   statement, not an alarm: a small red kicker, the sentence in the
+   largest type in ink, only the key word red. Loudest by frame, colour
+   and type, never by a fill. */
 .answer--danger {
-  --tone: var(--danger-fill);
-  position: relative; display: block;
-  margin: 12px var(--gut) 0; padding: 12px 15px 13px;
-  border: 0; border-radius: var(--r-stamp);
-  background: var(--danger-fill); color: var(--on-danger);
-}
-.answer--danger::before {                /* the seal detail: 1 px rule inset 5 px */
-  content: ""; position: absolute; inset: 5px; pointer-events: none;
-  border: 1px solid color-mix(in oklab, var(--on-danger) 55%, var(--danger-fill)); border-radius: 1px;
+  --tone: var(--danger); --tint: 7%;
+  display: block; margin: 12px var(--gut) 0; padding: 11px 16px 13px;
+  border: 2px solid var(--tone); border-radius: var(--r);
 }
 .answer--danger .answer__seal { display: none; }
-.answer--danger .answer__head { font-weight: 600; letter-spacing: 0; }
-.stamp-pre, .stamp-rest { display: block; }
-.stamp-word {
-  display: flex; align-items: center; gap: .2em; margin: 1px 0 3px;
-  font-size: var(--stamp-size); line-height: .98; font-weight: 900;
-  letter-spacing: -.02em; text-transform: uppercase; text-wrap: balance;
+.answer__kicker {
+  display: flex; align-items: center; gap: 6px;
+  font: var(--t-cap); font-weight: 700; letter-spacing: var(--track-cap); text-transform: uppercase;
+  color: var(--danger);
 }
-/* a single word wider than the stamp at --stamp-size: TVANGSAVVIKLING and
-   its glyph are 11 em in this font, so the size is the stamp's inner
-   width (the surface minus both gutters and the 15 px paddings) / 11.5 */
-.stamp-word--long { font-size: min(var(--stamp-size), calc((100cqi - 2 * var(--gut) - 30px) / 11.5)); }
-.stamp-word .glyph { width: .62em; height: .62em; color: inherit; stroke-width: 3.4; }
+.answer__kicker .glyph { width: 11px; height: 11px; stroke-width: 3; color: inherit; }
+.answer--danger .answer__head {
+  margin-top: 4px; font: var(--t-verdict); font-size: var(--verdict-size);
+  letter-spacing: -.018em; text-wrap: balance;
+}
+/* the key word: the sentence's own weight (the global strong rule would
+   set 600 under an 800 sentence), only the colour marks it */
+.stamp-word { display: inline-block; font-weight: inherit; color: var(--danger); }
 .answer--danger .answer__support {
-  margin-top: 10px; padding-top: 9px; color: var(--on-danger);
-  border-top: 1px solid color-mix(in oklab, var(--on-danger) 45%, var(--danger-fill));
+  grid-column: auto; margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid color-mix(in oklab, var(--tone) 30%, transparent);
 }
-.answer--danger .answer__support b { color: inherit; }
-.answer--danger .answer__actions { align-items: center; gap: 8px 12px; margin-top: 10px; }
-.text-btn--on-fill { color: var(--on-danger); font-weight: 600; text-decoration-color: color-mix(in oklab, var(--on-danger) 60%, var(--danger-fill)); }
-.text-btn--on-fill:hover { color: var(--on-danger); text-decoration-color: currentColor; }
-/* the amber ring is ~1.2:1 (light) / 2.7:1 (dark) on the fill; --on-danger
-   is 6.7 / 5.4 (WCAG 1.4.11 needs 3) */
-.answer--danger :focus-visible { outline-color: var(--on-danger); }
+.answer--danger .answer__actions { grid-column: auto; align-items: center; gap: 8px 12px; }
 
 
 /* ---------- ledger (signals) -------------------------------------------
@@ -409,8 +402,7 @@
 /* ---------- buttons -----------------------------------------------------
    .btn            hairline (secondary)
    .btn--primary   solid ink
-   .btn--tone      hairline in the answer's tone (inside a warn band)
-   .btn--on-fill   inside the danger stamp
+   .btn--tone      hairline in the answer's tone (inside a warn band or a verdict)
    .btn--sm        28 px */
 .btn {
   height: 34px; padding: 0 12px; display: inline-flex; align-items: center; gap: 7px;
@@ -424,8 +416,6 @@
 .btn--primary:hover { background: color-mix(in oklab, var(--ink) 86%, var(--paper)); }
 .btn--tone { border-color: var(--tone); color: var(--ink); }
 .btn--tone:hover { background: color-mix(in oklab, var(--tone) 14%, transparent); }
-.btn--on-fill { background: var(--on-danger); border-color: var(--on-danger); color: var(--danger-fill); }
-.btn--on-fill:hover { background: color-mix(in oklab, var(--on-danger) 88%, var(--danger-fill)); }
 .btn--sm { height: 28px; padding: 0 10px; }
 /* «Kopier sammendrag»: JS swaps the label to «Kopiert» and adds .is-copied */
 :is(.btn, .text-btn).is-copied .icon--copy { display: none; }
@@ -736,11 +726,11 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 }
 
 
-/* ---------- forced colors: rules, seals and the stamp must survive -------- */
+/* ---------- forced colors: rules, seals and the verdict's frame must survive ---- */
 @media (forced-colors: active) {
   .answer { border-top-color: CanvasText; }
-  .answer--danger { border: 3px solid CanvasText; }
-  .answer--danger::before, .answer--danger .answer__support { border-color: CanvasText; }
+  .answer--danger { border-color: CanvasText; }
+  .answer--danger .answer__support { border-color: CanvasText; }
   .answer__seal { forced-color-adjust: none; background: CanvasText; color: Canvas; }
   .equity__fill { forced-color-adjust: none; background: CanvasText; }
   .toggle[aria-checked="true"] .toggle__track { forced-color-adjust: none; background: Highlight; border-color: Highlight; }

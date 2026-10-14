@@ -283,7 +283,7 @@ describe('answer', () => {
     expect(onReject).toHaveBeenCalledOnce();
   });
 
-  it('danger: role=alert, no seal, the headline as prose around the stamp word', () => {
+  it('danger: role=alert, no seal, a kicker, the headline as prose around the key word', () => {
     const onReject = vi.fn();
     const { section, heading } = buildAnswer(
       {
@@ -300,20 +300,24 @@ describe('answer', () => {
     );
     expect(section.getAttribute('role')).toBe('alert');
     expect(section.querySelector('.answer__seal')).toBeNull();
+    const kicker = section.querySelector('.answer__kicker')!;
+    expect(kicker.textContent).toBe('Alvorlig');
+    expect(kicker.querySelector('use')?.getAttribute('href')).toBe('#g-danger');
+    expect(kicker.nextElementSibling).toBe(heading);
     expect(heading.textContent).toBe('Nettstedet er ikke koblet til selskapet');
     expect(heading.querySelector('.stamp-pre')?.textContent).toBe('Nettstedet er');
     expect(heading.querySelector('strong.stamp-word')?.textContent).toBe('ikke koblet');
-    expect(heading.querySelector('.stamp-word use')?.getAttribute('href')).toBe('#g-danger');
+    expect(heading.querySelector('svg')).toBeNull();
     expect(heading.querySelector('.stamp-rest')?.textContent).toBe('til selskapet');
     const support = section.querySelector('.answer__support')!;
     expect(support.querySelector('b')?.textContent).toBe('nordvik.no');
     expect(support.textContent).toBe(
       'Registrert hjemmeside er nordvik.no. Hvem som helst kan skrive et org.nr på siden sin.',
     );
-    const goto = section.querySelector<HTMLAnchorElement>('a.btn--on-fill')!;
+    const goto = section.querySelector<HTMLAnchorElement>('a.btn.btn--tone')!;
     expect(goto.href).toBe('https://nordvik.no/');
     expect(goto.textContent).toBe('Gå til nordvik.no ↗');
-    section.querySelector<HTMLButtonElement>('button.text-btn--on-fill')!.click();
+    section.querySelector<HTMLButtonElement>('button.text-btn')!.click();
     expect(onReject).toHaveBeenCalledOnce();
   });
 
@@ -327,25 +331,7 @@ describe('answer', () => {
     });
     expect(heading.textContent).toBe('Konkurs siden 26. aug. 2026');
     expect(heading.querySelector('.stamp-pre')).toBeNull();
-    expect(heading.querySelector('.stamp-word--long')).toBeNull();
     expect(section.querySelector('.answer__support b')?.textContent).toBe('Adv. Kari Nordmann');
-  });
-
-  it('a stamp word too long for the stamp is set to fit it', () => {
-    const { heading } = buildAnswer({
-      tone: 'danger',
-      headline: 'Tvangsavvikling – mangler regnskap',
-      stamp: { word: 'Tvangsavvikling', rest: '– mangler regnskap' },
-      actions: [],
-    });
-    expect(heading.querySelector('.stamp-word--long')?.textContent).toBe('Tvangsavvikling');
-    const spoof = buildAnswer({
-      tone: 'danger',
-      headline: 'Nettstedet er ikke koblet til selskapet',
-      stamp: { pre: 'Nettstedet er', word: 'ikke koblet', rest: 'til selskapet' },
-      actions: [],
-    });
-    expect(spoof.heading.querySelector('.stamp-word--long')).toBeNull();
   });
 
   it('the error band is warn with «Prøv igjen», never an alert or a stamp', () => {

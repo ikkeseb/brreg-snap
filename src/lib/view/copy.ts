@@ -41,6 +41,9 @@ export const COPY = {
   couldNotFetch: (parts: string) => `Noe kunne ikke hentes: ${parts}`,
   partName: { roller: 'roller', regnskap: 'regnskapstall', konsern: 'konsern', endringer: 'endringer' },
 
+  // the danger verdict's kicker, the same word the ledger's sr-only text uses
+  verdictKicker: 'Alvorlig',
+
   // ledger
   toneSr: { ok: ', ok', warn: ', advarsel', danger: ', alvorlig', neutral: '' },
   reject: 'Feil bedrift?',

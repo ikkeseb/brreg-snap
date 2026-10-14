@@ -56,15 +56,15 @@ export const STATES = [
   { name: 'popup-dnb', surface: 'popup', path: '/popup/popup.html?taburl=https://www.dnb.no/', state: 'result' },
   // nrk.no's hjemmeside search yields several candidates.
   { name: 'popup-picker', surface: 'popup', path: '/popup/popup.html?taburl=https://www.nrk.no/', state: 'picker' },
-  // A shop whose title carries Equinor's orgnr: the danger stamp
-  // «Nettstedet er IKKE KOBLET til selskapet».
+  // A shop whose title carries Equinor's orgnr: the danger verdict
+  // «Nettstedet er ikke koblet til selskapet», «ikke koblet» in red.
   {
     name: 'popup-spoof',
     surface: 'popup',
     path: '/popup/popup.html?taburl=https://trygg-handel-billig.shop/&tabtitle=Trygg%20Handel%20%7C%20Org.nr%20923%20609%20016',
     state: 'result',
   },
-  // A konkurs company, its orgnr in the page URL: the KONKURS stamp.
+  // A konkurs company, its orgnr in the page URL: the «Konkurs siden …» verdict.
   { name: 'popup-konkurs', surface: 'popup', path: '/popup/popup.html?taburl=https://example.no/?orgnr=915330193', state: 'result' },
   // No address to look up: search + recents.
   { name: 'popup-nosite', surface: 'popup', path: '/popup/popup.html?seedrecents=1', state: 'empty' },

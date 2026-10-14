@@ -34,15 +34,27 @@ for (const s of STATES) {
     }
 
     // A browser caps a popup at 600 px (docs/notes/ui.md § popup-budget),
-    // and a stamp word never runs out of its stamp.
+    // and a verdict's key word never runs out of its frame: the word is
+    // one inline-block, so its box is compared with the answer's content
+    // box (the frame minus border and padding); a word wider than the
+    // line would otherwise just poke out without any scroll overflow.
     if (s.surface === 'popup') {
       const height = await page.evaluate(() => document.body.getBoundingClientRect().height);
       expect.soft(height, 'popup within the 600 px budget').toBeLessThanOrEqual(600);
     }
     const stampOverflow = await page.evaluate(() =>
-      [...document.querySelectorAll('.stamp-word')].some((w) => w.scrollWidth > w.clientWidth),
+      [...document.querySelectorAll<HTMLElement>('.stamp-word')].some((w) => {
+        const box = w.closest<HTMLElement>('.answer');
+        if (!box) return true;
+        const cs = getComputedStyle(box);
+        const b = box.getBoundingClientRect();
+        const r = w.getBoundingClientRect();
+        const left = b.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft);
+        const right = b.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight);
+        return r.left < left - 0.5 || r.right > right + 0.5 || w.scrollWidth > w.clientWidth;
+      }),
     );
-    expect.soft(stampOverflow, 'stamp word inside its stamp').toBe(false);
+    expect.soft(stampOverflow, 'verdict key word inside its frame').toBe(false);
 
     await page.screenshot({
       path: join(testInfo.project.outputDir, 'screenshots', testInfo.project.name, `${s.name}.png`),

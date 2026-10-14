@@ -21,11 +21,18 @@ escalates only with the answer's tone:
 - **warn** — a firmer band: 4 px rule, 12 % tint, headline at 800, an
   optional supporting line, and the way out INSIDE the band as a
   hairline button in the tone («Feil bedrift? Velg en annen»).
-- **danger** — the stamp: a solid fill with a 1 px seal rule inset 5 px,
-  the key word in 900 caps (KONKURS, SLETTET, TVANGSAVVIKLING, IKKE
-  KOBLET), the rest of the sentence at lead size, a hairline, the
-  supporting line. Actions live inside it (`.btn--on-fill`,
-  `.text-btn--on-fill`).
+- **danger** — the stamped verdict: not a band across the page but a
+  field placed on it, inset by the gutter, held by a 2 px frame in the
+  danger red and a 7 % tint. Inside it the voice is a statement, not an
+  alarm: a red kicker («✕ Alvorlig», `.answer__kicker`,
+  `COPY.verdictKicker`), then the whole sentence in the largest type on
+  the page (`--t-verdict`) in ink with only the key word in red
+  (`.stamp-word`: Konkurs, Slettet, Tvangsavvikling, ikke koblet), a
+  hairline, the supporting line. The red is precise: the frame, the
+  kicker and the key word, no fill, so it is loudest by containment,
+  colour and type, never by flood. Actions live inside it like a warn
+  band's: the site link is a `.btn--sm.btn--tone`, the way out a plain
+  `.text-btn` beside it so the two keep to one line.
 
 Everything else follows from the tone: under `data-answer="danger"`
 the ledger's ok glyphs go grey (true, but not comfort), the popup
@@ -39,7 +46,7 @@ A part whose fetch failed is named, never presented as absent.
 konsern when the Enhet says erIKonsern, endringer on the panel). The
 popup's ok and warn bands get one quiet line under the headline,
 «Noe kunne ikke hentes: roller, regnskapstall» (`answer.note`,
-`.answer__note`); a stamp has no room for it (§ popup-budget). The
+`.answer__note`); a verdict has no room for it (§ popup-budget). The
 panel says it where the part lives: «Kunne ikke hente roller» /
 «… regnskapstallene» in their tabs, «Konsernet kunne ikke hentes.
 Trykk «Oppdater» …» as the Konsern section, «Endringer kunne ikke
@@ -56,21 +63,26 @@ All in `brreg.css`. Light is the default, dark comes from
 (sunk: inputs, kbd, hover), `--ink`, `--ink-2` (labels, details),
 `--ink-3` (captions, neutral glyphs), `--rule` (hairline, decorative),
 `--rule-strong` (UI boundaries), `--ok`, `--warn`, `--danger` (text
-tone), `--danger-fill` + `--on-danger` (the stamp), `--amber` (the
+tone and the verdict's frame, kicker and key word), `--amber` (the
 focus ring only), `--brand` (the mark only), `--skel` / `--skel-hi`.
-Every text/paper pair measures ≥ 4.5:1 in both themes, the stamp
-included (the table is in SPEC.md § Contrast).
+Every text/paper pair measures ≥ 4.5:1 in both themes (the table is
+in SPEC.md § Contrast). The verdict's tint is `color-mix` of 7 %
+`--danger` into `--paper` (resolves to #F2E5DB light / #211915 dark),
+and on it `--danger` measures 5.4 / 6.8, `--ink` 14.2 / 14.3, `--ink-2`
+7.3 / 8.5, the amber focus ring 4.8 / 8.0 (3.9 / 6.6 on the
+`.btn--tone` hover fill); the frame against `--paper` is 6.0 / 7.4.
 
-Type: four steps and the stamp word, nothing else — `--t-cap` (600
+Type: four steps and the verdict, nothing else — `--t-cap` (600
 11px, uppercase + `--track-cap` for section heads and micro labels),
 `--t-body` (400 13px, everything readable), `--t-lead` (700 16px, the
 answer, empty-state heads), `--t-name` (800 26px, the company name;
-23px below 340 px), `--stamp-size` (30px popup, `clamp(26px, 9cqi,
-36px)` panel; a word longer than ten letters, TVANGSAVVIKLING, is
-`.stamp-word--long`, sized to the stamp's inner width). Space is a 4 px grid (`--s1`…`--s5`); `--gut` is 20 px
+23px below 340 px), `--t-verdict` (800 22px/1.1, the danger sentence;
+`--verdict-size` is `clamp(22px, 6cqi, 24px)` in the panel: «Konkurs
+siden 26. aug. 2026» stays one line inside the frame at 400 px, and
+Tvangsavvikling fits as one word at 320 px, 166 px of the frame's 252). Space is a 4 px grid (`--s1`…`--s5`); `--gut` is 20 px
 in the popup, 16 px in the panel. Shape: no elevation anywhere, rules
 separate and fills escalate; `--r` 2 px for inputs, buttons, kbd and
-tags, `--r-stamp` 3 px for the stamp only. Motion: `--ease`,
+tags. Motion: `--ease`,
 `--t-fast`; every animation and transition is off under
 `prefers-reduced-motion`. `.app` is a container (`inline-size`) and
 the one breakpoint is 340 px (def-row columns stack, tab counts hide,
@@ -112,7 +124,7 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 | `masthead.ts` | `renderMasthead(container, {kind:'popup', host?, search} \| {kind:'panel', query?, autoSync}, handlers)` → `{input?, toggle?, searchButton?}`; `appendSiteLabel` | `header.mast > svg.mast__mark[role=img]` + popup `span.mast__site` (`<b>` = registrable domain) + `button.icon-btn[aria-label]`; panel `label.search > svg.icon + input[type=search][aria-label]` + `button.toggle[role=switch][aria-checked] > span.toggle__track` |
 | `identity.ts` | `renderIdentity(container, IdentityView, CopyHandlers)` → `{heading}`; `buildOrgnrButton(orgnr, handlers, {small})` | `div.ident > p.ident__over` (form · city) OR `p.ident__eyebrow` (provenance, `i-link`) · `h1.ident__name(--claim)` · `p.ident__line > button.orgnr + a.link` (with an eyebrow: `span.ident__rest > span.ident__meta` carries form · city, the link glued to its last word by `.nw`) · popup `p.ident__leaders > span × n` · `p.ident__note` (avdeling). Panel: the painter adds `div.ident__row > p.ident__flags + button.text-btn` (Kopier sammendrag) |
 | `copy-feedback.ts` | `attachCopy(button, () => text, {done, label?}, {copy, announce})`, `COPY_FEEDBACK_MS` = 1400 | adds `.is-copied` (icon `.icon--copy` ⇄ `.icon--done`, the label swaps to «Kopiert») or `.is-failed`; announces «Org.nr kopiert» / «Kunne ikke kopiere» in the live region |
-| `answer.ts` | `buildAnswer(AnswerView, {onReject})` → `{section, heading}`; `buildErrorAnswer({head, support, retry}, {onRetry})`; `buildAnswerLoading()` | `section.answer.answer--ok\|--warn\|--danger[aria-labelledby] > span.answer__seal > svg.glyph` + `h2.answer__head` + `p.answer__support` + `div.answer__actions`. Danger: `role=alert`, no seal, the head is prose `span.stamp-pre? · strong.stamp-word > svg.glyph + word · span.stamp-rest` |
+| `answer.ts` | `buildAnswer(AnswerView, {onReject})` → `{section, heading}`; `buildErrorAnswer({head, support, retry}, {onRetry})`; `buildAnswerLoading()` | `section.answer.answer--ok\|--warn\|--danger[aria-labelledby] > span.answer__seal > svg.glyph` + `h2.answer__head` + `p.answer__support` + `div.answer__actions`. Danger (the framed field): `role=alert`, no seal, `span.answer__kicker > svg.glyph + «Alvorlig»` before the head, and the head is prose `span.stamp-pre? · strong.stamp-word · span.stamp-rest` |
 | `ledger.ts` | `buildLedger(rows, {onReject, onForget, reportHref})`, `buildLedgerRow`, `buildFacts(TextPart[])` (spoof) | `dl.ledger > div.ledger-row[data-tone][data-key](--inline, --danger-value) > dt (svg.glyph + label + span.sr-only «, ok / advarsel / alvorlig») + dd (value, `.ledger-row__aux`, `.ledger-row__detail`, `.ledger-row__act`)`. Spoof: `p.ledger-cap` + `p.facts`. A `report` action without a mailto is left out |
 | `konsern.ts` | `buildKonsernRow(KonsernView, {onOpen})` | `button.konsern > svg.icon + span.konsern__text + svg.konsern__chev` |
 | `actions.ts` | `buildActions({summary, panelHref?}, handlers)` → `{container}` (popup) | `div.actions > a.btn.btn--primary[href]` (Åpne i sidepanel) + `button.btn` (Kopier sammendrag) |
@@ -143,19 +155,20 @@ search): the smoke and the tests key on those, not on classes.
   announcement goes through it: load progress («Henter … fra
   Brønnøysundregistrene»), copy outcomes, search result counts. A
   second region would make screen readers race.
-- `role="alert"` only on the danger stamp; the ok and warn bands are
+- `role="alert"` only on the danger verdict; the ok and warn bands are
   labelled sections. Errors are never alerts.
 - Tone is never colour alone: the glyph shape (✓ ! ✕ ·) is the first
   channel, the ledger's `span.sr-only` text («, ok», «, advarsel», «,
   alvorlig») the second, colour the third. Forced colours keep the
-  rules, the seals and the stamp border.
+  rules, the seals and the verdict's frame (`CanvasText`); the key
+  word loses its red there, so the kicker's ✕ and word are what mark
+  the verdict.
 - Focus moves only on a user-initiated transition (a pick, a search, a
   retry, a drill-in), to the result heading or the first picker row;
   a background repaint (auto-sync) never moves it. One focus style
   everywhere: the amber ring on `:focus-visible`; the search box
-  carries it for its input. Inside the stamp the ring is `--on-danger`
-  (amber on the fill is 1.2:1 light / 2.7:1 dark, under WCAG 1.4.11's
-  3:1; `--on-danger` is 6.7 / 5.4).
+  carries it for its input, the verdict too (on its tint the ring
+  measures 4.8 light / 8.0 dark against WCAG 1.4.11's 3:1, § tokens).
 - A background rebuild must not drop focus either: the panel's 30 s
   freshness tick rewrites the footer's text node in place
   (`renderFooter(...).tick`), and a same-view keep (provenance) that
@@ -163,8 +176,8 @@ search): the smoke and the tests key on those, not on classes.
   control — same tag, same accessible text (`rebuildKeepingFocus` in
   painter.ts) — or leaves it where the browser dropped it when the
   control is gone.
-- The stamp's DOM stays one sentence («Nettstedet er ikke koblet til
-  selskapet») so a screen reader hears it, whatever the caps say.
+- The verdict's DOM stays one sentence («Nettstedet er ikke koblet til
+  selskapet») so a screen reader hears it, whatever the colour marks.
 - The tablist is a real tablist (roving tabindex, arrow keys); the
   skeleton is `inert` and hidden from AT; `[hidden]` always renders
   `display: none` (the smoke asserts no hidden element paints). The
@@ -193,11 +206,14 @@ Firefox and Chrome cap a popup at 600 px; the design fixes the width at
 `document.body` height; the real popup's viewport reads 1 px under its
 content, a rounding, not an overflow). Measured 2026-10-06 against the
 live API, Chromium and Gecko alike: dnb 581, equinor 600 (no line to
-spare), spoof 588, konkurs 596, nrk picker 592, sbanken picker 559.
-With the «Noe kunne ikke hentes» line (a failed part drops a row too):
-dnb with roller + regnskap + konsern failed 506, equinor with only
-konsern failed 586; a stamp gets no line, because konkurs (596) or the
-spoof (588) plus a line would pass the cap.
+spare), nrk picker 592, sbanken picker 559; the two verdict states
+re-measured 2026-10-14 with the stamped verdict (live API and the smoke
+fixtures agree, Chromium through the preview harness): spoof 581,
+konkurs 586, nothing shed. With the «Noe kunne ikke hentes» line (a
+failed part drops a row too): dnb with roller + regnskap + konsern
+failed 506, equinor with only konsern failed 586; a verdict gets no
+line, because konkurs (586) or the spoof (581) plus a line would sit
+too close to the cap for a longer name.
 
 The design rules below keep the common states under the cap. Names,
 leaders and parent companies are as long as the registry has them, so
@@ -209,20 +225,22 @@ picker row's activity past one line, (2) the provenance eyebrow, (3) a
 neutral Kobling row's note («ingen hjemmeside registrert»). A warn or
 danger Kobling note is the finding and never sheds. A state that fits
 sheds nothing; the panel never sheds. The smoke asserts every popup
-state within 600 px and every stamp word inside its stamp.
+state within 600 px and every verdict's key word inside its frame (the
+word's box against the answer's content box, since an `inline-block`
+word pokes out of a line without any scroll overflow).
 
 - Identity uses one compact leaders line («Daglig leder X · Styreleder
   Y», wrapping whole pairs) instead of a two-column block; one person
   in both roles is one pair, «Daglig leder og styreleder X».
-- Under a stamp the leaders line is dropped (reassurance next to a
+- Under a verdict the leaders line is dropped (reassurance next to a
   konkurs), the regnskap row names the year only (the money lives in
   the panel's Økonomi tab), and the Kobling row is short («Registrert
   hjemmeside»: the host is already in the masthead, the date already
-  in the stamp).
+  in the verdict).
 - Under a warn band the popup's regnskap row names the year only too
   (`signalRow`'s `roomForMoney`): a url-param company with a merknad,
   a provenance line and two leaders measured 610 px with the money.
-  The panel keeps the money under a warn band; only a stamp drops it
+  The panel keeps the money under a warn band; only a verdict drops it
   there.
 - On a spoof the company's ledger becomes one prose line under «Om
   selskapet — sier ingenting om dette nettstedet» (`.facts`); four
@@ -335,7 +353,7 @@ real components on fictional data (`figure.example[data-answer]`, the
 card `aria-hidden`, the caption is what a screen reader gets, no
 `role=alert`, nothing focusable). The cards share one height and their
 content is balanced — the calm one carries the leaders line and four
-rows, the loud one the stamp — so neither ends in a blank. The only
+rows, the loud one the verdict — so neither ends in a blank. The only
 browser API read is `commands.getAll()` for the shortcut keys; the pin
 instruction and the way to change shortcuts come from
 `platform/engine.ts`. The page composes `welcome.css` on top of
