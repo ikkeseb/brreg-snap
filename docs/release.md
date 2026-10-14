@@ -12,7 +12,8 @@ CHANGELOG entries, the store release notes and the approval click.
    origin, CI green for `HEAD`, a non-empty `[Unreleased]`). It sets
    the version in `package.json` and both `public/manifest.*.json`,
    turns `[Unreleased]` into `## [X.Y.Z] — YYYY-MM-DD` under a fresh
-   empty `[Unreleased]`, runs `pnpm verify`, and renders the
+   empty `[Unreleased]` (and moves the compare links at the file's end
+   on to `vX.Y.Z`), runs `pnpm verify`, and renders the
    submission kit `docs/submission-kit/X.Y.Z/{amo,cws}.md` from
    `docs/submission-kit/templates/`. Nothing is committed yet.
    `--dry-run` runs the checks and prints every step without writing.
@@ -110,8 +111,8 @@ one line first: version, store, what changes.
 
 ## One-time setup (maintainer)
 
-Agents never create, see or store these keys. Everything lives in one
-GitHub environment, so only an approved `publish.yml` run can read it.
+The store API keys live only in the `store-publish` environment, so
+only an approved `publish.yml` run can read them.
 
 ### 1. The `store-publish` environment
 
@@ -133,8 +134,7 @@ Source: <https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-
 
 1. Signed in to AMO as the add-on's author, open
    <https://addons.mozilla.org/developers/addon/api/key/> and generate
-   credentials (the button's label wasn't checked: the page needs a
-   login).
+   credentials.
 2. Environment secret `AMO_JWT_ISSUER` = the **JWT issuer**
    (`user:…`), `AMO_JWT_SECRET` = the **JWT secret**.
 
@@ -178,11 +178,11 @@ publisher uses them only when `CWS_SERVICE_ACCOUNT_JSON` is unset.
 Publish the consent screen to "In production", or the token dies
 after 7 days.
 
-### 4. Tag protection (recommended, not applied)
+### 4. Tag protection
 
-Tags are the release record, so nobody should move or delete them.
-Settings → **Rules** → **Rulesets** → **New ruleset** → **New tag
-ruleset**:
+Tags are the release record, so nobody should move or delete them. To
+protect them: Settings → **Rules** → **Rulesets** → **New ruleset** →
+**New tag ruleset**:
 
 - Name `release tags`, enforcement **Active**, empty bypass list.
 - Target tags → **Add a target** → Include by pattern: `v*`,

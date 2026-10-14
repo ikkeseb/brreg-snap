@@ -58,6 +58,10 @@ export function setJsonVersion(text, version, label) {
 // ---------------------------------------------------------------- CHANGELOG
 
 const H2 = /^## /;
+/** A Markdown link reference definition, e.g. `[1.5.0]: https://…`. */
+const LINK_DEF = /^\[[^\]]+\]:\s/;
+/** `[Unreleased]: <repo>/compare/<previous tag>...HEAD` */
+const UNRELEASED_LINK = /^\[unreleased\]:\s*(\S+)\/compare\/(\S+)\.\.\.HEAD\s*$/i;
 const isUnreleased = (line) => /^## \[unreleased\]\s*$/i.test(line);
 const isVersionHeading = (line, version) =>
   line.startsWith(`## [${version}]`) &&
@@ -65,7 +69,7 @@ const isVersionHeading = (line, version) =>
 
 /**
  * Body lines of the first `## ` heading matching `pred`, up to the next
- * `## ` heading.
+ * `## ` heading or the link definitions at the end of the file.
  * @param {string} changelog
  * @param {(line: string) => boolean} pred
  * @returns {{ start: number, end: number, lines: string[] } | null}
@@ -75,7 +79,7 @@ function h2Section(changelog, pred) {
   const start = lines.findIndex(pred);
   if (start === -1) return null;
   let end = start + 1;
-  while (end < lines.length && !H2.test(lines[end])) end++;
+  while (end < lines.length && !H2.test(lines[end]) && !LINK_DEF.test(lines[end])) end++;
   return { start, end, lines };
 }
 
@@ -102,7 +106,9 @@ export function changelogSection(changelog, version) {
 
 /**
  * Turn `## [Unreleased]` into `## [version] — date` and open a fresh,
- * empty `## [Unreleased]` above it.
+ * empty `## [Unreleased]` above it. When the file ends in compare links,
+ * `[Unreleased]` moves on to compare from `v<version>`, and the new
+ * version gets the link from the previous tag to `v<version>`.
  * @param {string} changelog
  * @param {string} version
  * @param {string} date YYYY-MM-DD
@@ -117,6 +123,16 @@ export function promoteUnreleased(changelog, version, date) {
   const lines = changelog.split('\n');
   const i = lines.findIndex(isUnreleased);
   lines.splice(i, 1, '## [Unreleased]', '', `## [${version}] — ${date}`);
+  const link = lines.findIndex((l) => UNRELEASED_LINK.test(l));
+  if (link !== -1) {
+    const [, repo, previous] = /** @type {RegExpExecArray} */ (UNRELEASED_LINK.exec(lines[link]));
+    lines.splice(
+      link,
+      1,
+      `[Unreleased]: ${repo}/compare/v${version}...HEAD`,
+      `[${version}]: ${repo}/compare/${previous}...v${version}`,
+    );
+  }
   return lines.join('\n');
 }
 

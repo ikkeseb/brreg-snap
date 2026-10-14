@@ -93,10 +93,27 @@ describe('CHANGELOG', () => {
     expect(() => promoteUnreleased(CHANGELOG, '1.3.1', 'd')).toThrow(/already has/);
   });
 
+  it('stops a section at the link definitions and moves the compare links on promotion', () => {
+    const repo = 'https://github.com/o/r';
+    const linked = `${CHANGELOG}
+[Unreleased]: ${repo}/compare/v1.3.1...HEAD
+[1.3.1]: ${repo}/compare/v1.3.0...v1.3.1
+[1.3.0]: ${repo}/releases/tag/v1.3.0
+`;
+    expect(changelogSection(linked, '1.3.0')).toBe('- Older.');
+    const out = promoteUnreleased(linked, '1.4.0', '2026-10-01');
+    expect(changelogSection(out, '1.4.0')).toBe('### Fixed\n\n- A thing.');
+    expect(out).toContain(
+      `[Unreleased]: ${repo}/compare/v1.4.0...HEAD\n[1.4.0]: ${repo}/compare/v1.3.1...v1.4.0\n[1.3.1]:`,
+    );
+    expect(unreleasedBody(`## [Unreleased]\n\n[Unreleased]: ${repo}/compare/v1.3.1...HEAD\n`)).toBe('');
+  });
+
   it('the real CHANGELOG has an Unreleased heading and a 1.3.1 section', () => {
     const real = read('CHANGELOG.md');
     expect(unreleasedBody(real)).not.toBeNull();
     expect(changelogSection(real, '1.3.1')).toMatch(/^Correctness and privacy patch/);
+    expect(changelogSection(real, '1.0.0')).not.toContain('[1.0.0]:');
   });
 });
 
