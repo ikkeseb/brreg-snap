@@ -131,7 +131,7 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 | `notes.ts` | `buildNotes(merknader, endringer)` | `div.notes[data-tone=warn\|neutral] > figure.merknad > figcaption.note-head + blockquote.quote > p + p.quote__date > time`; `section[data-tone=neutral] > h3.note-head + ul.changes > li > time + span` (its own tone, so a merknad's warn never reaches its glyph) |
 | `oversikt.ts` | `buildOversikt(dossier, {onDrill})`, `buildDefs`, `buildDefRow`, `buildClamp(lines)` | `section.section > h3.section__head + dl > div.def-row > dt + dd` (plain lines, `button.ent` drill-in, `a.ent` link, `span.def-row__sub`). A `clamp` row: `dd > div.clamp-wrap > p.clamp#id + button.text-btn.clamp__btn[aria-expanded][aria-controls][hidden]` — four lines by CSS `line-clamp`, «Vis mer» only once a ResizeObserver has measured an overflow, `.is-open` lifts the clamp |
 | `personer.ts` | `buildPersoner(groups \| 'failed', {onDrill})`, `buildEntityRow(name, note, onOpen, {nameNode})` | `section > div.person(--gone) > b + span.person__role`; `button.entity-row > b + small + svg.icon` |
-| `okonomi.ts` | `buildOkonomi(OkonomiView)` | `section[data-tone] > div.fig-head > h2 + span.cap` · `p.fig-status` · `div.figs > h3.fig-group + dl > div.fig-row(--total)[data-tone] > dt + dd > span.fig-row__unit` · `div.equity > .equity__track[aria-hidden] > .equity__fill` (`--share`) + `.equity__legend` (read: the only place Gjeld is said) · `div.trend > h3.fig-group + table.trend__table[aria-labelledby] > thead (years) + tbody > tr > th[scope=row] + td (`.num--neg`, `.fig-row__unit`)` + `p.trend__read` × rows · `p.honest` · Dokumenter: `div.doc-row > .years`, `div.ext-row` |
+| `okonomi.ts` | `buildOkonomi(OkonomiView)` | `section[data-tone] > div.fig-head > h2 + span.cap` · `p.fig-status` · `div.figs > h3.fig-group + dl > div.fig-row(--total)[data-tone] > dt + dd > span.fig-row__unit` · `div.equity > .equity__track[aria-hidden] > .equity__fill` (`--share`) + `.equity__legend` (read: the only place Gjeld is said) · `div.trend > h3.fig-group.trend__head (+ `span.trend__cur` when no head above names the currency) + table.trend__table[aria-labelledby] > thead (years) + tbody > tr > th[scope=row] (label + `span.fig-row__unit`) + td (number only, `.num--neg`, `span.trend__comma`)` + `p.trend__read` × rows (§ okonomi-trend) · `p.honest`. With no latest figures the section is `section__text` lines, then the same trend and honest line · Dokumenter: `div.doc-row > .years`, `div.ext-row` |
 | `enheter.ts` | `buildEnheter(EnheterView, parentName, {onDrill, copy, announce})`, `KONSERN_CHILDREN_SHOWN` = 20 | Konsern: `ul.konsern-path > li` (`--depth`) with `.entity-row(--self)`; `p.konsern-sub.cap` + `ul > li > button.entity-row` (hidden past 20, `p.show-all`). Underenheter: `p.units-count`, `ul > li.unit(--gone) > span > .unit__name + .unit__meta` + `button.orgnr.orgnr--sm` |
 | `picker.ts` | `renderPicker(container, {site, candidates, query}, {onPick, onNone, onSearchSelect, announce})` → `{heading, firstRow, input, search}` | `div.pick-head > h1 + p`; `ol.picker > li > button.pick[aria-keyshortcuts] > span.kbd + span > .pick__name + .pick__sub + span.pick__right > (.status-mark \| «N ansatte») + span.evidence(--strong hjemmeside \| --weak underside / navnetreff)`; `button.pick.pick--none > span.kbd + span.pick__label`; `div.pick-search > label.field-label + label.search--lg`. Digit keys 1–4 / 0 on one document listener per document (§ lifecycle below). `pickerHead` words the head by what the rows are: no row with the site registered («Fant ikke selskapet bak …»), one row that has it («Står dette selskapet bak …?»), several that have it, or one among name matches («Mulige selskaper bak …»); every evidence chip has a `title` |
 | `search.ts` | `buildSearchField`, `buildEntryRow`, `searchPainter`, `buildListSection(head)`, `renderRecents`, `renderSearchView(container, data, handlers)` | `div.empty > h1 + p + label.search--lg + p.hint`; `section.section > h3.section__head + ul.results \| ul > li > button.recent > span.recent__name > b (+ .status-mark, .recent__sub) + span.recent__on`; `li.results__note`; `button.back > svg.icon + b` |
@@ -321,6 +321,43 @@ calc(100dvh - var(--land))`) and scrolls the tablist to sit right
 under the head. The min-height is what makes a short tab (Økonomi at
 320 px) scroll that far, and it keeps the tablist put when switching
 from a long tab to a short one.
+
+<!-- SECTION: okonomi-trend -->
+## The Økonomi trend
+
+`src/lib/view/trend.ts` builds «Utvikling <first>–<last>» from the
+company's own filings (`companyRegnskapByYear`): driftsinntekter and
+årsresultat, at most the last three years (three columns fit 320 px),
+only years in the currency of the newest year that holds a trend
+figure. It stands apart from the latest year's figures, so a latest
+filing without figures still shows the years before it. One year with
+figures: no block.
+
+Alignment: each row names its magnitude word once, beside its label
+(`formatAmountsIn`: the unit of the row's largest value; a non-zero
+value too small for it keeps one significant digit, «0,04»), so the
+cells are numbers only, right-aligned in equal fixed-width columns,
+`tabular-nums`, `nowrap`. The decimal comma sits in its own
+proportional span: Schibsted's tabular comma is digit-wide.
+
+One sentence per row, read for the period the heading names:
+
+- An end year without the figure: no sentence for that row.
+- No loss year: first to last. «uendret» (equal), «opp/ned N %» from a
+  first year above zero (under 1 % is «omtrent uendret»), bare
+  «opp»/«ned» otherwise. A middle year that leaves the ends' range by
+  more than a tenth of the larger end is named: «Driftsinntekter ned
+  26 %, høyest i 2024.»
+- Årsresultat with a loss, first match wins: every year a loss («i
+  underskudd begge år, like stort / omtrent like stort / større sist /
+  mindre sist», or «alle år, størst i 2024» for a deep middle); one
+  clean sign change («snudde fra underskudd til overskudd i 2025»);
+  profit at both ends with a loss between («opp 12 %, men underskudd i
+  2024»); otherwise the loss years («Årsresultat: underskudd i 2023 og
+  2025.»).
+
+Tone never changes: hairlines and ink, a negative cell is
+`.num--neg`, and the section's `data-tone` is the regnskap signal's.
 
 <!-- SECTION: badge -->
 ## The toolbar badge

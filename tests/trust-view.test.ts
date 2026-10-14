@@ -415,31 +415,18 @@ describe('buildTrustView — the Økonomi trend', () => {
       surface: 'panel',
     }).dossier!.okonomi;
 
-  it("holds the company's own years oldest first, never the group's, and reads the direction", () => {
+  it("holds the company's own years oldest first, never the group's, one unit per row", () => {
     const o = okonomiOf(regnskapEquinor);
     expect(o.figures.kind).toBe('figures');
     if (o.figures.kind !== 'figures') return;
     expect(o.figures.title).toBe('Årsregnskap 2025');
-    expect(o.figures.trend).toEqual({
+    // The figures head names USD, so the trend doesn't repeat it.
+    expect(o.trend).toEqual({
       title: 'Utvikling 2023–2025',
       years: ['2023', '2024', '2025'],
       rows: [
-        {
-          label: 'Driftsinntekter',
-          cells: [
-            { amount: '72,4', unit: 'mrd' },
-            { amount: '72,5', unit: 'mrd' },
-            { amount: '68,0', unit: 'mrd' },
-          ],
-        },
-        {
-          label: 'Årsresultat',
-          cells: [
-            { amount: '11,7', unit: 'mrd' },
-            { amount: '8,1', unit: 'mrd' },
-            { amount: '5,7', unit: 'mrd' },
-          ],
-        },
+        { label: 'Driftsinntekter', unit: 'mrd', cells: [{ amount: '72,4' }, { amount: '72,5' }, { amount: '68,0' }] },
+        { label: 'Årsresultat', unit: 'mrd', cells: [{ amount: '11,7' }, { amount: '8,1' }, { amount: '5,7' }] },
       ],
       read: ['Driftsinntekter ned 6\u00a0%.', 'Årsresultat ned 51\u00a0%.'],
     });
@@ -448,44 +435,76 @@ describe('buildTrustView — the Økonomi trend', () => {
 
   it('one year: no trend, and the honest line is unchanged', () => {
     const o = okonomiOf([selskap('2025-12-31', 10, 1)]);
-    if (o.figures.kind !== 'figures') throw new Error(o.figures.kind);
-    expect(o.figures.trend).toBeUndefined();
+    expect(o.trend).toBeUndefined();
     expect(o.honest).toBe('Viser bare siste års tall.');
   });
 
-  it('names a loss turning to profit, a deeper loss, a flat line, and a missing cell', () => {
-    const turned = okonomiOf([selskap('2023-12-31', 31_124_422, -475_672), selskap('2024-12-31', 42_599_757, 860_445)]);
-    if (turned.figures.kind !== 'figures') throw new Error(turned.figures.kind);
-    expect(turned.figures.trend?.read).toEqual([
+  it('a middle-year loss is named, not hidden by first-to-last (24FITNESS: 768 → −476 → 860 tusen)', () => {
+    const o = okonomiOf([
+      selskap('2023-12-31', 31_124_422, 768_000),
+      selskap('2024-12-31', 36_300_000, -475_672),
+      selskap('2025-12-31', 42_599_757, 860_445),
+    ]);
+    expect(o.trend?.read).toEqual([
       'Driftsinntekter opp 37\u00a0%.',
-      'Årsresultat snudde fra underskudd til overskudd.',
+      'Årsresultat opp 12\u00a0%, men underskudd i 2024.',
     ]);
-    expect(turned.figures.trend?.rows[1]?.cells[0]).toEqual({ amount: '-476', unit: 'tusen', negative: true });
-
-    const deeper = okonomiOf([selskap('2023-12-31', 1000, -100), selskap('2024-12-31', 1004, -300)]);
-    if (deeper.figures.kind !== 'figures') throw new Error(deeper.figures.kind);
-    expect(deeper.figures.trend?.read).toEqual([
-      'Driftsinntekter omtrent uendret.',
-      'Årsresultat i underskudd begge år, større sist.',
-    ]);
-
-    const gap = okonomiOf([
-      { regnskapstype: 'SELSKAP', regnskapsperiode: { tilDato: '2023-12-31' }, resultatregnskapResultat: { aarsresultat: 5 } },
-      selskap('2024-12-31', 10, 7),
-      selskap('2025-12-31', 12, 9),
-    ]);
-    if (gap.figures.kind !== 'figures') throw new Error(gap.figures.kind);
-    expect(gap.figures.trend?.rows[0]).toEqual({
-      label: 'Driftsinntekter',
-      cells: [undefined, { amount: '10', unit: '' }, { amount: '12', unit: '' }],
+    expect(o.trend?.rows[1]).toEqual({
+      label: 'Årsresultat',
+      unit: 'tusen',
+      cells: [{ amount: '768' }, { amount: '-476', negative: true }, { amount: '860' }],
     });
-    expect(gap.figures.trend?.read[0]).toBe('Driftsinntekter opp 20\u00a0%.');
+  });
+
+  it('an unchanged loss reads «like stort», not «mindre sist»', () => {
+    const o = okonomiOf([selskap('2024-12-31', 1000, -100_000), selskap('2025-12-31', 1000, -100_000)]);
+    expect(o.trend?.read).toEqual(['Driftsinntekter uendret.', 'Årsresultat i underskudd begge år, like stort.']);
+  });
+
+  it('a missing end year gives that row no sentence, never a silently shorter period', () => {
+    const o = okonomiOf([
+      selskap('2023-12-31', 100, 100),
+      selskap('2024-12-31', 200, 200),
+      { regnskapstype: 'SELSKAP', regnskapsperiode: { tilDato: '2025-12-31' }, resultatregnskapResultat: { driftsresultat: { driftsinntekter: { sumDriftsinntekter: 300 } } } },
+    ]);
+    expect(o.trend?.title).toBe('Utvikling 2023–2025');
+    expect(o.trend?.rows[1]?.cells).toEqual([{ amount: '100' }, { amount: '200' }, undefined]);
+    expect(o.trend?.read).toEqual(['Driftsinntekter opp 200\u00a0%.']);
+  });
+
+  it('a latest filing without figures still shows the years before it', () => {
+    const o = okonomiOf([
+      selskap('2023-12-31', 10_000_000, 1_000_000),
+      selskap('2024-12-31', 12_000_000, 1_500_000),
+      { regnskapstype: 'SELSKAP', regnskapsperiode: { tilDato: '2025-12-31' }, valuta: 'NOK' },
+    ]);
+    expect(o.figures).toEqual({ kind: 'text', lines: ['Regnskap registrert, men uten utdrag.'] });
+    expect(o.trend?.years).toEqual(['2023', '2024']);
+    // No figures head above it, so the trend names its own currency.
+    expect(o.trend?.currency).toBe('Beløp i NOK');
+    expect(o.trend?.read).toEqual(['Driftsinntekter opp 20\u00a0%.', 'Årsresultat opp 50\u00a0%.']);
+    expect(o.honest).toBe('Åpne data dekker 2023–2024.');
+  });
+
+  it('a duplicate year keeps one column (the later tilDato)', () => {
+    const o = okonomiOf([
+      selskap('2024-06-30', 50, 5),
+      selskap('2024-12-31', 100, 10),
+      selskap('2025-12-31', 110, 11),
+    ]);
+    expect(o.trend?.years).toEqual(['2024', '2025']);
+    expect(o.trend?.read).toEqual(['Driftsinntekter opp 10\u00a0%.', 'Årsresultat opp 10\u00a0%.']);
+  });
+
+  it('more than three years: the last three', () => {
+    const o = okonomiOf([2021, 2022, 2023, 2024, 2025].map((y) => selskap(`${y}-12-31`, y, 1)));
+    expect(o.trend?.years).toEqual(['2023', '2024', '2025']);
   });
 
   it('a year filed in another currency stays off the line', () => {
     const o = okonomiOf([selskap('2023-12-31', 10, 1, 'NOK'), selskap('2024-12-31', 10, 1, 'USD'), selskap('2025-12-31', 12, 2, 'USD')]);
-    if (o.figures.kind !== 'figures') throw new Error(o.figures.kind);
-    expect(o.figures.trend?.years).toEqual(['2024', '2025']);
+    expect(o.trend?.years).toEqual(['2024', '2025']);
+    expect(o.trend?.currency).toBeUndefined();
   });
 });
 

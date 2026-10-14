@@ -6,7 +6,7 @@
 // PDF years and the kunngjøringer link.
 
 import { COPY } from '../copy.js';
-import type { FigCell, FigRow, OkonomiView, TrendView } from '../dossier-view.js';
+import type { FigRow, OkonomiView, TrendCell, TrendView } from '../dossier-view.js';
 import { button, el, glyph, link, section, uniqueId } from './dom.js';
 
 const YEARS_SHOWN = 5;
@@ -21,19 +21,26 @@ function buildFigRow(row: FigRow): HTMLDivElement {
   return div;
 }
 
-function buildCell(cell: FigCell | undefined): HTMLTableCellElement {
-  const td = el('td', cell?.negative ? 'num--neg' : undefined, cell ? cell.amount : COPY.trendMissing);
-  if (cell?.unit) td.appendChild(el('span', 'fig-row__unit', cell.unit));
+// Tabular digits, but the decimal comma in its own proportional run:
+// Schibsted's tabular comma is digit-wide and reads «68 , 0».
+function buildCell(cell: TrendCell | undefined): HTMLTableCellElement {
+  if (!cell) return el('td', undefined, COPY.trendMissing);
+  const td = el('td', cell.negative ? 'num--neg' : undefined);
+  const [whole, decimals] = cell.amount.split(',');
+  td.append(whole!);
+  if (decimals !== undefined) td.append(el('span', 'trend__comma', ','), decimals);
   return td;
 }
 
 // Years across, the two figures down, the latest year in the weight
-// the rows above use; a sentence per row says the direction so no one
-// has to subtract. The table is the data, the sentence the reading.
+// the rows above use. Each row names its magnitude word once, beside
+// its label, so the cells hold numbers only and line up right-aligned.
+// A sentence per row says the direction so no one has to subtract.
 function buildTrend(trend: TrendView): HTMLElement {
   const wrap = el('div', 'trend');
-  const head = el('h3', 'fig-group cap', trend.title);
+  const head = el('h3', 'fig-group cap trend__head', trend.title);
   head.id = uniqueId('trend');
+  if (trend.currency) head.appendChild(el('span', 'trend__cur', trend.currency));
   wrap.appendChild(head);
   const table = el('table', 'trend__table');
   table.setAttribute('aria-labelledby', head.id);
@@ -52,6 +59,7 @@ function buildTrend(trend: TrendView): HTMLElement {
     const tr = el('tr');
     const th = el('th', undefined, row.label);
     th.scope = 'row';
+    if (row.unit) th.appendChild(el('span', 'fig-row__unit', row.unit));
     tr.appendChild(th);
     for (const cell of row.cells) tr.appendChild(buildCell(cell));
     tbody.appendChild(tr);
@@ -62,12 +70,22 @@ function buildTrend(trend: TrendView): HTMLElement {
   return wrap;
 }
 
+function buildHonest(text: string): HTMLParagraphElement {
+  const honest = el('p', 'honest');
+  honest.dataset.tone = 'neutral';
+  honest.appendChild(glyph('neutral'));
+  honest.appendChild(el('span', undefined, text));
+  return honest;
+}
+
 function buildFigures(view: OkonomiView): HTMLElement {
   const { figures } = view;
   if (figures.kind !== 'figures') {
     const sec = section(COPY.regnskap);
     const lines = figures.kind === 'failed' ? [figures.text] : figures.lines;
     for (const line of lines) sec.appendChild(el('p', 'section__text', line));
+    if (view.trend) sec.appendChild(buildTrend(view.trend));
+    if (view.honest) sec.appendChild(buildHonest(view.honest));
     return sec;
   }
   const sec = el('section', 'section');
@@ -107,15 +125,8 @@ function buildFigures(view: OkonomiView): HTMLElement {
     sec.appendChild(equity);
   }
 
-  if (figures.trend) sec.appendChild(buildTrend(figures.trend));
-
-  if (view.honest) {
-    const honest = el('p', 'honest');
-    honest.dataset.tone = 'neutral';
-    honest.appendChild(glyph('neutral'));
-    honest.appendChild(el('span', undefined, view.honest));
-    sec.appendChild(honest);
-  }
+  if (view.trend) sec.appendChild(buildTrend(view.trend));
+  if (view.honest) sec.appendChild(buildHonest(view.honest));
   return sec;
 }
 

@@ -275,7 +275,13 @@ describe('result: the dossier', () => {
     expect(trend.getAttribute('aria-labelledby')).toBe(q('#panel-okonomi .trend h3')?.id);
     expect(q('#panel-okonomi .trend h3')?.textContent).toBe('Utvikling 2023–2025');
     expect(qa('#panel-okonomi .trend__table thead th').map((t) => t.textContent)).toEqual(['2023', '2024', '2025']);
-    expect(qa('#panel-okonomi .trend__table tbody tr')[0]?.textContent).toBe('Driftsinntekter72,4mrd72,5mrd68,0mrd');
+    // One unit per row, beside the label; the cells hold numbers only.
+    const first = qa('#panel-okonomi .trend__table tbody tr')[0]!;
+    expect(first.querySelector('th[scope="row"] .fig-row__unit')?.textContent).toBe('mrd');
+    expect([...first.querySelectorAll('td')].map((td) => td.textContent)).toEqual(['72,4', '72,5', '68,0']);
+    expect(first.querySelector('td .fig-row__unit')).toBeNull();
+    // The figures head already says USD: the trend head carries no currency.
+    expect(q('#panel-okonomi .trend__cur')).toBeNull();
     expect(qa('#panel-okonomi .trend__read').map((p) => p.textContent)).toEqual([
       'Driftsinntekter ned 6\u00a0%.',
       'Årsresultat ned 51\u00a0%.',
@@ -295,6 +301,23 @@ describe('result: the dossier', () => {
     const ext = q<HTMLAnchorElement>('#panel-okonomi .ext-row a')!;
     expect(ext.textContent).toBe('Kunngjøringer ↗');
     expect(ext.href).toContain('w2.brreg.no/kunngjoring');
+  });
+
+  it('Økonomi: a latest filing without figures still paints the trend, with its own currency', () => {
+    const { painter } = setup({ initialTab: 'okonomi' });
+    const company = equinor();
+    // The 2025 SELSKAP row keeps its date and loses its figures.
+    const items = (regnskapEquinor as Array<Record<string, unknown>>).map((r) =>
+      r.regnskapstype === 'SELSKAP' && String((r.regnskapsperiode as { tilDato: string }).tilDato).startsWith('2025')
+        ? { regnskapstype: 'SELSKAP', regnskapsperiode: r.regnskapsperiode, valuta: r.valuta }
+        : r,
+    );
+    painter.result(resultPaint({ ...company, regnskap: { items } }));
+    expect(q('#panel-okonomi .fig-head')).toBeNull();
+    expect(q('#panel-okonomi .section__text')?.textContent).toBe('Regnskap registrert, men uten utdrag.');
+    expect(q('#panel-okonomi .trend h3')?.textContent).toBe('Utvikling 2023–2024Beløp i USD');
+    expect(qa('#panel-okonomi .trend__table thead th').map((t) => t.textContent)).toEqual(['2023', '2024']);
+    expect(q('#panel-okonomi .honest')?.textContent).toBe('Åpne data dekker 2023–2024. Eldre år finnes som PDF.');
   });
 
   it('Enheter: the Konsern section (path, children capped at 20, «Vis alle»), then the units', () => {

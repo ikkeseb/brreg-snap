@@ -121,14 +121,30 @@ export const COPY = {
   driftsinntekter: 'Driftsinntekter',
   aarsresultat: 'Årsresultat',
   trendMissing: '–',
-  trendMoved: (label: string, dir: 'up' | 'down' | 'flat', pct?: string) =>
-    dir === 'flat'
-      ? `${label} omtrent uendret.`
-      : `${label} ${dir === 'up' ? 'opp' : 'ned'}${pct ? ` ${pct}` : ''}.`,
-  trendTurned: (label: string, toLoss: boolean) =>
-    `${label} snudde ${toLoss ? 'fra overskudd til underskudd' : 'fra underskudd til overskudd'}.`,
-  trendLoss: (label: string, deeper: boolean) =>
-    `${label} i underskudd begge år, ${deeper ? 'større' : 'mindre'} sist.`,
+  // One sentence per row: «<label> <reading>[, <aside>].» The rules
+  // that pick the pieces are in src/lib/view/trend.ts.
+  trendSentence: (label: string, reading: string, aside?: string) =>
+    `${label} ${reading}${aside ? `, ${aside}` : ''}.`,
+  trendUp: (pct?: string) => (pct ? `opp ${pct}` : 'opp'),
+  trendDown: (pct?: string) => (pct ? `ned ${pct}` : 'ned'),
+  trendSame: 'uendret',
+  trendFlat: 'omtrent uendret',
+  trendHighest: (year: string) => `høyest i ${year}`,
+  trendLowest: (year: string) => `lavest i ${year}`,
+  trendTurned: (toLoss: boolean, year: string) =>
+    `snudde ${toLoss ? 'fra overskudd til underskudd' : 'fra underskudd til overskudd'} i ${year}`,
+  trendLossBetween: (years: string) => `men underskudd i ${years}`,
+  trendLossEvery: (two: boolean) => (two ? 'i underskudd begge år' : 'i underskudd alle år'),
+  trendLossLarger: 'større sist',
+  trendLossSmaller: 'mindre sist',
+  trendLossSame: 'like stort',
+  trendLossAbout: 'omtrent like stort',
+  trendLossMost: (year: string) => `størst i ${year}`,
+  trendLossLeast: (year: string) => `minst i ${year}`,
+  trendLossYears: (label: string, years: string) => `${label}: underskudd i ${years}.`,
+  // «2023», «2023 og 2025», «2022, 2023 og 2025».
+  yearList: (years: string[]) =>
+    years.length < 2 ? (years[0] ?? '') : `${years.slice(0, -1).join(', ')} og ${years.at(-1)!}`,
   // The Enhet names a newer filed year than the figures the API gave.
   filedNewer: (year: string) => `${year} er levert. Tallene er ikke i åpne data ennå.`,
   honestShowingYear: (year: string) => `Viser tallene for ${year}.`,

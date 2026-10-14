@@ -102,6 +102,32 @@ export function formatAmountParts(
   return m ? { amount: text.slice(0, m.index), unit: m[1]! } : { amount: text, unit: '' };
 }
 
+// Several amounts printed in ONE magnitude word, so a table column
+// holds numbers only and they line up: the unit is the one
+// formatMagnitude would pick for the largest, and every value is
+// written in it with that unit's decimals. A non-zero value that would
+// round to zero there keeps one significant digit («0,04»), so a small
+// figure never reads as nothing. Missing values stay undefined.
+export function formatAmountsIn(values: Array<number | undefined>): {
+  unit: string;
+  amounts: Array<string | undefined>;
+} {
+  const held = values.filter((v): v is number => typeof v === 'number' && !Number.isNaN(v));
+  const largest = held.reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+  const { unit } = formatAmountParts(largest) ?? { unit: '' };
+  const tier = MONEY_UNITS.find((u) => u.word === (unit ? ` ${unit}` : ''))!;
+  const amounts = values.map((v) => {
+    if (typeof v !== 'number' || Number.isNaN(v)) return undefined;
+    const scaled = Math.abs(v) / tier.size;
+    const opts: Intl.NumberFormatOptions =
+      v !== 0 && Number(scaled.toFixed(tier.digits)) === 0
+        ? { maximumSignificantDigits: 1 }
+        : { minimumFractionDigits: tier.digits, maximumFractionDigits: tier.digits };
+    return `${v < 0 ? '-' : ''}${scaled.toLocaleString('nb-NO', opts)}`;
+  });
+  return { unit, amounts };
+}
+
 // A regnskap's figures are in its `valuta`: NOK for most filers, but
 // companies reporting in a functional currency file in USD or EUR
 // (Equinor, Aker BP, Mowi). "kr" is right only for NOK; anything else
