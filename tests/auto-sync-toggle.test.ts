@@ -4,8 +4,10 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { DENY_MESSAGE } from '../src/lib/auto-sync-controller.js';
 import { createAutoSyncToggle } from '../src/lib/auto-sync-toggle.js';
+import { COPY } from '../src/lib/view/copy.js';
+
+const DENY_MESSAGE = COPY.autoSyncDenied;
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -151,6 +153,21 @@ describe('switching on: the consent step comes first', () => {
     expect(toggle.focus).toHaveBeenCalled();
     expect(permissions.request).not.toHaveBeenCalled();
     expect(log).toEqual(['focus toggle']);
+  });
+
+  it('«Slå på» after another window switched it on asks nothing and stays on', async () => {
+    const { autoSync, state, toggle, permissions, log, click } = setup();
+    click(true);
+    state.storedOn = true;
+    state.granted = true;
+    await autoSync.reconcile(); // storage.onChanged from another panel
+    state.status = DENY_MESSAGE;
+    autoSync.accept();
+    await settle();
+    expect(permissions.request).not.toHaveBeenCalled();
+    expect(log).toEqual(['attach']);
+    expect(toggle.checked).toBe(true);
+    expect(state.status).toBeNull();
   });
 
   it('a second «Slå på» while the prompt is open is ignored', async () => {

@@ -30,6 +30,7 @@ import {
   UNKNOWN_URL_METHOD,
   type ResolutionMethod,
 } from '../lib/resolution-method.js';
+import type { RejectOutcome } from '../lib/ui/picker.js';
 import type { TabContext } from '../lib/ui/resolve-tab.js';
 import type { PanelHistory } from './history.js';
 import type { PanelIntents, PanelPainter, ResultFocus } from './view.js';
@@ -50,14 +51,20 @@ export interface ControllerDeps {
   resolveTab: (url: string, title: string) => Promise<TabContext>;
   // `title`: the tab's title as a word-boundary hint (hostname-search.ts
   // § title segmentation). Given only when the panel has one for the host.
-  searchHost: (host: string, title?: string) => Promise<DetailedResult | undefined>;
+  searchHost: (host: string, title?: string) => Promise<DetailedResult>;
   // Called with PANEL_LOAD_OPTIONS (plus the group tree in hand on a
   // drill-in within the same konsern).
   loadCompany: (orgnr: string, opts: LoadCompanyOptions) => Promise<CompanyData>;
   invalidateCache: (orgnr: string) => Promise<void>;
   // `status`: a danger status worth a mark in the list («Konkurs»).
   pushRecent: (orgnr: string, navn: string, status?: string) => Promise<void>;
-  addRejectedChoice: (host: string, orgnr: string) => Promise<void>;
+  // lib/ui/picker.ts: the «Feil bedrift?» flow the popup shares.
+  rejectChoice: (
+    host: string,
+    orgnrs: readonly string[],
+    title: string | undefined,
+    isStale: () => boolean,
+  ) => Promise<RejectOutcome | undefined>;
   forgetHost: (host: string) => Promise<void>;
   getRememberedChoice: (host: string) => Promise<RememberedChoice | undefined>;
   loads?: LoadSequence;
@@ -381,20 +388,12 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       // the host search against the candidates.
       const orgnrs = [...new Set([orgnr, shownEnhetOrgnr])].filter((o): o is string => o !== undefined);
       const run = loads.begin();
-      // The rejections are stored either way; only the paint is dropped.
-      for (const o of orgnrs) await deps.addRejectedChoice(host, o);
-      if (run.isStale()) return;
       // Only the title of a tab on this very host: a view that came
       // from a sync message or a probe has none to offer.
-      const detailed = await deps.searchHost(host, titleFor(host));
-      if (run.isStale()) return;
-      if (detailed && detailed.candidates.length > 0) {
-        // Always show the picker (even if a single candidate now wins
-        // band='auto') — the user just expressed doubt; let them confirm.
-        showPicker(host, detailed.candidates, deps.hasFocus());
-        return;
-      }
-      showEmpty({ host }, deps.hasFocus());
+      const outcome = await deps.rejectChoice(host, orgnrs, titleFor(host), () => run.isStale());
+      if (!outcome || run.isStale()) return;
+      if (outcome.kind === 'picker') showPicker(host, outcome.candidates, deps.hasFocus());
+      else showEmpty({ host }, deps.hasFocus());
     },
 
     // Drops the picker choice / «Ingen av disse» / rejections stored

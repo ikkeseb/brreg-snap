@@ -15,7 +15,6 @@ import { invalidateCache } from '../lib/brreg.js';
 import { loadCompany } from '../lib/company-load.js';
 import { writeClipboard } from '../lib/copy-orgnr.js';
 import {
-  addRejectedChoice,
   forgetHost,
   getRememberedChoice,
   searchByHostnameDetailed,
@@ -29,6 +28,7 @@ import {
 import { setTrustBadge } from '../lib/platform/badge.js';
 import { isFirefox } from '../lib/platform/engine.js';
 import { createTabWatcher } from '../lib/tab-sync.js';
+import { rejectChoice } from '../lib/ui/picker.js';
 import { getRecent, pushRecent } from '../lib/ui/recent.js';
 import { resolveTabContext } from '../lib/ui/resolve-tab.js';
 import { liveRegionOf } from '../lib/view/components/live.js';
@@ -113,7 +113,7 @@ function main(): void {
     loadCompany,
     invalidateCache,
     pushRecent,
-    addRejectedChoice,
+    rejectChoice,
     forgetHost,
     getRememberedChoice,
   });

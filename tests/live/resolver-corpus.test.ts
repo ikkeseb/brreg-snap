@@ -162,9 +162,7 @@ afterAll(() => {
 
 describe('resolver corpus (live, shipped pipeline)', () => {
   it.each(CORPUS)('$host', async ({ host, expect: exp, why }) => {
-    const result = await searchByHostnameDetailed(host);
-    expect(result, `${host}: resolver returned nothing`).toBeDefined();
-    const { band, choice, candidates, complete } = result!;
+    const { band, choice, candidates, complete } = await searchByHostnameDetailed(host);
     // An incomplete run means a brreg query failed; the band is a guess.
     expect(complete, `${host}: a brreg query failed`).toBe(true);
     const orgnrs = candidates.map((c) => c.organisasjonsnummer);

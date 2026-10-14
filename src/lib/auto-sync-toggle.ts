@@ -1,14 +1,13 @@
 // The panel's «Auto-oppdater» toggle: the consent step, the runtime
 // `tabs` request, and attaching / detaching the tab watcher. details/auto-sync-ui.ts
 // wires the DOM events to these handlers; the ordering rules live here
-// so they can be tested without a DOM or a browser. The decision table
-// itself is decideToggle (auto-sync-controller.ts).
+// so they can be tested without a DOM or a browser.
 //
 // Auto-sync is on only when storage says so AND the `tabs` grant is
 // held: the user can revoke it outside the panel (about:addons).
 
-import { decideToggle } from './auto-sync-controller.js';
 import { hasPermission } from './platform/permissions.js';
+import { COPY } from './view/copy.js';
 
 const TABS: browser.permissions.Permissions = { permissions: ['tabs'] };
 
@@ -68,44 +67,38 @@ export function createAutoSyncToggle(deps: AutoSyncToggleDeps): AutoSyncToggle {
     // Captured before any await: a revoke can flip `enabled` meanwhile.
     const wasEnabled = enabled;
     try {
-      let grantOutcome: 'granted' | 'denied' | 'n/a' = 'n/a';
+      let status: string | null = null;
       if (desired && !wasEnabled) {
-        // CRITICAL: the first async call after the click (§ gesture-stack).
+        let granted = false;
         try {
-          grantOutcome = (await deps.permissions.request(TABS))
-            ? 'granted'
-            : 'denied';
+          // CRITICAL: the first async call after the click (§ gesture-stack).
+          granted = await deps.permissions.request(TABS);
         } catch {
-          grantOutcome = 'denied';
+          // Refused without a prompt: reads as not granted.
         }
-      }
-
-      const decision = decideToggle({
-        desired,
-        currentlyEnabled: wasEnabled,
-        grantOutcome,
-      });
-
-      // The checkbox always follows the decision: a declined prompt
-      // must untick it again.
-      toggle.checked = decision.nextEnabled;
-      // Detach first on the way off, so no tab event is resolved while
-      // the storage write and permission removal are pending.
-      if (decision.detachListeners) apply(false);
-      if (decision.persist) {
-        await deps.setAutoSync(decision.nextEnabled);
-        enabled = decision.nextEnabled;
-      }
-      if (decision.attachListeners) apply(true);
-      if (decision.removePermission) {
+        // A declined prompt must untick the checkbox again.
+        toggle.checked = granted;
+        if (granted) {
+          await deps.setAutoSync(true);
+          apply(true);
+        } else {
+          status = COPY.autoSyncDenied;
+        }
+      } else if (!desired && wasEnabled) {
+        // Detach first, so no tab event is resolved while the storage
+        // write and permission removal are pending.
+        apply(false);
+        await deps.setAutoSync(false);
         try {
           await deps.permissions.remove(TABS);
         } catch {
           // Best-effort: the grant stays, but storage already says off,
           // so nothing follows tabs. The user can revoke it by hand.
         }
+      } else {
+        toggle.checked = wasEnabled;
       }
-      deps.showStatus(decision.uiMessage);
+      deps.showStatus(status);
     } finally {
       toggle.disabled = false;
       inFlight = false;

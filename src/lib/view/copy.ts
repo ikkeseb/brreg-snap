@@ -216,6 +216,9 @@ export const COPY = {
     'Ingenting sendes til utvikleren. Nettleseren spør deretter om tilgang til fanene.',
   autoSyncAccept: 'Slå på',
   autoSyncCancel: 'Avbryt',
+  // Both engines, and both ways a request ends without the grant: the
+  // user declined the prompt, or the browser refused to show it.
+  autoSyncDenied: 'Tilgang til fanene ble ikke gitt. Slå på igjen for å prøve på nytt.',
 
   // panel: the compact head, sections with a sentence for a body
   regnskap: 'Regnskap',

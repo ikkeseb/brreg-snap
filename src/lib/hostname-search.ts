@@ -205,13 +205,6 @@ export async function forgetHost(host: string): Promise<void> {
   }
 }
 
-// Pull the brandable label out of a hostname for use as a search
-// query. Re-exported from hostname-score so existing callers
-// (tests, etc.) don't need a different import.
-export function queryFromHostname(hostname: string): string | undefined {
-  return hostnameLabel(hostname);
-}
-
 // Outcome of one query group. `ok` is true only when every constituent
 // fetch succeeded — a partially failed group can still contribute hits
 // (best effort), but the run must not be treated as authoritative.
@@ -465,7 +458,7 @@ function worthSegmenting(result: HostnameResult): boolean {
 export async function searchByHostnameDetailed(
   hostname: string,
   title?: string,
-): Promise<DetailedResult | undefined> {
+): Promise<DetailedResult> {
   const choice = await getPickerChoice(hostname);
   if (choice !== undefined) {
     if (choice === null) {
@@ -475,7 +468,7 @@ export async function searchByHostnameDetailed(
   }
 
   const domain = registrableDomain(hostname);
-  const label = queryFromHostname(hostname);
+  const label = hostnameLabel(hostname);
   if (!domain || !label) {
     // IP literals, intranet hosts and hosts with nothing brandable are
     // decided locally and never sent to brreg. Not cached either: the

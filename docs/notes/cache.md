@@ -8,13 +8,13 @@ Source: `src/lib/brreg.ts`, `src/lib/hostname-search.ts`,
 
 `src/lib/brreg.ts` caches every detail fetch (enhet, underenhet,
 roller, underenheter, regnskap) in `browser.storage.session`, 24h by
-default (per-entry TTL below). The search calls (`searchEnheter`,
-`searchEnheterWithParams`) are not cached there; the hostname
+default (per-entry TTL below). The search call
+(`searchEnheterWithParams`) is not cached there; the hostname
 pipeline caches its own outcome (below). `storage.session` is
 in-memory, process-local, and cleared when the browser shuts down —
 *not* `storage.local`. Cache writes are typed (`CacheEntry<T>` with
 `expiresAt` + `storedAt`) and fetchers validate the response shape
-via `isEnhet` / `isUnderenhet` / `isRollerResponse` before caching
+via `isUnit` / `isRollerResponse` before caching
 (no blind `as Enhet` cast).
 
 The module is `src/lib/session-cache.ts`. Its rules:
@@ -78,7 +78,7 @@ them for one site.
 <!-- SECTION: failure-no-cache -->
 ## Failures never enter the band cache
 
-`searchEnheter` / `searchEnheterWithParams` THROW on network failure,
+`searchEnheterWithParams` THROWS on network failure,
 timeout, or any non-2xx (429/503 included). `[]` means a genuine
 2xx response with zero hits, nothing else — the pipeline must be able
 to tell "no hits" from "couldn't ask".

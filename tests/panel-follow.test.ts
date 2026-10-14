@@ -111,9 +111,6 @@ describe('viewFromContext / viewFromHostSearch', () => {
     expect(
       viewFromHostSearch('x.no', { ...none, complete: false }),
     ).toMatchObject({ degraded: true });
-    expect(viewFromHostSearch('x.no', undefined)).toMatchObject({
-      degraded: false,
-    });
   });
 });
 
@@ -265,7 +262,7 @@ function makeFollower(overrides: Partial<FollowerDeps> = {}) {
     queryActiveTab: vi.fn(async (): Promise<TabFields | undefined> => undefined),
     getTab: vi.fn(async (): Promise<TabFields> => ({})),
     resolveTab: vi.fn(async (): Promise<TabContext> => ({})),
-    searchHost: vi.fn(async (): Promise<DetailedResult | undefined> => undefined),
+    searchHost: vi.fn(async (): Promise<DetailedResult> => ({ band: 'none', candidates: [], complete: true })),
     onScreen: () => onScreen,
     show: (view) => {
       loads.begin();
@@ -290,7 +287,7 @@ const companyView = (orgnr: string, host?: string): PanelView => ({
 
 describe('follower — a late result never paints over a newer one', () => {
   it('no-match re-probe for A, then a sync for B, then A resolves: B stays', async () => {
-    const searchA = deferred<DetailedResult | undefined>();
+    const searchA = deferred<DetailedResult>();
     const { follower, shown } = makeFollower({
       searchHost: vi.fn(() => searchA.promise),
     });

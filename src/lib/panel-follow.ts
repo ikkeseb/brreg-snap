@@ -78,22 +78,18 @@ export function viewFromContext(ctx: TabContext): PanelView {
 // was handed without a URL (no-match message, ?nomatch= hint).
 export function viewFromHostSearch(
   host: string,
-  detailed: DetailedResult | undefined,
+  detailed: DetailedResult,
 ): PanelView {
-  if (detailed?.band === 'picker') {
+  if (detailed.band === 'picker') {
     return { kind: 'picker', host, candidates: detailed.candidates };
   }
-  if (detailed?.band === 'auto' && detailed.choice) {
+  if (detailed.band === 'auto' && detailed.choice) {
     // No candidates means the choice came from an earlier picker pick.
     const method: ResolutionMethod =
       detailed.candidates.length === 0 ? 'host-pick' : 'host-auto';
     return { kind: 'company', orgnr: detailed.choice, method, host };
   }
-  return {
-    kind: 'empty',
-    host,
-    degraded: detailed !== undefined && !detailed.complete,
-  };
+  return { kind: 'empty', host, degraded: !detailed.complete };
 }
 
 // Whether `next` is what the panel already shows. The panel then keeps
@@ -199,7 +195,7 @@ export interface FollowerDeps {
   queryActiveTab(): Promise<TabFields | undefined>;
   getTab(tabId: number): Promise<TabFields>;
   resolveTab(url: string, title: string): Promise<TabContext>;
-  searchHost(host: string): Promise<DetailedResult | undefined>;
+  searchHost(host: string): Promise<DetailedResult>;
   onScreen(): PanelView | undefined;
   // Paint a different view. The painters claim their own load token.
   // `tabId`: the tab the view was resolved from (startup, a tab event),

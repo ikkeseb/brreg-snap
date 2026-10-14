@@ -14,7 +14,6 @@ import {
   getPickerChoice,
   getRejectedChoices,
   getRememberedChoice,
-  queryFromHostname,
   searchByHostnameDetailed,
   setPickerChoice,
   siteKey,
@@ -40,18 +39,6 @@ function hit(
     ...extra,
   };
 }
-
-describe('queryFromHostname', () => {
-  it('strips www and TLD, leaves the brand label', () => {
-    expect(queryFromHostname('www.yara.com')).toBe('yara');
-    expect(queryFromHostname('yara.com')).toBe('yara');
-  });
-
-  it('returns undefined for single-label or too-short hostnames', () => {
-    expect(queryFromHostname('localhost')).toBeUndefined();
-    expect(queryFromHostname('a.no')).toBeUndefined();
-  });
-});
 
 describe('searchByHostnameDetailed', () => {
   beforeEach(() => {

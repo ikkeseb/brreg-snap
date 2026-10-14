@@ -81,7 +81,9 @@ const CACHE_PREFIXES = [
   'aarsregnskap',
 ] as const;
 
-function isEnhet(value: unknown): value is Enhet {
+// The shape check for an enhet or an underenhet: both carry an orgnr
+// and a name.
+function isUnit<T extends Enhet | Underenhet>(value: unknown): value is T {
   return (
     typeof value === 'object' &&
     value !== null &&
@@ -104,26 +106,11 @@ export async function fetchEnhet(orgnr: string): Promise<Enhet> {
     throw new Error(`brreg API returned ${res.status}.`);
   }
   const data: unknown = await res.json();
-  if (!isEnhet(data)) {
+  if (!isUnit<Enhet>(data)) {
     throw new Error('brreg returned an unexpected response shape.');
   }
   await cacheSet(key, data);
   return data;
-}
-
-export async function searchEnheter(
-  query: string,
-  size = 10,
-): Promise<SearchHit[]> {
-  const url = new URL(`${API}/enheter`);
-  url.searchParams.set('navn', query);
-  url.searchParams.set('size', String(size));
-  const res = await brregFetch(url);
-  if (!res.ok) throw new Error(`brreg search returned ${res.status}.`);
-  const data = (await res.json()) as {
-    _embedded?: { enheter?: SearchHit[] };
-  };
-  return data._embedded?.enheter ?? [];
 }
 
 // Multi-parameter search for the hostname-resolution pipeline. Callers
@@ -176,16 +163,6 @@ export async function fetchRoller(orgnr: string): Promise<RollerResponse> {
   return data;
 }
 
-function isUnderenhet(value: unknown): value is Underenhet {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    typeof (value as { organisasjonsnummer?: unknown }).organisasjonsnummer ===
-      'string' &&
-    typeof (value as { navn?: unknown }).navn === 'string'
-  );
-}
-
 // One underenhet (a branch or department) by its own orgnr — the
 // fallback when an orgnr typed in or found in a URL is not an enhet.
 // Resolves undefined on 404 ("not an underenhet either") so a lookup
@@ -205,7 +182,7 @@ export async function fetchUnderenhet(
     throw new Error(`brreg underenhet API returned ${res.status}.`);
   }
   const data: unknown = await res.json();
-  if (!isUnderenhet(data)) {
+  if (!isUnit<Underenhet>(data)) {
     throw new Error('brreg returned an unexpected response shape.');
   }
   await cacheSet(key, data);
@@ -234,7 +211,7 @@ export async function fetchUnderenheter(
     page?: { totalElements?: unknown };
   };
   // A parent with none gets no _embedded at all, just page.totalElements 0.
-  const items = (data._embedded?.underenheter ?? []).filter(isUnderenhet);
+  const items = (data._embedded?.underenheter ?? []).filter(isUnit<Underenhet>);
   const reported = data.page?.totalElements;
   const total =
     typeof reported === 'number' && reported >= items.length

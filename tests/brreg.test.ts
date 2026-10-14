@@ -11,7 +11,6 @@ import {
   invalidateCache,
   MAX_RETRY_AFTER_MS,
   parseRetryAfter,
-  searchEnheter,
   searchEnheterWithParams,
 } from '../src/lib/brreg.js';
 import regnskap500 from './fixtures/brreg/regnskap-984851006-500.json';
@@ -84,30 +83,6 @@ describe('searchEnheterWithParams', () => {
   it('attaches an abort signal so a hung request times out', async () => {
     fetchMock.mockResolvedValue(jsonResponse({}));
     await searchEnheterWithParams(params());
-    const init = fetchMock.mock.calls[0]?.[1] as RequestInit | undefined;
-    expect(init?.signal).toBeInstanceOf(AbortSignal);
-  });
-});
-
-describe('searchEnheter', () => {
-  it('throws when fetch rejects', async () => {
-    fetchMock.mockRejectedValue(new TypeError('NetworkError'));
-    await expect(searchEnheter('orkla')).rejects.toThrow();
-  });
-
-  it('throws on non-2xx', async () => {
-    fetchMock.mockResolvedValue(jsonResponse({}, 500));
-    await expect(searchEnheter('orkla')).rejects.toThrow(/500/);
-  });
-
-  it('returns [] on 2xx with no hits', async () => {
-    fetchMock.mockResolvedValue(jsonResponse({}));
-    expect(await searchEnheter('orkla')).toEqual([]);
-  });
-
-  it('attaches an abort signal so a hung request times out', async () => {
-    fetchMock.mockResolvedValue(jsonResponse({}));
-    await searchEnheter('orkla');
     const init = fetchMock.mock.calls[0]?.[1] as RequestInit | undefined;
     expect(init?.signal).toBeInstanceOf(AbortSignal);
   });

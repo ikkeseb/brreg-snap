@@ -21,7 +21,6 @@ import {
   fetchRoller,
   fetchUnderenhet,
   fetchUnderenheter,
-  searchEnheter,
   searchEnheterWithParams,
 } from '../../src/lib/brreg.js';
 import { deriveKonsern, fetchKonsernstruktur } from '../../src/lib/konsern.js';
@@ -194,7 +193,7 @@ const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
     expect(undotted.map((h) => h.organisasjonsnummer)).not.toContain('924572051');
     // The note's canonical case: nothing is registered under "FINN.no"
     // (the finn.no company is VEND MARKETPLACES AS, formerly FINN NO AS).
-    await expect(searchEnheter('FINN.no')).resolves.toEqual([]);
+    await expect(searchOne({ navn: 'FINN.no' })).resolves.toEqual([]);
   },
 
   'konsernstruktur': async () => {

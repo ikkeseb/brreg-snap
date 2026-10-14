@@ -5,8 +5,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
 import type { CompanyData } from '../src/lib/company-load.js';
-import type { Candidate, DetailedResult } from '../src/lib/hostname-search.js';
+import type { Candidate } from '../src/lib/hostname-search.js';
 import type { PanelView, TabFields } from '../src/lib/panel-follow.js';
+import type { RejectOutcome } from '../src/lib/ui/picker.js';
 import type { TabContext } from '../src/lib/ui/resolve-tab.js';
 import { createPanelController, PANEL_LOAD_OPTIONS, type ControllerDeps } from '../src/details/controller.js';
 import { createPanelHistory, type HistoryWindow } from '../src/details/history.js';
@@ -125,6 +126,7 @@ interface SetupOptions {
   activeTab?: TabFields;
   resolveTab?: (url: string, title: string) => Promise<TabContext>;
   searchHost?: ControllerDeps['searchHost'];
+  rejectChoice?: ControllerDeps['rejectChoice'];
   // Loads resolve at once unless a test takes over with `pending`.
   manualLoads?: boolean;
 }
@@ -148,11 +150,11 @@ function setup(opts: SetupOptions = {}) {
     queryActiveTab: vi.fn(async () => opts.activeTab),
     getTab: vi.fn(async () => opts.activeTab ?? {}),
     resolveTab: vi.fn(opts.resolveTab ?? (async () => ({}))),
-    searchHost: vi.fn(opts.searchHost ?? (async () => undefined)),
+    searchHost: vi.fn(opts.searchHost ?? (async () => ({ band: 'none' as const, candidates: [], complete: true }))),
     loadCompany,
     invalidateCache: vi.fn(async () => {}),
     pushRecent: vi.fn(async () => {}),
-    addRejectedChoice: vi.fn(async () => {}),
+    rejectChoice: vi.fn(opts.rejectChoice ?? (async () => ({ kind: 'empty' as const }))),
     forgetHost: vi.fn(async () => {}),
     getRememberedChoice: vi.fn(async () => undefined),
   };
@@ -337,29 +339,26 @@ describe('«Feil bedrift?»', () => {
     method: 'host-auto',
   });
 
-  it('records the rejection, re-searches with the tab title and shows the picker', async () => {
+  it('rejects with the tab title and shows the picker', async () => {
     const { controller, intents, painter, deps } = setup({
       resolveTab,
-      searchHost: async () => ({ band: 'picker', candidates: CANDIDATES, complete: true }),
+      rejectChoice: async () => ({ kind: 'picker', candidates: CANDIDATES }),
     });
     await controller.followTab(1, tab);
     await settle();
     expect(painter.result).toHaveBeenCalledTimes(1);
 
     await intents.reject();
-    expect(deps.addRejectedChoice).toHaveBeenCalledWith('www.dnb.no', DNB);
-    expect(deps.searchHost).toHaveBeenLastCalledWith('www.dnb.no', 'DNB Bank');
+    expect(deps.rejectChoice).toHaveBeenCalledWith('www.dnb.no', [DNB], 'DNB Bank', expect.any(Function));
     expect(painter.picker).toHaveBeenCalledWith('www.dnb.no', CANDIDATES, { focus: true, tabId: 1 });
   });
 
   it('a view from a sync message has no title to offer', async () => {
-    const { controller, intents, deps, painter } = setup({
-      searchHost: async () => ({ band: 'none', candidates: [], complete: true }),
-    });
+    const { controller, intents, deps, painter } = setup();
     controller.follow(companyView(DNB, 'www.dnb.no'));
     await settle();
     await intents.reject();
-    expect(deps.searchHost).toHaveBeenLastCalledWith('www.dnb.no', undefined);
+    expect(deps.rejectChoice).toHaveBeenCalledWith('www.dnb.no', [DNB], undefined, expect.any(Function));
     expect(painter.empty).toHaveBeenCalledWith({
       host: 'www.dnb.no',
       degraded: false,
@@ -369,17 +368,20 @@ describe('«Feil bedrift?»', () => {
   });
 
   it('a tab event during the flow wins over its late picker', async () => {
-    const search = deferred<DetailedResult | undefined>();
-    const { controller, intents, painter } = setup({
+    const outcome = deferred<RejectOutcome | undefined>();
+    const { controller, intents, painter, deps } = setup({
       resolveTab,
-      searchHost: () => search.promise,
+      rejectChoice: () => outcome.promise,
     });
     await controller.followTab(1, tab);
     await settle();
     const rejecting = intents.reject();
     await settle();
+    const isStale = vi.mocked(deps.rejectChoice).mock.calls[0]![3];
+    expect(isStale()).toBe(false);
     controller.follow(companyView(EQUINOR, 'www.equinor.com'));
-    search.resolve({ band: 'picker', candidates: CANDIDATES, complete: true });
+    expect(isStale()).toBe(true);
+    outcome.resolve({ kind: 'picker', candidates: CANDIDATES });
     await rejecting;
     expect(painter.picker).not.toHaveBeenCalled();
   });
@@ -389,13 +391,11 @@ describe('«Feil bedrift?»', () => {
     controller.follow(companyView(DNB));
     await settle();
     await intents.reject();
-    expect(deps.addRejectedChoice).not.toHaveBeenCalled();
+    expect(deps.rejectChoice).not.toHaveBeenCalled();
   });
 
   it('an underenhet orgnr: rejects the orgnr the site gave and the parent shown', async () => {
-    const { controller, intents, deps } = setup({
-      searchHost: async () => ({ band: 'none', candidates: [], complete: true }),
-    });
+    const { controller, intents, deps } = setup();
     vi.mocked(deps.loadCompany).mockResolvedValueOnce({
       ...company(DNB),
       avdeling: { organisasjonsnummer: '973160834', navn: 'DNB BANK ASA AVD ALTA', overordnetEnhet: DNB },
@@ -403,10 +403,12 @@ describe('«Feil bedrift?»', () => {
     controller.follow({ kind: 'company', orgnr: '973160834', method: 'url-param', host: 'www.dnb.no' });
     await settle();
     await intents.reject();
-    expect(vi.mocked(deps.addRejectedChoice).mock.calls).toEqual([
-      ['www.dnb.no', '973160834'],
-      ['www.dnb.no', DNB],
-    ]);
+    expect(deps.rejectChoice).toHaveBeenCalledWith(
+      'www.dnb.no',
+      ['973160834', DNB],
+      undefined,
+      expect.any(Function),
+    );
   });
 });
 

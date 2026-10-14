@@ -54,8 +54,8 @@ function optionalString(value: unknown): value is string | undefined {
   return value === undefined || typeof value === 'string';
 }
 
-// Longest query the panel searches for — the manual search caps what
-// it sends to brreg at the same length.
+// Longest query the panel searches for; the manual search caps what it
+// sends to brreg at it too.
 export const QUERY_MAX_LENGTH = 100;
 
 // Selected text as a search query: whitespace (line breaks from a

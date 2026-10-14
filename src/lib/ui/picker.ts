@@ -31,7 +31,7 @@ export async function rejectChoice(
   if (isStale()) return undefined;
   const detailed = await searchByHostnameDetailed(host, title);
   if (isStale()) return undefined;
-  if (detailed && detailed.candidates.length > 0) {
+  if (detailed.candidates.length > 0) {
     // Always show the picker (even if a single candidate now wins
     // band='auto') — the user just expressed doubt; let them confirm.
     return { kind: 'picker', candidates: detailed.candidates };

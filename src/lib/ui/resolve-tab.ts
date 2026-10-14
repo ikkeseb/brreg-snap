@@ -77,7 +77,6 @@ export async function resolveTabContext(
   }
   if (!host) return {};
   const detailed = await searchByHostnameDetailed(host, title || undefined);
-  if (!detailed) return { host };
   if (detailed.band === 'auto') {
     // detailed.choice may have been written by an earlier picker pick
     // (positive picker-choice short-circuit) — distinguish via

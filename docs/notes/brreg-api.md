@@ -84,9 +84,9 @@ ENK case: `docs/notes/trust.md` § signals).
 <!-- SECTION: error-contract -->
 ## Error contract: search throws, [] means a real empty result
 
-`searchEnheter` and `searchEnheterWithParams` throw on network
-failure, timeout, and every non-2xx response (429/503 included).
-They return `[]` only for a genuine 2xx response with zero hits.
+`searchEnheterWithParams` throws on network failure, timeout, and
+every non-2xx response (429/503 included). It returns `[]` only
+for a genuine 2xx response with zero hits.
 Don't reintroduce a swallow-and-return-`[]` catch: the resolution
 pipeline caches its outcome for 24h, and an offline moment disguised
 as "no hits" gets pinned as a day-long "no match" (see

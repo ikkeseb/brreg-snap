@@ -18,18 +18,18 @@
 // through the surface's live region so screen-reader users hear
 // "5 treff" instead of silence.
 
-import { searchEnheter } from '../brreg.js';
+import { searchEnheterWithParams } from '../brreg.js';
 import {
   DeletedAvdelingError,
   isNotFoundError,
   lookupOrgnr,
 } from '../company-load.js';
 import { isValidOrgnr } from '../mod11.js';
+import { QUERY_MAX_LENGTH } from '../panel-protocol.js';
 import type { SearchHit } from '../../types/brreg.js';
 
 const DEBOUNCE_MS = 250;
 const MIN_QUERY_LENGTH = 2;
-const MAX_QUERY_LENGTH = 100;
 const RESULT_SIZE = 10;
 
 export type OrgnrQuery =
@@ -97,7 +97,9 @@ async function find(query: string): Promise<SearchRows> {
     };
   }
   if (parsed) return findByOrgnr(parsed.orgnr);
-  const results = await searchEnheter(query, RESULT_SIZE);
+  const results = await searchEnheterWithParams(
+    new URLSearchParams({ navn: query, size: String(RESULT_SIZE) }),
+  );
   if (results.length === 0) return { kind: 'note', text: 'Ingen treff.' };
   return { kind: 'hits', hits: results.map((hit) => ({ hit })) };
 }
@@ -155,7 +157,7 @@ export function attachManualSearch(
       return;
     }
     opts.onQueryActive?.();
-    const capped = value.slice(0, MAX_QUERY_LENGTH);
+    const capped = value.slice(0, QUERY_MAX_LENGTH);
     if (delayMs === 0) {
       void run(capped);
       return;
