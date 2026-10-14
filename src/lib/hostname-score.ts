@@ -128,8 +128,9 @@ export function registrableDomain(hostname: string): string | undefined {
 // → `firma`. IDN labels arrive punycoded from `new URL().hostname` and
 // are decoded back to human text (xn--blbr-roah.no → "blåbær") so name
 // search can match æ/ø/å brands. Returns undefined — the pipeline's
-// abstain signal, `resolveInternal` short-circuits to band 'none' /
-// manual search without a request — when nothing brandable remains:
+// abstain signal, `searchByHostnameDetailed` short-circuits to band
+// 'none' / manual search without a request — when nothing brandable
+// remains:
 // hosts registrableDomain refuses, labels shorter than 2 chars, or
 // xn-- labels that fail to decode (better manual search than querying
 // a raw ACE string that can never match a registered name).

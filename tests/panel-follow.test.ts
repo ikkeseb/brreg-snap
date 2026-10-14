@@ -1,6 +1,6 @@
 // The panel's follow logic without a DOM: which view wins at startup,
 // and that a late result can never paint over a newer one. The fake
-// `show` mirrors details.ts's painters — it claims the load token and
+// `show` mirrors the panel painters — it claims the load token and
 // settles the view immediately.
 
 import { describe, expect, it, vi } from 'vitest';
@@ -346,7 +346,7 @@ describe('follower — a late result never paints over a newer one', () => {
     });
 
     const following = follower.followTab(1, { url: 'https://www.dnb.no/' });
-    // e.g. a drill-in click: details.ts's painters claim the token.
+    // e.g. a drill-in click: the panel painters claim the token.
     deps.show(companyView(EQUINOR), 'start');
     slowResolve.resolve({ orgnr: DNB, host: 'www.dnb.no', method: 'host-auto' });
     await following;

@@ -284,9 +284,9 @@ The traps they handle:
   (`.local`, `.lokal`, `.internal`, `.intern`, `.lan`, `.home.arpa`,
   `.priv`, `.corp`, `.test`, …) and the router name `fritz.box` (only
   that name: `.box` is a public TLD) return `undefined`.
-  `resolveInternal` then answers band `none` without a request and
-  without a cache write — internal host names used to go out as
-  `hjemmeside=`/`navn=` queries. The list is fixed, so an intranet on
+  `searchByHostnameDetailed` then answers band `none` without a
+  request and without a cache write — internal host names used to go
+  out as `hjemmeside=`/`navn=` queries. The list is fixed, so an intranet on
   any other unregistered TLD is still sent; public claims name the
   reserved TLDs rather than promise "local names" in general.
 - **Multi-part public suffixes.** A small static list (`co.uk`,
@@ -304,8 +304,8 @@ The traps they handle:
   (`src/lib/punycode.ts`, decode only) restores the human label so
   the Nordic-variant machinery can actually match æ/ø/å brands. A
   label that fails to decode returns `undefined` — the abstain
-  signal: `resolveInternal` treats a falsy label as band `none`, so
-  the sidebar falls to manual search instead of querying a raw
+  signal: `searchByHostnameDetailed` treats a falsy label as band
+  `none`, so the sidebar falls to manual search instead of querying a raw
   `xn--` string that can never match.
 
 <!-- SECTION: queries -->
@@ -405,7 +405,7 @@ for IP/intranet hosts — so an answer given on `www.dnb.no` holds for
   `storage.session` and matches each key's site). The next lookup
   resolves from scratch. Never throws.
 
-The surfaces wire these (Phase 4 UI); the lib side is pinned in
+The surfaces wire these; the lib side is pinned in
 `tests/hostname-search.test.ts`.
 
 <!-- SECTION: reject-override -->
@@ -421,9 +421,9 @@ which:
 2. Clears `picker-choice:<site>` if it equals the rejected orgnr.
 
 The flow then re-runs `searchByHostnameDetailed(host, title)` with the
-title of the tab the host came from (`getContext` on both surfaces; the
-panel only has one when it resolved that tab itself, not for a sync
-message or probe), so the title word hints (§ title-segmentation)
+title of the tab the host came from (the popup's `tabTitle`, the
+panel's `titleFor`; the panel only has one when it resolved that tab
+itself, not for a sync message or probe), so the title word hints (§ title-segmentation)
 survive a rejection. It reads the rejected list, passes it through `runPipeline` which filters rejected candidates before
 scoring, and stores the result under
 `band:<site>:rej:<sorted>` so the pre-rejection cache entry

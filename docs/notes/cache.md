@@ -116,7 +116,7 @@ the fetch and counts as a failure like any other (no retries).
 ## Search debounce + race guard
 
 `src/lib/ui/manual-search.ts` (shared by popup and sidebar) uses a
-monotonic `runId` token to drop stale `runSearch` results when
+monotonic `runId` token to drop stale search results when
 the user keeps typing — the network can land calls out of order
 otherwise. Don't simplify it away.
 

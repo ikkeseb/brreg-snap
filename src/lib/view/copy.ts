@@ -1,5 +1,5 @@
 // Every user-facing string the popup and the panel share, in one place
-// (Norwegian bokmål; the English-UI bet in the plan starts here). The
+// (Norwegian bokmål; an English UI would start here). The
 // trust derivations in src/lib/trust/ keep their own wording (the
 // answer headline, signal values): those are the registry's facts, and
 // their tests pin them. This file holds the chrome around them.

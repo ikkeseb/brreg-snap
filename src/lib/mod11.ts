@@ -1,7 +1,8 @@
 // Mod-11 check digit for Norwegian organisasjonsnummer.
 //
-// Standalone module: consumed by orgnr.ts (URL/title resolution) and
-// details.ts (validating ?orgnr= URL params). Zero-dep keeps the
+// Standalone module: consumed by orgnr.ts (URL/title resolution), the
+// panel (src/details/, validating ?orgnr= URL params and drill-ins),
+// panel-protocol.ts and the manual search. Zero-dep keeps the
 // graph trivial — no risk of an import cycle when more callers land.
 
 const WEIGHTS = [3, 2, 7, 6, 5, 4, 3, 2] as const;

@@ -1,12 +1,12 @@
 // Downsamples the source brand PNG to the manifest icon sizes
 // (16, 32, 48, 128) using box-filter area averaging.
 //
-//   node scripts/generate-icons.mjs
+//   node scripts/generate-icons.mjs <path-to-brand-b.png>
 //
-// Source: docs/brand-b.png — the high-resolution "B" mark, RGBA.
+// Source: brand-b.png, the high-resolution "B" mark (RGBA), passed as
+// the one argument. The maintainer keeps it outside the public tree.
 // Output: public/icons/icon-{size}.png — RGBA PNGs consumed by the
-// extension manifest. The source stays out of public/ so it doesn't
-// end up packed into the .xpi.
+// extension manifest.
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
@@ -17,8 +17,13 @@ const SIZES = [16, 32, 48, 128];
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
-const SOURCE = resolve(REPO_ROOT, 'docs', 'brand-b.png');
 const OUT_DIR = resolve(REPO_ROOT, 'public', 'icons');
+
+if (!process.argv[2]) {
+  console.error('usage: node scripts/generate-icons.mjs <path-to-brand-b.png>');
+  process.exit(1);
+}
+const SOURCE = resolve(process.argv[2]);
 
 const source = PNG.sync.read(readFileSync(SOURCE));
 const { width: srcW, height: srcH, data: srcData } = source;

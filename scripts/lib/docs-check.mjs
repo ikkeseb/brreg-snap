@@ -9,7 +9,6 @@ const OUTPUT_DIRS = new Set([
 /** @param {string[]} trackedFiles */
 export function selectDocFiles(trackedFiles) {
   return trackedFiles.filter((file) => {
-    if (file.startsWith('docs/plans/')) return false;
     if (/^docs\/submission-kit\/\d+\.\d+\.\d+(?:[-+][^/]+)?\//.test(file)) return false;
     return /^(?:AGENTS|CLAUDE|README|BUILD|PRIVACY)\.md$/.test(file) ||
       /^docs\/[^/]+\.md$/.test(file) ||

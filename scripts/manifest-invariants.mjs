@@ -106,7 +106,7 @@ export const STRUCTURE = {
       default_title: 'brreg-snap',
       default_popup: 'popup/popup.html',
       // Firefox-only: the button lands in the toolbar on install
-      // instead of the extensions menu (plan Phase 5.2).
+      // instead of the extensions menu.
       default_area: 'navbar',
       default_icon: ICONS_TOOLBAR,
     },

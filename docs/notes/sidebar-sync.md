@@ -118,10 +118,10 @@ disse» so an open panel clears the stale company.
 ## One load token; every flow that paints checks it
 
 `controller.ts` has one `createLoadSequence()` (`panel-follow.ts`). The
-painters (`loadOrgnr`, `showPicker`, `showEmptyState`) claim a token
+painters (`loadOrgnr`, `showPicker`, `showEmpty`) claim a token
 themselves; flows that await before painting — startup, a tab event,
-a no-match probe, the «Feil bedrift?» reject flow (`claim` in
-`setupRejectChoice`) — claim one when they start and return after any
+a no-match probe, the «Feil bedrift?» reject flow (the `reject`
+intent) — claim one when they start and return after any
 await once it's stale. A sync message claims one even when it keeps
 the view, so an older tab event can't paint over it. Arrival order,
 not network order, decides what ends up on screen. There are no manual
@@ -154,20 +154,20 @@ change of the active tab, most of which stay on the same company.
 With auto-sync on, the panel repaints on tab switches while the user
 is working in the page. The rules, in `controller.ts` and `painter.ts` unless noted:
 
-- `showEmptyState` focuses the manual-search input only when
+- `showEmpty` focuses the manual-search input only when
   `document.hasFocus()` — an unconditional `focus()` yanked the
   keyboard out of the page on every switch to an unresolvable site.
-- `setState` hides the "Synket fra `<host>` · Data hentet … ·
-  Oppdater" footer and clears its 30s repaint interval for every
-  non-result state; it described an entity no longer on screen.
-  `markFetched()` re-arms both on the next successful load.
+- Every non-result paint re-renders the footer without the «Hentet
+  for … · Oppdater» freshness row, which described an entity no longer
+  on screen, and its 30 s tick runs only in the result state.
+  `paintResult` puts the row back on the next successful load.
 - The stamp is the data's age (`loadCompany`'s `fetchedAt`, the
   oldest cached part), never the paint time: a cache hit can be a
   day old. See `docs/notes/cache.md` § 24h-session.
 - "Synket fra `<host>`" appears only for a company resolved from the
   page. A drill-in, a manual-search pick and a recents pick clear the
-  label (`navigateToRelated`, `loadManualPick`), and the popup sends
-  no host with a manual pick (`syncSidebarIfOpen` in `popup.ts`).
+  label (the `drill` intent, `loadPick`), and the popup sends no host
+  with a manual pick (`syncSidebar` in `popup.ts`).
 
 <!-- SECTION: shared-ui-modules -->
 ## Popup and sidebar share their resolution UX via `src/lib/ui/` and `src/lib/view/`

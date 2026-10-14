@@ -24,15 +24,10 @@ playwright-report/
 .env
 .env.local
 
-# AI-process artifacts and unshipped concept assets: local only, not
-# for the public repo.
-docs/superpowers/
-docs/brand-b.png
-docs/concept.png
-docs/plans/
-docs/backlog.md
-docs/logo/
-
-# Maintainer-only local files (AGENTS.md points here)
+# The maintainer's private docs (AGENTS.md points here)
 maintainer/
-MAINTAINER.md
+
+# Guards: private working docs must not land in the public tree by habit
+docs/plans/
+docs/superpowers/
+docs/backlog.md

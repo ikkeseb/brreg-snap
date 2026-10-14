@@ -129,7 +129,7 @@ describe('hostnameLabel', () => {
   });
 
   it('abstains (undefined) when an xn-- label fails to decode', () => {
-    // undefined is the pipeline's abstain signal: resolveInternal in
+    // undefined is the pipeline's abstain signal: searchByHostnameDetailed in
     // hostname-search.ts treats a falsy label as band 'none', so the
     // sidebar falls through to manual search instead of querying the
     // raw ACE string (which can never match a registered name).

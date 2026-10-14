@@ -1,5 +1,5 @@
 // How the popup and the context menu (background) address the panel
-// (details.ts): the runtime messages that repaint an open panel, and
+// (src/details/): the runtime messages that repaint an open panel, and
 // the panel-URL hint that tells a freshly opened one what to show.
 //
 // Both halves exist because of how the panel is reached:

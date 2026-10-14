@@ -198,7 +198,7 @@ describe('live corpus', () => {
     const live = ['AGENTS.md', 'CLAUDE.md', 'README.md', 'BUILD.md', 'PRIVACY.md',
       'docs/guide.md', 'docs/notes/api.md', 'docs/submission-kit/templates/amo.md',
       'scripts/tool/README.md', 'tests/fixtures/deep/README.md', 'public/README.md', 'docs/screenshots/README.md'];
-    const excluded = ['CHANGELOG.md', 'backlog.md', 'docs/plans/README.md', 'docs/plans/old.md',
+    const excluded = ['CHANGELOG.md', 'backlog.md',
       'docs/submission-kit/1.4.0/README.md', 'docs/submission-kit/1.4.0/amo.md',
       'docs/submission-kit/1.4.0-beta.1/README.md', 'tests/note.md', 'docs/other/note.md', 'other/README.md'];
     expect(selectDocFiles([...live, ...excluded])).toEqual(live);
@@ -207,7 +207,6 @@ describe('live corpus', () => {
   it('does not scan excluded files or ask for an absent AGENTS.md', () => {
     const result = scan('', { files: {
       'CHANGELOG.md': '`src/missing.ts`',
-      'docs/plans/README.md': '`src/missing.ts`',
       'docs/submission-kit/1.4.0/amo.md': '`src/missing.ts`',
     } });
     expect(result.hits).toEqual([]);

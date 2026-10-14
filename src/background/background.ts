@@ -6,7 +6,7 @@
 // built-in `_execute_sidebar_action` command, which needs no listener.
 //
 // It registers no tab listeners. Auto-sync («Auto-oppdater ved
-// fane-bytte») lives in the panel itself (details.ts), which exists
+// fane-bytte») lives in the panel itself (src/details/), which exists
 // only while the sidebar / side panel is open — so no tab is resolved
 // and nothing reaches brreg while it's closed, and the event page /
 // service worker isn't woken on every tab switch. See

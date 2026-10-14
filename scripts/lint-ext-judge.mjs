@@ -3,9 +3,10 @@
 // Fails closed: a web-ext run that did not start, was killed or exited
 // non-zero fails even when its stdout parses as a clean report.
 
-// Expected since strict_min_version stays 115 (plan Decisions: Firefox
-// data consent) while data_collection_permissions needs Firefox 140 /
-// Firefox for Android 142. Older versions ignore the key.
+// Expected since strict_min_version stays 115 while
+// data_collection_permissions needs Firefox 140 / Firefox for Android
+// 142; older versions ignore the key
+// (docs/notes/permissions-model.md § data-collection-declaration).
 export const ALLOWED_WARNINGS = [
   'KEY_FIREFOX_UNSUPPORTED_BY_MIN_VERSION',
   'KEY_FIREFOX_ANDROID_UNSUPPORTED_BY_MIN_VERSION',
