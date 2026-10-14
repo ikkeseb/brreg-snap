@@ -3,7 +3,6 @@
 The current set is `v1.4-01-lookup.png` through `v1.4-05-search.png`.
 Upload all five in numerical order to AMO and CWS. Each is a 1280×800
 RGB PNG with Norwegian captions and the bundled Schibsted Grotesk font.
-Older files in this directory are historical.
 
 ## Source
 
