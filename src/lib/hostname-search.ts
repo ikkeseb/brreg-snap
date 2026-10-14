@@ -376,15 +376,18 @@ async function runPipeline(
 // extra name queries. The site's earlier candidates are re-scored
 // against the spaced label together with the new hits, so a picker of
 // hjemmeside-only franchisees (rema1000.no) gains the chain itself.
+// The re-scored candidates come from the plain run, so its result is
+// only as complete as that run: a failed plain query may hide a rival.
 async function runSegmented(
   domain: string,
   queries: string[],
   previous: Candidate[],
+  previousComplete: boolean,
   rejected: string[],
 ): Promise<PipelineOutcome> {
   const byNavn = await queryNames(queries);
   const result = decide([...previous, ...byNavn.hits], queries, domain, rejected);
-  return { result, complete: byNavn.ok };
+  return { result, complete: previousComplete && byNavn.ok };
 }
 
 function bandCacheKey(site: string, rejected: string[]): string {
@@ -495,7 +498,7 @@ export async function searchByHostnameDetailed(
     // never an answer.
     const cut = result.band === 'picker' && result.cut === true;
     const seg = await cachedRun(`${key}:seg:${queries.join('|')}`, () =>
-      runSegmented(domain, queries, previous, rejected),
+      runSegmented(domain, queries, previous, complete, rejected),
     );
     // A failed spaced query means "couldn't check", even when the
     // plain result stands.

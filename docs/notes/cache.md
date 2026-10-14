@@ -95,6 +95,11 @@ constituent query individually (`Promise.allSettled` via
 - **All queries failed** → `{band: 'none', candidates: []}` is
   returned, NOT cached.
 
+The title segmentation run (`runSegmented`) re-scores the plain run's
+candidates, so it is complete only when its own queries AND that plain
+run were: a failed plain query may hide a rival, and its `:seg:` entry
+would otherwise serve a day-old answer the full run wouldn't give.
+
 In both failure cases the next visit re-runs the pipeline instead of
 serving a 24h "no match" — an offline or throttled moment must never
 pin `{band: 'none'}` for a day. IP literals, intranet names and hosts

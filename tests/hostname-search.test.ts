@@ -876,4 +876,36 @@ describe('title as a word-boundary hint (run-together labels)', () => {
     expect(result?.complete).toBe(false);
     expect(Object.keys(store).filter((k) => k.includes(':seg:'))).toEqual([]);
   });
+
+  it('a failed plain run leaves the spaced result uncached', async () => {
+    // Visit 1: the hjemmeside query fails, so the rival that holds the
+    // site is missing; the spaced query alone finds the chain.
+    const store = installStorageMock();
+    const chain = hit('REMA 1000 AS', '982254604', {
+      hjemmeside: 'www.rema1000.no',
+      registrertIForetaksregisteret: true,
+    });
+    const rival = hit('REMA 1000 NORGE AS', '931059387', {
+      hjemmeside: 'www.rema1000.no',
+      registrertIForetaksregisteret: true,
+    });
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) throw new Error('timeout');
+      return params.get('navn') === 'rema 1000' ? [chain] : [];
+    });
+    const first = await searchByHostnameDetailed('rema1000.no', 'REMA 1000');
+    expect(first?.complete).toBe(false);
+    expect(Object.keys(store).filter((k) => k.includes(':seg:'))).toEqual([]);
+
+    // Visit 2: every query succeeds and the rival is back, so the answer
+    // is the fresh run's, not a day-old one built without the rival.
+    searchMock.mockImplementation(async (params: URLSearchParams) => {
+      if (params.has('hjemmeside')) return [rival];
+      return params.get('navn') === 'rema 1000' ? [chain] : [];
+    });
+    const second = await searchByHostnameDetailed('rema1000.no', 'REMA 1000');
+    expect(second?.complete).toBe(true);
+    expect(second?.band).toBe('picker');
+    expect(second?.candidates.map((c) => c.organisasjonsnummer)).toContain('931059387');
+  });
 });
