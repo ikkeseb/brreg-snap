@@ -220,9 +220,9 @@ function eyebrowFor(method: ResolutionMethod | undefined, host: string | undefin
   return undefined;
 }
 
-// The headline split around its stamp word, so the DOM stays one
+// The headline split around its key word, so the DOM stays one
 // sentence («Nettstedet er ikke koblet til selskapet») while the word
-// is set in the stamp's caps.
+// alone is set in red (same case, same size: «ikke koblet», «Konkurs»).
 const MISMATCH_PRE = 'Nettstedet er';
 const MISMATCH_WORD = 'ikke koblet';
 const MISMATCH_REST = 'til selskapet';

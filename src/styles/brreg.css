@@ -344,7 +344,9 @@
   margin-top: 4px; font: var(--t-verdict); font-size: var(--verdict-size);
   letter-spacing: -.018em; text-wrap: balance;
 }
-.stamp-word { display: inline-block; color: var(--danger); }
+/* the key word: the sentence's own weight (the global strong rule would
+   set 600 under an 800 sentence), only the colour marks it */
+.stamp-word { display: inline-block; font-weight: inherit; color: var(--danger); }
 .answer--danger .answer__support {
   grid-column: auto; margin-top: 8px; padding-top: 8px;
   border-top: 1px solid color-mix(in oklab, var(--tone) 30%, transparent);
