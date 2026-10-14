@@ -7,7 +7,7 @@
 //     <figure class="merknad"><figcaption class="note-head">…</figcaption>
 //       <blockquote class="quote"><p>…</p></blockquote>
 //       <p class="quote__date">Innført <time>…</time></p></figure>
-//     <section><h3 class="note-head">Endret nylig</h3>
+//     <section data-tone="neutral"><h3 class="note-head">Endret nylig</h3>
 //       <ul class="changes"><li><time>…</time><span><b>…</b><br>…</span></li>
 //       <p class="section__text">Endringer kunne ikke hentes.</p>  (feed failed)
 
@@ -47,6 +47,8 @@ export function buildNotes(
 
   if (endringer.length > 0 || endringerFailed) {
     const sec = el('section');
+    // Its own tone, or a merknad's warn on .notes would paint the glyph amber.
+    sec.dataset.tone = 'neutral';
     const head = el('h3', 'note-head');
     head.appendChild(glyph('neutral'));
     head.append(COPY.endretNylig);

@@ -50,8 +50,9 @@ function buildFigures(view: OkonomiView): HTMLElement {
 
   if (figures.equity) {
     const equity = el('div', 'equity');
-    equity.setAttribute('aria-hidden', 'true');
+    // The bar is decoration; the legend is the only place Gjeld is said.
     const track = el('div', 'equity__track');
+    track.setAttribute('aria-hidden', 'true');
     const fill = el('div', 'equity__fill');
     // CSSOM, not a style attribute: allowed under style-src 'self'.
     fill.style.setProperty('--share', `${figures.equity.share}%`);

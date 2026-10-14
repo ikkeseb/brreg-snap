@@ -356,6 +356,9 @@
 .answer--danger .answer__actions { align-items: center; gap: 8px 12px; margin-top: 10px; }
 .text-btn--on-fill { color: var(--on-danger); font-weight: 600; text-decoration-color: color-mix(in oklab, var(--on-danger) 60%, var(--danger-fill)); }
 .text-btn--on-fill:hover { color: var(--on-danger); text-decoration-color: currentColor; }
+/* the amber ring is ~1.2:1 (light) / 2.7:1 (dark) on the fill; --on-danger
+   is 6.7 / 5.4 (WCAG 1.4.11 needs 3) */
+.answer--danger :focus-visible { outline-color: var(--on-danger); }
 
 
 /* ---------- ledger (signals) -------------------------------------------

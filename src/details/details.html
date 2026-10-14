@@ -86,8 +86,10 @@
          zero-height sticky wrapper, so showing it never moves the page. -->
     <div class="stick-wrap"><div id="stick" class="stick" hidden></div></div>
     <!-- Shown only on a drilled-in entity: the sidebar has no browser
-         chrome, so without this the drill-in is a one-way trip. -->
-    <nav class="back-nav"><button type="button" id="back" class="back" hidden></button></nav>
+         chrome, so without this the drill-in is a one-way trip. The
+         nav hides with its button (painter.ts showBack): an empty
+         landmark still lists for a screen reader. -->
+    <nav class="back-nav" hidden><button type="button" id="back" class="back" hidden></button></nav>
     <main id="app" data-state="loading" aria-busy="true"></main>
     <footer id="foot" class="foot"></footer>
     <script type="module" src="main.ts"></script>

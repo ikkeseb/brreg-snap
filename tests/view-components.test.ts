@@ -23,6 +23,7 @@ import { buildKonsernRow } from '../src/lib/view/components/konsern.js';
 import { buildFacts, buildLedger, buildLedgerRow } from '../src/lib/view/components/ledger.js';
 import { focusElement, liveRegionOf } from '../src/lib/view/components/live.js';
 import { appendSiteLabel, renderMasthead } from '../src/lib/view/components/masthead.js';
+import { buildNotes } from '../src/lib/view/components/notes.js';
 import { pickerHead, renderPicker } from '../src/lib/view/components/picker.js';
 import {
   buildEntryRow,
@@ -469,6 +470,20 @@ describe('ledger', () => {
     expect(cap.textContent).toBe('Om selskapet — sier ingenting om dette nettstedet');
     expect(facts.className).toBe('facts');
     expect(facts.querySelectorAll('b')).toHaveLength(2);
+  });
+});
+
+describe('notes', () => {
+  it('a merknad tones the block warn; «Endret nylig» keeps its neutral glyph', () => {
+    const notes = buildNotes(
+      [{ text: 'Foretaksregisteret har grunn til å anta at …' }],
+      [{ iso: '2026-09-04', date: '4. sep. 2026', title: 'Endret styre' }],
+    )!;
+    expect(notes.dataset.tone).toBe('warn');
+    const [merknadGlyph, changesGlyph] = [...notes.querySelectorAll('.note-head .glyph')];
+    // --tone comes from the nearest [data-tone]: that is what paints the glyph.
+    expect(merknadGlyph!.closest<HTMLElement>('[data-tone]')?.dataset.tone).toBe('warn');
+    expect(changesGlyph!.closest<HTMLElement>('[data-tone]')?.dataset.tone).toBe('neutral');
   });
 });
 
