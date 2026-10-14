@@ -49,6 +49,22 @@ describe('parsePanelMessage', () => {
     });
   });
 
+  it('carries the sender\'s tab id on every type, and drops one that is not a tab id', () => {
+    const sync = { type: 'sync', windowId: 3, orgnr: DNB, host: 'x.no', method: 'host-auto' };
+    expect(parsePanelMessage({ ...sync, tabId: 7 })).toEqual({ ...sync, tabId: 7 });
+    expect(parsePanelMessage({ ...sync, tabId: 0 })).toEqual({ ...sync, tabId: 0 });
+    expect(parsePanelMessage({ type: 'no-match', windowId: 3, tabId: 7, host: 'x.no' }))
+      .toEqual({ type: 'no-match', windowId: 3, tabId: 7, host: 'x.no' });
+    expect(parsePanelMessage({ type: 'search', windowId: 3, tabId: 7, query: 'kiwi' }))
+      .toEqual({ type: 'search', windowId: 3, tabId: 7, query: 'kiwi' });
+    // -1 is TAB_ID_NONE: the message still repaints, it just names no tab.
+    for (const tabId of [-1, 1.5, '7', null, Number.NaN]) {
+      const msg = parsePanelMessage({ ...sync, tabId });
+      expect(msg).toEqual(sync);
+      expect(msg).not.toHaveProperty('tabId');
+    }
+  });
+
   it('rejects messages without a window — they could be for any panel', () => {
     expect(
       parsePanelMessage({ type: 'sync', orgnr: DNB, method: 'url-path' }),

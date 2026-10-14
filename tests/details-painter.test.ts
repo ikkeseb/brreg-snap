@@ -120,7 +120,6 @@ function fakeIntents(): PanelIntents {
     none: vi.fn(),
     manual: vi.fn(),
     recent: vi.fn(),
-    search: vi.fn(),
     selectTab: vi.fn(),
   };
 }
@@ -480,6 +479,12 @@ describe('result: the dossier', () => {
     expect(deps.setBadge).toHaveBeenCalledTimes(2);
     painter.result(resultPaint(scan));
     expect(deps.setBadge).toHaveBeenCalledTimes(2);
+    // A kept picker / empty state that now follows another tab clears
+    // that tab's badge and repaints nothing.
+    const main = app().innerHTML;
+    painter.clearBadge(11);
+    expect(deps.setBadge).toHaveBeenLastCalledWith(11, undefined);
+    expect(app().innerHTML).toBe(main);
   });
 
   it('the freshness tick moves the footer text on in place: focus on «Oppdater» survives', async () => {
@@ -734,7 +739,7 @@ describe('the masthead search view', () => {
     expect(app().getAttribute('aria-busy')).toBe('true');
   });
 
-  it('a search intent prefills the field and runs it over the empty state', async () => {
+  it('a search request prefills the field and runs it over the empty state', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const { painter, roots } = setup();
     painter.empty({ degraded: false, query: 'equinor', focus: true });

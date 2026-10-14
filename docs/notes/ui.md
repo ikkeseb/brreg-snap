@@ -314,8 +314,16 @@ company on screen is the tab's own (host-derived: URL, title or
 hostname) and it is warn or danger; cleared for everything else — an
 ok answer, a manual pick, a drill-in, a picker, an empty or error
 state. The popup uses the tab it opened on; the panel the tab it
-resolved at startup or on a tab event (`tabId` on every paint, kept
-across messages, never set by a message or a probe). No permission:
+follows (`tabId` on every paint): the one it read at startup, the last
+tab event's, or the one the last message named (`PanelMessage.tabId`).
+A message that names none leaves it following none, so it never touches
+another tab's badge; a drill-in and the panel's own re-resolves
+(«Prøv igjen», «Glem valget») keep it. Back / Forward keep it only when
+the entry was painted for that same tab (stamped in `history.state`),
+else follow none. A kept picker or empty state that now follows another
+tab clears that tab's badge without repainting. Known limit: with
+auto-sync off the panel can't see its followed tab navigate, so a later
+paint can still badge that tab's new page. No permission:
 `action.setBadgeText` needs only the manifest's `action` key.
 
 <!-- SECTION: welcome -->

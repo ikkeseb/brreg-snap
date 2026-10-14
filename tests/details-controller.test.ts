@@ -111,6 +111,7 @@ function fakePainter() {
     error: vi.fn(),
     setBack: vi.fn(),
     selectTab: vi.fn(),
+    clearBadge: vi.fn(),
   };
   return {
     painter,
@@ -547,15 +548,15 @@ describe('startup and messages', () => {
     expect(results()[0]).toMatchObject({ method: 'url-path', host: undefined });
   });
 
-  it('a search message repaints the empty state with the query', async () => {
-    const { intents, painter } = setup();
-    intents.search('kaffe');
+  it('a search message repaints the empty state with the query, for its tab', async () => {
+    const { controller, painter } = setup();
+    controller.follow({ kind: 'empty', query: 'kaffe' }, 7);
     expect(painter.empty).toHaveBeenCalledWith({
       host: undefined,
       degraded: false,
       query: 'kaffe',
       focus: true,
-      tabId: undefined,
+      tabId: 7,
     });
   });
 
@@ -575,7 +576,7 @@ describe('startup and messages', () => {
     expect(url().searchParams.has('orgnr')).toBe(false);
   });
 
-  it('every paint names the followed tab: the one read at startup or on a tab event, kept across messages', async () => {
+  it('every paint names the followed tab: the one read at startup, on a tab event or named by a message', async () => {
     const { controller, intents, painter, results } = setup({
       activeTab: { id: 4, url: 'https://www.dnb.no/', title: 'DNB' },
       resolveTab: async (url) =>
@@ -590,18 +591,96 @@ describe('startup and messages', () => {
     await settle();
     expect(painter.provenance).toHaveBeenLastCalledWith(expect.objectContaining({ tabId: 5 }));
 
-    // A message or a drill-in has no tab of its own: the followed tab stays.
-    controller.follow({ kind: 'company', orgnr: EQUINOR, method: 'host-pick', host: 'equinor.com' });
+    // A message names its sender's tab: the panel follows that one now,
+    // and a drill-in from its view names it too.
+    controller.follow({ kind: 'company', orgnr: EQUINOR, method: 'host-pick', host: 'equinor.com' }, 9);
     await settle();
-    expect(results().at(-1)).toMatchObject({ host: 'equinor.com', tabId: 5 });
+    expect(results().at(-1)).toMatchObject({ host: 'equinor.com', tabId: 9 });
     intents.drill(DNB);
     await settle();
-    expect(results().at(-1)).toMatchObject({ method: 'drill-in', tabId: 5 });
+    expect(results().at(-1)).toMatchObject({ method: 'drill-in', tabId: 9 });
+
+    // A message that names no tab follows none: no stale tab's badge.
+    controller.follow({ kind: 'company', orgnr: EQUINOR, method: 'host-pick', host: 'equinor.com' });
+    await settle();
+    expect(results().at(-1)).toMatchObject({ host: 'equinor.com', tabId: undefined });
+    intents.drill(DNB);
+    await settle();
+    expect(results().at(-1)).toMatchObject({ method: 'drill-in', tabId: undefined });
+
+    // A no-match message names its tab the same way.
+    await controller.probe('example.com', 8);
+    expect(painter.empty).toHaveBeenLastCalledWith(expect.objectContaining({ host: 'example.com', tabId: 8 }));
 
     // Picker, empty and error paints carry it too.
     await controller.followTab(6, { id: 6, url: 'https://www.nrk.no/', title: '' });
     await settle();
     expect(painter.empty).toHaveBeenLastCalledWith(expect.objectContaining({ tabId: 6 }));
+  });
+
+  it('Back keeps the followed tab only for an entry painted for it; otherwise it names none', async () => {
+    const { controller, intents, results } = setup({
+      activeTab: { id: 4, url: 'https://www.dnb.no/', title: 'DNB' },
+      resolveTab: async () => ({ host: 'dnb.no', orgnr: DNB, method: 'host-auto' }),
+    });
+    await controller.init({ fresh: false });
+    await settle();
+    intents.drill(EQUINOR);
+    await settle();
+    // Another tab's popup: the panel follows tab 9 now.
+    controller.follow(companyView(DNB, 'www.dnb.no'), 9);
+    await settle();
+    expect(results().at(-1)).toMatchObject({ host: 'www.dnb.no', tabId: 9 });
+
+    // Back to tab 4's entry: the panel follows 9, so it follows none.
+    intents.back();
+    await settle();
+    expect(results().at(-1)).toMatchObject({
+      company: { enhet: { organisasjonsnummer: DNB } },
+      host: 'dnb.no',
+      tabId: undefined,
+    });
+
+    // An entry for the tab still followed keeps it.
+    controller.follow(companyView(DNB, 'dnb.no'), 4);
+    await settle();
+    intents.drill(EQUINOR);
+    await settle();
+    intents.back();
+    await settle();
+    expect(results().at(-1)).toMatchObject({ host: 'dnb.no', tabId: 4 });
+
+    // An entry without a tab (older), or with junk there, names none.
+    for (const state of [
+      { orgnr: DNB, method: 'host-auto', host: 'dnb.no' },
+      { orgnr: DNB, method: 'host-auto', host: 'dnb.no', tabId: -1 },
+      { orgnr: DNB, method: 'host-auto', host: 'dnb.no', tabId: '4' },
+    ]) {
+      controller.follow(companyView(EQUINOR, 'www.equinor.com'), 4);
+      await settle();
+      controller.restore(state);
+      await settle();
+      expect(results().at(-1)).toMatchObject({ host: 'dnb.no', tabId: undefined });
+    }
+  });
+
+  it('a kept empty state that now follows another tab clears that tab\'s badge, repainting nothing', async () => {
+    const { controller, painter } = setup({
+      activeTab: { id: 4, url: 'https://example.com/', title: '' },
+      resolveTab: async () => ({ host: 'example.com' }),
+    });
+    await controller.init({ fresh: false });
+    await settle();
+    expect(painter.empty).toHaveBeenLastCalledWith(expect.objectContaining({ host: 'example.com', tabId: 4 }));
+
+    // A no-match from tab 9 on the same host: same view, kept.
+    await controller.probe('example.com', 9);
+    expect(painter.empty).toHaveBeenCalledTimes(1);
+    expect(painter.clearBadge).toHaveBeenCalledWith(9);
+
+    // The same tab again: nothing new to clear.
+    await controller.probe('example.com', 9);
+    expect(painter.clearBadge).toHaveBeenCalledTimes(1);
   });
 
   it('a result stamps the recents and reads the stored choice for its host', async () => {

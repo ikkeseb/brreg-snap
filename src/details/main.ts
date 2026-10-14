@@ -162,16 +162,14 @@ function main(): void {
     void panelWindowId.then((windowId) => {
       if (!isForWindow(msg, windowId)) return;
       if (msg.type === 'sync') {
-        controller.follow({
-          kind: 'company',
-          orgnr: msg.orgnr,
-          method: msg.method,
-          host: msg.host,
-        });
+        controller.follow(
+          { kind: 'company', orgnr: msg.orgnr, method: msg.method, host: msg.host },
+          msg.tabId,
+        );
       } else if (msg.type === 'search') {
-        controller.intents.search(msg.query);
+        controller.follow({ kind: 'empty', query: msg.query }, msg.tabId);
       } else {
-        void controller.probe(msg.host);
+        void controller.probe(msg.host, msg.tabId);
       }
     });
   });

@@ -43,11 +43,11 @@ export interface ResultPaint {
   // load token.
   isStale: () => boolean;
   focus: ResultFocus;
-  // The tab the panel follows (the one it resolved at startup or on a
-  // tab event): its toolbar badge is set from this result — the answer's
-  // tone when the company is the tab's own (host-derived, warn or
-  // danger), cleared otherwise. Undefined = no tab known; the badge is
-  // left alone.
+  // The tab the panel follows (read at startup, a tab event's, the one
+  // the last message named; docs/notes/ui.md § badge): its toolbar
+  // badge is set from this result — the answer's tone when the company
+  // is the tab's own (host-derived, warn or danger), cleared otherwise.
+  // Undefined = no tab known; the badge is left alone.
   tabId?: number;
 }
 
@@ -92,6 +92,9 @@ export interface PanelPainter {
   picker(host: string, candidates: Candidate[], opts: { focus: boolean; tabId?: number }): void;
   empty(paint: EmptyPaint): void;
   error(err: unknown, paint: ErrorPaint): void;
+  // A kept picker or empty state now follows `tabId`: clear its badge
+  // (no company on screen) without repainting.
+  clearBadge(tabId: number): void;
   // «Tilbake»: only a drilled-in entity has an in-panel back to offer.
   setBack(visible: boolean): void;
   // Reflect a restored ?tab= (Back/Forward) without persisting it.
@@ -125,8 +128,6 @@ export interface PanelIntents {
   manual: (orgnr: string) => void;
   // A recents-list entry.
   recent: (orgnr: string) => void;
-  // Search for text in the empty state (the selection lookup).
-  search: (query: string) => void;
   // The user selected a tab; persists ?tab= into the history entry.
   selectTab: (key: string) => void;
 }

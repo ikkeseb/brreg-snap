@@ -18,6 +18,10 @@
 //     sidebar in the first window it checks, which need not be the
 //     window the open was for. So the URL names its window too, and a
 //     panel in any other window reads it as no hint at all.
+//
+// A message also names the tab it is about (`tabId`, when the sender
+// has one): the panel follows that tab from then on, so its toolbar
+// badge describes that tab and no other (docs/notes/ui.md § badge).
 
 import { isValidOrgnr } from './mod11.js';
 import {
@@ -29,6 +33,7 @@ export type PanelMessage =
   | {
       type: 'sync';
       windowId: number;
+      tabId?: number;
       orgnr: string;
       host?: string;
       // How the sender resolved the orgnr — drives the panel's
@@ -40,6 +45,7 @@ export type PanelMessage =
       // alone. The panel re-runs the picker-aware host search itself.
       type: 'no-match';
       windowId: number;
+      tabId?: number;
       host?: string;
     }
   | {
@@ -47,11 +53,24 @@ export type PanelMessage =
       // orgnr: the panel prefills its search with the text and runs it.
       type: 'search';
       windowId: number;
+      tabId?: number;
       query: string;
     };
 
 function optionalString(value: unknown): value is string | undefined {
   return value === undefined || typeof value === 'string';
+}
+
+// A real tab id: not -1 (TAB_ID_NONE) or junk. Also guards the tab id
+// stamped into the panel's history.state (details/history.ts).
+export function isTabId(value: unknown): value is number {
+  return Number.isInteger(value) && (value as number) >= 0;
+}
+
+// A tab id that isn't one is dropped, not fatal: the message still
+// repaints, it just names no tab.
+function tabIdOf(value: unknown): { tabId?: number } {
+  return isTabId(value) ? { tabId: value } : {};
 }
 
 // Longest query the panel searches for; the manual search caps what it
@@ -74,12 +93,13 @@ export function parsePanelMessage(msg: unknown): PanelMessage | undefined {
   if (typeof m.windowId !== 'number' || !optionalString(m.host)) {
     return undefined;
   }
+  const tab = tabIdOf(m.tabId);
   if (m.type === 'no-match') {
-    return { type: 'no-match', windowId: m.windowId, host: m.host };
+    return { type: 'no-match', windowId: m.windowId, ...tab, host: m.host };
   }
   if (m.type === 'search' && typeof m.query === 'string') {
     const query = normalizeQuery(m.query);
-    return query ? { type: 'search', windowId: m.windowId, query } : undefined;
+    return query ? { type: 'search', windowId: m.windowId, ...tab, query } : undefined;
   }
   if (
     m.type === 'sync' &&
@@ -90,6 +110,7 @@ export function parsePanelMessage(msg: unknown): PanelMessage | undefined {
     return {
       type: 'sync',
       windowId: m.windowId,
+      ...tab,
       orgnr: m.orgnr,
       host: m.host,
       method: m.method as ResolutionMethod,

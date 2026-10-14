@@ -86,10 +86,11 @@ export interface PanelController {
   init(hint: PanelHint): Promise<void>;
   // A tab in this panel's window became active or navigated.
   followTab(tabId: number, tab?: TabFields): Promise<void>;
-  // A sync message: the sender already resolved the view.
-  follow(view: PanelView): void;
-  // A no-match message: resolve the host here.
-  probe(host: string | undefined): Promise<void>;
+  // A sync or search message: the sender already resolved the view.
+  // `tabId`: the sender's tab, followed from now on (none if omitted).
+  follow(view: PanelView, tabId?: number): void;
+  // A no-match message: resolve the host here. `tabId` as for follow.
+  probe(host: string | undefined, tabId?: number): Promise<void>;
   // popstate: restore the entry the browser moved to.
   restore(state: unknown): void;
 }
@@ -117,9 +118,12 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   // The title of the tab the follower last resolved, keyed by that tab's
   // host: «Feil bedrift?» re-runs the host search with its word hints.
   let lastTabTitle: { host: string; title: string } | undefined;
-  // The tab the panel follows (resolved at startup or on a tab event).
+  // The tab the panel follows: the one it read at startup, the last tab
+  // event's, or the one the last message named (none when it named
+  // none); Back / Forward keep it only for an entry painted for it.
   // Every paint names it, so the painter can set or clear its toolbar
-  // badge; a message or a probe never changes it.
+  // badge; the panel's own re-resolves («Prøv igjen», «Glem valget»)
+  // keep it.
   let followedTabId: number | undefined;
   // What the panel settled on (result / picker / empty) — undefined
   // while loading or on error. Lets a sync or tab event for what's
@@ -281,7 +285,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     if (view.degraded && view.host) {
       const host = view.host;
       lastLoad = () => {
-        void follower.probe(host);
+        void follower.probe(host, followedTabId);
       };
     }
     painter.empty({
@@ -301,7 +305,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         currentHost = view.host;
         // replaceState, not push — this tracks the active tab, not a
         // navigation the user wants to reverse.
-        history.setOrgnr(view.orgnr, view.method, view.host, { push: false });
+        history.setOrgnr(view.orgnr, view.method, view.host, { push: false, tabId: followedTabId });
         void loadOrgnr(view.orgnr, view.method);
         return;
       case 'picker':
@@ -317,12 +321,16 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   // (no skeleton, scroll and focus stay put); only how it was reached —
   // the footer host and the «Feil bedrift?» method — is refreshed. A
   // picker or empty state for the same host is left alone, including a
-  // half-typed manual search.
-  function keepView(view: PanelView): void {
-    if (view.kind !== 'company') return;
+  // half-typed manual search; only a newly followed tab's badge is
+  // cleared (`movedTab`).
+  function keepView(view: PanelView, movedTab: boolean): void {
+    if (view.kind !== 'company') {
+      if (movedTab && followedTabId !== undefined) painter.clearBadge(followedTabId);
+      return;
+    }
     currentHost = view.host;
     currentMethod = view.method;
-    history.setOrgnr(view.orgnr, view.method, view.host, { push: false });
+    history.setOrgnr(view.orgnr, view.method, view.host, { push: false, tabId: followedTabId });
     onScreen = view;
     painter.setBack(history.current()?.method === 'drill-in');
     // The stored choice for the new host is read again: the kept
@@ -349,12 +357,13 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     searchHost: (host) => deps.searchHost(host),
     onScreen: () => onScreen,
     show: (view, origin, tabId) => {
-      if (tabId !== undefined) followedTabId = tabId;
+      followedTabId = tabId;
       showView(view, origin);
     },
     keep: (view, origin, tabId) => {
-      if (tabId !== undefined) followedTabId = tabId;
-      keepView(view);
+      const movedTab = tabId !== followedTabId;
+      followedTabId = tabId;
+      keepView(view, movedTab);
     },
   });
 
@@ -368,7 +377,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     drill(orgnr): void {
       if (!isValidOrgnr(orgnr)) return;
       currentHost = undefined;
-      history.setOrgnr(orgnr, 'drill-in', undefined, { push: true });
+      history.setOrgnr(orgnr, 'drill-in', undefined, { push: true, tabId: followedTabId });
       void loadOrgnr(orgnr, 'drill-in', { focus: 'heading', reuseTree: true });
     },
 
@@ -412,7 +421,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         view = { kind: 'empty', host, degraded: true };
       }
       if (run.isStale()) return;
-      follower.follow(view);
+      follower.follow(view, followedTabId);
     },
 
     retry(): void {
@@ -431,7 +440,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
 
     pick(host, orgnr): void {
       if (!pickerStillShown(host)) return;
-      history.setOrgnr(orgnr, 'host-pick', host, { push: false });
+      history.setOrgnr(orgnr, 'host-pick', host, { push: false, tabId: followedTabId });
       void loadOrgnr(orgnr, 'host-pick');
     },
 
@@ -453,10 +462,6 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       loadPick(orgnr);
     },
 
-    search(query): void {
-      follower.follow({ kind: 'empty', query });
-    },
-
     selectTab(key): void {
       history.setTab(key);
     },
@@ -464,7 +469,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
 
   function loadPick(orgnr: string): void {
     currentHost = undefined;
-    history.setOrgnr(orgnr, 'manual', undefined, { push: false });
+    history.setOrgnr(orgnr, 'manual', undefined, { push: false, tabId: followedTabId });
     void loadOrgnr(orgnr, 'manual');
   }
 
@@ -479,17 +484,24 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     },
 
     followTab: (tabId, tab) => follower.followTab(tabId, tab),
-    follow: (view) => follower.follow(view),
-    probe: (host) => follower.probe(host),
+    follow: (view, tabId) => follower.follow(view, tabId),
+    probe: (host, tabId) => follower.probe(host, tabId),
 
     // Browser Back / Forward within the panel — only reachable after an
     // in-panel drill-in pushed an entry. Restore from history.state,
     // falling back to the URL params for the initial entry (which may
     // predate state stamping). Each branch paints through a function
     // that claims the load token, so a slower in-flight load can't
-    // paint over the restored entry when it lands.
+    // paint over the restored entry when it lands. The panel keeps
+    // following its tab only when the entry was painted for that same
+    // tab; otherwise (a message since moved it, an older entry, the
+    // ?nomatch= one) it follows none, so Back never badges a tab the
+    // restored view isn't about.
     restore(state): void {
       const entry = history.entryOf(state);
+      if (entry?.tabId === undefined || entry.tabId !== followedTabId) {
+        followedTabId = undefined;
+      }
       const orgnr = entry?.orgnr ?? history.orgnrFromUrl();
       if (orgnr && isValidOrgnr(orgnr)) {
         currentHost = entry?.host;

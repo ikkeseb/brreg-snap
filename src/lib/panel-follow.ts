@@ -198,9 +198,9 @@ export interface FollowerDeps {
   searchHost(host: string): Promise<DetailedResult>;
   onScreen(): PanelView | undefined;
   // Paint a different view. The painters claim their own load token.
-  // `tabId`: the tab the view was resolved from (startup, a tab event),
-  // for its toolbar badge; undefined when the view came from a message
-  // or a probe.
+  // `tabId`: the tab the view is about (the one read at startup, the
+  // tab event's, the message sender's), which the panel follows from
+  // this paint on, toolbar badge included; undefined = none known.
   show(view: PanelView, origin: FollowOrigin, tabId?: number): void;
   // `view` is already on screen: refresh its host label / method only.
   keep(view: PanelView, origin: FollowOrigin, tabId?: number): void;
@@ -211,10 +211,12 @@ export interface PanelFollower {
   // A tab in this panel's window became active (tab omitted) or the
   // active one navigated (tab given — onUpdated hands it over).
   followTab(tabId: number, tab?: TabFields): Promise<void>;
-  // A sync message: the sender already resolved the view.
-  follow(view: PanelView): void;
+  // A sync or search message: the sender already resolved the view.
+  // `tabId` as for show; the panel's own re-resolves pass the tab it
+  // already follows.
+  follow(view: PanelView, tabId?: number): void;
   // A no-match message or ?nomatch= history entry: resolve the host.
-  probe(host: string | undefined): Promise<void>;
+  probe(host: string | undefined, tabId?: number): Promise<void>;
 }
 
 export function createPanelFollower(deps: FollowerDeps): PanelFollower {
@@ -227,9 +229,10 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
     run: LoadToken,
     host: string | undefined,
     origin: FollowOrigin,
+    tabId?: number,
   ): Promise<void> {
     if (!host) {
-      apply({ kind: 'empty' }, origin);
+      apply({ kind: 'empty' }, origin, tabId);
       return;
     }
     let view: PanelView;
@@ -239,7 +242,7 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
       view = { kind: 'empty', host, degraded: true };
     }
     if (run.isStale()) return;
-    apply(view, origin);
+    apply(view, origin, tabId);
   }
 
   async function readTab(
@@ -293,15 +296,15 @@ export function createPanelFollower(deps: FollowerDeps): PanelFollower {
       apply(view, 'tab', tabId);
     },
 
-    follow(view) {
+    follow(view, tabId) {
       // Claim even when the view is kept: an older tab event still
       // resolving must not paint over what this newer message says.
       deps.loads.begin();
-      apply(view, 'message');
+      apply(view, 'message', tabId);
     },
 
-    async probe(host) {
-      await probeWith(deps.loads.begin(), host, 'probe');
+    async probe(host, tabId) {
+      await probeWith(deps.loads.begin(), host, 'probe', tabId);
     },
   };
 }

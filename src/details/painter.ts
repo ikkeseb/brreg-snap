@@ -719,6 +719,10 @@ export function createPanelPainter(
       if (focus) focusElement(answer.heading);
     },
 
+    clearBadge(tabId): void {
+      badge(tabId);
+    },
+
     setBack(visible): void {
       backHidden = !visible;
       if (aside) aside.backHidden = backHidden;

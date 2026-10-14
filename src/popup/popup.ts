@@ -160,8 +160,9 @@ function panelTarget(): PanelTarget {
 async function syncOpenPanel(msg: PanelMessage): Promise<void> {
   // A panel open in this window, opened earlier on a different tab,
   // holds stale data until something tells it to repaint: this
-  // message, which the open details page applies in place. No setPanel
-  // here — that would only leave a global panel URL behind.
+  // message, which the open details page applies in place. It names
+  // this popup's tab: the panel follows it from then on, badge and all.
+  // No setPanel here — that would only leave a global panel URL behind.
   try {
     if (!(await sidebar.isOpen(msg.windowId))) return;
   } catch {
@@ -176,6 +177,7 @@ function syncSidebar(orgnr: string): void {
   void syncOpenPanel({
     type: 'sync',
     windowId,
+    tabId,
     orgnr,
     // A manual pick has nothing to do with the tab's site.
     host: method === 'manual' ? undefined : host,
@@ -185,7 +187,7 @@ function syncSidebar(orgnr: string): void {
 
 function syncSidebarNoMatch(): void {
   if (windowId === undefined) return;
-  void syncOpenPanel({ type: 'no-match', windowId, host });
+  void syncOpenPanel({ type: 'no-match', windowId, tabId, host });
 }
 
 // --- badge ------------------------------------------------------------------

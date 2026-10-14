@@ -131,13 +131,15 @@ function openOnPage(tab: GestureTab | undefined): void {
   // open sidebar in only one window, not necessarily this one
   // (panel-protocol.ts), so tell this window's panel directly. On a
   // sync miss the panel runs the picker-aware host search itself — the
-  // one resolver, and it can show the picker.
+  // one resolver, and it can show the picker. The message names the
+  // tab, so the panel follows it from then on (its toolbar badge too).
   const windowId = tab?.windowId;
   if (windowId === undefined) return;
+  const tabId = tab?.id;
   void notifyPanel(
     sync
-      ? { type: 'sync', windowId, orgnr: sync.orgnr, host: sync.host, method: sync.method }
-      : { type: 'no-match', windowId, host },
+      ? { type: 'sync', windowId, tabId, orgnr: sync.orgnr, host: sync.host, method: sync.method }
+      : { type: 'no-match', windowId, tabId, host },
   );
 }
 
@@ -160,10 +162,11 @@ function openOnSelection(
 
   const windowId = tab?.windowId;
   if (windowId === undefined) return;
+  const tabId = tab?.id;
   if (orgnr) {
-    void notifyPanel({ type: 'sync', windowId, orgnr, method: 'manual' });
+    void notifyPanel({ type: 'sync', windowId, tabId, orgnr, method: 'manual' });
   } else if (query) {
-    void notifyPanel({ type: 'search', windowId, query });
+    void notifyPanel({ type: 'search', windowId, tabId, query });
   }
 }
 

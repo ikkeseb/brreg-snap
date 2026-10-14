@@ -251,6 +251,7 @@ describe('context menu click', () => {
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'sync',
       windowId: 3,
+      tabId: 7,
       orgnr: '984851006',
       host: 'example.com',
       method: 'url-path',
@@ -276,6 +277,7 @@ describe('context menu click', () => {
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'no-match',
       windowId: 3,
+      tabId: 7,
       host: 'www.yara.com',
     });
     // The panel runs the picker-aware search; the background never does.
@@ -322,6 +324,7 @@ describe('selection lookup («Slå opp «%s» i brreg-snap»)', () => {
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'sync',
       windowId: 3,
+      tabId: 7,
       orgnr: '923609016',
       method: 'manual',
     });
@@ -345,6 +348,7 @@ describe('selection lookup («Slå opp «%s» i brreg-snap»)', () => {
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'search',
       windowId: 3,
+      tabId: 7,
       query: 'Kiwi Norge',
     });
     // The panel searches; the background never talks to brreg.
@@ -373,6 +377,7 @@ describe('selection lookup («Slå opp «%s» i brreg-snap»)', () => {
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'search',
       windowId: 3,
+      tabId: 7,
       query: '923609016 og 984851006',
     });
   });
@@ -409,6 +414,7 @@ describe('keyboard command (Chrome «open-panel»)', () => {
     expect(mock.runtime.sendMessage).toHaveBeenCalledWith({
       type: 'sync',
       windowId: 3,
+      tabId: 7,
       orgnr: '984851006',
       host: 'example.com',
       method: 'url-path',

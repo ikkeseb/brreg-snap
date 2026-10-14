@@ -1,22 +1,25 @@
-// The panel's history entries: ?orgnr= (with the resolution method and
-// source host stamped into history.state), ?nomatch=, ?tab=, and the
-// ?at= stamp of a panel-URL hint. Everything the controller does to
-// window.history / window.location goes through here, against an
-// injectable window shape, so the controller is tested with a fake.
+// The panel's history entries: ?orgnr= (with the resolution method,
+// source host and followed tab stamped into history.state), ?nomatch=,
+// ?tab=, and the ?at= stamp of a panel-URL hint. Everything the
+// controller does to window.history / window.location goes through
+// here, against an injectable window shape, so the controller is
+// tested with a fake.
 
 import { isValidOrgnr } from '../lib/mod11.js';
+import { isTabId } from '../lib/panel-protocol.js';
 import {
   RESOLUTION_METHODS,
   type ResolutionMethod,
 } from '../lib/resolution-method.js';
 
 // Shape stored in history.state for an orgnr entry, so popstate can
-// restore the company, its override-button method, and the footer host
-// without re-resolving.
+// restore the company, its override-button method, the footer host and
+// the tab it was painted for (its toolbar badge) without re-resolving.
 export interface HistoryEntry {
   orgnr: string;
   method: ResolutionMethod;
   host?: string;
+  tabId?: number;
 }
 
 export function isHistoryEntry(value: unknown): value is HistoryEntry {
@@ -54,12 +57,13 @@ export interface PanelHistory {
   // navigation the user wants to reverse). The method is stamped into
   // history.state so popstate can restore the right override-button
   // visibility on Back; the host so a Back/Forward restores the footer
-  // label too.
+  // label too; `tabId` (the tab the panel follows) so it restores the
+  // tab whose badge the entry describes.
   setOrgnr(
     orgnr: string,
     method: ResolutionMethod,
     host: string | undefined,
-    opts: { push: boolean },
+    opts: { push: boolean; tabId: number | undefined },
   ): void;
   // Clear any orgnr left in the URL so a panel reload doesn't re-fetch
   // the stale company.
@@ -81,8 +85,12 @@ export interface PanelHistory {
 export function createPanelHistory(win: HistoryWindow): PanelHistory {
   const params = (): URLSearchParams => new URLSearchParams(win.location.search);
 
+  // An entry written before the tab was stamped, or with junk there,
+  // names no tab.
   function entryOf(state: unknown): HistoryEntry | undefined {
-    return isHistoryEntry(state) ? state : undefined;
+    if (!isHistoryEntry(state)) return undefined;
+    const { tabId, ...entry } = state;
+    return isTabId(tabId) ? { ...entry, tabId } : entry;
   }
 
   return {
@@ -93,7 +101,7 @@ export function createPanelHistory(win: HistoryWindow): PanelHistory {
       const url = new URL(win.location.href);
       url.searchParams.set('orgnr', orgnr);
       url.searchParams.delete('nomatch');
-      const state: HistoryEntry = { orgnr, method, host };
+      const state: HistoryEntry = { orgnr, method, host, tabId: opts.tabId };
       if (opts.push) {
         win.history.pushState(state, '', url.toString());
       } else {

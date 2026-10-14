@@ -37,9 +37,9 @@ reloads its open sidebar. That need not be the sender's window. So the
 popup (after resolving the tab, and on «Ingen av disse») and the
 context menu send a `runtime.sendMessage` the open panel applies in
 place. The shape lives in `panel-protocol.ts`: `{type:'sync', windowId,
-orgnr, host, method}`, `{type:'no-match', windowId, host}`, or
-`{type:'search', windowId, query}` (the selection lookup's text, see
-permissions-model.md § commands-and-selection). Don't
+tabId, orgnr, host, method}`, `{type:'no-match', windowId, tabId, host}`,
+or `{type:'search', windowId, tabId, query}` (the selection lookup's
+text, see permissions-model.md § commands-and-selection). Don't
 switch to a per-window `setPanel({windowId})`: against the one shared
 `this.panel`, every tab switch in the other window would then count as
 a URL change and reload that window's open sidebar.
@@ -49,7 +49,9 @@ window has its own panel document, so every message carries the
 sender's `windowId` and the panel drops the rest (`isForWindow`; a
 panel that couldn't learn its window takes none). `method` travels
 with a sync so «Feil bedrift?» shows in the panel exactly when it
-shows on the sender. A missing listener (panel closed) rejects
+shows on the sender. `tabId` (optional; dropped unless a non-negative
+integer) names the tab the message is about, which the panel follows
+from then on (ui.md § badge). A missing listener (panel closed) rejects
 `sendMessage` — expected, swallowed in `notifyPanel`.
 
 The popup only messages an open panel; it no longer calls `setPanel`
@@ -109,7 +111,7 @@ sends its extension id to brreg as a hostname.
 
 The context menu resolves only synchronously (gesture stack, see
 permissions-model.md § gesture-stack). On a miss it sends
-`{type:'no-match', windowId, host}` and the panel runs the picker-aware
+`{type:'no-match', windowId, tabId, host}` and the panel runs the picker-aware
 host search — the one resolver, which can show the picker and keeps
 the resolution method. The popup sends `no-match` after «Ingen av
 disse» so an open panel clears the stale company.

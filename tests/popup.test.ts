@@ -90,13 +90,14 @@ const waitState = (s: string) => vi.waitFor(() => expect(state()).toBe(s));
 const byText = (text: string): HTMLElement | undefined =>
   [...document.querySelectorAll<HTMLElement>('button, a')].find((el) => el.textContent?.trim() === text);
 
-async function boot(tab: unknown = DNB_TAB): Promise<void> {
+async function boot(tab: unknown = DNB_TAB): Promise<ReturnType<typeof fakeBrowser>> {
   // A fresh controller instance per boot (the module runs init on import).
   vi.resetModules();
   mountRoots();
   const browser = fakeBrowser({ engine: 'chrome' });
   browser.tabs.query.mockResolvedValue([tab]);
   await import('../src/popup/popup.js');
+  return browser;
 }
 
 beforeEach(() => {
@@ -310,6 +311,20 @@ describe('popup controller — search view, error, refresh', () => {
     open.click();
     expect(mocks.sidebar.setPanel).toHaveBeenCalledWith(expect.stringMatching(/orgnr=984851006&at=\d+&w=1$/));
     expect(mocks.sidebar.open).toHaveBeenCalledWith({ windowId: 1, tabId: 7 });
+  });
+
+  it('an open panel is told what this tab shows, naming the tab, so it badges no other', async () => {
+    mocks.sidebar.isOpen.mockResolvedValue(true);
+    const { runtime } = await boot();
+    await waitState('result');
+    expect(runtime.sendMessage).toHaveBeenCalledWith({
+      type: 'sync',
+      windowId: 1,
+      tabId: 7,
+      orgnr: '984851006',
+      host: 'www.dnb.no',
+      method: 'host-auto',
+    });
   });
 
   it('no address to look up: the empty state, no badge, no site', async () => {
