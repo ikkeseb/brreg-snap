@@ -1,9 +1,10 @@
 // The answer: ONE headline in the tone of the most severe finding.
 //   ok      quiet band with a seal, no support line
 //   warn    firmer band, support line, the way out inside it
-//   danger  the stamp: role="alert", no seal, the headline as plain
-//           prose around the stamp word so a screen reader hears the
-//           sentence («Nettstedet er ikke koblet til selskapet»)
+//   danger  the verdict: role="alert", no seal, a kicker («✕ Alvorlig»),
+//           the headline as plain prose around the key word so a screen
+//           reader hears the sentence («Nettstedet er ikke koblet til
+//           selskapet»)
 // Plus the loading skeleton and the error band (always warn, never a
 // stamp: a failed lookup says nothing about the company).
 
@@ -34,18 +35,16 @@ export function buildAnswer(answer: AnswerView, handlers: AnswerHandlers = {}): 
   const { section: sec, head } = section(answer.tone);
   if (answer.tone === 'danger') {
     sec.setAttribute('role', 'alert');
+    const kicker = el('span', 'answer__kicker');
+    kicker.appendChild(glyph('danger'));
+    kicker.append(COPY.verdictKicker);
+    sec.appendChild(kicker);
     const stamp = answer.stamp ?? { word: answer.headline };
     if (stamp.pre) {
       head.appendChild(el('span', 'stamp-pre', stamp.pre));
       head.append(' ');
     }
-    const word = el('strong', 'stamp-word');
-    // A word too long for the stamp's set size (TVANGSAVVIKLING) takes
-    // the size that fits the stamp instead of running out of it.
-    if (stamp.word.split(' ').some((w) => w.length > 10)) word.classList.add('stamp-word--long');
-    word.appendChild(glyph('danger'));
-    word.append(stamp.word);
-    head.appendChild(word);
+    head.appendChild(el('strong', 'stamp-word', stamp.word));
     if (stamp.rest) {
       head.append(' ');
       head.appendChild(el('span', 'stamp-rest', stamp.rest));
@@ -70,13 +69,15 @@ export function buildAnswer(answer: AnswerView, handlers: AnswerHandlers = {}): 
     for (const action of answer.actions) {
       if (action.kind === 'goto') {
         actions.appendChild(
-          link(action.text, action.href, { external: true, className: 'btn btn--sm btn--on-fill' }),
+          link(action.text, action.href, { external: true, className: 'btn btn--sm btn--tone' }),
         );
         continue;
       }
+      // Under a verdict the way out is a text button beside the site
+      // link, so the two keep to one line (§ popup-budget).
       const btn =
         answer.tone === 'danger'
-          ? button('text-btn text-btn--on-fill', action.text)
+          ? button('text-btn', action.text)
           : button('btn btn--tone', action.text);
       if (answer.tone !== 'danger') btn.appendChild(icon('i-chev'));
       btn.addEventListener('click', () => handlers.onReject?.());

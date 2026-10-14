@@ -81,7 +81,7 @@ html {
   letter-spacing: -0.008em;
 }
 .example[data-answer='ok'] .example__cap { --tone: var(--ok); }
-.example[data-answer='danger'] .example__cap { --tone: var(--danger-fill); }
+.example[data-answer='danger'] .example__cap { --tone: var(--danger); }
 .example__cap .answer__seal { width: 18px; height: 18px; }
 .example__cap .answer__seal .glyph { width: 11px; height: 11px; }
 
@@ -234,7 +234,7 @@ html {
   .app--welcome { --t-display: 800 34px/1 var(--font); }
   .welcome { padding-top: 16px; }
   .examples { margin-top: 16px; }
-  .example__card { --stamp-size: 26px; }
+  .example__card { --verdict-size: 20px; }
   .ways { margin-top: 16px; }
   .privacy { margin-top: 12px; }
 }
