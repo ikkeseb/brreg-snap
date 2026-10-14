@@ -1,0 +1,19 @@
+# Editor defaults for every machine; line endings are also enforced by
+# .gitattributes.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false
+
+# Recorded API responses and third-party texts stay byte for byte.
+[{tests/fixtures/**,tests/e2e/fixtures/**,public/fonts/**}]
+insert_final_newline = false
+trim_trailing_whitespace = false

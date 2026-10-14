@@ -1,7 +1,12 @@
 {
   "name": "brreg-snap",
   "version": "1.5.0",
-  "description": "Nettleserutvidelse (Firefox og Chrome) som henter bedriftsinfo fra Brønnøysundregistrene med ett klikk.",
+  "description": "Browser extension (Firefox + Chrome) that shows who is behind the site you're on, straight from Brønnøysundregistrene.",
+  "homepage": "https://sebastian.nuez.no/lab/brreg-snap/",
+  "bugs": {
+    "url": "https://github.com/ikkeseb/brreg-snap/issues",
+    "email": "sebastian@nuez.no"
+  },
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.0",
@@ -17,8 +22,8 @@
     "dev:chrome": "pnpm run build:chrome && web-ext run -t chromium --source-dir dist-chrome",
     "watch": "vite build --watch --mode firefox",
     "package": "pnpm run package:firefox",
-    "package:firefox": "pnpm run build:firefox && web-ext build --source-dir dist-firefox --artifacts-dir web-ext-artifacts --overwrite-dest --ignore-files \"**/*.map\" \"icons/README.md\"",
-    "package:chrome": "pnpm run build:chrome && web-ext build --source-dir dist-chrome --artifacts-dir web-ext-artifacts --filename \"brreg-snap-chrome-{version}.zip\" --overwrite-dest --ignore-files \"**/*.map\" \"icons/README.md\"",
+    "package:firefox": "pnpm run build:firefox && web-ext build --source-dir dist-firefox --artifacts-dir web-ext-artifacts --overwrite-dest --ignore-files \"**/*.map\"",
+    "package:chrome": "pnpm run build:chrome && web-ext build --source-dir dist-chrome --artifacts-dir web-ext-artifacts --filename \"brreg-snap-chrome-{version}.zip\" --overwrite-dest --ignore-files \"**/*.map\"",
     "package:source": "node scripts/package-source.mjs",
     "lint:ext": "node scripts/lint-ext.mjs",
     "test": "vitest run",

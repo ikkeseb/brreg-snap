@@ -116,8 +116,6 @@ export default defineConfig(
       'node_modules/',
       'coverage/',
       '.claude/',
-      // Preview harness browser shim (browser globals): not linted yet.
-      'scripts/preview/shim.js',
     ],
   },
   {
@@ -186,5 +184,11 @@ export default defineConfig(
     files: ['**/*.js', '**/*.mjs'],
     extends: [js.configs.recommended],
     languageOptions: { globals: nodeGlobals },
+  },
+  // The preview harness's browser shim is a classic script loaded into a
+  // page, not a Node module.
+  {
+    files: ['scripts/preview/shim.js'],
+    languageOptions: { sourceType: 'script', globals: { location: 'readonly' } },
   },
 );

@@ -6,7 +6,6 @@ web-ext-artifacts/
 .web-ext/
 
 *.log
-npm-debug.log*
 
 .DS_Store
 Thumbs.db
@@ -24,10 +23,8 @@ playwright-report/
 .env
 .env.local
 
-# The maintainer's private docs (AGENTS.md points here)
+# Maintainer-local notes and working docs
 maintainer/
-
-# Guards: private working docs must not land in the public tree by habit
 docs/plans/
 docs/superpowers/
 docs/backlog.md
