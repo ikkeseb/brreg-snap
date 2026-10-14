@@ -6,8 +6,8 @@
 
    Principle: loudness is proportional to severity. When nothing is wrong
    the view is a calm registry extract (paper, ink, hairlines). A warning
-   gets a firmer band. Danger is a verdict: the one statement in the
-   largest type, the key word in red, the colour nowhere else.
+   gets a firmer band. Danger is a stamped verdict: one framed field on
+   the page, the statement in the largest type, the key word in red.
 
    Order: font · tokens (light, dark via media, .theme-* overrides) ·
    base · layout shells · components (one commented block each) ·
@@ -82,7 +82,7 @@
   --rule-strong: #8C8476;  /*  3.3  UI boundaries: inputs, buttons, kbd */
   --ok: #1D6A3A;           /*  5.9 */
   --warn: #8A5200;         /*  5.7  (4.8 on its own 12 % tint) */
-  --danger: #AE2A1E;       /*  6.0  text tone, the verdict word, negative figures */
+  --danger: #AE2A1E;       /*  6.0  text tone, the verdict's frame + word (5.4 on its own 7 % tint), negative figures */
   --amber: #8A5A12;        /*  5.3  focus ring only */
   --brand: #A5711F;        /*  the mark only (graphic, 3.8) */
   --skel: #E4DED1;
@@ -124,7 +124,7 @@
   overflow-wrap: break-word;
 }
 .app--popup { --gut: 20px; width: 380px; }
-.app--panel { --gut: 16px; min-height: 100vh; --verdict-size: clamp(22px, 6.5cqi, 26px); }
+.app--panel { --gut: 16px; min-height: 100vh; --verdict-size: clamp(22px, 6cqi, 24px); }
 
 .app *, .app *::before, .app *::after { box-sizing: border-box; }
 /* `hidden` wins over every component's display value (the smoke asserts
@@ -296,9 +296,10 @@
    .answer--ok      quiet band: 3 px rule, 5 % tint, seal, no support line
    .answer--warn    firmer band: 4 px rule, 12 % tint, 800 head, support
                     line, the way-out action inside the band
-   .answer--danger  the verdict: 6 px rule, no tint, a red kicker
-                    («✕ ALVORLIG»), the sentence in the largest type with
-                    the key word in red (.stamp-word) — DOM stays plain prose
+   .answer--danger  the stamped verdict: a field inset by the gutter, 2 px
+                    red frame, 7 % tint, a red kicker («✕ ALVORLIG»), the
+                    sentence in the largest type in ink with the key word
+                    in red (.stamp-word) — DOM stays plain prose
    <section class="answer answer--warn" aria-labelledby="…"> */
 .answer {
   --tint: 5%;
@@ -321,12 +322,16 @@
 .answer__note { color: var(--ink-3); }   /* «Noe kunne ikke hentes: …», quieter than a finding */
 .answer__actions { grid-column: 2; display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 
-/* danger: the verdict. The same band as the others, escalated by rule
-   weight and type, not by a fill: the loudest state is the one with the
-   biggest type and the only red type on the page. */
+/* danger: the stamped verdict. Not a band across the page but a field
+   placed on it, inset by the gutter: a 2 px frame in the danger red and
+   a faint tint hold it as one object, while inside it the voice is a
+   statement, not an alarm: a small red kicker, the sentence in the
+   largest type in ink, only the key word red. Loudest by frame, colour
+   and type, never by a fill. */
 .answer--danger {
-  --tone: var(--danger); --tint: 0%;
-  display: block; border-top-width: 6px; padding-top: 11px; padding-bottom: 14px;
+  --tone: var(--danger); --tint: 7%;
+  display: block; margin: 12px var(--gut) 0; padding: 11px 16px 13px;
+  border: 2px solid var(--tone); border-radius: var(--r);
 }
 .answer--danger .answer__seal { display: none; }
 .answer__kicker {
@@ -341,7 +346,8 @@
 }
 .stamp-word { display: inline-block; color: var(--danger); }
 .answer--danger .answer__support {
-  grid-column: auto; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--rule);
+  grid-column: auto; margin-top: 8px; padding-top: 8px;
+  border-top: 1px solid color-mix(in oklab, var(--tone) 30%, transparent);
 }
 .answer--danger .answer__actions { grid-column: auto; align-items: center; gap: 8px 12px; }
 
@@ -718,9 +724,10 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 }
 
 
-/* ---------- forced colors: rules, seals and the verdict's rule must survive -------- */
+/* ---------- forced colors: rules, seals and the verdict's frame must survive ---- */
 @media (forced-colors: active) {
   .answer { border-top-color: CanvasText; }
+  .answer--danger { border-color: CanvasText; }
   .answer--danger .answer__support { border-color: CanvasText; }
   .answer__seal { forced-color-adjust: none; background: CanvasText; color: Canvas; }
   .equity__fill { forced-color-adjust: none; background: CanvasText; }

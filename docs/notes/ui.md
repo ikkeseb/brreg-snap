@@ -21,16 +21,18 @@ escalates only with the answer's tone:
 - **warn** — a firmer band: 4 px rule, 12 % tint, headline at 800, an
   optional supporting line, and the way out INSIDE the band as a
   hairline button in the tone («Feil bedrift? Velg en annen»).
-- **danger** — the verdict: the same band, escalated by type instead of
-  a fill. A 6 px tone rule on plain paper (no tint), a red kicker
-  («✕ Alvorlig», `.answer__kicker`, `COPY.verdictKicker`), then the
-  whole sentence in the largest type on the page (`--t-verdict`) with
-  only the key word in red (`.stamp-word`: Konkurs, Slettet,
-  Tvangsavvikling, ikke koblet), a hairline, the supporting line. The
-  red is precise: the rule, the kicker and the key word, nothing else.
-  Actions live inside it like a warn band's: the site link is a
-  `.btn--sm.btn--tone`, the way out a plain `.text-btn` beside it so the
-  two keep to one line.
+- **danger** — the stamped verdict: not a band across the page but a
+  field placed on it, inset by the gutter, held by a 2 px frame in the
+  danger red and a 7 % tint. Inside it the voice is a statement, not an
+  alarm: a red kicker («✕ Alvorlig», `.answer__kicker`,
+  `COPY.verdictKicker`), then the whole sentence in the largest type on
+  the page (`--t-verdict`) in ink with only the key word in red
+  (`.stamp-word`: Konkurs, Slettet, Tvangsavvikling, ikke koblet), a
+  hairline, the supporting line. The red is precise: the frame, the
+  kicker and the key word, no fill, so it is loudest by containment,
+  colour and type, never by flood. Actions live inside it like a warn
+  band's: the site link is a `.btn--sm.btn--tone`, the way out a plain
+  `.text-btn` beside it so the two keep to one line.
 
 Everything else follows from the tone: under `data-answer="danger"`
 the ledger's ok glyphs go grey (true, but not comfort), the popup
@@ -61,19 +63,23 @@ All in `brreg.css`. Light is the default, dark comes from
 (sunk: inputs, kbd, hover), `--ink`, `--ink-2` (labels, details),
 `--ink-3` (captions, neutral glyphs), `--rule` (hairline, decorative),
 `--rule-strong` (UI boundaries), `--ok`, `--warn`, `--danger` (text
-tone and the verdict's rule, kicker and key word), `--amber` (the
+tone and the verdict's frame, kicker and key word), `--amber` (the
 focus ring only), `--brand` (the mark only), `--skel` / `--skel-hi`.
 Every text/paper pair measures ≥ 4.5:1 in both themes (the table is
-in SPEC.md § Contrast); the verdict adds nothing to it, since it sits
-on plain paper: `--danger` on `--paper` is 6.0 light / 7.4 dark.
+in SPEC.md § Contrast). The verdict's tint is `color-mix` of 7 %
+`--danger` into `--paper` (resolves to #F2E5DB light / #211915 dark),
+and on it `--danger` measures 5.4 / 6.8, `--ink` 14.2 / 14.3, `--ink-2`
+7.3 / 8.5, the amber focus ring 4.8 / 8.0 (3.9 / 6.6 on the
+`.btn--tone` hover fill); the frame against `--paper` is 6.0 / 7.4.
 
 Type: four steps and the verdict, nothing else — `--t-cap` (600
 11px, uppercase + `--track-cap` for section heads and micro labels),
 `--t-body` (400 13px, everything readable), `--t-lead` (700 16px, the
 answer, empty-state heads), `--t-name` (800 26px, the company name;
 23px below 340 px), `--t-verdict` (800 22px/1.1, the danger sentence;
-`--verdict-size` is `clamp(22px, 6.5cqi, 26px)` in the panel, so
-Tvangsavvikling fits as one word at 320 px). Space is a 4 px grid (`--s1`…`--s5`); `--gut` is 20 px
+`--verdict-size` is `clamp(22px, 6cqi, 24px)` in the panel: «Konkurs
+siden 26. aug. 2026» stays one line inside the frame at 400 px, and
+Tvangsavvikling fits as one word at 320 px, 166 px of the frame's 252). Space is a 4 px grid (`--s1`…`--s5`); `--gut` is 20 px
 in the popup, 16 px in the panel. Shape: no elevation anywhere, rules
 separate and fills escalate; `--r` 2 px for inputs, buttons, kbd and
 tags. Motion: `--ease`,
@@ -118,7 +124,7 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 | `masthead.ts` | `renderMasthead(container, {kind:'popup', host?, search} \| {kind:'panel', query?, autoSync}, handlers)` → `{input?, toggle?, searchButton?}`; `appendSiteLabel` | `header.mast > svg.mast__mark[role=img]` + popup `span.mast__site` (`<b>` = registrable domain) + `button.icon-btn[aria-label]`; panel `label.search > svg.icon + input[type=search][aria-label]` + `button.toggle[role=switch][aria-checked] > span.toggle__track` |
 | `identity.ts` | `renderIdentity(container, IdentityView, CopyHandlers)` → `{heading}`; `buildOrgnrButton(orgnr, handlers, {small})` | `div.ident > p.ident__over` (form · city) OR `p.ident__eyebrow` (provenance, `i-link`) · `h1.ident__name(--claim)` · `p.ident__line > button.orgnr + a.link` (with an eyebrow: `span.ident__rest > span.ident__meta` carries form · city, the link glued to its last word by `.nw`) · popup `p.ident__leaders > span × n` · `p.ident__note` (avdeling). Panel: the painter adds `div.ident__row > p.ident__flags + button.text-btn` (Kopier sammendrag) |
 | `copy-feedback.ts` | `attachCopy(button, () => text, {done, label?}, {copy, announce})`, `COPY_FEEDBACK_MS` = 1400 | adds `.is-copied` (icon `.icon--copy` ⇄ `.icon--done`, the label swaps to «Kopiert») or `.is-failed`; announces «Org.nr kopiert» / «Kunne ikke kopiere» in the live region |
-| `answer.ts` | `buildAnswer(AnswerView, {onReject})` → `{section, heading}`; `buildErrorAnswer({head, support, retry}, {onRetry})`; `buildAnswerLoading()` | `section.answer.answer--ok\|--warn\|--danger[aria-labelledby] > span.answer__seal > svg.glyph` + `h2.answer__head` + `p.answer__support` + `div.answer__actions`. Danger: `role=alert`, no seal, `span.answer__kicker > svg.glyph + «Alvorlig»` before the head, and the head is prose `span.stamp-pre? · strong.stamp-word · span.stamp-rest` |
+| `answer.ts` | `buildAnswer(AnswerView, {onReject})` → `{section, heading}`; `buildErrorAnswer({head, support, retry}, {onRetry})`; `buildAnswerLoading()` | `section.answer.answer--ok\|--warn\|--danger[aria-labelledby] > span.answer__seal > svg.glyph` + `h2.answer__head` + `p.answer__support` + `div.answer__actions`. Danger (the framed field): `role=alert`, no seal, `span.answer__kicker > svg.glyph + «Alvorlig»` before the head, and the head is prose `span.stamp-pre? · strong.stamp-word · span.stamp-rest` |
 | `ledger.ts` | `buildLedger(rows, {onReject, onForget, reportHref})`, `buildLedgerRow`, `buildFacts(TextPart[])` (spoof) | `dl.ledger > div.ledger-row[data-tone][data-key](--inline, --danger-value) > dt (svg.glyph + label + span.sr-only «, ok / advarsel / alvorlig») + dd (value, `.ledger-row__aux`, `.ledger-row__detail`, `.ledger-row__act`)`. Spoof: `p.ledger-cap` + `p.facts`. A `report` action without a mailto is left out |
 | `konsern.ts` | `buildKonsernRow(KonsernView, {onOpen})` | `button.konsern > svg.icon + span.konsern__text + svg.konsern__chev` |
 | `actions.ts` | `buildActions({summary, panelHref?}, handlers)` → `{container}` (popup) | `div.actions > a.btn.btn--primary[href]` (Åpne i sidepanel) + `button.btn` (Kopier sammendrag) |
@@ -154,13 +160,15 @@ search): the smoke and the tests key on those, not on classes.
 - Tone is never colour alone: the glyph shape (✓ ! ✕ ·) is the first
   channel, the ledger's `span.sr-only` text («, ok», «, advarsel», «,
   alvorlig») the second, colour the third. Forced colours keep the
-  rules, the seals and the verdict's rule.
+  rules, the seals and the verdict's frame (`CanvasText`); the key
+  word loses its red there, so the kicker's ✕ and word are what mark
+  the verdict.
 - Focus moves only on a user-initiated transition (a pick, a search, a
   retry, a drill-in), to the result heading or the first picker row;
   a background repaint (auto-sync) never moves it. One focus style
   everywhere: the amber ring on `:focus-visible`; the search box
-  carries it for its input, the verdict too (it sits on paper, where
-  the ring measures 5.3 light / 8.7 dark against WCAG 1.4.11's 3:1).
+  carries it for its input, the verdict too (on its tint the ring
+  measures 4.8 light / 8.0 dark against WCAG 1.4.11's 3:1, § tokens).
 - A background rebuild must not drop focus either: the panel's 30 s
   freshness tick rewrites the footer's text node in place
   (`renderFooter(...).tick`), and a same-view keep (provenance) that
@@ -198,11 +206,14 @@ Firefox and Chrome cap a popup at 600 px; the design fixes the width at
 `document.body` height; the real popup's viewport reads 1 px under its
 content, a rounding, not an overflow). Measured 2026-10-06 against the
 live API, Chromium and Gecko alike: dnb 581, equinor 600 (no line to
-spare), spoof 588, konkurs 596, nrk picker 592, sbanken picker 559.
-With the «Noe kunne ikke hentes» line (a failed part drops a row too):
-dnb with roller + regnskap + konsern failed 506, equinor with only
-konsern failed 586; a verdict gets no line, because konkurs (596) or the
-spoof (588) plus a line would pass the cap.
+spare), nrk picker 592, sbanken picker 559; the two verdict states
+re-measured 2026-10-14 with the stamped verdict (live API and the smoke
+fixtures agree, Chromium through the preview harness): spoof 581,
+konkurs 586, nothing shed. With the «Noe kunne ikke hentes» line (a
+failed part drops a row too): dnb with roller + regnskap + konsern
+failed 506, equinor with only konsern failed 586; a verdict gets no
+line, because konkurs (586) or the spoof (581) plus a line would sit
+too close to the cap for a longer name.
 
 The design rules below keep the common states under the cap. Names,
 leaders and parent companies are as long as the registry has them, so
@@ -214,7 +225,9 @@ picker row's activity past one line, (2) the provenance eyebrow, (3) a
 neutral Kobling row's note («ingen hjemmeside registrert»). A warn or
 danger Kobling note is the finding and never sheds. A state that fits
 sheds nothing; the panel never sheds. The smoke asserts every popup
-state within 600 px and every verdict's key word inside its band.
+state within 600 px and every verdict's key word inside its frame (the
+word's box against the answer's content box, since an `inline-block`
+word pokes out of a line without any scroll overflow).
 
 - Identity uses one compact leaders line («Daglig leder X · Styreleder
   Y», wrapping whole pairs) instead of a two-column block; one person
