@@ -1,4 +1,4 @@
-// The picker (P5): a head that says what the rows are, up to four candidate
+// The picker: a head that says what the rows are, up to four candidate
 // rows with a digit shortcut each, «Ingen av disse» (0), and a
 // prefilled «Eller søk selv» field. Digit keys are scoped to the picker:
 // one document listener per document, replaced by the next picker

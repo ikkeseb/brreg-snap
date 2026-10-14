@@ -1,15 +1,16 @@
 /* =====================================================================
-   brreg-snap 1.4 — «Dossier, stamped»
-   Production stylesheet for popup.html and details.html (side panel).
-   Lifted from the design deliverable (~/design/brreg-1.4/final/brreg.css)
-   with the seat amendments noted inline («amendment»).
+   brreg-snap UI system
+   Production stylesheet for popup.html, details.html (side panel) and
+   welcome.html. The design decisions behind it are in docs/notes/ui.md.
+   Comments citing «ui.md § amendments» mark a deviation from the
+   original design.
 
    Principle: loudness is proportional to severity. When nothing is wrong
    the view is a calm registry extract (paper, ink, hairlines). A warning
    gets a firmer band. Danger is a stamped verdict: one framed field on
    the page, the statement in the largest type, the key word in red.
 
-   Order: font · tokens (light, dark via media, .theme-* overrides) ·
+   Order: font · tokens (light default, dark via prefers-color-scheme) ·
    base · layout shells · components (one commented block each) ·
    motion · forced colors.
    CSP-safe: no inline styles needed anywhere; everything is a class,
@@ -21,8 +22,8 @@
    Bundled variable Schibsted Grotesk (OFL, fonts/OFL.txt). The absolute
    path is the extension root: vite.config.ts copies public/fonts/ there
    unhashed, so popup.css and details.css resolve the same file.
-   Amendment b: font-display swap (the HTML preloads the file), and a
-   size-adjusted local fallback face so the swap barely reflows.
+   font-display swap (the HTML preloads the file), and a size-adjusted
+   local fallback face so the swap barely reflows (ui.md § font-and-csp).
    Measured in Chromium on a 160-character sample at 13 px: Arial /
    Liberation Sans (metric-compatible) runs 0.6 % narrower than
    Schibsted at 400 and 3 % narrower at 700; 101.5 % splits it. Vertical
@@ -70,7 +71,7 @@
 }
 
 /* ---------- tokens: light (default) -----------------------------------
-   Contrast on --paper, WCAG 2.x (measured with contrast.py). */
+   The figures are WCAG 2.x contrast ratios against --paper. */
 :root {
   color-scheme: light;
   --paper: #F5F2EA;        /* page */
@@ -237,8 +238,8 @@
 .ident__name--claim { font-size: 20px; font-weight: 800; letter-spacing: -.012em; }
 .ident__line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin-top: 7px; color: var(--ink-2); }
 .ident__meta { color: var(--ink-2); }
-/* amendment b: with an eyebrow the org.nr owns its line; «form · city» and
-   brreg.no ↗ share the next, the link glued to the last word (.nw) so it
+/* with an eyebrow the org.nr owns its line (ui.md § amendments);
+   «form · city» and brreg.no ↗ share the next, the link glued to the last word (.nw) so it
    never lands alone on a line */
 .ident__rest { flex-basis: 100%; }
 .ident__rest .link { margin-left: 9px; }
@@ -268,10 +269,11 @@
 
 /* ---------- org.nr copy button -----------------------------------------
    <button class="orgnr"> label · number · icon (copy ⇄ check).
-   Amendment a: no floating toast. JS adds .is-copied for 1.4 s (the icon
-   swaps to the check and the number tints --ok) and writes «Org.nr
-   kopiert» into the app's aria-live region; a refused clipboard write
-   adds .is-failed instead (danger tint, «Kunne ikke kopiere» announced). */
+   No floating toast (ui.md § amendments): JS adds .is-copied for 1.4 s
+   (the icon swaps to the check and the number tints --ok) and writes
+   «Org.nr kopiert» into the app's aria-live region; a refused clipboard
+   write adds .is-failed instead (danger tint, «Kunne ikke kopiere»
+   announced). */
 .orgnr {
   position: relative; display: inline-flex; align-items: baseline; gap: 6px;
   padding: 0; border: 0; background: none; cursor: copy;
@@ -370,9 +372,9 @@
 .ledger-row__aux { font-weight: 400; color: var(--ink-2); }
 .ledger-row__detail { display: block; font-weight: 400; color: var(--ink-2); }
 .ledger-row__detail .link, .ledger-row__detail .text-btn { font-weight: 400; }
-/* short value + its way out on one line. Amendment a: a flex-wrap row with
-   a column gap, never a leading margin — when the action wraps it starts
-   flush with the value's left edge */
+/* short value + its way out on one line (ui.md § amendments): a
+   flex-wrap row with a column gap, never a leading margin — when the
+   action wraps it starts flush with the value's left edge */
 .ledger-row--inline dd { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; }
 .ledger-row--inline .ledger-row__detail { display: inline; white-space: nowrap; }
 .ledger-row__act { display: block; }
@@ -550,8 +552,8 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .konsern-sub { display: flex; justify-content: space-between; gap: 12px; margin-top: 14px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
 .konsern-sub .tab__count { margin: 0; letter-spacing: 0; }
 .show-all { margin-top: 8px; }
-/* amendment c: a child or branch named after its parent — the shared
-   prefix recedes so the distinguishing part reads first */
+/* a child or branch named after its parent (ui.md § amendments): the
+   shared prefix recedes so the distinguishing part reads first */
 .name-prefix { color: var(--ink-3); font-weight: 400; }
 /* back bar after drilling */
 .back {
@@ -641,10 +643,11 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
   width: 100%; padding: 8px 0 9px; border: 0; border-bottom: 1px solid var(--rule);
   background: none; text-align: left; cursor: pointer;
 }
-/* amendment: no fill on hover. A row filled edge to edge put the key
-   flush against the fill's edge. Hover and keyboard focus underline
-   the name, like every other list row, and invert the key («press 1»);
-   the focus ring keeps the global outward offset, clear of the key. */
+/* no fill on hover (ui.md § amendments): a row filled edge to edge
+   puts the key flush against the fill's edge. Hover and keyboard focus
+   underline the name, like every other list row, and invert the key
+   («press 1»); the focus ring keeps the global outward offset, clear of
+   the key. */
 .pick:is(:hover, :focus-visible) .kbd { border-color: var(--ink); background: var(--ink); color: var(--paper); }
 .pick:is(:hover, :focus-visible) :is(.pick__name, .pick__label) { text-decoration: underline; text-underline-offset: 3px; }
 .pick__name { display: block; font-weight: 600; }

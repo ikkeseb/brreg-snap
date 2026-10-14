@@ -72,7 +72,7 @@ const equinor = () =>
     aarsregnskapYears: [...(yearsEquinor)].sort().reverse(),
   });
 
-describe('buildTrustView — a company on its own registered site (P1)', () => {
+describe('buildTrustView — a company on its own registered site', () => {
   const v = view({ company: equinor(), method: 'host-auto', host: 'www.equinor.com' });
 
   it('answers quietly and keeps the kobling first in the ledger', () => {
@@ -126,7 +126,7 @@ describe('buildTrustView — a company on its own registered site (P1)', () => {
   });
 });
 
-describe('buildTrustView — a shop pasting a real company’s orgnr (P4)', () => {
+describe('buildTrustView — a shop pasting a real company’s orgnr', () => {
   const v = view({
     company: equinor(),
     method: 'title',
@@ -166,7 +166,7 @@ describe('buildTrustView — a shop pasting a real company’s orgnr (P4)', () =
   });
 });
 
-describe('buildTrustView — a name guess (P3)', () => {
+describe('buildTrustView — a name guess', () => {
   const v = view({ company: company(enhetBbc), method: 'host-auto', host: 'www.bbc.co.uk' });
 
   it('puts the way out inside the warn band, the short evidence in the row', () => {

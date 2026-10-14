@@ -1,5 +1,5 @@
 /* Side panel surface — layout only. Tokens and every component live in
- * ../styles/brreg.css (the 1.4 design system). */
+ * ../styles/brreg.css (the UI system, docs/notes/ui.md). */
 @import '../styles/brreg.css';
 
 html {

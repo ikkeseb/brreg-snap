@@ -1,4 +1,4 @@
-// The Enheter tab (S6 + the Konsern section): first the group — the
+// The Enheter tab: first the group — the
 // path from the top parent down to the company, then its direct
 // children (capped, «Vis alle N»), every row a drill-in — then the
 // underenheter: name · address · employees · copyable org.nr, a deleted

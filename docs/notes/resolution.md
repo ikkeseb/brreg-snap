@@ -38,9 +38,9 @@ then reuses; if brreg can't be asked, the orgnr is kept and the load
 shows the real error. There is
 no static domain → orgnr table — every resolution decision is a live
 brreg API call. Hosts brreg's data can't disambiguate (e.g. `finn.no`,
-whose legal name "FINN.no" loses its period in the search index)
-simply don't resolve, and the sidebar falls back to inline manual
-search.
+whose company is VEND MARKETPLACES AS, a name the domain doesn't
+carry: `docs/notes/brreg-api.md` § search-dots-literal) simply don't
+resolve, and the sidebar falls back to inline manual search.
 
 **Ambiguity → abstain (anti-shadowing).** `extractOrgnrFromText`
 trusts a 9-digit run ONLY when it is the *single* distinct mod-11-valid

@@ -207,7 +207,7 @@ describe('deriveSignals — ansatte', () => {
 
   it('says «1–4» when the register flags employees but gives no count', () => {
     // Live shape: brreg drops antallAnsatte below five employees and
-    // keeps harRegistrertAntallAnsatte true. This used to read «Ingen».
+    // keeps harRegistrertAntallAnsatte true, which is «1–4», not «Ingen».
     const s = signal(smallEmployer, undefined, 'ansatte');
     expect(smallEmployer).not.toHaveProperty('antallAnsatte');
     expect(s).toEqual({

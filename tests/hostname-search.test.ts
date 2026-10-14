@@ -208,8 +208,9 @@ describe('hosts that never reach brreg', () => {
     searchMock.mockReset();
   });
 
-  // Intranet names and IP literals used to go out as hjemmeside=/navn=
-  // queries (192.168.10.20 → navn=10, jira.corp.internal → navn=corp).
+  // Intranet names and IP literals never go out as hjemmeside=/navn=
+  // queries (192.168.10.20 must not become navn=10, jira.corp.internal
+  // must not become navn=corp).
   const hosts = [
     '192.168.10.20',
     '10.0.0.12',

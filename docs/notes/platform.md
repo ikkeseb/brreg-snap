@@ -6,8 +6,6 @@ Source: `src/lib/platform/`, `public/manifest.firefox.json`,
 
 Both engines run the same JavaScript; only the manifest is chosen at
 build time (mechanics: `docs/notes/build.md` § dual-browser-build).
-The Chrome-port history and its decision log (D1–D15) live in git:
-`git log --follow -- docs/chrome-port.md`.
 
 <!-- SECTION: manifest-split -->
 ## The manifests are the only build-time switch
@@ -36,9 +34,9 @@ the floors (`vite.config.ts`).
 only `chrome` exists. Every API the code awaits (storage, tabs,
 permissions, runtime, sidePanel) returns a native Promise on Chrome at
 the manifest floor; the calls that don't (`menus.create`,
-`runtime.getURL`) are never awaited. webextension-polyfill was
-rejected (decision D8, 2026-06-01): no third-party JS ships
-(`AGENTS.md` § Dependencies).
+`runtime.getURL`) are never awaited. There is no
+webextension-polyfill: no third-party JS ships (`AGENTS.md`
+§ Dependencies).
 
 `globals.js` must be the first import of every entry point:
 `engine.ts` and `menus.ts` read `browser` at module load. Types come
@@ -51,8 +49,8 @@ locally (`ChromeSidePanel` in `sidebar.ts`). Pinned:
 
 `isFirefox` in `src/lib/platform/engine.ts` is
 `'sidebarAction' in browser`. Shipping both branches costs well under
-1 KB and needs no `resolve.alias`, tsconfig paths or second typecheck
-(decision D9, 2026-06-01). Callers: `sidebar.ts`,
+1 KB and needs no `resolve.alias`, tsconfig paths or second
+typecheck. Callers: `sidebar.ts`,
 `src/details/main.ts` (`supportsUpdateFilter`), `src/welcome/welcome.ts`
 (panel command name), and the browser name in bug reports. A new engine difference goes behind
 `isFirefox` or its own feature check, not into the build.
@@ -96,10 +94,9 @@ click», «keyboard command»).
 Firefox exposes `browser.menus` under the `menus` permission and no
 `browser.contextMenus` alias: it is `undefined`. Chrome has only
 `contextMenus`. `menus` in `src/lib/platform/menus.ts` takes whichever
-exists. A hardcoded `browser.contextMenus.onClicked` threw at the
-background's top level on Firefox and took every later listener with
-it (`CHANGELOG.md` 1.1.0). This corrects decision D10 (2026-06-01),
-which assumed Firefox aliased `contextMenus`. Pinned:
+exists. A hardcoded `browser.contextMenus.onClicked` throws at the
+background's top level on Firefox and takes every later listener with
+it. Pinned:
 `tests/background-module.test.ts` («uses browser.menus on Firefox»).
 
 Chrome keeps menu items across service-worker restarts, so a repeat
@@ -110,9 +107,9 @@ Chrome keeps menu items across service-worker restarts, so a repeat
 ## `tabs.onUpdated` filters throw on Chrome
 
 Firefox accepts an `onUpdated` filter (`{properties: ['url'],
-windowId}`); Chrome throws «This event does not support filters». In the background that once aborted module evaluation
-(decision D13, 2026-06-06); today only the panel registers tab
-listeners (`docs/notes/sidebar-sync.md` § panel-hosted-auto-sync).
+windowId}`); Chrome throws «This event does not support filters»,
+which aborts module evaluation when it happens at a module's top
+level. Only the panel registers tab listeners (`docs/notes/sidebar-sync.md` § panel-hosted-auto-sync).
 `createTabWatcher` in `src/lib/tab-sync.ts` passes the filter only
 when `supportsUpdateFilter` is set (`isFirefox`, from
 `src/details/main.ts`). `followsUpdate` is the real gate on both engines;

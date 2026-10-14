@@ -36,14 +36,15 @@ function validOrgnrsIn(text: string): string[] {
 }
 
 export function extractOrgnrFromText(text: string): string | undefined {
-  // Trust a 9-digit run ONLY when it is the single mod-11-valid candidate
-  // in the text. Roughly ~9% of arbitrary 9-digit numbers pass mod-11, so
-  // a tracking id / timestamp / SKU sitting before the real number used to
-  // win by position and silently resolve the WRONG company. When two or
-  // more distinct valid candidates appear we abstain (return undefined)
-  // and let the caller fall through to the hostname pipeline / picker —
-  // better no answer than a confidently wrong one. A single valid run
-  // (even with earlier mod-11-INVALID runs around it) still resolves.
+  // Trust a 9-digit run only when it is the single mod-11-valid candidate
+  // in the text. About 9 % of arbitrary 9-digit numbers pass mod-11, so
+  // a tracking id / timestamp / SKU sitting before the real number would
+  // otherwise win by position and silently resolve the wrong company.
+  // When two or more distinct valid candidates appear we abstain (return
+  // undefined) and let the caller fall through to the hostname pipeline
+  // / picker — better no answer than a confidently wrong one. A single
+  // valid run (even with earlier mod-11-invalid runs around it) still
+  // resolves.
   const found = validOrgnrsIn(text);
   return found.length === 1 ? found[0] : undefined;
 }

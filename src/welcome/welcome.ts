@@ -22,7 +22,7 @@ import type { AnswerView, LedgerRow } from '../lib/view/trust-view.js';
 const W = COPY.welcome;
 const NBSP = ' ';
 
-// --- the examples: fictional companies from the design brief ---------------
+// --- the examples: fictional example companies -----------------------------
 
 interface Example {
   tone: 'ok' | 'danger';

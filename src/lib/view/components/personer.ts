@@ -1,4 +1,4 @@
-// The Personer tab (S3): one section per role group. A person is a row
+// The Personer tab: one section per role group. A person is a row
 // (name · role, «Avregistrert» struck and muted); an entity holding a
 // role (revisor, regnskapsfører, a board member that is a company) is
 // a drill-in row into its own dossier.

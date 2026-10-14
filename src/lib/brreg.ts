@@ -227,11 +227,10 @@ function isRegnskap(value: unknown): value is Regnskap {
 }
 
 async function parseUnsupportedPlan(res: Response): Promise<string | undefined> {
-  // The 500 body used to name the plan: `{"message": "Regnskapet
-  // inneholder en oppstillingsplan som ikke er stottet (BANK)"}`. By
-  // 2026-09 it is a generic "An error occurred while processing the
-  // request." for the same companies. Still parsed in case brreg
-  // restores it; nothing depends on it being there.
+  // A 500 body may name the plan: `{"message": "Regnskapet inneholder
+  // en oppstillingsplan som ikke er stottet (BANK)"}`. brreg also sends
+  // a generic "An error occurred while processing the request." for the
+  // same companies, so the plan is optional and nothing depends on it.
   try {
     const body = (await res.json()) as { message?: unknown };
     const msg = typeof body?.message === 'string' ? body.message : '';

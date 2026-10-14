@@ -7,12 +7,12 @@ maintainer's own sessions live in a local, gitignored
 
 ## Active work + release rules
 
-The plan for active work and the backlog are local, gitignored files;
-`maintainer/AGENTS.md` names them. Release state lives in git tags
-(`v*` = tagged release, `amo-submission-*` / `cws-submission-*` = what
-was uploaded to each store) and GitHub Releases. Store state is never
-written down; run `pnpm store-status` (`--deep` compares the served
-packages with the Release).
+The backlog is a local, gitignored file that `maintainer/AGENTS.md`
+names. Release state lives in git tags (`v*` = tagged release,
+`amo-submission-*` / `cws-submission-*` = what was uploaded to each
+store) and GitHub Releases. Store state is never written down; run
+`pnpm store-status` (`--deep` compares the served packages with the
+Release).
 
 - `main` is the only branch that lives. One maintainer, so work lands
   on `main` directly once `pnpm verify` is green (the pre-push hook
@@ -90,7 +90,7 @@ note before reading the source file.
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
 | Trust view: answer priority, signals (deadline-aware regnskap, rekonstruksjon, NUF), merknader (påtegninger), endringer + the change feed | `src/lib/trust/*.ts`, `src/lib/brreg-endringer.ts`, `company-load.ts` | `docs/notes/trust.md`             |
 | Stores: store-status probe + verdict rules, what AMO/CWS change in a package; listing text lives in `docs/amo-submission.md` / `docs/cws-submission.md` (the kit renders from their anchors) | `scripts/store-status*.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
-| UI system (1.4): the loudness rule, tokens + type scale, font + CSP, the component inventory (module → API → markup), the a11y contract, the popup's 600 px budget, seat amendments, the panel's search view + compact head + tab landing, the badge rule, the welcome page | `src/styles/brreg.css`, `src/lib/view/{trust-view,dossier-view,copy}.ts`, `src/lib/view/components/*.ts`, `src/popup/views.ts`, `src/details/{painter,tabs}.ts`, `src/welcome/` | `docs/notes/ui.md`                |
+| UI system: the loudness rule, tokens + type scale, font + CSP, the component inventory (module → API → markup), the a11y contract, the popup's 600 px budget, deviations from the original design, the panel's search view + compact head + tab landing, the badge rule, the welcome page | `src/styles/brreg.css`, `src/lib/view/{trust-view,dossier-view,copy}.ts`, `src/lib/view/components/*.ts`, `src/popup/views.ts`, `src/details/{painter,tabs}.ts`, `src/welcome/` | `docs/notes/ui.md`                |
 
 UI work starts in `docs/notes/ui.md`. Three rules bite most often:
 every user-facing string lives in `src/lib/view/copy.ts`; no `style`
