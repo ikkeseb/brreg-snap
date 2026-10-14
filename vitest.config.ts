@@ -5,8 +5,8 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts'],
-    // Future suites with their own commands: live-API canary and browser
-    // smoke. Neither may run in the default `pnpm test`.
+    // tests/live (`pnpm test:live`) and tests/e2e (`pnpm smoke`) have
+    // their own runners and must not run in the default `pnpm test`.
     exclude: ['tests/live/**', 'tests/e2e/**'],
     environment: 'node',
   },
