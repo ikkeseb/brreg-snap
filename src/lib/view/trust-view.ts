@@ -382,7 +382,7 @@ function signalRow(
       if (signal.detail) row.aux = `· ${signal.detail}`;
       break;
     case 'ansatte':
-      if (signal.detail === 'registrert') row.value = `${signal.value} registrert`;
+      if (signal.detail === 'registrert') row.value = COPY.registered(signal.value);
       else if (signal.detail) row.aux = `· ${signal.detail}`;
       break;
     case 'regnskap': {

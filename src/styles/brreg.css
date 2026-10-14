@@ -70,7 +70,7 @@
 
 /* ---------- tokens: light (default) -----------------------------------
    Contrast on --paper, WCAG 2.x (measured with contrast.py). */
-:root, .theme-light {
+:root {
   color-scheme: light;
   --paper: #F5F2EA;        /* page */
   --paper-2: #ECE7DB;      /* sunk: inputs, kbd, hover */
@@ -112,29 +112,6 @@
     --skel-hi: #2C2822;
   }
 }
-
-/* ---------- tokens: explicit overrides (gallery, tests, a future
-   in-app theme switch). Same values as the media block above. -------- */
-.theme-dark {
-  color-scheme: dark;
-  --paper: #14120F;
-  --paper-2: #1D1A16;
-  --ink: #EEE9DF;
-  --ink-2: #BDB5A6;
-  --ink-3: #9A9283;
-  --rule: #302C26;
-  --rule-strong: #6E675B;
-  --ok: #7CC592;
-  --warn: #E6AC4C;
-  --danger: #F2836F;
-  --danger-fill: #B53A2C;
-  --on-danger: #FFF4EC;
-  --amber: #D9A866;
-  --brand: #D4A574;
-  --skel: #221F1A;
-  --skel-hi: #2C2822;
-}
-
 
 /* ---------- base -------------------------------------------------------
    .app is the root of both surfaces: <body class="app app--popup"> in
@@ -430,7 +407,7 @@
    .btn            hairline (secondary)
    .btn--primary   solid ink
    .btn--tone      hairline in the answer's tone (inside a warn band)
-   .btn--on-fill / .btn--on-fill-quiet   inside the danger stamp
+   .btn--on-fill   inside the danger stamp
    .btn--sm        28 px */
 .btn {
   height: 34px; padding: 0 12px; display: inline-flex; align-items: center; gap: 7px;
@@ -446,8 +423,6 @@
 .btn--tone:hover { background: color-mix(in oklab, var(--tone) 14%, transparent); }
 .btn--on-fill { background: var(--on-danger); border-color: var(--on-danger); color: var(--danger-fill); }
 .btn--on-fill:hover { background: color-mix(in oklab, var(--on-danger) 88%, var(--danger-fill)); }
-.btn--on-fill-quiet { border-color: var(--on-danger); color: var(--on-danger); }
-.btn--on-fill-quiet:hover { background: color-mix(in oklab, var(--on-danger) 12%, transparent); }
 .btn--sm { height: 28px; padding: 0 10px; }
 /* «Kopier sammendrag»: JS swaps the label to «Kopiert» and adds .is-copied */
 :is(.btn, .text-btn).is-copied .icon--copy { display: none; }

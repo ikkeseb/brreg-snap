@@ -27,6 +27,7 @@ import {
 import { isValidOrgnr } from '../mod11.js';
 import { QUERY_MAX_LENGTH } from '../panel-protocol.js';
 import type { SearchHit } from '../../types/brreg.js';
+import { COPY } from '../view/copy.js';
 
 const DEBOUNCE_MS = 250;
 const MIN_QUERY_LENGTH = 2;
@@ -100,7 +101,7 @@ async function find(query: string): Promise<SearchRows> {
   const results = await searchEnheterWithParams(
     new URLSearchParams({ navn: query, size: String(RESULT_SIZE) }),
   );
-  if (results.length === 0) return { kind: 'note', text: 'Ingen treff.' };
+  if (results.length === 0) return { kind: 'note', text: COPY.noHits };
   return { kind: 'hits', hits: results.map((hit) => ({ hit })) };
 }
 
@@ -188,7 +189,7 @@ export function attachManualSearch(
         );
       }
       const n = rows.hits.length;
-      announce(n === 1 ? '1 treff.' : `${n} treff.`);
+      announce(COPY.hitCount(n));
     } catch {
       if (myRunId !== runId) return;
       renderSearchError(query);
@@ -198,11 +199,11 @@ export function attachManualSearch(
   function renderSearchError(query: string): void {
     opts.resultsEl.replaceChildren();
     opts.resultsEl.appendChild(
-      paint.error('Søket feilet.', () => {
+      paint.error(COPY.searchFailed, () => {
         void run(query);
       }),
     );
-    announce('Søket feilet.');
+    announce(COPY.searchFailed);
   }
 
   return {

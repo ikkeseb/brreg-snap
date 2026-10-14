@@ -51,8 +51,8 @@ changes never raise the tone (`docs/notes/trust.md` § answer-priority).
 ## Tokens and the type scale
 
 All in `brreg.css`. Light is the default, dark comes from
-`prefers-color-scheme` and, with the same values, `.theme-dark` /
-`.theme-light` (tests, the gallery). Colour: `--paper`, `--paper-2`
+`prefers-color-scheme` (the smoke sets it through Playwright's
+`colorScheme`). Colour: `--paper`, `--paper-2`
 (sunk: inputs, kbd, hover), `--ink`, `--ink-2` (labels, details),
 `--ink-3` (captions, neutral glyphs), `--rule` (hairline, decorative),
 `--rule-strong` (UI boundaries), `--ok`, `--warn`, `--danger` (text

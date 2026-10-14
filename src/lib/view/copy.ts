@@ -184,7 +184,6 @@ export const COPY = {
   emptyNone: (site: string) => `Du valgte «Ingen av disse» for ${site}`,
   emptyNoneText: 'Søk etter riktig selskap.',
   searchHead: 'Søk i Brønnøysundregistrene',
-  searchSelection: 'Søk etter teksten du markerte:',
   searchText: 'Navn eller org.nr.',
   recents: 'Nylig sett',
   results: 'Treff',
@@ -194,7 +193,6 @@ export const COPY = {
   avdelingAv: (parent: string) => ` — avdeling av ${parent}`,
   forgetSite: (site: string) => `Glem valget for ${site}`,
   backToSite: (site: string) => `Tilbake til treffet for ${site}`,
-  searchFailedSupport: (q: string) => `Søket på «${q}» ble ikke fullført.`,
   degradedSupport: (site: string) =>
     `${site} kunne ikke sjekkes. Det sier ingenting om nettstedet.`,
 
@@ -222,9 +220,7 @@ export const COPY = {
 
   // panel: the compact head, sections with a sentence for a body
   regnskap: 'Regnskap',
-  konsernPath: 'Eierkjede',
   registered: (n: string) => `${n} registrert`,
-  registeredPlural: (n: string) => `${n} registrerte`,
 
   // welcome page (opened once, on install)
   welcome: {
