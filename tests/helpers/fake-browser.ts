@@ -2,9 +2,9 @@
 //
 // RULE: change this fake only to match behaviour observed in a real
 // engine (Firefox or Chrome), never to make a test pass. A fake that
-// drifts from the engine hides real bugs: before 16d9bdd the Firefox
-// mock exposed `contextMenus`, so tests stayed green while Firefox
-// auto-sync was dead.
+// drifts from the engine hides real bugs: a Firefox fake that exposes
+// `contextMenus` would keep tests green while code that calls it fails
+// in real Firefox.
 //
 // Engine namespaces are exclusive, as in the real engines:
 //   firefox: `menus` + `sidebarAction` (no `contextMenus`, no `sidePanel`)

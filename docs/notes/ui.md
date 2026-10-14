@@ -1,12 +1,11 @@
-# UI system: «Dossier, stamped» (1.4)
+# UI system
 
 Source: `src/styles/brreg.css` (tokens + every component),
 `src/lib/view/trust-view.ts` + `dossier-view.ts` (the view models),
 `src/lib/view/components/*.ts` (the DOM writers), `src/lib/view/copy.ts`
 (every UI string), `src/popup/{popup,views}.ts`,
-`src/details/{painter,tabs}.ts`, `src/welcome/*`. Design sources
-(outside the repo): `~/design/brreg-1.4/final/{SPEC,SYNTHESIS}.md`.
-Visual loop: `scripts/preview/` (its README).
+`src/details/{painter,tabs}.ts`, `src/welcome/*`. Visual loop:
+`scripts/preview/` (its README).
 
 <!-- SECTION: loudness -->
 ## The loudness rule
@@ -65,8 +64,8 @@ All in `brreg.css`. Light is the default, dark comes from
 `--rule-strong` (UI boundaries), `--ok`, `--warn`, `--danger` (text
 tone and the verdict's frame, kicker and key word), `--amber` (the
 focus ring only), `--brand` (the mark only), `--skel` / `--skel-hi`.
-Every text/paper pair measures ≥ 4.5:1 in both themes (the table is
-in SPEC.md § Contrast). The verdict's tint is `color-mix` of 7 %
+Every text/paper pair measures ≥ 4.5:1 in both themes; each token's
+ratio against `--paper` sits beside it in `brreg.css`. The verdict's tint is `color-mix` of 7 %
 `--danger` into `--paper` (resolves to #F2E5DB light / #211915 dark),
 and on it `--danger` measures 5.4 / 6.8, `--ink` 14.2 / 14.3, `--ink-2`
 7.3 / 8.5, the amber focus ring 4.8 / 8.0 (3.9 / 6.6 on the
@@ -244,7 +243,7 @@ word pokes out of a line without any scroll overflow).
   there.
 - On a spoof the company's ledger becomes one prose line under «Om
   selskapet — sier ingenting om dette nettstedet» (`.facts`); four
-  rows put P4 at 660 px.
+  rows put the spoof popup at 660 px.
 - A merknad in the answer is carried as a count («1 merknad i
   registeret») on both surfaces: the popup has no room for the quote,
   and the panel quotes it in full in the notes block right under the
@@ -253,7 +252,7 @@ word pokes out of a line without any scroll overflow).
   condition) stays visible under a long name.
 
 <!-- SECTION: amendments -->
-## Seat amendments (differences from the design deliverable)
+## Deviations from the original design
 
 - **No copy toast.** Copy feedback is the button itself: the icon swaps
   to the check, the number tints ok (or the label reads «Kopiert») for

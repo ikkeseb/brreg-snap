@@ -1,4 +1,4 @@
-// The Økonomi tab (S4): the latest filing's figures with their currency,
+// The Økonomi tab: the latest filing's figures with their currency,
 // the equity share as a proportion bar (width through the CSSOM, never
 // a style attribute), the honest single-year note, then Dokumenter:
 // the annual-report PDF years and the kunngjøringer link. One year of

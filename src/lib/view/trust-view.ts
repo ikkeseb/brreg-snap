@@ -397,7 +397,7 @@ function signalRow(
       } else if (signal.detail) {
         row.aux = `· ${signal.detail}`;
       }
-      // Under a stamp the row names the year only (P2): the money
+      // Under a stamp the row names the year only: the money
       // lives in the panel's Økonomi tab. The popup shows it only in
       // the calm state: a warn band, a provenance line and two leaders
       // already fill its 600 px (a url-param company with a merknad
@@ -583,10 +583,10 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   } else if (fc) {
     identity.over = fc;
   }
-  // The popup's leaders line is a normal company's line (P1). Under a
-  // stamp it would read as reassurance next to a konkurs, and on a
-  // spoof the company is the site's claim, not its identity (P2, P4
-  // carry no leaders; the bostyrer is in the stamp).
+  // The popup's leaders line is a normal company's line. Under a stamp
+  // it would read as reassurance next to a konkurs, and on a spoof the
+  // company is the site's claim, not its identity (no danger answer
+  // carries leaders; the bostyrer is in the stamp).
   if (surface === 'popup' && roller && answerView.tone !== 'danger') {
     const dagl = findRoleHolder(roller, 'DAGL');
     const lede = findRoleHolder(roller, 'LEDE');
@@ -613,8 +613,8 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   }
 
   // --- konsern, notes
-  // On a spoof the group line would read as the site's credentials
-  // (P4 carries none); the facts line already says what the company is.
+  // On a spoof the group line would read as the site's credentials, so
+  // it carries none; the facts line already says what the company is.
   const konsern =
     company.konsern && !spoof ? { parts: konsernParts(company.konsern) } : undefined;
   const merknadViews: MerknadView[] = merknader.map((m) => {

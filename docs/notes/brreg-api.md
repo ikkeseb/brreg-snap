@@ -7,8 +7,8 @@ Source: `src/lib/brreg.ts`, `konsern.ts`, `aarsregnskap.ts`.
 
 Enhetsregisteret lives at `data.brreg.no/enhetsregisteret/api`, but
 Regnskapsregisteret is on
-`data.brreg.no/regnskapsregisteret/regnskap/<orgnr>` (no `/api/`,
-different sub-host). Response is an array in no guaranteed order;
+`data.brreg.no/regnskapsregisteret/regnskap/<orgnr>` (same host, a
+different base path with no `/api/`). Response is an array in no guaranteed order;
 `latestRegnskap` picks from it (§ regnskap-years-and-types). 404 is normal: many small AS-er don't file
 separately. Cache the empty array so refresh doesn't re-hit.
 
@@ -232,18 +232,14 @@ anything that isn't a 4-digit year, caches 24 h under
 
 The brreg open API does not expose signaturrett/prokura on
 `/api/enheter/<orgnr>` and the nested `/signatur` path returns 404.
-The data lives only behind paid Foretaksregisteret endpoints. The
-project used to carry a `SignaturResponse` type and a hidden
-`#signatur` card in `details.html` as scaffolding; both were deleted
-in `4ec8d12` since they were dead code. Don't reintroduce them — and
-don't waste a session trying to re-discover the gap.
+The data lives only behind paid Foretaksregisteret endpoints, so the
+extension has no signatur type, fetch or card.
 
-<!-- SECTION: search-drops-dots -->
+<!-- SECTION: search-dots-literal -->
 ## Name search and dots: the dot is matched literally
 
-The anchor name is historical: this note used to say the index drops
-periods. Measured 2026-09-24 (and asserted weekly by the canary), it
-doesn't. `?navn=APOTERA.NO` finds APOTERA.NO AS and `?navn=APOTERANO`
+The search index keeps periods (the weekly canary asserts it).
+`?navn=APOTERA.NO` finds APOTERA.NO AS and `?navn=APOTERANO`
 finds nothing, so a legal name with a dot is found by exactly that
 name. `?navn=FINN.no` returns 0 hits because no entity is registered
 under that name. finn.no's company is VEND MARKETPLACES AS, formerly

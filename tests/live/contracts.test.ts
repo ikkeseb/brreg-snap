@@ -182,9 +182,9 @@ const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
     expect(status).toBe(404);
   },
 
-  'search-drops-dots': async () => {
-    // Measured 2026-09-24: the dot is matched literally, not dropped. A
-    // legal name with a dot is found by that name and not without it.
+  'search-dots-literal': async () => {
+    // The dot is matched literally, not dropped: a legal name with a dot
+    // is found by that name and not without it.
     const dotted = remember(
       await searchOne({ navn: 'APOTERA.NO', navnMetodeForSoek: 'FORTLOEPENDE' }),
     );

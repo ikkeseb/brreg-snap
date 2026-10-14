@@ -75,8 +75,8 @@ version, via a string-level replacement that leaves every other byte
 of the manifest untouched — so the built Firefox manifest stays
 byte-identical to `public/manifest.firefox.json` whenever the two
 versions agree. Both source manifests carry the same version as
-`package.json`; a mismatch would only appear if a manifest bump were
-forgotten, and the stamp makes that harmless.
+`package.json`, and `pnpm verify` fails when they drift
+(`tests/manifest.test.ts`).
 
 The final artifact lands at
 `web-ext-artifacts/brreg-snap-<version>.zip`. (web-ext writes the
@@ -86,19 +86,14 @@ package as `.zip`; AMO accepts both extensions interchangeably.)
 
 The **contents** of the package — every file under the archive
 root — are reproducible bit-for-bit with the same Node/pnpm
-combination, on any OS. Checked 2026-09-23: a build on Windows 11
-from an LF checkout matched the CI (Ubuntu) packages of the v1.3.0
-GitHub Release file for file, for both Firefox and Chrome.
-
-This holds because the repository forces LF line endings
-(`.gitattributes`: `* text=auto eol=lf`, since 1.3.1). Vite copies the
-manifests and HTML entries byte for byte, so before that a Windows
-checkout with `core.autocrlf=true` (Git for Windows' default) built
-packages whose manifest and HTML files had CRLF line endings. Source
-zips made with `git archive` have LF line endings (checked for
-v1.3.0), so building from one was not affected. A clone made before
-1.3.1 keeps its CRLF files until a one-time refresh on a clean tree:
-`git rm -r -q --cached . && git reset -q --hard`.
+combination, on any OS. Vite copies the manifests and HTML entries
+byte for byte, so the repository normalizes text files to LF
+(`.gitattributes`: `* text=auto eol=lf`) whatever a checkout's
+`core.autocrlf` says; source zips made with `git archive` carry LF
+too. The release workflow's `reproduce` job
+(`.github/workflows/release.yml`) rebuilds the Firefox package from
+the source zip, the way a reviewer does, and diffs it against the
+release package before the GitHub Release is created.
 
 The zip envelope itself has different SHA-256 hashes between builds
 because `web-ext` records each file's modification time in the
@@ -121,12 +116,15 @@ diff -r mine ci                             # expect no output
 1. **`pnpm build:firefox`** (Vite) — compiles TypeScript sources
    under `src/` to JavaScript, copies the Firefox manifest
    (`public/manifest.firefox.json` → `manifest.json`, stamping its
-   `version` field from `package.json` — see Versioning above) and
-   toolbar icons, relocates the popup/details HTML entries to their
-   manifest-expected paths, and writes everything to `dist-firefox/`.
+   `version` field from `package.json` — see Versioning above), the
+   toolbar icons and the bundled Schibsted Grotesk font with its OFL
+   notice (`public/fonts/` → `fonts/`), relocates the popup, details
+   and welcome HTML entries to their packaged paths, and writes
+   everything to `dist-firefox/`. The icon copy leaves out the
+   folder's `README.md`.
 2. **`web-ext build`** — packages the contents of `dist-firefox/`
    into `web-ext-artifacts/brreg-snap-<version>.zip`, excluding
-   sourcemaps (`*.map`) and `icons/README.md`. No code transformation.
+   sourcemaps (`*.map`). No code transformation.
 
 ## Minification
 
@@ -177,4 +175,7 @@ unzip -l web-ext-artifacts/brreg-snap-<version>.zip
 ```
 
 Expected top-level entries: `manifest.json`, `background/`,
-`popup/`, `details/`, `chunks/`, `icons/`. No other files.
+`popup/`, `details/`, `welcome/`, `chunks/`, `icons/`, `fonts/`.
+`pnpm verify` (`verify:dist`) fails on any root entry outside
+`DIST_ROOT` in `scripts/manifest-invariants.mjs`, which also allows an
+`assets/` directory.

@@ -2,9 +2,9 @@
 // sammendrag»): the write happens inside the click (the gesture is what
 // lets navigator.clipboard through without a permission), then the
 // button shows the outcome for 1.4 s and the surface's live region says
-// it. No floating toast (seat amendment a): the icon swaps to the check
-// via .is-copied, and the button's own text or number carries the
-// state. A refused write adds .is-failed and says so in the danger
+// it. No floating toast (docs/notes/ui.md § amendments): the icon
+// swaps to the check via .is-copied, and the button's own text or
+// number carries the state. A refused write adds .is-failed and says so in the danger
 // tone. Reduced-motion safe: the CSS transitions are the only motion,
 // and they are off under prefers-reduced-motion.
 

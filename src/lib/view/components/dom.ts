@@ -1,8 +1,8 @@
 // DOM helpers for the view components: element factories, the sprite
 // icons and the TextPart writer. Everything is built with createElement
 // / createElementNS / textContent — ESLint bans the HTML sinks — and
-// the icons reference the <symbol>s each page inlines once (icons.svg
-// in popup.html / details.html).
+// the icons reference the <symbol>s each page inlines once (the sprite
+// in popup.html, details.html and welcome.html).
 
 import type { Tone } from '../../trust/types.js';
 import type { TextPart } from '../trust-view.js';
@@ -123,8 +123,8 @@ export function section(label: string, count?: number | string): HTMLElement {
   return sec;
 }
 
-// Amendment c: a branch or subsidiary named after its parent («NORDVIK
-// ENERGI ASA AVD FORUS», «EQUINOR ALGERIA AS» under «EQUINOR ASA») —
+// A branch or subsidiary named after its parent («NORDVIK ENERGI ASA
+// AVD FORUS», «EQUINOR ALGERIA AS» under «EQUINOR ASA») —
 // the shared prefix is written in a quieter span so the distinguishing
 // part reads first. The prefix is the parent's full name or its base
 // name (the name minus a legal-form suffix), matched as whole words at

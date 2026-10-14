@@ -70,10 +70,6 @@ notes for reviewers below say how consent works there.
 
 > Slå opp norske bedrifter i Brønnøysundregistrene med ett klikk. Henter status, daglig leder, styret, nøkkeltall og regnskap direkte fra data.brreg.no. Ingen content scripts, ingen tredjeparts-trackere.
 
-(202 tegn — under grensen. NB: tidligere versjoner nevnte
-«signaturrett» — den finnes ikke i det åpne API-et og vises ikke i
-produktet; fjernet fra all listing-tekst 2026-07-05.)
-
 <!-- SECTION: description-nb -->
 ### Description (nb — paste as is)
 
@@ -99,8 +95,6 @@ produktet; fjernet fra all listing-tekst 2026-07-05.)
 ### Summary (≤ 250 chars)
 
 > Look up Norwegian companies in the public Brønnøysund Register with one click. Shows status, CEO, board, key figures, and accounts straight from data.brreg.no. No content scripts, no third-party trackers.
-
-(206 chars — under the limit.)
 
 <!-- SECTION: description-en -->
 ### Description (en)

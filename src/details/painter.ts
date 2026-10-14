@@ -1,4 +1,4 @@
-// The panel's painter: the 1.4 design («Dossier, stamped») behind the
+// The panel's painter: the UI system (docs/notes/ui.md) behind the
 // PanelPainter seam (view.ts). It composes the shared view components
 // (src/lib/view/components/) into details.html's roots — one live
 // region, the masthead's search field, the compact sticky head, the
@@ -761,7 +761,7 @@ export function createPanelPainter(
   }
 }
 
-// The loading skeleton (S5): the shared identity + answer + ledger
+// The loading skeleton: the shared identity + answer + ledger
 // geometry, then the konsern row, the tabs and the first section, so
 // the layout that lands is the layout that shimmered. Static text only:
 // the tabs are not a tablist (main is inert meanwhile).

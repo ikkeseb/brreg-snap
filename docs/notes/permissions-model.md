@@ -146,13 +146,12 @@ key points at it.
 <!-- SECTION: iframe-not-a-gesture-surface -->
 ## A button *inside* the sidebar iframe does NOT grant activeTab
 
-Tested empirically: a sync button rendered inside the sidebar that
-called `tabs.query({active:true, currentWindow:true})` got the same
-empty `url`/`title` as `tabs.onActivated`. The user-gesture grant is
-scoped to the toolbar/sidebar-action surface, not clicks inside the
-already-loaded panel. A sync button existed in the sidebar header
-for this — it was removed because the hypothesis was wrong. Don't
-re-add it.
+A click inside the sidebar is not a gesture on the extension's
+surface: `tabs.query({active:true, currentWindow:true})` called from a
+button in the panel returns the same empty `url`/`title` as
+`tabs.onActivated`. The user-gesture grant is scoped to the toolbar/sidebar-action surface, not clicks inside the
+already-loaded panel, so a sync button inside the panel can't read
+the active tab.
 
 <!-- SECTION: desktop-only -->
 ## Desktop only: no Firefox for Android target

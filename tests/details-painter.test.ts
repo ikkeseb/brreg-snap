@@ -309,7 +309,7 @@ describe('result: the dossier', () => {
     expect(units.querySelector('.section__head .tab__count')?.textContent).toBe('133');
     expect(units.querySelector('.units-count')?.textContent).toBe('Viser 2 av 133 · Se alle på brreg.no ↗');
     const first = units.querySelector('.unit')!;
-    // Amendment c: the parent's name is a quieter prefix; the text stays whole.
+    // The parent's name is a quieter prefix; the text stays whole.
     expect(first.querySelector('.unit__name')?.textContent).toBe('EQUINOR ASA AVD FORUS');
     expect(first.querySelector('.unit__name .name-prefix')?.textContent).toBe('EQUINOR ASA ');
     expect(first.querySelector('.unit__meta')?.textContent).toBe(`Forusbeen 50, 4035 Stavanger · 1${NBSP}840 ansatte`);
@@ -802,7 +802,7 @@ describe('the auto-sync switch and consent band', () => {
   });
 });
 
-describe('appendName (amendment c)', () => {
+describe('appendName (name-prefix muting)', () => {
   const muted = (name: string, parent: string) => {
     const b = document.createElement('b');
     appendName(b, name, parent);

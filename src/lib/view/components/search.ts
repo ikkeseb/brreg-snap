@@ -1,4 +1,4 @@
-// Search + empty state + recents (P6): the search field, the manual-
+// Search + empty state + recents: the search field, the manual-
 // search rows (the debounce, the orgnr shortcut and the error handling
 // stay in src/lib/ui/manual-search.ts — this file only paints), and the
 // «Nylig sett» list from src/lib/ui/recent.ts.

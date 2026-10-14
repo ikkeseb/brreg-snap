@@ -461,7 +461,7 @@ export function scoreCandidate(
   // not touch an exact hjemmeside tie: then the registry itself says
   // this is the site's own company, and «konkurs» / «under avvikling»
   // is the headline a trust tool exists to show, not noise to rank
-  // away (such a site used to fall to «Ingen bedrift identifisert»).
+  // away into «Ingen bedrift identifisert».
   // Deleted entities need no case here: search never returns them.
   if ((cand.konkurs || cand.underAvvikling) && hjemScore !== 35) {
     score -= 30;
