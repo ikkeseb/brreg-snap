@@ -349,7 +349,8 @@ One sentence per row, read for the period the heading names:
 - An end year without the figure: no sentence for that row.
 - No loss year: first to last. «uendret» (equal), «opp/ned N %» from a
   first year above zero (under 1 % is «omtrent uendret»), bare
-  «opp»/«ned» otherwise and from 1000 % up (`PCT_CAP`: a tiny base). A middle year that leaves the ends' range by
+  «opp»/«ned» otherwise and from 1000 % up (`PCT_CAP`: a tiny base).
+  A middle year that leaves the ends' range by
   more than a tenth of the larger end is named: «Driftsinntekter ned
   26 %, høyest i 2024.»
 - Årsresultat with a loss, first match wins: every year a loss («i
