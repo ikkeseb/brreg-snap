@@ -1,10 +1,31 @@
 # Changelog
 
 All notable changes to brreg-snap are documented here. Format follows
-[Keep a Changelog](https://keepachangelog.com/) (loosely).
+[Keep a Changelog](https://keepachangelog.com/).
 Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
+
+### Changed
+
+- A danger verdict is a field framed in thin red on a faint tint: a red
+  «✕ Alvorlig» kicker, then the sentence in large type with only the
+  key word in red.
+
+### Fixed
+
+- With auto-sync off, a lookup in the popup could set or clear the
+  toolbar badge of the tab the panel followed before. The badge now
+  marks only the tab whose company is on screen.
+- The focus ring inside a danger verdict is clearly visible; screen
+  readers hear the equity bar's legend; «Endret nylig» keeps its
+  neutral mark next to a merknad; the panel's back navigation no longer
+  leaves an empty landmark.
+- A site whose lookup partly failed could keep a cached direct answer
+  where a complete lookup shows a picker.
+- Short subsidiary keywords no longer match inside longer words (IT in
+  SPIRIT, CARE in SKINCARE), and a site with æ, ø or å in its domain
+  ties to the company that registered it.
 
 ## [1.5.0] — 2026-10-06
 
@@ -216,7 +237,7 @@ shipped, and several facts on screen had quietly become wrong.
   nettbank.dnb.no). IP addresses and reserved local names (localhost,
   .local, .lokal, .internal, .intern, .lan, .home.arpa, .priv …) are
   never sent.
-- [firefox] The add-on now declares `browsingActivity` data collection:
+- `[firefox]` The add-on now declares `browsingActivity` data collection:
   the visited site's domain goes to data.brreg.no, never to the
   developer. Earlier versions declared "none", which was wrong. Firefox
   140+ asks existing users to accept this once when updating.
@@ -514,3 +535,15 @@ name; functionality unchanged from the pre-1.0 development branch.
   via Firefox's prompt — install-time permissions stay
   `activeTab` + `storage` + `menus` + the brreg host.
 - Zero runtime dependencies in the shipped bundle.
+
+[Unreleased]: https://github.com/ikkeseb/brreg-snap/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/ikkeseb/brreg-snap/compare/v1.4.2...v1.5.0
+[1.4.2]: https://github.com/ikkeseb/brreg-snap/compare/v1.4.1...v1.4.2
+[1.4.1]: https://github.com/ikkeseb/brreg-snap/compare/v1.4.0...v1.4.1
+[1.4.0]: https://github.com/ikkeseb/brreg-snap/compare/v1.3.1...v1.4.0
+[1.3.1]: https://github.com/ikkeseb/brreg-snap/compare/v1.3.0...v1.3.1
+[1.3.0]: https://github.com/ikkeseb/brreg-snap/compare/v1.2.0...v1.3.0
+[1.2.0]: https://github.com/ikkeseb/brreg-snap/compare/v1.1.0...v1.2.0
+[1.1.0]: https://github.com/ikkeseb/brreg-snap/compare/v1.0.1...v1.1.0
+[1.0.1]: https://github.com/ikkeseb/brreg-snap/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/ikkeseb/brreg-snap/releases/tag/v1.0.0
