@@ -1,5 +1,5 @@
 import { ESLint } from 'eslint';
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 // The src security rules in eslint.config.js (AGENTS.md § Security
 // constraints), run through the REAL config: each snippet is linted as
@@ -15,9 +15,15 @@ const SECURITY_RULES = new Set([
 ]);
 
 let eslint: ESLint;
-beforeAll(() => {
+// Every case is a type-aware lint: well under a second on a quiet
+// machine, past vitest's 5 s default on a loaded one, which then blocks
+// the pre-push gate. The first lintText builds the program cold, so
+// it's paid here, under the hook's own timeout.
+vi.setConfig({ testTimeout: 30_000 });
+beforeAll(async () => {
   eslint = new ESLint({ cwd: process.cwd() });
-});
+  await eslint.lintText('', { filePath: 'src/lib/orgnr.ts' });
+}, 120_000);
 
 async function findings(code: string, filePath = 'src/lib/orgnr.ts'): Promise<string[]> {
   const [result] = await eslint.lintText(code, { filePath });
