@@ -595,6 +595,7 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .trend__table th[scope="row"] { padding-right: 8px; text-align: left; color: var(--ink-2); font-weight: 400; }
 .trend__table th[scope="col"], .trend__table tbody td { width: 4.25em; padding-left: 8px; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .trend__comma { font-variant-numeric: normal; }
+.trend__table th .fig-row__unit { margin-left: 0; }  /* a real space precedes it */
 .trend__table thead th { font: var(--t-cap); letter-spacing: var(--track-cap); color: var(--ink-3); }
 .trend__table tbody td { color: var(--ink-2); }
 .trend__table tbody td:last-child { font-weight: 600; color: var(--ink); }

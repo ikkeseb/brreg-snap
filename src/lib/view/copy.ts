@@ -121,6 +121,13 @@ export const COPY = {
   driftsinntekter: 'Driftsinntekter',
   aarsresultat: 'Årsresultat',
   trendMissing: '–',
+  // The row header's accessible name: the unit beside the label is
+  // only «mrd» on screen. «Driftsinntekter, milliarder NOK».
+  trendRowName: (label: string, unit: string, valuta: string) => {
+    const words: Record<string, string> = { mrd: 'milliarder', mill: 'millioner', tusen: 'tusen' };
+    const unitWord = words[unit];
+    return `${label}, ${unitWord ? `${unitWord} ` : ''}${valuta}`;
+  },
   // One sentence per row: «<label> <reading>[, <aside>].» The rules
   // that pick the pieces are in src/lib/view/trend.ts.
   trendSentence: (label: string, reading: string, aside?: string) =>
@@ -131,8 +138,10 @@ export const COPY = {
   trendFlat: 'omtrent uendret',
   trendHighest: (year: string) => `høyest i ${year}`,
   trendLowest: (year: string) => `lavest i ${year}`,
-  trendTurned: (toLoss: boolean, year: string) =>
-    `snudde ${toLoss ? 'fra overskudd til underskudd' : 'fra underskudd til overskudd'} i ${year}`,
+  // The year only when the years around the turn are both held and
+  // back to back; otherwise the turn is somewhere in the period.
+  trendTurned: (toLoss: boolean, year?: string) =>
+    `snudde ${toLoss ? 'fra overskudd til underskudd' : 'fra underskudd til overskudd'}${year ? ` i ${year}` : ''}`,
   trendLossBetween: (years: string) => `men underskudd i ${years}`,
   trendLossEvery: (two: boolean) => (two ? 'i underskudd begge år' : 'i underskudd alle år'),
   trendLossLarger: 'større sist',

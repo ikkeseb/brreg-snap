@@ -9,15 +9,16 @@
 // - A loss is never hidden. Årsresultat with a loss year reads, in
 //   order: a loss every year («i underskudd alle år, større sist»); one
 //   clean change of sign («snudde fra underskudd til overskudd i
-//   2025»); profits at both ends with a loss between («opp 12 %, men
+//   2025», the year only when the years around it are held and back
+//   to back); profits at both ends with a loss between («opp 12 %, men
 //   underskudd i 2024»); anything else lists the loss years
 //   («Årsresultat: underskudd i 2023 og 2025.»).
 // - Otherwise first to last: «uendret» when equal, a percentage when
 //   the first year is above zero (under 1 % is «omtrent uendret»), the
-//   bare direction when it isn't. A middle year outside the ends' range
+//   bare direction when it isn't or the change is 1000 % or more. A middle year outside the ends' range
 //   by more than a tenth of the larger end is named («høyest i 2024»).
 
-import { formatAmountsIn, formatPercent } from '../format.js';
+import { formatAmountsIn, formatMoney, formatPercent } from '../format.js';
 import type { KeyFigures } from '../regnskap.js';
 import { COPY } from './copy.js';
 
@@ -28,6 +29,9 @@ export const TREND_YEARS = 3;
 export interface TrendCell {
   amount: string;
   negative?: boolean;
+  // The exact amount («2 kr») when `amount` is only «<0,1» in the
+  // row's unit: the cell's title and accessible name.
+  exact?: string;
 }
 
 export interface TrendView {
@@ -37,7 +41,9 @@ export interface TrendView {
   currency?: string;
   // One magnitude word per row («mill»), so the cells hold numbers
   // only; a cell is undefined when that year lacks the figure.
-  rows: Array<{ label: string; unit: string; cells: Array<TrendCell | undefined> }>;
+  // `name` is the row header's accessible name, unit and currency in
+  // words.
+  rows: Array<{ label: string; unit: string; name: string; cells: Array<TrendCell | undefined> }>;
   read: string[];
 }
 
@@ -66,24 +72,34 @@ function middleAside(first: Point, last: Point, middle: Point[], loss: boolean):
   return undefined;
 }
 
+// From this many percent the base is too small to carry a percentage
+// («opp 99 999 999 900 %» is true and useless): the bare direction.
+const PCT_CAP = 1000;
+
 function moved(first: number, last: number): string {
   if (first === last) return COPY.trendSame;
   const up = last > first;
   if (first <= 0 || last < 0) return up ? COPY.trendUp() : COPY.trendDown();
   const pct = ((last - first) / first) * 100;
+  if (Math.abs(pct) >= PCT_CAP) return up ? COPY.trendUp() : COPY.trendDown();
   if (Math.abs(pct) < 1) return COPY.trendFlat;
   const text = formatPercent(Math.abs(pct));
   return up ? COPY.trendUp(text) : COPY.trendDown(text);
 }
 
-// The one year where a clean change of sign lands: every year before it
-// on one side of zero and every year from it on the other, no zeros.
-function cleanTurn(points: Point[]): Point | undefined {
+// A clean change of sign: every held year before it on one side of
+// zero and every one from it on the other, no zeros. `year` is named
+// only when the years either side of the turn are held and back to
+// back; across a missing year the turn could have come a year earlier.
+function cleanTurn(points: Point[]): { toLoss: boolean; year?: string } | undefined {
   if (points.some((p) => p.value === 0)) return undefined;
   const at = points.findIndex((p) => p.value < 0 !== points[0]!.value < 0);
   if (at < 1) return undefined;
   const after = points.slice(at);
-  return after.every((p) => p.value < 0 === after[0]!.value < 0) ? after[0] : undefined;
+  const turn = after[0]!;
+  if (!after.every((p) => p.value < 0 === turn.value < 0)) return undefined;
+  const contiguous = Number(turn.year) - Number(points[at - 1]!.year) === 1;
+  return contiguous ? { toLoss: turn.value < 0, year: turn.year } : { toLoss: turn.value < 0 };
 }
 
 // The sentence for one row; undefined when an end year lacks the figure.
@@ -118,7 +134,7 @@ export function trendRead(
     return COPY.trendSentence(label, COPY.trendLossEvery(points.length === 2), aside);
   }
   const turn = cleanTurn(points);
-  if (turn) return COPY.trendSentence(label, COPY.trendTurned(turn.value < 0, turn.year));
+  if (turn) return COPY.trendSentence(label, COPY.trendTurned(turn.toLoss, turn.year));
   if (first.value >= 0 && last.value >= 0) {
     return COPY.trendSentence(
       label,
@@ -160,9 +176,13 @@ export function trendOf(years: KeyFigures[], headValuta?: string): TrendView | u
     rows.push({
       label: s.label,
       unit,
-      cells: amounts.map((amount, i) => {
-        if (amount === undefined) return undefined;
-        return values[i]! < 0 ? { amount, negative: true } : { amount };
+      name: COPY.trendRowName(s.label, unit, valuta),
+      cells: amounts.map((a, i) => {
+        if (a === undefined) return undefined;
+        const cell: TrendCell = { amount: a.amount };
+        if (values[i]! < 0) cell.negative = true;
+        if (a.small) cell.exact = formatMoney(values[i], valuta)!;
+        return cell;
       }),
     });
     const sentence = trendRead(

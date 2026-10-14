@@ -26,6 +26,12 @@ function buildFigRow(row: FigRow): HTMLDivElement {
 function buildCell(cell: TrendCell | undefined): HTMLTableCellElement {
   if (!cell) return el('td', undefined, COPY.trendMissing);
   const td = el('td', cell.negative ? 'num--neg' : undefined);
+  // «<0,1» in the row's unit: the exact amount on hover and for a
+  // screen reader (attributes, no style).
+  if (cell.exact) {
+    td.title = cell.exact;
+    td.setAttribute('aria-label', cell.exact);
+  }
   const [whole, decimals] = cell.amount.split(',');
   td.append(whole!);
   if (decimals !== undefined) td.append(el('span', 'trend__comma', ','), decimals);
@@ -59,7 +65,10 @@ function buildTrend(trend: TrendView): HTMLElement {
     const tr = el('tr');
     const th = el('th', undefined, row.label);
     th.scope = 'row';
-    if (row.unit) th.appendChild(el('span', 'fig-row__unit', row.unit));
+    // On screen the unit is a quiet «mrd»; the name says it in words,
+    // with the currency.
+    th.setAttribute('aria-label', row.name);
+    if (row.unit) th.append(' ', el('span', 'fig-row__unit', row.unit));
     tr.appendChild(th);
     for (const cell of row.cells) tr.appendChild(buildCell(cell));
     tbody.appendChild(tr);

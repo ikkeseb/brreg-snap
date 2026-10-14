@@ -29,6 +29,12 @@ describe('trendRead — first to last', () => {
     expect(inntekter(50, -20)).toBe('Driftsinntekter ned.');
   });
 
+  it('1000 % or more: the bare direction, a tiny base carries no percentage (1 → 2 → 1 000 000 000)', () => {
+    expect(inntekter(1, 2, 1_000_000_000)).toBe('Driftsinntekter opp.');
+    expect(inntekter(100, 1099)).toBe(`Driftsinntekter opp ${pct(999)}.`);
+    expect(inntekter(100, 1100)).toBe('Driftsinntekter opp.');
+  });
+
   it('a missing end year: no sentence (the heading names a period the figure does not cover)', () => {
     expect(resultat(100, 200, null)).toBeUndefined();
     expect(resultat(null, 200, 300)).toBeUndefined();
@@ -60,6 +66,22 @@ describe('trendRead — a loss is never hidden', () => {
     expect(resultat(5, -1, -2)).toBe('Årsresultat snudde fra overskudd til underskudd i 2024.');
   });
 
+  it('a turn across a missing year names no year: it may have come a year earlier', () => {
+    expect(resultat(-5, null, 3)).toBe('Årsresultat snudde fra underskudd til overskudd.');
+    expect(resultat(5, null, -3)).toBe('Årsresultat snudde fra overskudd til underskudd.');
+    // Held years that are not back to back (brreg skipped one): same.
+    const gap = [
+      { year: '2021', value: -5 },
+      { year: '2023', value: 3 },
+    ];
+    expect(trendRead('Årsresultat', gap, true)).toBe('Årsresultat snudde fra underskudd til overskudd.');
+    // A missing year after the turn does not hide it: 2024 follows 2023.
+    expect(resultat(-5, 3, null)).toBeUndefined();
+    expect(trendRead('Årsresultat', [{ year: '2023', value: -5 }, { year: '2024', value: 3 }, undefined, { year: '2026', value: 4 }], true)).toBe(
+      'Årsresultat snudde fra underskudd til overskudd i 2024.',
+    );
+  });
+
   it('every year a loss: the size compared, equal values before bigger/smaller', () => {
     expect(resultat(-100_000, -100_000)).toBe('Årsresultat i underskudd begge år, like stort.');
     expect(resultat(-100_000, -100_500)).toBe('Årsresultat i underskudd begge år, omtrent like stort.');
@@ -82,18 +104,33 @@ describe('trendRead — a loss is never hidden', () => {
 
 describe('formatAmountsIn — one magnitude word per row', () => {
   it('takes the unit of the largest value and writes every value in it', () => {
-    expect(formatAmountsIn([31_124_422, 36_300_000, 42_599_757])).toEqual({ unit: 'mill', amounts: ['31,1', '36,3', '42,6'] });
-    expect(formatAmountsIn([768_000, -475_672, 860_445])).toEqual({ unit: 'tusen', amounts: ['768', '-476', '860'] });
-    expect(formatAmountsIn([900_000, 1_200_000])).toEqual({ unit: 'mill', amounts: ['0,9', '1,2'] });
-    expect(formatAmountsIn([999_500, 10])).toEqual({ unit: 'mill', amounts: ['1,0', '0,00001'] });
+    expect(formatAmountsIn([31_124_422, 36_300_000, 42_599_757])).toEqual({
+      unit: 'mill',
+      amounts: [{ amount: '31,1' }, { amount: '36,3' }, { amount: '42,6' }],
+    });
+    expect(formatAmountsIn([768_000, -475_672, 860_445])).toEqual({
+      unit: 'tusen',
+      amounts: [{ amount: '768' }, { amount: '-476' }, { amount: '860' }],
+    });
+    expect(formatAmountsIn([900_000, 1_200_000])).toEqual({ unit: 'mill', amounts: [{ amount: '0,9' }, { amount: '1,2' }] });
   });
 
-  it('a small non-zero value keeps one significant digit; missing stays missing; zero is zero', () => {
-    expect(formatAmountsIn([2_000_000, 40_000, undefined, 0])).toEqual({
-      unit: 'mill',
-      amounts: ['2,0', '0,04', undefined, '0,0'],
+  it('a non-zero value that rounds to zero in the unit reads «<0,1», sign kept, marked small', () => {
+    // 1, 2 and 1 000 000 000: short cells, never «0,000000001».
+    expect(formatAmountsIn([1, 2, 1_000_000_000])).toEqual({
+      unit: 'mrd',
+      amounts: [{ amount: '<0,1', small: true }, { amount: '<0,1', small: true }, { amount: '1,0' }],
     });
-    expect(formatAmountsIn([500, -20])).toEqual({ unit: '', amounts: ['500', '-20'] });
+    expect(formatAmountsIn([-40_000, 2_000_000, undefined, 0])).toEqual({
+      unit: 'mill',
+      amounts: [{ amount: '-<0,1', small: true }, { amount: '2,0' }, undefined, { amount: '0,0' }],
+    });
+    // A whole-number unit: «<1».
+    expect(formatAmountsIn([300, 500_000])).toEqual({ unit: 'tusen', amounts: [{ amount: '<1', small: true }, { amount: '500' }] });
+  });
+
+  it('plain kroner and missing values', () => {
+    expect(formatAmountsIn([500, -20])).toEqual({ unit: '', amounts: [{ amount: '500' }, { amount: '-20' }] });
     expect(formatAmountsIn([undefined, undefined])).toEqual({ unit: '', amounts: [undefined, undefined] });
   });
 });

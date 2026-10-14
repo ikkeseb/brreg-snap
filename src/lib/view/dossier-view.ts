@@ -440,11 +440,15 @@ function okonomi(input: DossierInput): OkonomiView {
       // reads; and which, when a newer one is filed), and point at the
       // copies where the others live. No figures and no trend: nothing
       // to qualify.
+      // A newer filed year missing from the API is said in the status
+      // line; here it only turns «Eldre år» into «Andre år».
       if (figures.kind === 'figures') {
-        honest = newerFiledYear(key, regnskapSignal)
-          ? `${COPY.honestShowingYear(key.year)}${years && years.length > 0 ? COPY.honestOtherPdf : ''}`
-          : trend
-            ? `${COPY.honestYears(trend.years[0]!, key.year)}${pdfNote}`
+        const newer = newerFiledYear(key, regnskapSignal);
+        const otherPdf = years && years.length > 0 ? COPY.honestOtherPdf : '';
+        honest = trend
+          ? `${COPY.honestYears(trend.years[0]!, key.year)}${newer ? otherPdf : pdfNote}`
+          : newer
+            ? `${COPY.honestShowingYear(key.year)}${otherPdf}`
             : `${COPY.honestSingleYear}${pdfNote}`;
       } else if (trend) {
         honest = `${COPY.honestYears(trend.years[0]!, trend.years.at(-1)!)}${pdfNote}`;

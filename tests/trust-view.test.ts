@@ -390,7 +390,10 @@ describe('buildTrustView — the regnskap row says what is and is not there', ()
       tone: 'neutral',
       text: '2025 er levert. Tallene er ikke i åpne data ennå.',
     });
-    expect(d.okonomi.honest).toBe('Viser tallene for 2024. Andre år finnes som PDF.');
+    // A trend held (2023–2024): it sets the span; the newer year stays
+    // in the status line and turns «Eldre år» into «Andre år».
+    expect(d.okonomi.trend?.years).toEqual(['2023', '2024']);
+    expect(d.okonomi.honest).toBe('Åpne data dekker 2023–2024. Andre år finnes som PDF.');
     const noCopies = view({
       company: company(enhetEquinor, {
         regnskap: { items: behind } as unknown as RegnskapResponse,
@@ -398,7 +401,19 @@ describe('buildTrustView — the regnskap row says what is and is not there', ()
       }),
       surface: 'panel',
     }).dossier!;
-    expect(noCopies.okonomi.honest).toBe('Viser tallene for 2024.');
+    expect(noCopies.okonomi.honest).toBe('Åpne data dekker 2023–2024.');
+    // One year held: the one-year wording names it.
+    const oneYear = view({
+      company: company(enhetEquinor, {
+        regnskap: {
+          items: behind.filter((r) => r.regnskapsperiode.tilDato.startsWith('2024')),
+        } as unknown as RegnskapResponse,
+        aarsregnskapYears: ['2025', '2024'],
+      }),
+      surface: 'panel',
+    }).dossier!;
+    expect(oneYear.okonomi.trend).toBeUndefined();
+    expect(oneYear.okonomi.honest).toBe('Viser tallene for 2024. Andre år finnes som PDF.');
   });
 });
 
@@ -425,8 +440,18 @@ describe('buildTrustView — the Økonomi trend', () => {
       title: 'Utvikling 2023–2025',
       years: ['2023', '2024', '2025'],
       rows: [
-        { label: 'Driftsinntekter', unit: 'mrd', cells: [{ amount: '72,4' }, { amount: '72,5' }, { amount: '68,0' }] },
-        { label: 'Årsresultat', unit: 'mrd', cells: [{ amount: '11,7' }, { amount: '8,1' }, { amount: '5,7' }] },
+        {
+          label: 'Driftsinntekter',
+          unit: 'mrd',
+          name: 'Driftsinntekter, milliarder USD',
+          cells: [{ amount: '72,4' }, { amount: '72,5' }, { amount: '68,0' }],
+        },
+        {
+          label: 'Årsresultat',
+          unit: 'mrd',
+          name: 'Årsresultat, milliarder USD',
+          cells: [{ amount: '11,7' }, { amount: '8,1' }, { amount: '5,7' }],
+        },
       ],
       read: ['Driftsinntekter ned 6\u00a0%.', 'Årsresultat ned 51\u00a0%.'],
     });
@@ -452,6 +477,7 @@ describe('buildTrustView — the Økonomi trend', () => {
     expect(o.trend?.rows[1]).toEqual({
       label: 'Årsresultat',
       unit: 'tusen',
+      name: 'Årsresultat, tusen NOK',
       cells: [{ amount: '768' }, { amount: '-476', negative: true }, { amount: '860' }],
     });
   });
@@ -494,6 +520,18 @@ describe('buildTrustView — the Økonomi trend', () => {
     ]);
     expect(o.trend?.years).toEqual(['2024', '2025']);
     expect(o.trend?.read).toEqual(['Driftsinntekter opp 10\u00a0%.', 'Årsresultat opp 10\u00a0%.']);
+  });
+
+  it('a widely spread row stays short: a value too small for the unit reads «<0,1» and keeps its exact amount', () => {
+    const o = okonomiOf([selskap('2023-12-31', 1, -2), selskap('2024-12-31', 2, 5), selskap('2025-12-31', 1_000_000_000, 7)]);
+    expect(o.trend?.rows[0]).toEqual({
+      label: 'Driftsinntekter',
+      unit: 'mrd',
+      name: 'Driftsinntekter, milliarder NOK',
+      cells: [{ amount: '<0,1', exact: '1 kr' }, { amount: '<0,1', exact: '2 kr' }, { amount: '1,0' }],
+    });
+    // Plain kroner: no unit word, the name says the currency alone.
+    expect(o.trend?.rows[1]?.name).toBe('Årsresultat, NOK');
   });
 
   it('more than three years: the last three', () => {
