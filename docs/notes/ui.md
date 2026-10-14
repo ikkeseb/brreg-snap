@@ -117,10 +117,10 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 | `konsern.ts` | `buildKonsernRow(KonsernView, {onOpen})` | `button.konsern > svg.icon + span.konsern__text + svg.konsern__chev` |
 | `actions.ts` | `buildActions({summary, panelHref?}, handlers)` → `{container}` (popup) | `div.actions > a.btn.btn--primary[href]` (Åpne i sidepanel) + `button.btn` (Kopier sammendrag) |
 | `footer.ts` | `renderFooter(container, {fetchedAt?, now?, loading?, reportHref?}, {onRefresh})` | `footer.foot > div.foot__row` (freshness «Hentet … · Oppdater», the mailto) + `div.foot__row` (NLOD attribution; the mailto joins it when there is no freshness row). No mailto in the error state (no match to report) or when the Kobling row carries it (`TrustView.footReportHref`). In the panel the footer sits at the bottom of a short state: `details.css` makes the body a column and `main` takes the spare room |
-| `notes.ts` | `buildNotes(merknader, endringer)` | `div.notes[data-tone=warn] > figure.merknad > figcaption.note-head + blockquote.quote > p + p.quote__date > time`; `section > h3.note-head + ul.changes > li > time + span` |
+| `notes.ts` | `buildNotes(merknader, endringer)` | `div.notes[data-tone=warn\|neutral] > figure.merknad > figcaption.note-head + blockquote.quote > p + p.quote__date > time`; `section[data-tone=neutral] > h3.note-head + ul.changes > li > time + span` (its own tone, so a merknad's warn never reaches its glyph) |
 | `oversikt.ts` | `buildOversikt(dossier, {onDrill})`, `buildDefs`, `buildDefRow`, `buildClamp(lines)` | `section.section > h3.section__head + dl > div.def-row > dt + dd` (plain lines, `button.ent` drill-in, `a.ent` link, `span.def-row__sub`). A `clamp` row: `dd > div.clamp-wrap > p.clamp#id + button.text-btn.clamp__btn[aria-expanded][aria-controls][hidden]` — four lines by CSS `line-clamp`, «Vis mer» only once a ResizeObserver has measured an overflow, `.is-open` lifts the clamp |
 | `personer.ts` | `buildPersoner(groups \| 'failed', {onDrill})`, `buildEntityRow(name, note, onOpen, {nameNode})` | `section > div.person(--gone) > b + span.person__role`; `button.entity-row > b + small + svg.icon` |
-| `okonomi.ts` | `buildOkonomi(OkonomiView)` | `section[data-tone] > div.fig-head > h2 + span.cap` · `p.fig-status` · `div.figs > h3.fig-group + dl > div.fig-row(--total)[data-tone] > dt + dd > span.fig-row__unit` · `div.equity > .equity__track > .equity__fill` (`--share`) + `.equity__legend` · `p.honest` · Dokumenter: `div.doc-row > .years`, `div.ext-row` |
+| `okonomi.ts` | `buildOkonomi(OkonomiView)` | `section[data-tone] > div.fig-head > h2 + span.cap` · `p.fig-status` · `div.figs > h3.fig-group + dl > div.fig-row(--total)[data-tone] > dt + dd > span.fig-row__unit` · `div.equity > .equity__track[aria-hidden] > .equity__fill` (`--share`) + `.equity__legend` (read: the only place Gjeld is said) · `p.honest` · Dokumenter: `div.doc-row > .years`, `div.ext-row` |
 | `enheter.ts` | `buildEnheter(EnheterView, parentName, {onDrill, copy, announce})`, `KONSERN_CHILDREN_SHOWN` = 20 | Konsern: `ul.konsern-path > li` (`--depth`) with `.entity-row(--self)`; `p.konsern-sub.cap` + `ul > li > button.entity-row` (hidden past 20, `p.show-all`). Underenheter: `p.units-count`, `ul > li.unit(--gone) > span > .unit__name + .unit__meta` + `button.orgnr.orgnr--sm` |
 | `picker.ts` | `renderPicker(container, {site, candidates, query}, {onPick, onNone, onSearchSelect, announce})` → `{heading, firstRow, input, search}` | `div.pick-head > h1 + p`; `ol.picker > li > button.pick[aria-keyshortcuts] > span.kbd + span > .pick__name + .pick__sub + span.pick__right > (.status-mark \| «N ansatte») + span.evidence(--strong hjemmeside \| --weak underside / navnetreff)`; `button.pick.pick--none > span.kbd + span.pick__label`; `div.pick-search > label.field-label + label.search--lg`. Digit keys 1–4 / 0 on one document listener per document (§ lifecycle below). `pickerHead` words the head by what the rows are: no row with the site registered («Fant ikke selskapet bak …»), one row that has it («Står dette selskapet bak …?»), several that have it, or one among name matches («Mulige selskaper bak …»); every evidence chip has a `title` |
 | `search.ts` | `buildSearchField`, `buildEntryRow`, `searchPainter`, `buildListSection(head)`, `renderRecents`, `renderSearchView(container, data, handlers)` | `div.empty > h1 + p + label.search--lg + p.hint`; `section.section > h3.section__head + ul.results \| ul > li > button.recent > span.recent__name > b (+ .status-mark, .recent__sub) + span.recent__on`; `li.results__note`; `button.back > svg.icon + b` |
@@ -153,7 +153,9 @@ search): the smoke and the tests key on those, not on classes.
   retry, a drill-in), to the result heading or the first picker row;
   a background repaint (auto-sync) never moves it. One focus style
   everywhere: the amber ring on `:focus-visible`; the search box
-  carries it for its input.
+  carries it for its input. Inside the stamp the ring is `--on-danger`
+  (amber on the fill is 1.2:1 light / 2.7:1 dark, under WCAG 1.4.11's
+  3:1; `--on-danger` is 6.7 / 5.4).
 - A background rebuild must not drop focus either: the panel's 30 s
   freshness tick rewrites the footer's text node in place
   (`renderFooter(...).tick`), and a same-view keep (provenance) that
@@ -165,7 +167,9 @@ search): the smoke and the tests key on those, not on classes.
   selskapet») so a screen reader hears it, whatever the caps say.
 - The tablist is a real tablist (roving tabindex, arrow keys); the
   skeleton is `inert` and hidden from AT; `[hidden]` always renders
-  `display: none` (the smoke asserts no hidden element paints).
+  `display: none` (the smoke asserts no hidden element paints). The
+  panel's `nav.back-nav` hides with its drill-in button, so no empty
+  landmark lists.
 - Every copy and drill action is a `<button>`; external links say so
   (`target=_blank`, `rel=noopener noreferrer`, the «↗» is
   `aria-hidden`). The org.nr button's name is «Kopier org.nr 923 609

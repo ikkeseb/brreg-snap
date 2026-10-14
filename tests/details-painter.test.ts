@@ -85,12 +85,16 @@ function mount() {
   const back = document.createElement('button');
   back.className = 'back';
   back.hidden = true;
+  const backNav = document.createElement('nav');
+  backNav.className = 'back-nav';
+  backNav.hidden = true;
+  backNav.appendChild(back);
   const main = document.createElement('main');
   main.id = 'app';
   main.dataset.state = 'loading';
   const foot = document.createElement('footer');
   foot.className = 'foot';
-  document.body.replaceChildren(live, mast, underMast, stick, back, main, foot);
+  document.body.replaceChildren(live, mast, underMast, stick, backNav, main, foot);
   const masthead = renderMasthead(mast, { kind: 'panel', autoSync: { on: false } });
   const roots: PainterRoots = {
     body: document.body,
@@ -261,6 +265,11 @@ describe('result: the dossier', () => {
     expect(q('#panel-okonomi .fig-row dd')?.textContent).toBe('68,0mrd');
     const fill = q('#panel-okonomi .equity__fill')!;
     expect(fill.getAttribute('style')).toMatch(/--share:\s*\d+%/);
+    // The bar is decoration; the legend is read (the only place Gjeld is said).
+    expect(q('#panel-okonomi .equity__track')?.getAttribute('aria-hidden')).toBe('true');
+    const legend = q('#panel-okonomi .equity__legend')!;
+    expect(legend.closest('[aria-hidden]')).toBeNull();
+    expect(legend.textContent).toMatch(/^Egenkapital .+Gjeld .+/);
     expect(q('#panel-okonomi .honest')?.textContent).toBe(
       'Viser bare siste års tall. Eldre år finnes som PDF.',
     );
@@ -416,11 +425,14 @@ describe('result: the dossier', () => {
   it('a drill-in labels the back bar with the company it came from; focus lands on the heading', () => {
     const { painter, intents, roots } = setup({ initialTab: 'personer' });
     painter.result(resultPaint(equinor()));
+    // No drill-in, no back: the nav landmark is hidden with its button.
+    expect(q<HTMLElement>('nav.back-nav')?.hidden).toBe(true);
     q<HTMLButtonElement>('#panel-personer button.entity-row')!.click();
     expect(intents.drill).toHaveBeenCalled();
     painter.result(resultPaint(konkurs(), { method: 'drill-in', host: undefined, focus: 'heading' }));
     painter.setBack(true);
     expect(roots.back.hidden).toBe(false);
+    expect(q<HTMLElement>('nav.back-nav')?.hidden).toBe(false);
     expect(roots.back.textContent).toBe('Tilbake til EQUINOR ASA');
     expect(document.activeElement).toBe(q('h1.ident__name'));
     roots.back.click();

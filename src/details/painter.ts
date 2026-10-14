@@ -203,6 +203,13 @@ export function createPanelPainter(
     }
   }
   roots.back.addEventListener('click', () => intents.back());
+  // The nav landmark around the button hides with it: an empty <nav>
+  // still lists for a screen reader.
+  function showBack(visible: boolean): void {
+    roots.back.hidden = !visible;
+    const nav = roots.back.closest('nav');
+    if (nav) nav.hidden = !visible;
+  }
 
   // The followed tab's toolbar badge, same rule as the popup: the
   // answer's tone when the company on screen is the tab's own
@@ -280,7 +287,7 @@ export function createPanelPainter(
     const nodes = document.createDocumentFragment();
     nodes.append(...main.childNodes);
     aside = { nodes, state, answer: answerAttr, backHidden: roots.back.hasAttribute('hidden') };
-    roots.back.hidden = true;
+    showBack(false);
     roots.stick.hidden = true;
     searchBack.replaceChildren(icon('i-back'), el('b', undefined, searchBackLabel()));
     results.section.hidden = true;
@@ -315,7 +322,7 @@ export function createPanelPainter(
     main.replaceChildren(kept.nodes);
     main.dataset.state = kept.state;
     body.dataset.answer = kept.answer;
-    roots.back.hidden = kept.backHidden;
+    showBack(!kept.backHidden);
     state = kept.state;
     answerAttr = kept.answer;
     setBusy(kept.state === 'loading');
@@ -715,7 +722,7 @@ export function createPanelPainter(
     setBack(visible): void {
       backHidden = !visible;
       if (aside) aside.backHidden = backHidden;
-      else roots.back.hidden = backHidden;
+      else showBack(visible);
     },
 
     selectTab(key): void {
