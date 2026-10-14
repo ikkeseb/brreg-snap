@@ -269,8 +269,29 @@ describe('result: the dossier', () => {
     const legend = q('#panel-okonomi .equity__legend')!;
     expect(legend.closest('[aria-hidden]')).toBeNull();
     expect(legend.textContent).toMatch(/^Egenkapital .+Gjeld .+/);
+    // The trend: the company's own three years, oldest first, as a
+    // labelled table read in a sentence; the group's rows never enter.
+    const trend = q('#panel-okonomi .trend__table')!;
+    expect(trend.getAttribute('aria-labelledby')).toBe(q('#panel-okonomi .trend h3')?.id);
+    expect(q('#panel-okonomi .trend h3')?.textContent).toBe('Utvikling 2023–2025');
+    expect(qa('#panel-okonomi .trend__table thead th').map((t) => t.textContent)).toEqual(['2023', '2024', '2025']);
+    // One unit per row, beside the label; the cells hold numbers only.
+    const first = qa('#panel-okonomi .trend__table tbody tr')[0]!;
+    const rowHead = first.querySelector('th[scope="row"]')!;
+    expect(rowHead.querySelector('.fig-row__unit')?.textContent).toBe('mrd');
+    // Real whitespace before the unit, and a name that says it in words.
+    expect(rowHead.textContent).toBe('Driftsinntekter mrd');
+    expect(rowHead.getAttribute('aria-label')).toBe('Driftsinntekter, milliarder USD');
+    expect([...first.querySelectorAll('td')].map((td) => td.textContent)).toEqual(['72,4', '72,5', '68,0']);
+    expect(first.querySelector('td .fig-row__unit')).toBeNull();
+    // The figures head already says USD: the trend head carries no currency.
+    expect(q('#panel-okonomi .trend__cur')).toBeNull();
+    expect(qa('#panel-okonomi .trend__read').map((p) => p.textContent)).toEqual([
+      'Driftsinntekter ned 6\u00a0%.',
+      'Årsresultat ned 51\u00a0%.',
+    ]);
     expect(q('#panel-okonomi .honest')?.textContent).toBe(
-      'Viser bare siste års tall. Eldre år finnes som PDF.',
+      'Åpne data dekker 2023–2025. Eldre år finnes som PDF.',
     );
     const years = qa('#panel-okonomi .years a');
     expect(years.map((a) => a.textContent)).toEqual(['2025', '2024', '2023', '2022', '2021', '2020', '2019']);
@@ -284,6 +305,38 @@ describe('result: the dossier', () => {
     const ext = q<HTMLAnchorElement>('#panel-okonomi .ext-row a')!;
     expect(ext.textContent).toBe('Kunngjøringer ↗');
     expect(ext.href).toContain('w2.brreg.no/kunngjoring');
+  });
+
+  it('Økonomi: a latest filing without figures still paints the trend, with its own currency', () => {
+    const { painter } = setup({ initialTab: 'okonomi' });
+    const company = equinor();
+    // The 2025 SELSKAP row keeps its date and loses its figures.
+    const items = (regnskapEquinor as Array<Record<string, unknown>>).map((r) =>
+      r.regnskapstype === 'SELSKAP' && String((r.regnskapsperiode as { tilDato: string }).tilDato).startsWith('2025')
+        ? { regnskapstype: 'SELSKAP', regnskapsperiode: r.regnskapsperiode, valuta: r.valuta }
+        : r,
+    );
+    painter.result(resultPaint({ ...company, regnskap: { items } }));
+    expect(q('#panel-okonomi .fig-head')).toBeNull();
+    expect(q('#panel-okonomi .section__text')?.textContent).toBe('Regnskap registrert, men uten utdrag.');
+    expect(q('#panel-okonomi .trend h3')?.textContent).toBe('Utvikling 2023–2024Beløp i USD');
+    expect(qa('#panel-okonomi .trend__table thead th').map((t) => t.textContent)).toEqual(['2023', '2024']);
+    expect(q('#panel-okonomi .honest')?.textContent).toBe('Åpne data dekker 2023–2024. Eldre år finnes som PDF.');
+  });
+
+  it('Økonomi: a trend cell too small for the row unit reads «<0,1», the exact amount in title and name', () => {
+    const { painter } = setup({ initialTab: 'okonomi' });
+    const items = (regnskapEquinor as Array<Record<string, unknown>>).map((r) =>
+      r.regnskapstype === 'SELSKAP' && String((r.regnskapsperiode as { tilDato: string }).tilDato).startsWith('2023')
+        ? { ...r, resultatregnskapResultat: { driftsresultat: { driftsinntekter: { sumDriftsinntekter: 2 } }, aarsresultat: 1 } }
+        : r,
+    );
+    painter.result(resultPaint({ ...equinor(), regnskap: { items } }));
+    const cell = qa('#panel-okonomi .trend__table tbody tr')[0]!.querySelector('td')!;
+    expect(cell.textContent).toBe('<0,1');
+    expect(cell.title).toBe('2 USD');
+    expect(cell.getAttribute('aria-label')).toBe('2 USD');
+    expect(cell.hasAttribute('style')).toBe(false);
   });
 
   it('Enheter: the Konsern section (path, children capped at 20, «Vis alle»), then the units', () => {

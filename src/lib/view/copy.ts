@@ -114,7 +114,46 @@ export const COPY = {
   egenkapitalLegend: (amount: string) => `Egenkapital ${amount}`,
   gjeldLegend: (amount: string) => `Gjeld ${amount}`,
   honestSingleYear: 'Viser bare siste års tall.',
+  honestYears: (from: string, to: string) => `Åpne data dekker ${from}–${to}.`,
   honestPdf: ' Eldre år finnes som PDF.',
+  // The trend: the company's own figures over the years brreg served.
+  trendTitle: (from: string, to: string) => `Utvikling ${from}–${to}`,
+  driftsinntekter: 'Driftsinntekter',
+  aarsresultat: 'Årsresultat',
+  trendMissing: '–',
+  // The row header's accessible name: the unit beside the label is
+  // only «mrd» on screen. «Driftsinntekter, milliarder NOK».
+  trendRowName: (label: string, unit: string, valuta: string) => {
+    const words: Record<string, string> = { mrd: 'milliarder', mill: 'millioner', tusen: 'tusen' };
+    const unitWord = words[unit];
+    return `${label}, ${unitWord ? `${unitWord} ` : ''}${valuta}`;
+  },
+  // One sentence per row: «<label> <reading>[, <aside>].» The rules
+  // that pick the pieces are in src/lib/view/trend.ts.
+  trendSentence: (label: string, reading: string, aside?: string) =>
+    `${label} ${reading}${aside ? `, ${aside}` : ''}.`,
+  trendUp: (pct?: string) => (pct ? `opp ${pct}` : 'opp'),
+  trendDown: (pct?: string) => (pct ? `ned ${pct}` : 'ned'),
+  trendSame: 'uendret',
+  trendFlat: 'omtrent uendret',
+  trendHighest: (year: string) => `høyest i ${year}`,
+  trendLowest: (year: string) => `lavest i ${year}`,
+  // The year only when the years around the turn are both held and
+  // back to back; otherwise the turn is somewhere in the period.
+  trendTurned: (toLoss: boolean, year?: string) =>
+    `snudde ${toLoss ? 'fra overskudd til underskudd' : 'fra underskudd til overskudd'}${year ? ` i ${year}` : ''}`,
+  trendLossBetween: (years: string) => `men underskudd i ${years}`,
+  trendLossEvery: (two: boolean) => (two ? 'i underskudd begge år' : 'i underskudd alle år'),
+  trendLossLarger: 'større sist',
+  trendLossSmaller: 'mindre sist',
+  trendLossSame: 'like stort',
+  trendLossAbout: 'omtrent like stort',
+  trendLossMost: (year: string) => `størst i ${year}`,
+  trendLossLeast: (year: string) => `minst i ${year}`,
+  trendLossYears: (label: string, years: string) => `${label}: underskudd i ${years}.`,
+  // «2023», «2023 og 2025», «2022, 2023 og 2025».
+  yearList: (years: string[]) =>
+    years.length < 2 ? (years[0] ?? '') : `${years.slice(0, -1).join(', ')} og ${years.at(-1)!}`,
   // The Enhet names a newer filed year than the figures the API gave.
   filedNewer: (year: string) => `${year} er levert. Tallene er ikke i åpne data ennå.`,
   honestShowingYear: (year: string) => `Viser tallene for ${year}.`,

@@ -15,9 +15,9 @@ import {
 import type { KonsernChild, KonsernRef } from '../konsern.js';
 import {
   egenkapitalandelTone,
+  companyRegnskapByYear,
   keyFigures,
   regnskapGap,
-  latestRegnskap,
   type KeyFigures,
 } from '../regnskap.js';
 import { isResigned, roleSubjectName } from '../roller.js';
@@ -25,6 +25,9 @@ import type { Signal, Tone } from '../trust/types.js';
 import { deriveStatusFlags } from '../ui/flags.js';
 import type { Adresse, Enhet, Rolle, RollerResponse, Underenhet } from '../../types/brreg.js';
 import { COPY } from './copy.js';
+import { trendOf, type TrendView } from './trend.js';
+
+export type { TrendCell, TrendView } from './trend.js';
 
 const NBSP = ' ';
 const spaced = (digits: string): string =>
@@ -80,6 +83,9 @@ export type OkonomiFigures =
 
 export interface OkonomiView {
   figures: OkonomiFigures;
+  // Independent of the figures: a latest filing without figures still
+  // shows the years before it.
+  trend?: TrendView;
   honest?: string;
   // undefined: the year list couldn't be fetched.
   pdf?: { years: Array<{ year: string; href: string }> };
@@ -411,6 +417,7 @@ function okonomi(input: DossierInput): OkonomiView {
   const regnskapSignal = signals.find((s) => s.key === 'regnskap');
   let figures: OkonomiFigures;
   let honest: string | undefined;
+  let trend: TrendView | undefined;
   const years = company.aarsregnskapYears;
   const pdfNote = years && years.length > 0 ? COPY.honestPdf : '';
   if (!regnskap) {
@@ -421,20 +428,35 @@ function okonomi(input: DossierInput): OkonomiView {
     if (enhet.sisteInnsendteAarsregnskap) lines.push(COPY.lastFiled(enhet.sisteInnsendteAarsregnskap));
     figures = { kind: 'text', lines };
   } else {
-    const latest = latestRegnskap(regnskap.items);
-    if (!latest) {
+    const held = companyRegnskapByYear(regnskap.items).map(keyFigures);
+    const key = held[held.length - 1];
+    if (!key) {
       figures = { kind: 'text', lines: [COPY.regnskapNone] };
     } else {
-      const key = keyFigures(latest);
       figures = figuresOf(key, regnskapSignal);
-      // The view shows one year only: say so (and which, when a newer
-      // one is filed), and point at the copies where the others live.
-      honest = newerFiledYear(key, regnskapSignal)
-        ? `${COPY.honestShowingYear(key.year)}${years && years.length > 0 ? COPY.honestOtherPdf : ''}`
-        : `${COPY.honestSingleYear}${pdfNote}`;
+      const headValuta = figures.kind === 'figures' ? (key.valuta ?? 'NOK') : undefined;
+      trend = trendOf(held, headValuta);
+      // Say which years the view holds (one, or the span the trend
+      // reads; and which, when a newer one is filed), and point at the
+      // copies where the others live. No figures and no trend: nothing
+      // to qualify.
+      // A newer filed year missing from the API is said in the status
+      // line; here it only turns «Eldre år» into «Andre år».
+      if (figures.kind === 'figures') {
+        const newer = newerFiledYear(key, regnskapSignal);
+        const otherPdf = years && years.length > 0 ? COPY.honestOtherPdf : '';
+        honest = trend
+          ? `${COPY.honestYears(trend.years[0]!, key.year)}${newer ? otherPdf : pdfNote}`
+          : newer
+            ? `${COPY.honestShowingYear(key.year)}${otherPdf}`
+            : `${COPY.honestSingleYear}${pdfNote}`;
+      } else if (trend) {
+        honest = `${COPY.honestYears(trend.years[0]!, trend.years.at(-1)!)}${pdfNote}`;
+      }
     }
   }
   const view: OkonomiView = { figures, kunngjoringer };
+  if (trend) view.trend = trend;
   if (honest) view.honest = honest;
   if (years) {
     view.pdf = { years: years.map((year) => ({ year, href: pdfUrl(enhet.organisasjonsnummer, year) })) };

@@ -35,11 +35,15 @@ type, so they showed a parent's group figures as its own. `år` and
 `regnskapstype` now filter the response (observed 2026-10-06); the
 code filters on the client and depends on neither.
 
-The Økonomi tab still shows the latest year only, says so, and points
-at the annual-report copies for older years
-(`src/lib/view/dossier-view.ts`, `src/lib/view/components/okonomi.ts`;
-§ aarsregnskap-kopi). A multi-year trend view is now possible from
-this data.
+The Økonomi tab leads with the latest year, then reads the company's
+own years as a trend (`companyRegnskapByYear`, `src/lib/view/trend.ts`;
+`docs/notes/ui.md` § okonomi-trend) when two or more hold figures; one
+year is the plain view, and the honest line says which years the open
+data covers and points at the annual-report copies for the rest
+(§ aarsregnskap-kopi). How many years brreg keeps serving is unknown:
+a return to one row degrades to the plain view without an error, so
+the live canary asserts at least two own Equinor years with
+driftsinntekter and årsresultat (§ live-canary).
 
 <!-- SECTION: regnskap-500-unsupported-plan -->
 ## 500 from regnskap = "not in the open API", not a network failure
@@ -279,7 +283,8 @@ It has two files:
   has no test. It also checks the entity shapes the code reads (DNB,
   Equinor in USD, a konkurs AS with a BOBE bostyrer, a slettet entity,
   an ENK, a NUF, an underenhet, roller with `avregistrert` and no
-  `fratraadt`), the search semantics the resolver depends on (no Nordic
+  `fratraadt`; at least two own Equinor years for the Økonomi trend),
+  the search semantics the resolver depends on (no Nordic
   folding, hjemmeside substring, `organisasjonsnummer=`), and the 1.4
   endpoints (konsernstruktur, oppdateringer, `kopi/{orgnr}/aar`). Two
   tests are deliberate tripwires. `regnskap-years-and-types` fails when

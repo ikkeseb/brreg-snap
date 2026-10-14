@@ -102,6 +102,39 @@ export function formatAmountParts(
   return m ? { amount: text.slice(0, m.index), unit: m[1]! } : { amount: text, unit: '' };
 }
 
+// Several amounts printed in ONE magnitude word, so a table column
+// holds numbers only and they line up: the unit is the one
+// formatMagnitude would pick for the largest, and every value is
+// written in it with that unit's decimals. A non-zero value that would
+// round to zero there reads «<0,1» («-<0,1» for a negative; «<1» in a
+// whole-number unit) and is marked `small`, so the caller can give the
+// exact amount; the cell stays short however wide the row's spread.
+// Missing values stay undefined.
+export function formatAmountsIn(values: Array<number | undefined>): {
+  unit: string;
+  amounts: Array<{ amount: string; small?: true } | undefined>;
+} {
+  const held = values.filter((v): v is number => typeof v === 'number' && !Number.isNaN(v));
+  const largest = held.reduce((m, v) => Math.max(m, Math.abs(v)), 0);
+  const { unit } = formatAmountParts(largest) ?? { unit: '' };
+  const tier = MONEY_UNITS.find((u) => u.word === (unit ? ` ${unit}` : ''))!;
+  const step = (10 ** -tier.digits).toLocaleString('nb-NO');
+  const amounts = values.map((v) => {
+    if (typeof v !== 'number' || Number.isNaN(v)) return undefined;
+    const sign = v < 0 ? '-' : '';
+    const scaled = Math.abs(v) / tier.size;
+    if (v !== 0 && Number(scaled.toFixed(tier.digits)) === 0) {
+      return { amount: `${sign}<${step}`, small: true as const };
+    }
+    const text = scaled.toLocaleString('nb-NO', {
+      minimumFractionDigits: tier.digits,
+      maximumFractionDigits: tier.digits,
+    });
+    return { amount: `${sign}${text}` };
+  });
+  return { unit, amounts };
+}
+
 // A regnskap's figures are in its `valuta`: NOK for most filers, but
 // companies reporting in a functional currency file in USD or EUR
 // (Equinor, Aker BP, Mowi). "kr" is right only for NOK; anything else

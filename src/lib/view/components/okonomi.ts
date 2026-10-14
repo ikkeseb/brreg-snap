@@ -1,12 +1,13 @@
 // The Økonomi tab: the latest filing's figures with their currency,
 // the equity share as a proportion bar (width through the CSSOM, never
-// a style attribute), the honest single-year note, then Dokumenter:
-// the annual-report PDF years and the kunngjøringer link. One year of
-// figures is shown — no trend, no chart.
+// a style attribute), the trend (driftsinntekter and årsresultat over
+// the years brreg served, as a plain table read in a sentence; no
+// chart), the honest years note, then Dokumenter: the annual-report
+// PDF years and the kunngjøringer link.
 
 import { COPY } from '../copy.js';
-import type { FigRow, OkonomiView } from '../dossier-view.js';
-import { button, el, glyph, link, section } from './dom.js';
+import type { FigRow, OkonomiView, TrendCell, TrendView } from '../dossier-view.js';
+import { button, el, glyph, link, section, uniqueId } from './dom.js';
 
 const YEARS_SHOWN = 5;
 
@@ -20,12 +21,80 @@ function buildFigRow(row: FigRow): HTMLDivElement {
   return div;
 }
 
+// Tabular digits, but the decimal comma in its own proportional run:
+// Schibsted's tabular comma is digit-wide and reads «68 , 0».
+function buildCell(cell: TrendCell | undefined): HTMLTableCellElement {
+  if (!cell) return el('td', undefined, COPY.trendMissing);
+  const td = el('td', cell.negative ? 'num--neg' : undefined);
+  // «<0,1» in the row's unit: the exact amount on hover and for a
+  // screen reader (attributes, no style).
+  if (cell.exact) {
+    td.title = cell.exact;
+    td.setAttribute('aria-label', cell.exact);
+  }
+  const [whole, decimals] = cell.amount.split(',');
+  td.append(whole!);
+  if (decimals !== undefined) td.append(el('span', 'trend__comma', ','), decimals);
+  return td;
+}
+
+// Years across, the two figures down, the latest year in the weight
+// the rows above use. Each row names its magnitude word once, beside
+// its label, so the cells hold numbers only and line up right-aligned.
+// A sentence per row says the direction so no one has to subtract.
+function buildTrend(trend: TrendView): HTMLElement {
+  const wrap = el('div', 'trend');
+  const head = el('h3', 'fig-group cap trend__head', trend.title);
+  head.id = uniqueId('trend');
+  if (trend.currency) head.appendChild(el('span', 'trend__cur', trend.currency));
+  wrap.appendChild(head);
+  const table = el('table', 'trend__table');
+  table.setAttribute('aria-labelledby', head.id);
+  const thead = el('thead');
+  const hr = el('tr');
+  hr.appendChild(el('td'));
+  for (const year of trend.years) {
+    const th = el('th', undefined, year);
+    th.scope = 'col';
+    hr.appendChild(th);
+  }
+  thead.appendChild(hr);
+  table.appendChild(thead);
+  const tbody = el('tbody');
+  for (const row of trend.rows) {
+    const tr = el('tr');
+    const th = el('th', undefined, row.label);
+    th.scope = 'row';
+    // On screen the unit is a quiet «mrd»; the name says it in words,
+    // with the currency.
+    th.setAttribute('aria-label', row.name);
+    if (row.unit) th.append(' ', el('span', 'fig-row__unit', row.unit));
+    tr.appendChild(th);
+    for (const cell of row.cells) tr.appendChild(buildCell(cell));
+    tbody.appendChild(tr);
+  }
+  table.appendChild(tbody);
+  wrap.appendChild(table);
+  for (const line of trend.read) wrap.appendChild(el('p', 'trend__read', line));
+  return wrap;
+}
+
+function buildHonest(text: string): HTMLParagraphElement {
+  const honest = el('p', 'honest');
+  honest.dataset.tone = 'neutral';
+  honest.appendChild(glyph('neutral'));
+  honest.appendChild(el('span', undefined, text));
+  return honest;
+}
+
 function buildFigures(view: OkonomiView): HTMLElement {
   const { figures } = view;
   if (figures.kind !== 'figures') {
     const sec = section(COPY.regnskap);
     const lines = figures.kind === 'failed' ? [figures.text] : figures.lines;
     for (const line of lines) sec.appendChild(el('p', 'section__text', line));
+    if (view.trend) sec.appendChild(buildTrend(view.trend));
+    if (view.honest) sec.appendChild(buildHonest(view.honest));
     return sec;
   }
   const sec = el('section', 'section');
@@ -65,13 +134,8 @@ function buildFigures(view: OkonomiView): HTMLElement {
     sec.appendChild(equity);
   }
 
-  if (view.honest) {
-    const honest = el('p', 'honest');
-    honest.dataset.tone = 'neutral';
-    honest.appendChild(glyph('neutral'));
-    honest.appendChild(el('span', undefined, view.honest));
-    sec.appendChild(honest);
-  }
+  if (view.trend) sec.appendChild(buildTrend(view.trend));
+  if (view.honest) sec.appendChild(buildHonest(view.honest));
   return sec;
 }
 

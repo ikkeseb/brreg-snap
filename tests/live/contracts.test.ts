@@ -26,7 +26,7 @@ import {
 import { deriveKonsern, fetchKonsernstruktur } from '../../src/lib/konsern.js';
 import type { KonsernNode } from '../../src/types/brreg.js';
 import { isValidOrgnr } from '../../src/lib/mod11.js';
-import { keyFigures, latestRegnskap, regnskapGap } from '../../src/lib/regnskap.js';
+import { companyRegnskapByYear, keyFigures, latestRegnskap, regnskapGap } from '../../src/lib/regnskap.js';
 import { findRoleHolder, isResigned } from '../../src/lib/roller.js';
 import { deriveSignals } from '../../src/lib/trust/signals.js';
 import type { Enhet, Rolle, RollerResponse, SearchHit } from '../../src/types/brreg.js';
@@ -289,6 +289,16 @@ describe('entity shapes', () => {
     expect(figures.year).toMatch(/^\d{4}$/);
     expect(typeof figures.driftsinntekter).toBe('number');
     expect(typeof figures.egenkapital).toBe('number');
+  });
+
+  // The Økonomi trend lives on brreg serving several of the company's
+  // own years; with one row it disappears without an error. This says
+  // when that shape changes (docs/notes/brreg-api.md
+  // § regnskap-years-and-types).
+  it('Equinor 923609016: at least two own (SELSKAP) years with the trend figures', async () => {
+    const own = companyRegnskapByYear((await equinorRegnskap()).items).map(keyFigures);
+    const withTrend = own.filter((k) => typeof k.driftsinntekter === 'number' && typeof k.aarsresultat === 'number');
+    expect(withTrend.length, `own years: ${own.map((k) => k.year).join(', ')}`).toBeGreaterThanOrEqual(2);
   });
 
   it('a konkurs AS: konkurs flag, date, and a BOBE role naming the bostyrer', async () => {
