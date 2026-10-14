@@ -334,9 +334,11 @@ clubs) fills the 20 rows with bigger unrelated organisations.
 Brreg's `hjemmeside` field is free text ("http://www.equinor.com",
 "https://orkla.com/", "www.storebrand.no/eiendom"). Each entry (the
 field is split on commas, semicolons and whitespace first) is
-reduced by `normalizeHjemmeside` to a bare lowercase host (strip
-scheme, `www.`, path/port/query/fragment, trailing dots), then
-compared on domain-label boundaries only:
+reduced by the URL parser to a bare lowercase host (`hjemmesideEntries`:
+scheme, `www.`, port, query, fragment and trailing dots dropped, IDN
+spellings punycoded like the tab's hostname, e-mail addresses
+skipped), the same parse Kobling reads through `hjemmesideDomains`,
+then compared on domain-label boundaries only:
 
 | Relation | Example (visiting `storebrand.no`) | Points |
 |---|---|---|

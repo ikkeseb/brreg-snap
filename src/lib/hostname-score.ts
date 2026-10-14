@@ -246,67 +246,50 @@ export interface ScoreResult {
   nameLength: number;
 }
 
-// Brreg's hjemmeside field is free text — "http://www.equinor.com",
-// "https://orkla.com/", "tine.no/om", trailing dots, mixed case.
-// Reduce it to a bare lowercase host so it compares against the
-// visited host like-for-like. Without this, an exact-host hjemmeside
-// wrapped in scheme/www/port fell through to a weaker band and
-// confident matches landed in the picker.
-export function normalizeHjemmeside(raw: string): string {
-  return raw
-    .trim()
-    .toLowerCase()
-    .replace(/^https?:\/\//, '')
-    .replace(/^www\./, '')
-    .replace(/[/:?#].*$/, '') // drop path, port, query, fragment
-    .replace(/\.+$/, ''); // drop trailing dot(s)
-}
-
-// The registrable domains a company's free-text hjemmeside names, in
-// the order written, deduplicated. The field may hold several sites
-// ("a.no, b.no"), pages ("www.storebrand.no/eiendom") or junk
-// ("ingen", an e-mail address); junk yields nothing. IDN spellings are
-// punycoded by the URL parser, so they compare with the tab's hostname.
-export function hjemmesideDomains(raw: string | undefined): string[] {
-  const out = new Set<string>();
-  for (const entry of (raw ?? '').split(/[\s,;]+/)) {
-    if (!entry || entry.includes('@')) continue;
-    let host: string;
-    try {
-      host = new URL(
-        /^[a-z][a-z0-9+.-]*:\/\//i.test(entry) ? entry : `http://${entry}`,
-      ).hostname;
-    } catch {
-      continue;
-    }
-    const domain = registrableDomain(host);
-    if (domain) out.add(domain);
-  }
-  return [...out];
-}
-
 interface HjemmesideEntry {
+  // Bare lowercase host, punycoded, without `www.` or trailing dots.
   host: string;
   // False when the entry points at a page on the site rather than the
   // site itself ("www.storebrand.no/eiendom", "nrk.no/urort/artist/…").
   root: boolean;
 }
 
-// A free-text field can name more than one site ("a.no, b.no"), so
-// split before normalizing — otherwise the second entry survives as
-// junk glued onto the first host.
-function hjemmesideEntries(raw: string): HjemmesideEntry[] {
-  return raw
-    .split(/[\s,;]+/)
-    .map((entry) => {
-      const path = entry
-        .trim()
-        .replace(/^https?:\/\//i, '')
-        .replace(/^[^/?#]+/, '') // host and port
-        .replace(/[?#].*$/, '');
-      return { host: normalizeHjemmeside(entry), root: path.length <= 1 };
-    })
-    .filter((e) => e.host);
+// Brreg's hjemmeside field is free text: "http://www.equinor.com",
+// "https://orkla.com/", "tine.no/om", several sites ("a.no, b.no"),
+// trailing dots, mixed case, IDN spellings, junk ("ingen", an e-mail
+// address). Split first, then let the URL parser reduce each entry to
+// a host, so it compares with the tab's hostname like-for-like: the
+// parser punycodes IDN spellings (www.blåbær.no → xn--blbr-roah.no)
+// and drops port, query and fragment. Unparseable entries and e-mail
+// addresses yield nothing. The scorer and hjemmesideDomains (Kobling)
+// both read the field through here, so they never disagree on a site.
+function hjemmesideEntries(raw: string | undefined): HjemmesideEntry[] {
+  const out: HjemmesideEntry[] = [];
+  for (const entry of (raw ?? '').split(/[\s,;]+/)) {
+    if (!entry || entry.includes('@')) continue;
+    let url: URL;
+    try {
+      url = new URL(
+        /^[a-z][a-z0-9+.-]*:\/\//i.test(entry) ? entry : `http://${entry}`,
+      );
+    } catch {
+      continue;
+    }
+    const host = url.hostname.replace(/\.+$/, '').replace(/^www\./, '');
+    if (host) out.push({ host, root: url.pathname.length <= 1 });
+  }
+  return out;
+}
+
+// The registrable domains a company's free-text hjemmeside names, in
+// the order written, deduplicated; junk yields nothing.
+export function hjemmesideDomains(raw: string | undefined): string[] {
+  const out = new Set<string>();
+  for (const { host } of hjemmesideEntries(raw)) {
+    const domain = registrableDomain(host);
+    if (domain) out.add(domain);
+  }
+  return [...out];
 }
 
 export function scoreCandidate(
@@ -346,8 +329,8 @@ export function scoreCandidate(
   // Hjemmeside-felt match. Weighted lower than name match — small
   // associations populate this field more often than parent companies
   // (SHELL VETERANENE for shell.no, drift companies for lieoverflate).
-  // Each entry is normalized to a bare host first (see
-  // normalizeHjemmeside) so "http://www.equinor.com" scores exact
+  // Each entry is reduced to a bare host first (see
+  // hjemmesideEntries) so "http://www.equinor.com" scores exact
   // against equinor.com. Matching is on domain-label boundaries only;
   // plain substrings are not a relation (tidsbanken.no contains
   // sbanken.no, vg.nordland.no starts with vg.no):
@@ -367,7 +350,7 @@ export function scoreCandidate(
   let hjemScore = 0;
   let hjemReason = '';
   let hjemmesideKind: ScoreResult['hjemmesideKind'];
-  for (const entry of hjemmesideEntries(cand.hjemmeside ?? '')) {
+  for (const entry of hjemmesideEntries(cand.hjemmeside)) {
     const sameSite = entry.host === bareHost || entry.host === domain;
     if (sameSite && entry.root) {
       hjemScore = 35;
@@ -438,11 +421,11 @@ export function scoreCandidate(
 
   // Subsidiary keywords only count when the label is already matched
   // — otherwise unrelated entities containing these words get
-  // penalised for no reason.
+  // penalised for no reason. Whole words only: IT must not fire inside
+  // SPIRIT or VISIT, nor CARE inside SKINCARE.
   if (nameScore > 0) {
-    const matchedSub = SUBSIDIARY_KEYWORDS.find(
-      (w) => navn.includes(' ' + w) || navn.includes(w + ' '),
-    );
+    const words = navn.split(/\s+/);
+    const matchedSub = SUBSIDIARY_KEYWORDS.find((w) => words.includes(w));
     if (matchedSub) {
       score -= 15;
       reasons.push(`subsidiary-kw=${matchedSub}(-15)`);

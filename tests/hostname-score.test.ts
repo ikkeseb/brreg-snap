@@ -8,7 +8,6 @@ import {
   hjemmesideDomains,
   hostnameLabel,
   namedAfterSite,
-  normalizeHjemmeside,
   pickerRows,
   registrableDomain,
   scoreCandidate,
@@ -238,27 +237,6 @@ describe('registrableDomain', () => {
   });
 });
 
-describe('normalizeHjemmeside', () => {
-  it('strips scheme and www', () => {
-    expect(normalizeHjemmeside('http://www.equinor.com')).toBe('equinor.com');
-    expect(normalizeHjemmeside('https://orkla.com')).toBe('orkla.com');
-    expect(normalizeHjemmeside('www.tine.no')).toBe('tine.no');
-  });
-
-  it('strips path, query, fragment, and trailing slash', () => {
-    expect(normalizeHjemmeside('https://orkla.com/')).toBe('orkla.com');
-    expect(normalizeHjemmeside('tine.no/om')).toBe('tine.no');
-    expect(normalizeHjemmeside('tine.no?lang=no')).toBe('tine.no');
-    expect(normalizeHjemmeside('tine.no#main')).toBe('tine.no');
-  });
-
-  it('strips ports, trailing dots, whitespace, and lowercases', () => {
-    expect(normalizeHjemmeside('tine.no:8080')).toBe('tine.no');
-    expect(normalizeHjemmeside('tine.no.')).toBe('tine.no');
-    expect(normalizeHjemmeside(' TINE.NO ')).toBe('tine.no');
-  });
-});
-
 describe('scoreCandidate', () => {
   it('returns 0 for a candidate with neither name nor hjemmeside relation', () => {
     const c = cand({ navn: 'NORDAN AS' });
@@ -373,6 +351,8 @@ describe('scoreCandidate', () => {
       ['tine.no.', 'tine.no'],
       ['tine.no:8080', 'tine.no'],
       ['tine.no?lang=no', 'tine.no'],
+      ['tine.no#main', 'tine.no'],
+      [' TINE.NO ', 'tine.no'],
       ['Askertannlegene.no', 'askertannlegene.no'],
     ] as const;
     for (const [hjemmeside, host] of shapes) {
@@ -382,6 +362,21 @@ describe('scoreCandidate', () => {
         'hjemmeside=exact(+35)',
       );
     }
+  });
+
+  it('ties an IDN hjemmeside to the punycoded host, as Kobling does', () => {
+    // The tab's hostname arrives punycoded; brreg stores the human
+    // spelling. Scorer and hjemmesideDomains must read it alike.
+    const c = cand({ navn: 'BLÅBÆR AS', hjemmeside: 'www.blåbær.no' });
+    const { reasons, hjemmesideTie, hjemmesideKind } = scoreCandidate(
+      c,
+      'blåbær',
+      'xn--blbr-roah.no',
+    );
+    expect(hjemmesideDomains(c.hjemmeside)).toEqual(['xn--blbr-roah.no']);
+    expect(hjemmesideTie).toBe(true);
+    expect(hjemmesideKind).toBe('exact');
+    expect(reasons).toContain('hjemmeside=exact(+35)');
   });
 
   it('matches a normalized hjemmeside against a www-visited host', () => {
@@ -526,6 +521,27 @@ describe('scoreCandidate', () => {
     expect(scoreCandidate(sub, 'orkla', 'orkla.com').score).toBeLessThan(
       scoreCandidate(plain, 'orkla', 'orkla.com').score,
     );
+  });
+
+  it('matches subsidiary keywords as whole words only', () => {
+    // IT inside SPIRIT / VISIT / BENEFIT and CARE inside SKINCARE are
+    // letters of another word, not a division name.
+    for (const [navn, label] of [
+      ['SPIRIT AS', 'spirit'],
+      ['VISIT OSLO AS', 'visit'],
+      ['BENEFIT AS', 'benefit'],
+      ['SKINCARE AS', 'skincare'],
+    ] as const) {
+      const { reasons } = scoreCandidate(cand({ navn }), label, `${label}.no`);
+      expect(reasons.some((r) => r.startsWith('subsidiary-kw')), navn).toBe(false);
+    }
+    // The whole word still fires, mid-name or last before the form.
+    expect(
+      scoreCandidate(cand({ navn: 'ORKLA FOODS NORGE AS' }), 'orkla', 'orkla.com').reasons,
+    ).toContain('subsidiary-kw=FOODS(-15)');
+    expect(
+      scoreCandidate(cand({ navn: 'TELENOR IT AS' }), 'telenor', 'telenor.no').reasons,
+    ).toContain('subsidiary-kw=IT(-15)');
   });
 
   it('does NOT penalise NORGE / NORDIC / GROUP as subsidiary keywords', () => {
