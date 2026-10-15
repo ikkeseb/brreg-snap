@@ -21,7 +21,7 @@ the captured text or data.
 |---|---|---|
 | 01 lookup | `popup-light/popup-dnb.png` | Entire 380×600 capture |
 | 02 warnings | `panel-400-light/konkurs.png` | x=0, y=0, width=400, height=640 |
-| 03 accounts | `panel-400-light/equinor-okonomi.png` | x=0, y=474, width=400, height=680 |
+| 03 accounts | `panel-400-light/equinor-okonomi.png` | x=0, y=474, width=400, height=670 |
 | 04 group | `panel-400-light/equinor-enheter.png` | x=0, y=474, width=400, height=640 |
 | 05 search | `panel-400-light/search-view.png` | x=0, y=0, width=400, height=624 |
 
