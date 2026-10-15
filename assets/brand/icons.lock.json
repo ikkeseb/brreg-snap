@@ -1,0 +1,11 @@
+{
+  "assets/brand/mark-128.svg": "cded97e47cc39f228fd539a393ba473ab535628701fa300ccdf323b352d9d65d",
+  "assets/brand/mark-16.svg": "3c009ba4b7366eac6ae604caca0d1dfebb8598908244b15d53f43fa446c3e5eb",
+  "assets/brand/mark-32.svg": "536ee63838cd7734d1ad1b6b904974d2746ef6855a2a4e079dae2cecb84e52db",
+  "assets/brand/mark.svg": "9943d0e8f937ef5248c1b2140bf2426a8804adf812c2cb749e52625fdf7dd4a8",
+  "public/icons/icon-128.png": "d4dd50bae5b1d14e4cafe6c82a395bbd9d92ddc8ef94fd6ef5c4a2823a2226c1",
+  "public/icons/icon-16.png": "2ddfa6f7c0bb7bb4148020b521d8790234a2aa099e2d569d8b77e14f0f482fbf",
+  "public/icons/icon-32.png": "57bafa3cd14d3fd941b9668aaee26498f92f9977eb6e1dc3f676d126f5a27248",
+  "public/icons/icon-48.png": "2d725c101e688c802ad5928c88581608696c61f54bf0ab4ab7304822167d4263",
+  "src/lib/view/mark-data.ts": "86db12568d19dbd20106e33ee21e5714cd280de6c69f8dc7fc698fc8618bf4e5"
+}

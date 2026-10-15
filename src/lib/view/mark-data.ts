@@ -11,7 +11,6 @@ export interface MarkDrawing {
   width: number;
   height: number;
   d: readonly string[];
-  source: string;
 }
 
 export const MARK: { width: number; height: number; drawings: readonly MarkDrawing[] } = {
@@ -27,8 +26,7 @@ export const MARK: { width: number; height: number; drawings: readonly MarkDrawi
         "M0 5.5 C0 3.567 1.567 2 3.5 2 C5.433 2 7 3.567 7 5.5 L7 8 C7 8.552 7.448 9 8 9 L8 11 C6.343 11 5 9.657 5 8 L5 5.5 C5 4.672 4.328 4 3.5 4 C2.672 4 2 4.672 2 5.5 L2 7 L0 7 Z M1 8 C1.792 8 2.282 6 4 6 L4 8 C3.884 8 3.463 8.54 3.384 8.636 C2.789 9.357 2.111 10 1 10 L0 10 L0 8 Z M8 8 L8 6 C9.657 6 11 7.343 11 9 L11 11 C11 12.657 9.657 14 8 14 L3 14 C1.343 14 0 12.657 0 11 L2 11 C2 11.552 2.448 12 3 12 L8 12 C8.552 12 9 11.552 9 11 L9 9 C9 8.448 8.552 8 8 8 Z M12 11 L12 9 L16 9 L16 11 Z"
       ],
       x: 0,
-      y: 0,
-      source: "mark-16.svg"
+      y: 0
     },
     {
       scale: 2,
@@ -39,8 +37,7 @@ export const MARK: { width: number; height: number; drawings: readonly MarkDrawi
         "M7 11.5 C7 8.462 9.462 6 12.5 6 C15.538 6 18 8.462 18 11.5 L18 16.5 C18 17.328 18.672 18 19.5 18 L20 18 L20 21 L19.5 21 C17.015 21 15 18.985 15 16.5 L15 11.5 C15 10.119 13.881 9 12.5 9 C11.119 9 10 10.119 10 11.5 L10 14 L7 14 Z M10.5 15 C11.116 15 11.63 12 14 12 L14 15 C14.078 15 14.198 14.976 14.271 14.913 C13.814 15.308 13.041 18 10.5 18 L0 18 L0 15 Z M19 15 L19 12 C21.761 12 24 14.239 24 17 L24 19.5 C24 23.09 21.09 26 17.5 26 L12.5 26 C9.462 26 7 23.538 7 20.5 L7 19 L10 19 L10 20.5 C10 21.881 11.119 23 12.5 23 L17.5 23 C19.433 23 21 21.433 21 19.5 L21 17 C21 15.895 20.105 15 19 15 Z M25 21 L25 18 L32 18 L32 21 Z"
       ],
       x: 0,
-      y: 1,
-      source: "mark-32.svg"
+      y: 1
     }
   ]
 };

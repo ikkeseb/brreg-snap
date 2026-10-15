@@ -159,15 +159,17 @@ masthead (popup, panel, the welcome page and its example cards).
 sprite: one `svg.mast__mark` holding a nested `<svg>` per drawing from
 `src/lib/view/mark-data.ts`, which `pnpm icons` generates from the
 masters (`assets/brand/README.md`). `mark--x1` is the 16 px icon's
-drawing at one CSS px per unit; `mark--x2` is the 32 px drawing at half
-that, shown from `1.5dppx` up (the masthead block in `src/styles/brreg.css`), so the mark lands
-on whole device pixels at 1x and at 2x and shows both tails where there
-is room for them, as the toolbar does. Width and height are SVG
-attributes, not `style` (CSP). Colour is `--brand`, the masters'
-`#4A74FF` in both themes (3.6 light, 4.7 dark: a graphic, so 3:1);
-`tests/brand.test.ts` fails when the two drift. The popup and panel
-masthead name it (`role="img"`, `aria-label` «brreg-snap»); on the
-welcome page it is `aria-hidden`, beside the brand name in text.
+drawing at one CSS px per unit; `mark--x2` is the 32 px drawing at
+half that, shown from `1.5dppx` up (the masthead block in
+`src/styles/brreg.css`), so the mark lands on whole device pixels at
+1x and at 2x and shows both tails where there is room for them, as the
+toolbar does. Fractional scales (125 %, 150 %, browser zoom) get the
+nearer drawing, scaled, so there it is not pixel-crisp. Width and
+height are SVG attributes, not `style` (CSP). Colour is `--brand`, the
+masters' `#4A74FF` in both themes (3.6 light, 4.7 dark: a graphic, so
+3:1); `tests/brand.test.ts` fails when the two drift. The popup and
+panel masthead name it (`role="img"`, `aria-label` «brreg-snap»); on
+the welcome page it is `aria-hidden`, beside the brand name in text.
 
 <!-- SECTION: a11y -->
 ## The a11y contract

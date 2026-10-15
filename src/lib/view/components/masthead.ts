@@ -8,7 +8,7 @@
 import { registrableDomain } from '../../hostname-score.js';
 import { COPY } from '../copy.js';
 import { MARK } from '../mark-data.js';
-import { button, el, icon } from './dom.js';
+import { button, el, icon, SVG_NS } from './dom.js';
 
 export type MastheadData =
   | {
@@ -43,8 +43,6 @@ export interface Masthead {
   // Popup: the search icon button (focus returns here after a search).
   searchButton?: HTMLButtonElement;
 }
-
-const SVG_NS = 'http://www.w3.org/2000/svg';
 
 // The brand mark, inline: one <svg> holding a nested <svg> per drawing
 // (the 16 px and the 32 px one, mark-data.ts), and brreg.css shows the
