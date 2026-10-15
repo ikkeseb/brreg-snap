@@ -298,6 +298,11 @@ describe('popup controller — search view, error, refresh', () => {
     document.querySelector<HTMLButtonElement>('.mast .icon-btn')!.click();
     await waitState('empty');
     expect(document.querySelector('h1')?.textContent).toBe('Søk i Brønnøysundregistrene');
+    // The head, the placeholder and the hint introduce the field; no
+    // sub line repeats the placeholder.
+    expect(document.querySelector('.empty > p:not(.hint)')).toBeNull();
+    expect(document.querySelector<HTMLInputElement>('main input[type="search"]')?.placeholder).toBe('Navn eller org.nr');
+    expect(document.querySelector('.empty .hint')).not.toBeNull();
     expect(document.querySelector('button.back')?.textContent).toBe('Tilbake til DNB BANK ASA');
     expect(document.activeElement).toBe(document.querySelector('input[type="search"]'));
     // No icon while the field itself is on screen.

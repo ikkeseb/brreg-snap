@@ -310,7 +310,9 @@ listener bails while its list is detached instead of removing itself;
 one listener per document, replaced by the next picker rendered).
 Any paint from the controller discards the aside. The popup has the
 same view (`{kind:'search'}` in `paintEmpty`) painted over its state,
-with `repaint` as the way back.
+with `repaint` as the way back: the head «Søk i Brønnøysundregistrene»,
+the field and its hint, no sub line (the placeholder says what to
+type).
 
 The compact head (`#stick`: seal · name · org.nr) sits in a zero-height
 sticky wrapper so showing it never moves the page; an
