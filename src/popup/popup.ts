@@ -253,7 +253,7 @@ function showResult(view: TrustView, opts: { focus: LoadFocus; reveal: boolean }
   const painted = paint(opts.reveal);
   repaint = () => paint(false);
   badge(view);
-  if (opts.focus === 'refresh') focusElement(roots.foot.querySelector('button'));
+  if (opts.focus === 'refresh') focusElement(roots.foot.querySelector('.foot__refresh'));
   else if (opts.focus) focusElement(painted.heading);
 }
 

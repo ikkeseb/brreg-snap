@@ -50,7 +50,7 @@ export function renderFooter(
       tick = (now) => {
         text.data = when(now);
       };
-      const refresh = button('', COPY.refresh);
+      const refresh = button('foot__refresh', COPY.refresh);
       refresh.title = COPY.refreshTitle;
       refresh.addEventListener('click', () => handlers.onRefresh?.());
       left.appendChild(refresh);
