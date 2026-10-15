@@ -17,7 +17,7 @@ import {
   syncAmoListing,
 } from '../scripts/lib/amo.mjs';
 import { CWS_SCOPE, cwsAuthKind, publishCws, TOKEN_URL } from '../scripts/lib/cws.mjs';
-import { diffLines } from '../scripts/lib/publish.mjs';
+import { call, diffLines } from '../scripts/lib/publish.mjs';
 
 // The store publishers against a fake fetch: request order, URLs, bodies
 // and auth headers, plus the skip and dry-run paths. Every credential
@@ -30,7 +30,7 @@ interface Call {
   body: unknown;
 }
 
-type Reply = { status?: number; json?: unknown };
+type Reply = { status?: number; json?: unknown; text?: string; headers?: Record<string, string> };
 
 function fakeFetch(replies: Reply[]) {
   const calls: Call[] = [];
@@ -42,7 +42,8 @@ function fakeFetch(replies: Reply[]) {
     return Promise.resolve({
       ok: status >= 200 && status < 300,
       status,
-      text: () => Promise.resolve(r.json === undefined ? '' : JSON.stringify(r.json)),
+      headers: new Headers(r.headers),
+      text: () => Promise.resolve(r.text ?? (r.json === undefined ? '' : JSON.stringify(r.json))),
     });
   });
   return { fetch, calls };
@@ -54,6 +55,65 @@ const quiet = { log: () => {}, sleep: () => Promise.resolve() };
 const NOW = 1_800_000_000_000;
 
 afterEach(() => vi.restoreAllMocks());
+
+describe('call: a throttled request (HTTP 429)', () => {
+  const url = `${AMO_API}addon/x/eula_policy/`;
+  const amoThrottle = { status: 429, json: { detail: 'Request was throttled. Expected available in 55 seconds.' } };
+  const setup = (replies: Reply[]) => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const sleep = vi.fn((_ms: number) => Promise.resolve());
+    return { ...fakeFetch(replies), sleep };
+  };
+
+  it('waits the Retry-After seconds, then sends the same request again', async () => {
+    const { fetch, calls, sleep } = setup([{ status: 429, headers: { 'Retry-After': '7' } }, { json: { ok: 1 } }]);
+    await expect(call(fetch, 'PATCH', url, { body: '{"a":1}', sleep })).resolves.toEqual({ ok: 1 });
+    expect(sleep.mock.calls).toEqual([[7000]]);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]).toEqual(calls[0]);
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining(`PATCH ${url} throttled (HTTP 429): retrying in 7 s`));
+  });
+
+  it("reads AMO's «Expected available in N seconds» when there is no header", async () => {
+    const { fetch, sleep } = setup([amoThrottle, { json: {} }]);
+    await call(fetch, 'PATCH', url, { sleep });
+    expect(sleep.mock.calls).toEqual([[55_000]]);
+  });
+
+  it('builds the headers per attempt, so a retry carries a fresh JWT', async () => {
+    const { fetch, calls, sleep } = setup([amoThrottle, { json: {} }]);
+    let n = 0;
+    await call(fetch, 'PATCH', url, { headers: () => ({ Authorization: `JWT ${++n}` }), sleep });
+    expect(calls.map((c) => c.headers.Authorization)).toEqual(['JWT 1', 'JWT 2']);
+  });
+
+  it('gives up at once when the named wait is over the cap', async () => {
+    const { fetch, calls, sleep } = setup([{ status: 429, headers: { 'Retry-After': '121' } }]);
+    await expect(call(fetch, 'PATCH', url, { sleep })).rejects.toThrow(`PATCH ${url} -> HTTP 429`);
+    expect(sleep).not.toHaveBeenCalled();
+    expect(calls).toHaveLength(1);
+  });
+
+  it('gives up after three retries, with the status and body', async () => {
+    const { fetch, calls, sleep } = setup([amoThrottle, amoThrottle, amoThrottle, amoThrottle]);
+    await expect(call(fetch, 'PATCH', url, { sleep })).rejects.toThrow(/HTTP 429\n.*Expected available in 55 seconds/);
+    expect(calls).toHaveLength(4);
+    expect(sleep).toHaveBeenCalledTimes(3);
+  });
+
+  it('waits a default 30 s when the 429 names no wait', async () => {
+    const { fetch, sleep } = setup([{ status: 429 }, { json: {} }]);
+    await call(fetch, 'GET', url, { sleep });
+    expect(sleep.mock.calls).toEqual([[30_000]]);
+  });
+
+  it('never retries any other error', async () => {
+    const { fetch, calls, sleep } = setup([{ status: 503, json: { detail: 'Expected available in 5 seconds.' } }]);
+    await expect(call(fetch, 'GET', url, { sleep })).rejects.toThrow(`GET ${url} -> HTTP 503`);
+    expect(sleep).not.toHaveBeenCalled();
+    expect(calls).toHaveLength(1);
+  });
+});
 
 describe('publishAmo', () => {
   const secret = 'test-secret-not-real';

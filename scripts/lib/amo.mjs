@@ -269,7 +269,7 @@ export async function publishAmo(o) {
   up.set('upload', new File([o.pkg.bytes], o.pkg.name, { type: 'application/zip' }));
   up.set('channel', 'listed');
   log(`  1. upload ${describe(o.pkg)}`);
-  const upload = await call(o.fetch, 'POST', `${AMO_API}upload/`, { headers: headers(), body: up });
+  const upload = await call(o.fetch, 'POST', `${AMO_API}upload/`, { headers, body: up });
   const uuid = String(upload.uuid ?? '');
   if (!uuid) throw new Error(`AMO upload: no uuid in the response: ${JSON.stringify(upload)}`);
 
@@ -279,7 +279,7 @@ export async function publishAmo(o) {
   while (!detail.processed) {
     if (now() > deadline) throw new Error(`AMO validation of upload ${uuid} did not finish in ${timeoutMs / 60_000} min`);
     await sleep(pollMs);
-    detail = await call(o.fetch, 'GET', `${AMO_API}upload/${uuid}/`, { headers: headers() });
+    detail = await call(o.fetch, 'GET', `${AMO_API}upload/${uuid}/`, { headers });
   }
   const messages = detail.validation?.messages ?? [];
   for (const m of messages) log(`     ${m.type ?? 'message'}: ${stripTags(m.message)}${m.file ? ` (${m.file})` : ''}`);
@@ -288,7 +288,7 @@ export async function publishAmo(o) {
 
   // 3. Version.
   const created = await call(o.fetch, 'POST', `${AMO_API}addon/${o.guid}/versions/`, {
-    headers: headers({ 'Content-Type': 'application/json' }),
+    headers: () => headers({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ ...versionBody, upload: uuid }),
   });
   const versionId = Number(created.id);
@@ -299,7 +299,7 @@ export async function publishAmo(o) {
   const src = new FormData();
   src.set('source', new File([o.source.bytes], o.source.name, { type: 'application/zip' }));
   try {
-    await call(o.fetch, 'PATCH', `${AMO_API}addon/${o.guid}/versions/${versionId}/`, { headers: headers(), body: src });
+    await call(o.fetch, 'PATCH', `${AMO_API}addon/${o.guid}/versions/${versionId}/`, { headers, body: src });
   } catch (err) {
     throw new Error(
       `AMO version ${o.version} (id ${versionId}) exists, but attaching the source failed. ` +
@@ -390,10 +390,10 @@ export async function syncAmoListing(o) {
     const jwt = signHs256({ iss: issuer, jti: newJti(), iat, exp: iat + 60 }, secret);
     return { Authorization: `JWT ${jwt}`, Accept: 'application/json', 'Content-Type': 'application/json' };
   };
-  await call(o.fetch, 'PATCH', addonUrl, { headers: headers(), body: JSON.stringify(addon) });
+  await call(o.fetch, 'PATCH', addonUrl, { headers, body: JSON.stringify(addon) });
   log('  1. name, summary, description and categories updated');
   try {
-    await call(o.fetch, 'PATCH', policyUrl, { headers: headers(), body: JSON.stringify(policy) });
+    await call(o.fetch, 'PATCH', policyUrl, { headers, body: JSON.stringify(policy) });
   } catch (err) {
     throw new Error(`AMO listing text was updated, but the privacy policy was not.\n${err.message}`, { cause: err });
   }
