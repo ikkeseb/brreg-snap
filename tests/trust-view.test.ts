@@ -419,6 +419,28 @@ describe('buildTrustView — the regnskap row says what is and is not there', ()
   });
 });
 
+describe('buildTrustView — accounts the open data does not carry', () => {
+  // Said in the register's own words: no «brreg sitt», no «API».
+  const linesOf = (enhet: unknown) => {
+    const f = view({
+      company: company(enhet, { regnskap: { items: [], unavailable: true } as unknown as RegnskapResponse }),
+      surface: 'panel',
+    }).dossier!.okonomi.figures;
+    return f.kind === 'text' ? f.lines : [];
+  };
+
+  it('a bank files special accounts that are not in the open data', () => {
+    expect(linesOf(enhetDnb)[0]).toBe(
+      'Banker og forsikringsselskaper leverer særskilte årsregnskap som ikke finnes i Brønnøysundregistrenes åpne data.',
+    );
+  });
+
+  it('any other company: the register answered with an error', () => {
+    expect(linesOf(enhetEquinor)[0]).toBe('Brønnøysundregistrene ga feil for dette regnskapet.');
+    expect([...linesOf(enhetDnb), ...linesOf(enhetEquinor)].join(' ')).not.toMatch(/API|brreg sitt/i);
+  });
+});
+
 describe('buildTrustView — the Økonomi trend', () => {
   const selskap = (tilDato: string, driftsinntekter: number, aarsresultat: number, valuta = 'NOK') => ({
     regnskapstype: 'SELSKAP',

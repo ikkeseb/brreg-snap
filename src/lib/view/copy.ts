@@ -209,8 +209,8 @@ export const COPY = {
   regnskapNone: 'Ingen årsregnskap er registrert.',
   regnskapNoFigures: 'Regnskap registrert, men uten utdrag.',
   specialAccounts:
-    'Banker og forsikringsselskaper leverer særskilte årsregnskap som brreg sitt åpne API ikke viser.',
-  apiError: 'Brreg sitt åpne API ga feil for dette regnskapet.',
+    'Banker og forsikringsselskaper leverer særskilte årsregnskap som ikke finnes i Brønnøysundregistrenes åpne data.',
+  apiError: 'Brønnøysundregistrene ga feil for dette regnskapet.',
   lastFiled: (year: string) => `Siste innsendte årsregnskap: ${year}.`,
   dokumenter: 'Dokumenter',
   pdfLabel: 'Årsregnskap (PDF)',
