@@ -2,8 +2,8 @@
    brreg-snap UI system
    Production stylesheet for popup.html, details.html (side panel) and
    welcome.html. The design decisions behind it are in docs/notes/ui.md.
-   Comments citing «ui.md § amendments» mark a deviation from the
-   original design.
+   Comments citing «ui.md § amendments» point to a design decision
+   recorded there.
 
    Principle: loudness is proportional to severity. When nothing is wrong
    the view is a calm registry extract (paper, ink, hairlines). A warning

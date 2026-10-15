@@ -28,8 +28,17 @@ CHANGELOG entries, the store release notes and the approval click.
    a paragraph are fine: the publisher joins them (AMO keeps every
    newline). Everything else in the kit is generated: fix wording in
    the canonical docs (`docs/amo-submission.md`,
-   `docs/cws-submission.md`, `PRIVACY.md`, `CHANGELOG.md`) and re-run,
-   never in the kit.
+   `docs/cws-submission.md`, `PRIVACY.md`, `CHANGELOG.md`), never in
+   the kit. Step 2 does not run over its own output (it wants a clean
+   tree at `origin/main` and no `X.Y.Z` kit), and `CHANGELOG.md` is
+   both a canonical doc and a release file, so keep this order: save
+   the notes you wrote; discard the release files with the undo line
+   step 2 prints when `pnpm verify` fails (`git checkout -- package.json
+   public/manifest.firefox.json public/manifest.chrome.json
+   CHANGELOG.md docs/submission-kit && git clean -fd
+   docs/submission-kit/X.Y.Z`); only then fix the canonical docs,
+   commit and push the fix to `main`; once CI is green run step 2
+   again and paste the notes back.
 4. **`pnpm release X.Y.Z --tag`** refuses while a TODO is left,
    anything but the release files changed, or an earlier kit file is
    anything but deleted, then commits

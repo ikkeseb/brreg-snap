@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: 2026-09-30. Applies to brreg-snap 1.4 and later._
+_Last updated: 2026-10-15. Applies to brreg-snap 1.4 and later._
 
 brreg-snap is a browser extension for Firefox and Chrome that shows
 public information about Norwegian companies from
@@ -14,9 +14,11 @@ says exactly what is sent, when, and what is kept on your device.
 - The extension talks to one service only: `data.brreg.no`, the
   public API of Brønnøysundregistrene, a Norwegian government agency.
 - It sends the domain of the site you look up (for example `dnb.no`
-  when you are on `nettbank.dnb.no`; subdomains are not sent). It
-  never sends the full page address, the page title or cookies, and
-  never page content unless you select text and choose to look it up.
+  when you are on `nettbank.dnb.no`; subdomains are not sent, but on
+  some known hosting platforms, such as `github.io`, the site's own
+  name there is its domain: `firma.github.io`). It never sends the full page address, the page
+  title or cookies, and never page content unless you select text and
+  choose to look it up.
 - Nothing goes to the developer or to any other party. There is no
   developer server, no analytics, no ads and no telemetry.
 - Lookups happen when you ask for one. If you turn on the optional
@@ -51,11 +53,11 @@ any other site.
 
 | Data | Example | Why |
 |---|---|---|
-| The site's registrable domain. Subdomains and `www.` are not sent | `dnb.no` (on `nettbank.dnb.no`) | Finds companies that list that domain as their website |
+| The site's registrable domain. Subdomains and `www.` are not sent. On some known hosting platforms, such as `github.io`, the site's own name there is kept (`firma.github.io`) | `dnb.no` (on `nettbank.dnb.no`) | Finds companies that list that domain as their website |
 | The main word of that domain, plus Norwegian spellings of it | `elkjop`, `elkjøp` (on `elkjop.no`) | Finds companies whose name matches the domain |
 | An organisation number | `923609016` | Fetches the company's registry entry, roles, sub-units, group structure, recent changes, the latest accounts and the list of filed annual reports. All of it from `data.brreg.no`. The number comes from the page address or title (read on your device), from a search result, from a link in the extension, or from your recent lookups |
 | Text you type in the search box | `equinor` | Searches the register by company name |
-| Text you select, only when you choose «Slå opp «…» i brreg-snap» in the right-click menu (at most 100 characters) | `Kiwi Norge` | Searches the register by company name, as if you had typed it. If the selection contains an organisation number, only that number is sent |
+| Text you select, only when you choose «Slå opp «…» i brreg-snap» in the right-click menu (at most 100 characters) | `Kiwi Norge` | Searches the register by company name, as if you had typed it. If the selection contains exactly one valid organisation number, only that number is sent; otherwise the text is searched as it is |
 
 Never sent: the full page address (path and query string), the page
 title, page content other than text you select and look up, cookies or

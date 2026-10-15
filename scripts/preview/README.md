@@ -1,7 +1,7 @@
 # Browser preview harness
 
-Runs the REAL built popup/details pages in a plain browser tab against
-the LIVE brreg API (default) or recorded fixtures — no extension
+Runs the real built popup/details pages in a plain browser tab against
+the live brreg API (default) or recorded fixtures — no extension
 loading. This is the fast visual dev loop for frontend work and the
 base of the browser smoke (`pnpm smoke`, tests/e2e/), not a substitute
 for `pnpm dev` before shipping.

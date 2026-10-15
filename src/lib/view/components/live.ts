@@ -1,9 +1,9 @@
 // The surface's one permanent sr-only live region, and the focus helper.
 //
 // Both surfaces keep exactly one <p class="sr-only" aria-live="polite">
-// for the whole document (SPEC root) and route every announcement
-// through it: copy feedback, load progress, search result counts. A
-// second live region would make screen readers race.
+// for the whole document (the surface root) and route every
+// announcement through it: copy feedback, load progress, search result
+// counts. A second live region would make screen readers race.
 //
 // Focus moves only on user-initiated transitions (a pick, a search, a
 // retry): the controller calls focusElement on the result heading or

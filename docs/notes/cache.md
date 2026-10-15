@@ -38,8 +38,9 @@ The module is `src/lib/session-cache.ts`. Its rules:
   orgnrs and reloads.
 
 `fetchRegnskap` caches empty results (404, normal for small AS) for
-24h and "unavailable" results (500, banks/insurers) for 6h, so a
-refresh doesn't re-hit (see `docs/notes/brreg-api.md`
+24h and "unavailable" results (500, banks/insurers) for 6h, so opening
+the company again within that time doesn't re-hit; «Oppdater» drops
+them with the rest (see `docs/notes/brreg-api.md`
 § regnskap-500-unsupported-plan).
 
 `hostname-search.ts` caches under three keys, all per SITE — the

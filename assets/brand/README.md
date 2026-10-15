@@ -16,8 +16,8 @@ three kinds of output:
 | `mark-128.svg` | the 128 px store and install icon (art inside 96 px) | `public/icons/icon-128.png` |
 | `mark-32.svg` | 32 px, on the pixel grid | `public/icons/icon-32.png`; the in-UI mark at 2x |
 | `mark-16.svg` | 16 px, on the pixel grid | `public/icons/icon-16.png`; the in-UI mark at 1x |
-| `lockup.svg`, `lockup-h.svg` | the mark with the wordmark, stacked and horizontal, on light grounds | nothing yet |
-| `lockup-dark.svg`, `lockup-h-dark.svg` | the same on dark (butter wordmark) | nothing yet |
+| `lockup.svg`, `lockup-h.svg` | the mark with the wordmark, stacked and horizontal, on light grounds | nothing (not used by the build) |
+| `lockup-dark.svg`, `lockup-h-dark.svg` | the same on dark (butter wordmark) | nothing (not used by the build) |
 
 The in-UI mark is `src/lib/view/mark-data.ts`: the paths of the 16 and
 the 32 drawing, each cropped to its ink (`docs/notes/ui.md` § masthead-mark).

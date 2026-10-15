@@ -20,9 +20,12 @@ the *toolbar/shortcut* surface (click the sidebar icon, or the
 sidebar shortcut — see § commands-and-selection), or
 (b) accept the limitation. Escalating to `tabs` as a static
 install-time permission would relax the security differentiator —
-see `AGENTS.md` § Security constraints. Don't
-burn cycles re-investigating `webNavigation`, `tabs.onUpdated`, or
-focus events; they all need `tabs` or content scripts.
+see `AGENTS.md` § Security constraints. `webNavigation`,
+`tabs.onUpdated` and focus events are no way around it: none of them
+gives URL or title access with today's permissions (tab and focus
+events fire, but without `tabs` they carry no URL or title), and
+`webNavigation` would be a new install-time permission those same
+security rules do not allow.
 
 <!-- SECTION: tabs-runtime-optin -->
 ## Tab-sync via runtime `tabs` opt-in is the supported path
@@ -104,8 +107,8 @@ to the panel (sidebar-sync.md § no-match-broadcast).
   handler in `background.ts`. A command also grants activeTab on
   Chrome (activeTab docs: «Executing a keyboard shortcut from the
   commands API»), so the tab's URL is readable there.
-- Why not Alt+Shift+B (the first suggestion): Chromium binds it to
-  «focus bookmarks bar» on Windows, Linux and ChromeOS
+- Why not Alt+Shift+B: Chromium binds it to «focus bookmarks bar» on
+  Windows, Linux and ChromeOS
   (`chrome/browser/ui/accelerator_table.cc`, `IDC_FOCUS_BOOKMARKS`).
   Checked 2026-09-24: that table has no Alt+Shift+O/S; Firefox's
   `browser-sets.inc.xhtml` keyset has no Alt+Shift combination at all.
@@ -149,9 +152,9 @@ key points at it.
 A click inside the sidebar is not a gesture on the extension's
 surface: `tabs.query({active:true, currentWindow:true})` called from a
 button in the panel returns the same empty `url`/`title` as
-`tabs.onActivated`. The user-gesture grant is scoped to the toolbar/sidebar-action surface, not clicks inside the
-already-loaded panel, so a sync button inside the panel can't read
-the active tab.
+`tabs.onActivated`. The user-gesture grant is scoped to the
+toolbar/sidebar-action surface, not clicks inside the already-loaded
+panel, so a sync button inside the panel can't read the active tab.
 
 <!-- SECTION: desktop-only -->
 ## Desktop only: no Firefox for Android target

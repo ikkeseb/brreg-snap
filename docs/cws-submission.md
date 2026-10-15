@@ -94,7 +94,7 @@ Source code under the MIT licence: https://github.com/ikkeseb/brreg-snap
    site the user looks up (dnb.no for nettbank.dnb.no) to
    data.brreg.no (the CWS User Data FAQ counts "the domains or URLs
    the browser interacts with" as web browsing activity). Lookups run
-   when the user asks for one; auto-update runs only after the user
+   when the user asks for one; "Auto-oppdater" runs only after the user
    confirms an in-panel disclosure and grants `tabs` (see the `tabs`
    justification below). Leave unchecked: personally identifiable
    information, health, financial and payment, authentication,
@@ -123,8 +123,8 @@ Source code under the MIT licence: https://github.com/ikkeseb/brreg-snap
    | Permission | Justification |
    |-----------|---------------|
    | `activeTab` | Reads the URL and title of the active tab only after the user clicks the toolbar icon or a context-menu item, or uses a keyboard shortcut, to find the company behind that site in Brreg. Only an organisation number found in the URL or title, or else the site's registrable domain (dnb.no for nettbank.dnb.no) and a name label derived from it, is sent to data.brreg.no for that lookup; the page content is never read. |
-   | `storage` | Caches Brreg lookup results and the user's picker choice per site (24 h, in session storage, cleared when the browser closes), keeps the 5 most recent companies, and stores the on/off setting for auto-update. Local only; nothing is synced. |
-   | `contextMenus` | Adds right-click items to look up the current page or selected text. Text is sent to data.brreg.no only when the user chooses that lookup, limited to 100 characters; if it contains an organisation number, only that number is sent. |
+   | `storage` | Caches Brreg lookup results and the user's picker choice per site (24 h, in session storage, cleared when the browser closes), keeps the 5 most recent companies, and stores the on/off setting for "Auto-oppdater". Local only; nothing is synced. |
+   | `contextMenus` | Adds right-click items to look up the current page or selected text. Text is sent to data.brreg.no only when the user chooses that lookup, limited to 100 characters; if it contains exactly one valid organisation number, only that number is sent. |
    | `sidePanel` | Shows the detailed company view (roles, parent unit, sub-units, key figures) in Chrome's side panel alongside the page. |
    | host `https://data.brreg.no/*` | The extension's sole network endpoint: all company data is fetched read-only from the official Brønnøysund open-data API. No other hosts are contacted; there are no content scripts. |
    | `tabs` *(optional)* | Requested at runtime only when the user turns on "Auto-oppdater" in the side panel, so an open panel can look up the page in front every time the user switches tabs or opens a new page. Turning it on first shows an in-panel disclosure: pages are looked up while a brreg-snap panel is open, the domain goes to data.brreg.no, nothing goes to the developer. Its "Slå på" button calls permissions.request; turning the setting off calls permissions.remove. Used only while a side panel is open. Not requested at install time. |

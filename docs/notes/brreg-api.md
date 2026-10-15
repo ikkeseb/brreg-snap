@@ -72,13 +72,13 @@ is unknown. Don't depend on the body.
 - network failure / other status → rejects; callers map it to
   `undefined` ("couldn't ask").
 
-The UI never says "prøv igjen senere" for a 500. Nøkkeltall explains
-the gap via `regnskapGap()` (`src/lib/regnskap.ts`): NACE 64.1x / 65.x
-(or a named plan) → banks and insurers file special accounts the open
-API doesn't show («… som ikke finnes i Brønnøysundregistrenes åpne
-data»); anything else → «Brønnøysundregistrene ga feil for dette
-regnskapet» (the UI never says «API»). It
-also shows `Enhet.sisteInnsendteAarsregnskap` and links the company's
+The UI never says "prøv igjen senere" for a 500. The Økonomi tab
+explains the gap via `regnskapGap()` (`src/lib/regnskap.ts`): NACE
+64.1x / 65.x (or a named plan) → banks and insurers file special
+accounts the open API doesn't show («… som ikke finnes i
+Brønnøysundregistrenes åpne data»); anything else →
+«Brønnøysundregistrene ga feil for dette regnskapet» (the UI never
+says «API»). It also shows `Enhet.sisteInnsendteAarsregnskap` and links the company's
 brreg page. The verdict strip reads the filing year from that Enhet
 field first, so a 500 no longer blanks the cell. Only when the Enhet
 has no year does the regnskap response decide it: no response or a

@@ -12,11 +12,12 @@ Firefox), builds to `dist-${browser}/`, and the `copy-static-assets`
 `dist-${browser}/manifest.json`. `publicDir` is set to `false` so
 Vite's automatic public/ copy doesn't drag BOTH source manifests into
 the output — the plugin copies exactly the right one, the icons
-(filtering out `icons/*.md`) and `public/fonts/`. Scripts: `build:{firefox,chrome}`,
-`package:{firefox,chrome}`; the bare `build`/`dev`/`package` alias the
-Firefox target, and `watch` rebuilds `dist-firefox/` on every change. The built `manifest.json` is the source manifest
-byte for byte apart from the stamped `version` (string replace, not
-JSON re-serialisation). AMO re-serialises the manifest when it signs,
+(filtering out `icons/*.md`) and `public/fonts/`. Scripts:
+`build:{firefox,chrome}`, `package:{firefox,chrome}`; the bare
+`build`/`dev`/`package` alias the Firefox target, and `watch` rebuilds
+`dist-firefox/` on every change. The built `manifest.json` is the
+source manifest byte for byte apart from the stamped `version` (string
+replace, not JSON re-serialisation). AMO re-serialises the manifest when it signs,
 so the signed `.xpi` never matches the repo; compare the unsigned
 package instead, as BUILD.md tells reviewers.
 

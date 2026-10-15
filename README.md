@@ -128,6 +128,10 @@ pnpm dev        # build + launch a Firefox profile with the extension
 pnpm verify     # the full gate: typecheck, lint, tests, both builds
 ```
 
+`pnpm install` also sets this clone's `core.hooksPath` to
+`.githooks/`, whose pre-push hook runs `pnpm verify`
+(`git push --no-verify` skips it).
+
 - [BUILD.md](BUILD.md): reproducible builds, for store reviewers too
 - [docs/release.md](docs/release.md): releasing and store publishing
 - [docs/notes/platform.md](docs/notes/platform.md): Firefox and Chrome

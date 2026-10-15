@@ -1,8 +1,8 @@
 // Links to the official annual-report copies (årsregnskap) and to the
-// company's kunngjøringer: the multi-year history the Økonomi tab
-// doesn't show. The only fetch is the small year list on
-// data.brreg.no; the PDFs and the announcement page are plain links the
-// user clicks. See docs/notes/brreg-api.md § aarsregnskap-kopi.
+// company's kunngjøringer: the filed documents behind and before the
+// figures the Økonomi tab shows. The only fetch is the small year list
+// on data.brreg.no; the PDFs and the announcement page are plain links
+// the user clicks. See docs/notes/brreg-api.md § aarsregnskap-kopi.
 
 import { brregFetch } from './brreg.js';
 import { cacheGet, cacheSet } from './session-cache.js';

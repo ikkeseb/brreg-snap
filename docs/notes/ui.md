@@ -290,12 +290,11 @@ word pokes out of a line without any scroll overflow).
   condition) stays visible under a long name.
 
 <!-- SECTION: amendments -->
-## Deviations from the original design
+## Design decisions
 
 - **No copy toast.** Copy feedback is the button itself: the icon swaps
   to the check, the number tints ok (or the label reads «Kopiert») for
-  1.4 s, and the live region says it. The design's floating
-  `.orgnr__toast` is gone.
+  1.4 s, and the live region says it.
 - **Flush inline actions.** `.ledger-row--inline dd` is a flex-wrap row
   with a column gap, never a leading margin: when «Feil bedrift?» wraps
   it starts flush with the value's left edge.

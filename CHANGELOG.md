@@ -560,8 +560,8 @@ name; functionality unchanged from the pre-1.0 development branch.
   legal name, status flags, business and postal address, NACE code,
   employee count.
 - Sidebar panel with a deeper layout: board members (`STYR` /
-  `LEDE`), signaturrett and prokura, latest filed regnskap with
-  key figures, underenheter, parent enhet.
+  `LEDE`), latest filed regnskap with key figures, underenheter,
+  parent enhet.
 - Hostname → orgnr resolution via a multi-query brreg pipeline with
   confidence scoring. Three outcomes: auto-resolve when one
   candidate is clearly ahead, surface a "Mente du …?" picker when

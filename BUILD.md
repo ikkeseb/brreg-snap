@@ -42,14 +42,18 @@ corepack prepare pnpm@12.10.1 --activate
 
 ## Reproducing the build
 
-From the root of the unzipped source zip (or a checkout of the tag):
+From the root of the unzipped source zip:
 
 ```bash
 pnpm install --frozen-lockfile      # uses pnpm-lock.yaml exactly
-pnpm verify                         # typecheck, eslint (zero warnings), tests,
-                                    # both builds, manifest invariants, web-ext lint
 pnpm package                        # builds Firefox + produces the package
 ```
+
+These are the steps the release workflow's `reproduce` job runs on
+every release. In a git checkout of the tag, `pnpm verify` also runs
+the full gate (typecheck, eslint with zero warnings, tests, the docs
+check, both builds, manifest invariants, web-ext lint); the docs check
+reads the file list from git, so it needs the checkout's `.git`.
 
 `pnpm package` is an alias for `pnpm package:firefox`. The repository
 also builds a Chrome target (`pnpm package:chrome`). Both come from

@@ -81,7 +81,7 @@ notes for reviewers below say how consent works there.
 > • Søk på navn eller org.nr, slå opp markert tekst med høyreklikk, eller bruk en hurtigtast.
 > • Velg en annen bedrift ved feil treff, glem et tidligere valg, og kopier org.nr eller et sammendrag.
 >
-> Slå på «Auto-oppdater» hvis du vil at et åpent sidepanel skal følge fanen du ser på. Du får først en forklaring og en forespørsel om tilgang til faner. Slår du bryteren av, gis tilgangen tilbake.
+> Slå på "Auto-oppdater" hvis du vil at et åpent sidepanel skal følge fanen du ser på. Du får først en forklaring og en forespørsel om tilgang til faner. Slår du bryteren av, gis tilgangen tilbake.
 >
 > Personvern: Oppslag sendes bare til data.brreg.no, aldri til utvikleren. Utvidelsen sender nettstedets registrerbare domene, et organisasjonsnummer eller søketeksten du selv skriver eller velger å slå opp. Den har ingen content scripts og leser ikke nettsideinnhold automatisk. Ingen analytics, trackere eller telemetri. Velkomstsiden gjør ingen nettverkskall. «Rapporter feil treff» åpner e-postprogrammet ditt; du velger selv om meldingen sendes.
 >
@@ -123,24 +123,24 @@ permission, explaining why each is necessary.
 
 - **`activeTab`** — Reads the URL and title of the active tab only
   when the user clicks the toolbar icon, the sidebar icon, or a
-  context-menu item, or uses a keyboard shortcut. Used to extract a 9-digit Norwegian
-  organisation number, or to derive the site's registrable domain
-  for a brreg search query. The permission does not grant DOM access
-  or background tab access.
+  context-menu item, or uses a keyboard shortcut. Used to extract a
+  9-digit Norwegian organisation number, or to derive the site's
+  registrable domain for a brreg search query. The permission does
+  not grant DOM access or background tab access.
 
 - **`storage`** — `storage.session` (in memory, cleared when the
   browser closes): brreg API responses and per-hostname lookup
   results, including the user's picker choice, each with a 24-hour
   TTL, plus the 5 most recently viewed companies. `storage.local`:
-  one boolean, the auto-sync toggle. Nothing is synced to a remote
-  account.
+  one boolean, the "Auto-oppdater" setting. Nothing is synced to a
+  remote account.
 
 - **`menus`** — Registers right-click items for looking up the current
   page and selected text. Selected text is sent only when the user
-  chooses that lookup, limited to 100 characters; if it contains an
-  organisation number, only that number is sent. This permission is on
-  Mozilla's no-prompt list
-  and does not grant tab access by itself.
+  chooses that lookup, limited to 100 characters; if it contains
+  exactly one valid organisation number, only that number is sent.
+  This permission is on Mozilla's no-prompt list and does not grant
+  tab access by itself.
 
 - **`host_permissions: https://data.brreg.no/*`** — The only
   external endpoint the extension contacts. This is the public
@@ -175,11 +175,13 @@ permission, explaining why each is necessary.
 > Data collection: to find the company behind the current site, the
 > add-on sends data.brreg.no an organisation number found in the page
 > address or title or, if there is none, the site's registrable
-> domain (`dnb.no` for `nettbank.dnb.no`; subdomains are not sent)
-> and a name label derived from it. Text typed in the search box or
-> explicitly selected for a right-click lookup is sent as a search.
-> Selected text is limited to 100 characters; if it contains an
-> organisation number, only that number is sent. The manifest therefore declares
+> domain (`dnb.no` for `nettbank.dnb.no`; subdomains are not sent,
+> except a site's own name on some known hosting platforms, such as
+> `firma.github.io`) and a name label derived from it. Text typed in
+> the search box or explicitly selected for a right-click lookup is
+> sent as a search. Selected text is limited to 100 characters; if it
+> contains exactly one valid organisation number, only that number is
+> sent. The manifest therefore declares
 > `data_collection_permissions` with `required: ["browsingActivity"]`,
 > which Firefox 140+ shows in the install and update prompts. IP
 > addresses and reserved local names (localhost, single-label hosts,
@@ -189,20 +191,22 @@ permission, explaining why each is necessary.
 >
 > Lookups run when the user clicks the toolbar button, opens the
 > sidebar, uses a keyboard shortcut or context-menu item, or searches,
-> and, only if the
-> user turns on "Auto-oppdater" and grants `tabs`, on
+> and, only if the user turns on "Auto-oppdater" and grants `tabs`, on
 > every tab switch or new page while a brreg-snap sidebar is open.
 >
 > Firefox 115–139 ignore the manifest declaration. There, each click
 > lookup is a direct, immediate result of a single deliberate user
 > command on a clearly labelled control, and this listing says what
-> is sent (implicit consent under the add-on policies). Auto-sync is
-> the only lookup not tied to a click: before it asks for `tabs`, the
-> sidebar shows its own disclosure of what is sent and to whom, and
-> its «Slå på» button is the explicit consent.
+> is sent (implicit consent under the add-on policies). "Auto-oppdater"
+> is the only lookup not tied to a click: before it asks for `tabs`,
+> the sidebar shows its own disclosure of what is sent and to whom,
+> and its «Slå på» button is the explicit consent.
 >
-> Version 1.4 adds no permissions. Its new group-structure, recent-change
-> and annual-report-year requests use the same host, data.brreg.no.
+> No API or host permission has been added since 1.1.0; 1.3.1
+> changed only the data collection declaration, from `none` to
+> `browsingActivity`. Every request,
+> including the group-structure, recent-change and annual-report-year
+> lookups, goes to data.brreg.no.
 > Annual-report PDFs and announcements are ordinary user-clicked links.
 > A welcome page opens once on installation, not on update; it makes no
 > network requests. Schibsted Grotesk is bundled locally under the SIL

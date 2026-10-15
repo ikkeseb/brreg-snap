@@ -376,9 +376,9 @@ next visit. Clears with the `storage.session` lifetime, or with
 `forgetHost` (§ undo).
 
 Each picker candidate is a `Candidate`: the search hit plus
-`evidence` — `'hjemmeside'` when its registered hjemmeside ties it to
-the site (itself, a page on it, a subdomain), else `'navn'` — for a
-per-row label.
+`evidence` — `'hjemmeside'` when its registered hjemmeside is the
+site itself, `'side'` when it is only a page or a subdomain on it,
+else `'navn'` (only the name matched) — for a per-row label.
 
 Only a deliberate decline stores the negative choice: the «Ingen av
 disse» button or its `0` shortcut. Escape is not a shortcut: it is

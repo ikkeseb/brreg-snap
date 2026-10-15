@@ -17,7 +17,7 @@ lists what the recorder replaces). The caption canvas is composed by a
 script kept outside the repo; it adds no UI elements and does not alter
 the captured text or data.
 
-| Image | Capture under `screenshots/` | Crop in source pixels |
+| Image | Capture under `test-results/screenshots/` | Crop in source pixels |
 |---|---|---|
 | 01 lookup | `popup-light/popup-dnb.png` | Entire 380×600 capture |
 | 02 warnings | `panel-400-light/konkurs.png` | x=0, y=0, width=400, height=640 |
