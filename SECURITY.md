@@ -7,11 +7,8 @@ Web Store gets security fixes.
 
 ## Reporting a vulnerability
 
-Please report it privately, not in a public issue:
-
-- email [sebastian@nuez.no](mailto:sebastian@nuez.no), or
-- use [Report a vulnerability](https://github.com/ikkeseb/brreg-snap/security/advisories/new)
-  on GitHub.
+Please report it privately, not in a public issue: email
+[sebastian@nuez.no](mailto:sebastian@nuez.no).
 
 Say what you found, the browser and extension version, and how to
 reproduce it. brreg-snap has one maintainer, so expect a reply within
