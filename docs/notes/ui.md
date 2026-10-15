@@ -322,10 +322,15 @@ opening Enheter) lands on the tabs: after `document.fonts.ready` the
 painter shows the head, gives the tab region (`div.tab-panels`) the
 height the landing leaves it (`--land` = head + tablist + what follows
 the region, i.e. the footer; details.css sets `min-height:
-calc(100dvh - var(--land))`) and scrolls the tablist to sit right
-under the head. The min-height is what makes a short tab (Økonomi at
-320 px) scroll that far, and it keeps the tablist put when switching
-from a long tab to a short one.
+calc(100dvh - var(--land))` on `.tab-panels--held`) and scrolls the
+tablist to sit right under the head. The min-height is what makes a
+short tab (Økonomi at 320 px) scroll that far, and it keeps the tablist
+put when switching from a long tab to a short one, so the painter adds
+`--held` only once the tabs are in use: a landing, a tab switch, or a
+Back/Forward restore (a tab selected while loading holds the result
+that follows). A plain load of a short dossier (a deleted company's
+Registrering) has no scrollbar; the footer stays pinned to the bottom,
+so blank paper can remain under a short tab.
 
 <!-- SECTION: okonomi-trend -->
 ## The Økonomi trend

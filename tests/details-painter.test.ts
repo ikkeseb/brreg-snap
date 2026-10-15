@@ -462,6 +462,38 @@ describe('result: the dossier', () => {
     expect([...region.children].map((c) => c.id)).toEqual(['panel-oversikt', 'panel-personer', 'panel-okonomi', 'panel-enheter']);
   });
 
+  it('the region holds its min-height only once the tabs are in use, so a plain load ends at its footer', () => {
+    const held = () => q('.tab-panels')!.classList.contains('tab-panels--held');
+    const plain = setup();
+    plain.painter.result(resultPaint(equinor()));
+    expect(held()).toBe(false);
+    q<HTMLButtonElement>('#tab-okonomi')!.click();
+    expect(held()).toBe(true);
+    // A new company starts plain again, on the tab kept from before.
+    plain.painter.result(resultPaint(konkurs()));
+    expect(held()).toBe(false);
+    plain.painter.selectTab('personer');
+    expect(held()).toBe(true);
+    // A deep link lands on the tabs: held from the first paint.
+    const landed = setup({ initialTab: 'enheter' });
+    landed.painter.result(resultPaint(equinor()));
+    expect(held()).toBe(true);
+  });
+
+  it('a tab selected while loading (Back/Forward) holds the region on the result that follows', () => {
+    const held = () => q('.tab-panels')!.classList.contains('tab-panels--held');
+    const { painter } = setup();
+    painter.loading('923609016', { kobling: false });
+    painter.selectTab('enheter');
+    painter.result(resultPaint(equinor()));
+    expect(q('#tab-enheter')!.getAttribute('aria-selected')).toBe('true');
+    expect(held()).toBe(true);
+    // Used once: the next company starts plain again.
+    painter.loading('923609016', { kobling: false });
+    painter.result(resultPaint(konkurs()));
+    expect(held()).toBe(false);
+  });
+
   it('a tab click persists the key; a restored ?tab= only reflects it; the key survives a new company', () => {
     const { painter, intents } = setup();
     painter.result(resultPaint(equinor()));

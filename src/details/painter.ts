@@ -133,6 +133,8 @@ export function createPanelPainter(
 
   let state: PanelState = 'loading';
   let answerAttr: AnswerAttr = 'loading';
+  // A tab-region hold asked for while loading (holdTabs below).
+  let holdPending = false;
   // Bumped by every paint: an async fill (recents, the stored choice)
   // that lands after a newer paint is dropped.
   let paintId = 0;
@@ -161,6 +163,7 @@ export function createPanelPainter(
   }
 
   function setState(next: PanelState, answer: AnswerAttr): void {
+    if (next !== 'loading') holdPending = false;
     state = next;
     answerAttr = answer;
     main.dataset.state = next;
@@ -475,6 +478,7 @@ export function createPanelPainter(
   // the tablist and the footer) so its min-height lets even a short
   // tab scroll that far, with the footer flush at the bottom.
   function scrollToTabs(): void {
+    holdTabs();
     const doc = main.ownerDocument;
     const go = (): void => {
       const tablist = main.querySelector<HTMLElement>('[role="tablist"]');
@@ -494,6 +498,18 @@ export function createPanelPainter(
     const fonts = (doc as Document & { fonts?: { ready: Promise<unknown> } }).fonts;
     if (fonts) void fonts.ready.then(go);
     else go();
+  }
+
+  // The region's min-height (details.css) holds only once the tabs are
+  // in use, a landing or a switch: it keeps the tablist put when a long
+  // tab gives way to a short one. A plain load of a short dossier ends
+  // without a scrollbar. A hold asked for while loading (Back/Forward
+  // selects the restored tab before its result lands) waits for the
+  // next result paint.
+  function holdTabs(): void {
+    const region = main.querySelector('.tab-panels');
+    if (region) region.classList.add('tab-panels--held');
+    else if (state === 'loading') holdPending = true;
   }
 
   let footer: FooterHandle | undefined;
@@ -517,16 +533,19 @@ export function createPanelPainter(
   }, FRESHNESS_TICK_MS);
 
   function paintResult(view: TrustView, paint: Pick<ResultPaint, 'company' | 'method' | 'host' | 'remembered'>, reveal: boolean): void {
+    const held = holdPending;
     setState('result', view.answer.tone);
     const top = buildTop(view);
     const { tablist, panels } = buildTabs(view);
     const region = el('div', 'tab-panels');
+    if (held) region.classList.add('tab-panels--held');
     region.append(...panels);
     main.replaceChildren(...top.nodes, tablist, region);
     tabs = setupTabs(tablist, {
       initial: selectedTab,
       onSelect: (key) => {
         if (isTabKey(key)) selectedTab = key;
+        holdTabs();
         intents.selectTab(key);
       },
     });
@@ -734,6 +753,7 @@ export function createPanelPainter(
     selectTab(key): void {
       if (!isTabKey(key)) return;
       selectedTab = key;
+      holdTabs();
       tabs?.activateByKey(key);
     },
   };
