@@ -30,6 +30,13 @@ for (const s of STATES) {
       if (s.surface === 'panel') {
         await expect(page.getByRole('tablist')).toBeVisible();
         await expect(page.getByRole('tab').first()).toBeVisible();
+        // The tab region holds a viewport's min-height only after a
+        // landing (?tab= other than the default) or a switch; a plain
+        // load has no scrollbar.
+        if (!s.actions) {
+          const held = await page.locator('.tab-panels').evaluate((r) => r.classList.contains('tab-panels--held'));
+          expect.soft(held, 'tab region held only after a landing').toBe(/tab=(?!oversikt)/.test(s.path));
+        }
       }
     }
 
