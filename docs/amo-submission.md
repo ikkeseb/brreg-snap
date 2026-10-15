@@ -77,7 +77,7 @@ notes for reviewers below say how consent works there.
 >
 > • Se hvordan nettstedet er koblet til bedriften: registrert hjemmeside, et org.nr siden selv oppgir, eller et mulig navnetreff.
 > • Se status, alder, ansatte og siste innleverte regnskap. Ingen varsler i registeret er ingen garanti for at en nettbutikk er trygg.
-> • Åpne sidepanelet for roller, adresser, aktivitet, konsern, underenheter og lenker til årsregnskap og kunngjøringer.
+> • Åpne sidepanelet for roller, adresser, aktivitet, omsetning og resultat over flere år, konsern, underenheter og lenker til årsregnskap og kunngjøringer.
 > • Søk på navn eller org.nr, slå opp markert tekst med høyreklikk, eller bruk en hurtigtast.
 > • Velg en annen bedrift ved feil treff, glem et tidligere valg, og kopier org.nr eller et sammendrag.
 >
@@ -103,7 +103,7 @@ notes for reviewers below say how consent works there.
 >
 > • See how the site relates to the company: a registered website, an organisation number claimed by the site, or a possible name match.
 > • Check status, age, employees and the latest filed accounts. No registry warnings is not a guarantee that a shop is safe.
-> • Open the side panel for roles, addresses, activities, company groups, sub-units and links to annual reports and announcements.
+> • Open the side panel for roles, addresses, activities, revenue and results over several years, company groups, sub-units and links to annual reports and announcements.
 > • Search by name or organisation number, look up selected text from the right-click menu, or use a keyboard shortcut.
 > • Choose another company after a wrong match, forget a previous choice, and copy an organisation number or summary.
 >

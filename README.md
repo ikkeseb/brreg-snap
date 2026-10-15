@@ -27,9 +27,9 @@ Click the toolbar button on a shop or company website. The popup shows:
 
 - **The answer.** A quiet band when the register has no warnings
   («Ingen varsler i registeret»), a firmer band for a warning, and a
-  stamp for bankruptcy, deletion, forced dissolution, or a site that
-  claims a company it isn't registered for. No warnings is not a
-  guarantee that a shop is safe.
+  verdict in a red frame for bankruptcy, deletion, forced dissolution,
+  or a site that claims a company it isn't registered for. No warnings
+  is not a guarantee that a shop is safe.
 - **Kobling:** how the site relates to the company. It can be the
   company's registered website, an organisation number found in the
   page address or title, or only a name match.
@@ -38,10 +38,10 @@ Click the toolbar button on a shop or company website. The popup shows:
   one.
 
 The sidebar (Firefox) or side panel (Chrome) goes deeper, with tabs
-for Oversikt, Personer (roles), Økonomi (latest accounts, the annual
-report PDFs and announcements) and Enheter (group structure and
-sub-units). Registry notes (påtegninger) and recent changes show above
-the tabs.
+for Oversikt, Personer (roles), Økonomi (latest accounts, revenue and
+result over the last few years, the annual report PDFs and
+announcements) and Enheter (group structure and sub-units). Registry
+notes (påtegninger) and recent changes show above the tabs.
 
 Other ways in:
 
@@ -54,8 +54,9 @@ Other ways in:
 When several companies fit the site equally well, a picker lets you
 choose instead of the extension guessing. A wrong match can be
 replaced and the choice forgotten. The toolbar button shows «!» for a
-warning and «✕» for a stamp on the tab you looked up. «Auto-oppdater»
-(off by default) lets an open panel follow your active tab.
+warning and «✕» for a serious finding on the tab you looked up.
+«Auto-oppdater» (off by default) lets an open panel follow your active
+tab.
 
 On install, a welcome page opens once to show how to use it. It makes
 no network request.
