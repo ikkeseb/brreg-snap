@@ -145,7 +145,8 @@ Source code under the MIT licence: https://github.com/ikkeseb/brreg-snap
 The package shape and the Chrome manifest are gated
 (`scripts/verify-package.mjs`, `tests/manifest.test.ts`). What no gate
 checks: the privacy tab, `PRIVACY.md` and the Firefox manifest must
-tell the same story, that the site's domain goes to data.brreg.no (Web
-history / `browsingActivity`) and nowhere else. Check the listing and
+tell the same story, that the site's domain (Web history /
+`browsingActivity`) and the text a user selects and looks up (Website
+content / `websiteContent`) go to data.brreg.no and nowhere else. Check the listing and
 privacy tabs against this file whenever they change. Review usually
 takes a few days but can take weeks.

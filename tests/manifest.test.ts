@@ -21,8 +21,9 @@ import {
 // The Firefox data-collection declaration is pinned too: it is what
 // the install prompt tells users, and it must say the same thing as
 // PRIVACY.md and the store privacy forms (the visited site's domain
-// goes to data.brreg.no = `browsingActivity`). A silent flip back to
-// "none" would be a false claim to every user.
+// goes to data.brreg.no = `browsingActivity`; selected text a user
+// looks up = `websiteContent`). A silent flip back to "none" would be
+// a false claim to every user.
 
 interface Manifest {
   version: string;
@@ -100,11 +101,30 @@ describe.each(['firefox', 'chrome'] as const)('manifest.%s', (target) => {
 const EXPECTED_FIREFOX_DATA_COLLECTION = DATA_COLLECTION.firefox;
 
 describe('data collection declaration', () => {
-  it('Firefox declares browsingActivity as required data collection', () => {
+  it('Firefox declares browsingActivity and websiteContent as required data collection', () => {
+    expect(EXPECTED_FIREFOX_DATA_COLLECTION).toEqual({
+      required: ['browsingActivity', 'websiteContent'],
+    });
     expect(
       manifests.firefox.browser_specific_settings?.gecko
         ?.data_collection_permissions,
     ).toEqual(EXPECTED_FIREFOX_DATA_COLLECTION);
+  });
+
+  it.each([
+    [{ required: ['browsingActivity'] }],
+    [{ required: ['websiteContent'] }],
+    [{ required: ['browsingActivity', 'websiteContent', 'searchTerms'] }],
+    [{ required: ['browsingActivity'], optional: ['websiteContent'] }],
+    [{ required: ['none'] }],
+  ])('rejects any other Firefox declaration: %j', (dcp) => {
+    const m = structuredClone(manifests.firefox) as unknown as {
+      browser_specific_settings: { gecko: { data_collection_permissions: unknown } };
+    };
+    m.browser_specific_settings.gecko.data_collection_permissions = dcp;
+    expect(check(m, 'firefox', pkg)).toEqual([
+      expect.stringMatching(/^data_collection_permissions must be exactly/),
+    ]);
   });
 
   it('Chrome ships no gecko block (the CWS privacy form declares it)', () => {

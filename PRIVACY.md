@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: 2026-10-15. Applies to brreg-snap 1.4 and later._
+_Last updated: 2026-10-16. Applies to brreg-snap 1.4 and later._
 
 brreg-snap is a browser extension for Firefox and Chrome that shows
 public information about Norwegian companies from
@@ -110,9 +110,10 @@ Removing the extension deletes all of it.
 
 ## Store declarations
 
-- **Firefox** lists «browsing activity» as required data collection,
-  because the domain of the site you look up is sent to
-  Brønnøysundregistrene. It goes only to that public registry, never
+- **Firefox** lists «browsing activity» and «website content» as
+  required data collection, because the domain of the site you look up,
+  and the text you select and choose to look up, are sent to
+  Brønnøysundregistrene. They go only to that public registry, never
   to the developer.
 - **Chrome Web Store** lists the same data as «Web history», and the
   text you select and choose to look up as «Website content».
