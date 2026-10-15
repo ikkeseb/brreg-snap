@@ -216,7 +216,7 @@ permission, explaining why each is necessary.
 > instructions are in `BUILD.md` at the repo root — reproduction is
 > `pnpm install --frozen-lockfile && pnpm package` with Node 24
 > (`.node-version`; `engines` allows `^22.13 || ^24 || >=26`) and
-> pnpm 10.33.0 (pinned via the `packageManager` field). The
+> pnpm 12.10.1 (pinned via the `packageManager` field). The
 > unzipped package matches the CI build attached to the GitHub
 > Release for `v<version>`.
 >
