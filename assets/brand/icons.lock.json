@@ -1,11 +1,11 @@
 {
-  "assets/brand/mark-128.svg": "cded97e47cc39f228fd539a393ba473ab535628701fa300ccdf323b352d9d65d",
-  "assets/brand/mark-16.svg": "3c009ba4b7366eac6ae604caca0d1dfebb8598908244b15d53f43fa446c3e5eb",
-  "assets/brand/mark-32.svg": "536ee63838cd7734d1ad1b6b904974d2746ef6855a2a4e079dae2cecb84e52db",
-  "assets/brand/mark.svg": "9943d0e8f937ef5248c1b2140bf2426a8804adf812c2cb749e52625fdf7dd4a8",
-  "public/icons/icon-128.png": "d4dd50bae5b1d14e4cafe6c82a395bbd9d92ddc8ef94fd6ef5c4a2823a2226c1",
-  "public/icons/icon-16.png": "2ddfa6f7c0bb7bb4148020b521d8790234a2aa099e2d569d8b77e14f0f482fbf",
-  "public/icons/icon-32.png": "57bafa3cd14d3fd941b9668aaee26498f92f9977eb6e1dc3f676d126f5a27248",
-  "public/icons/icon-48.png": "2d725c101e688c802ad5928c88581608696c61f54bf0ab4ab7304822167d4263",
-  "src/lib/view/mark-data.ts": "86db12568d19dbd20106e33ee21e5714cd280de6c69f8dc7fc698fc8618bf4e5"
+  "assets/brand/mark-128.svg": "0c582fdd67d749466572485f3442dc289b0ad6dd8ae786c189dc89fbcb770afe",
+  "assets/brand/mark-16.svg": "e5017219f6eb0a1615326cf909e6333b303e6ce97cc14b9f7bf9ae0d0a2597d2",
+  "assets/brand/mark-32.svg": "452530d3ef3cf43f7b769359e89c7b9eff17650e69882d4ed7d47e7fdc602c99",
+  "assets/brand/mark.svg": "cc198213bfb7d62e3053ccd220fad7c6ee8dbd1541b7c7f3a9d6ebb89d0fc2d9",
+  "public/icons/icon-128.png": "1c2c7db1694a3c237e8dcb03739db22c10da9b40d7d8b07df04c2486f6bd5a3f",
+  "public/icons/icon-16.png": "0e6e3c5000f2922c2152089cd0c04aa70ed7fc4ec18e75f4e47ab9b0cff3e4c4",
+  "public/icons/icon-32.png": "199d8d3cbf58ca86c864802e32bdf60ae6fe00bf19839da0ccca447885da710b",
+  "public/icons/icon-48.png": "8c458ae93804c21733f9d828efa83519ac241ebe3a5ef666f5e3f6d6560ba7d2",
+  "src/lib/view/mark-data.ts": "a1ba7dcd64055dc100c3edaddfcf18229c212af283f2a2471d482cd56462cb3e"
 }
