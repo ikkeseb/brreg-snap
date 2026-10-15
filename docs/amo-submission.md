@@ -73,15 +73,15 @@ notes for reviewers below say how consent works there.
 <!-- SECTION: description-nb -->
 ### Description (nb — paste as is)
 
-> Sjekk hvem som står bak en norsk nettbutikk eller nettside. brreg-snap slår opp bedriften i Brønnøysundregistrene og viser organisasjonsnummer, konkurs og andre registrerte varsler, styre og regnskap.
+> Brønnøysundregistrene, rett fra nettsiden du er på. Ett klikk slår opp bedriften bak siden: organisasjonsnummer, status og det viktigste fra registeret.
 >
-> • Se hvordan nettstedet er koblet til bedriften: registrert hjemmeside, et org.nr siden selv oppgir, eller et mulig navnetreff.
-> • Se status, alder, ansatte og siste innleverte regnskap. Ingen varsler i registeret er ingen garanti for at en nettbutikk er trygg.
-> • Åpne sidepanelet for roller, adresser, aktivitet, omsetning og resultat over flere år, konsern, underenheter og lenker til årsregnskap og kunngjøringer.
+> • Se hvordan siden henger sammen med bedriften: registrert hjemmeside, et org.nr siden selv oppgir, eller bare et navnetreff.
+> • Sidepanelet går dypere: roller, adresser, næring og formål, konsern og underenheter, nøkkeltall som omsetning og resultat over flere år der de åpne dataene har dem, og lenker til årsregnskap og kunngjøringer.
+> • Varsler i registeret, som konkurs, avvikling eller manglende regnskap, vises tydelig. Ingen varsler er likevel ingen garanti.
 > • Søk på navn eller org.nr, slå opp markert tekst med høyreklikk, eller bruk en hurtigtast.
-> • Velg en annen bedrift ved feil treff, glem et tidligere valg, og kopier org.nr eller et sammendrag.
+> • Velg en annen bedrift ved feil treff, og kopier org.nr eller et sammendrag.
 >
-> Slå på "Auto-oppdater" hvis du vil at et åpent sidepanel skal følge fanen du ser på. Du får først en forklaring og en forespørsel om tilgang til faner. Slår du bryteren av, gis tilgangen tilbake.
+> Med «Auto-oppdater» følger et åpent sidepanel fanen du ser på. Du får først en forklaring, deretter spør nettleseren om tilgang til faner. Slår du det av, gis tilgangen tilbake.
 >
 > Personvern: Oppslag sendes bare til data.brreg.no, aldri til utvikleren. Utvidelsen sender nettstedets registrerbare domene, et organisasjonsnummer eller søketeksten du selv skriver eller velger å slå opp. Den har ingen content scripts og leser ikke nettsideinnhold automatisk. Ingen analytics, trackere eller telemetri. Velkomstsiden gjør ingen nettverkskall. «Rapporter feil treff» åpner e-postprogrammet ditt; du velger selv om meldingen sendes.
 >
@@ -101,15 +101,15 @@ notes for reviewers below say how consent works there.
 <!-- SECTION: description-en -->
 ### Description (en)
 
-> Check which company is behind a Norwegian shop or website. brreg-snap looks up the company in the Brønnøysund Register Centre and shows its organisation number, bankruptcy and other registry warnings, board and accounts.
+> Norway's company register, right from the site you are on. One click looks up the company behind the page in the Brønnøysund Register Centre and shows its organisation number, its status and the essentials from the register.
 >
-> • See how the site relates to the company: a registered website, an organisation number claimed by the site, or a possible name match.
-> • Check status, age, employees and the latest filed accounts. No registry warnings is not a guarantee that a shop is safe.
-> • Open the side panel for roles, addresses, activities, revenue and results over several years, company groups, sub-units and links to annual reports and announcements.
+> • See how the site connects to the company: its registered website, an organisation number stated on the site, or only a name match.
+> • The side panel goes deeper: roles, addresses, industry and purpose, group structure and sub-units, key figures such as revenue and profit over several years where the open data has them, and links to annual accounts and announcements.
+> • Registry warnings stand out, such as bankruptcy, liquidation or overdue accounts. A clean record is still no guarantee.
 > • Search by name or organisation number, look up selected text from the right-click menu, or use a keyboard shortcut.
-> • Choose another company after a wrong match, forget a previous choice, and copy an organisation number or summary.
+> • Pick another company after a wrong match and copy the organisation number or a summary.
 >
-> Turn on "Auto-oppdater" to let an open side panel follow your active tab. A short explanation and a request for tab access appear first. Turning it off gives the permission back.
+> With "Auto-oppdater" on, an open side panel follows your active tab. A short explanation comes first, then the browser asks for tab access. Turning it off gives the permission back.
 >
 > Privacy: Lookups go only to data.brreg.no, never to the developer. The extension sends the site's registrable domain, an organisation number or search text you type or choose to look up. It has no content scripts and does not read page content automatically. No analytics, trackers or telemetry. The welcome page makes no network requests. "Rapporter feil treff" opens your email app; you decide whether to send the message.
 >
