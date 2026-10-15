@@ -1,0 +1,67 @@
+name: Feil selskap for en nettside
+description: brreg-snap viser feil selskap (eller ingen) for en nettside. / The extension shows the wrong company for a site.
+title: "Feil treff: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Takk! Domenet holder, og det er tryggest: ikke lim inn lenker med innlogging, søk eller andre personlige data i adressen.
+        *Thanks! The domain is enough; leave out paths that carry personal data.*
+  - type: input
+    id: site
+    attributes:
+      label: Nettside
+      description: Domenet eller adressen. / Domain or URL.
+      placeholder: example.no
+    validations:
+      required: true
+  - type: input
+    id: shown
+    attributes:
+      label: Org.nr eller selskap som ble vist
+      description: "Det brreg-snap viste, eller «ingen» om den ikke fant noe. / What the extension showed, or \"none\"."
+      placeholder: 123456789 / Eksempel AS
+    validations:
+      required: true
+  - type: input
+    id: expected
+    attributes:
+      label: Riktig selskap eller org.nr
+      description: Hvis du vet det. / If you know it.
+    validations:
+      required: false
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Nettleser
+      description: Browser.
+      options:
+        - Firefox
+        - Chrome
+        - Annen / other
+    validations:
+      required: true
+  - type: input
+    id: browser-version
+    attributes:
+      label: Nettleserversjon
+      description: "Browser version (Firefox: about:support, Chrome: chrome://version)."
+      placeholder: "131"
+    validations:
+      required: false
+  - type: input
+    id: extension-version
+    attributes:
+      label: brreg-snap-versjon
+      description: "Extension version (Firefox: about:addons, Chrome: chrome://extensions)."
+      placeholder: 1.6.0
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: Noe mer?
+      description: Anything else, e.g. what you expected or a screenshot.
+    validations:
+      required: false
