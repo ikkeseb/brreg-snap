@@ -139,9 +139,8 @@ export function formatAmountsIn(values: Array<number | undefined>): {
 // companies reporting in a functional currency file in USD or EUR
 // (Equinor, Aker BP, Mowi). "kr" is right only for NOK; anything else
 // gets its ISO code so 67 956 000 000 USD never reads as kroner.
-function isNok(valuta: string | undefined): boolean {
-  return !valuta || valuta.toUpperCase() === 'NOK';
-}
+const currencyLabel = (valuta: string | undefined): string =>
+  !valuta || valuta.toUpperCase() === 'NOK' ? 'kr' : valuta.toUpperCase();
 
 // Compact money string: 37_877_000_000 → "37,9 mrd kr", or with a
 // foreign valuta "68,0 mrd USD". Undefined for nullish/NaN so addRow
@@ -152,7 +151,21 @@ export function formatMoney(
 ): string | undefined {
   const amount = formatMagnitude(value);
   if (amount === undefined) return undefined;
-  return `${amount} ${isNok(valuta) ? 'kr' : valuta!.toUpperCase()}`;
+  return `${amount} ${currencyLabel(valuta)}`;
+}
+
+// The full amount, no magnitude word: 12_345 → "12 345 kr", with
+// nb-NO's no-break group separator and formatMoney's ASCII minus and
+// currency. For where a compact figure can't say it: the title and
+// accessible name of a trend cell that reads «<0,1».
+export function formatMoneyExact(
+  value: number | undefined,
+  valuta?: string,
+): string | undefined {
+  if (value === undefined || value === null || Number.isNaN(value)) return undefined;
+  const sign = value < 0 ? '-' : '';
+  const amount = Math.abs(value).toLocaleString('nb-NO', { maximumFractionDigits: 2 });
+  return `${sign}${amount} ${currencyLabel(valuta)}`;
 }
 
 // brreg dates are date-only ISO strings ("2002-09-12"). `new Date()`

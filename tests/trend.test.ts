@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { formatAmountsIn } from '../src/lib/format.js';
-import { trendRead } from '../src/lib/view/trend.js';
+import { trendOf, trendRead } from '../src/lib/view/trend.js';
 
 const YEARS = ['2023', '2024', '2025'];
 // Points over 2023… (or 2024–2025 for two values); null = no figure.
@@ -132,5 +132,24 @@ describe('formatAmountsIn — one magnitude word per row', () => {
   it('plain kroner and missing values', () => {
     expect(formatAmountsIn([500, -20])).toEqual({ unit: '', amounts: [{ amount: '500' }, { amount: '-20' }] });
     expect(formatAmountsIn([undefined, undefined])).toEqual({ unit: '', amounts: [undefined, undefined] });
+  });
+});
+
+describe('trendOf — the exact amount behind a «<0,1» cell', () => {
+  it('is written out in full, not in the row unit', () => {
+    const trend = trendOf([
+      { year: '2023', tilDato: '2023-12-31', driftsinntekter: 12_345 },
+      { year: '2024', tilDato: '2024-12-31', driftsinntekter: 1_000_000_000 },
+    ])!;
+    expect(trend.rows[0]!.unit).toBe('mrd');
+    expect(trend.rows[0]!.cells).toEqual([{ amount: '<0,1', exact: '12\u00a0345 kr' }, { amount: '1,0' }]);
+  });
+
+  it('keeps a loss and a foreign currency', () => {
+    const trend = trendOf([
+      { year: '2023', tilDato: '2023-12-31', valuta: 'USD', aarsresultat: -40_000 },
+      { year: '2024', tilDato: '2024-12-31', valuta: 'USD', aarsresultat: 2_000_000 },
+    ])!;
+    expect(trend.rows[0]!.cells[0]).toEqual({ amount: '-<0,1', negative: true, exact: '-40\u00a0000 USD' });
   });
 });

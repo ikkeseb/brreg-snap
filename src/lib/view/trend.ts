@@ -18,7 +18,7 @@
 //   bare direction when it isn't or the change is 1000 % or more. A middle year outside the ends' range
 //   by more than a tenth of the larger end is named («høyest i 2024»).
 
-import { formatAmountsIn, formatMoney, formatPercent } from '../format.js';
+import { formatAmountsIn, formatMoneyExact, formatPercent } from '../format.js';
 import type { KeyFigures } from '../regnskap.js';
 import { COPY } from './copy.js';
 
@@ -29,8 +29,8 @@ export const TREND_YEARS = 3;
 export interface TrendCell {
   amount: string;
   negative?: boolean;
-  // The exact amount («2 kr») when `amount` is only «<0,1» in the
-  // row's unit: the cell's title and accessible name.
+  // The exact amount («12 345 kr») when `amount` is only «<0,1» in
+  // the row's unit: the cell's title and accessible name.
   exact?: string;
 }
 
@@ -181,7 +181,7 @@ export function trendOf(years: KeyFigures[], headValuta?: string): TrendView | u
         if (a === undefined) return undefined;
         const cell: TrendCell = { amount: a.amount };
         if (values[i]! < 0) cell.negative = true;
-        if (a.small) cell.exact = formatMoney(values[i], valuta)!;
+        if (a.small) cell.exact = formatMoneyExact(values[i], valuta)!;
         return cell;
       }),
     });

@@ -5,6 +5,7 @@ import {
   formatAddress,
   formatDateNo,
   formatMoney,
+  formatMoneyExact,
   formatOrgnr,
   formatPercent,
   formatRelativeTime,
@@ -302,6 +303,21 @@ describe('formatMoney with a foreign valuta', () => {
 
   it('keeps the sign and small amounts', () => {
     expect(formatMoney(-250, 'EUR')).toBe('-250 EUR');
+  });
+});
+
+describe('formatMoneyExact', () => {
+  it('the full amount: nb-NO grouping, no magnitude word, the currency as formatMoney writes it', () => {
+    expect(formatMoneyExact(12_345)).toBe(`12${NBSP}345 kr`);
+    expect(formatMoneyExact(1_000_000_000, 'nok')).toBe(`1${NBSP}000${NBSP}000${NBSP}000 kr`);
+    expect(formatMoneyExact(2, 'USD')).toBe('2 USD');
+    expect(formatMoneyExact(1_234.5, 'eur')).toBe(`1${NBSP}234,5 EUR`);
+  });
+
+  it('an ASCII minus like formatMoney, and undefined for nullish/NaN', () => {
+    expect(formatMoneyExact(-40_000)).toBe(`-40${NBSP}000 kr`);
+    expect(formatMoneyExact(undefined)).toBeUndefined();
+    expect(formatMoneyExact(Number.NaN)).toBeUndefined();
   });
 });
 describe('parseIsoDate / formatDateNo', () => {
