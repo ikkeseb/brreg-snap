@@ -66,10 +66,12 @@ under `nb-NO`, the add-on's default locale.
 
 Not a form field: AMO and Firefox read it from the manifest
 (`browser_specific_settings.gecko.data_collection_permissions`). It is
-`required: ["browsingActivity"]`, because the domain of the site the
-user looks up is sent to data.brreg.no. Firefox 140+ shows it in the
+`required: ["browsingActivity", "websiteContent"]`, because the domain
+of the site the user looks up, and text the user selects and chooses
+to look up, are sent to data.brreg.no. Firefox 140+ shows it in the
 install prompt, and existing users get an update prompt («New required
-data collection») the first time a version adds it. Why required, not
+data collection») the first time a version adds a type (1.6.1 adds
+`websiteContent`). Why required, not
 optional: `docs/notes/permissions-model.md`
 § data-collection-declaration. Firefox 115–139 ignore the key; the
 notes for reviewers below say how consent works there.
@@ -197,8 +199,9 @@ a reviewer asks. The notes for reviewers below carry the short form.
 > text and text explicitly selected for a right-click lookup are sent
 > as a search (a selection: at most 100 characters, and only the
 > number when it holds exactly one valid organisation number). Hence
-> `data_collection_permissions` `required: ["browsingActivity"]`,
-> which Firefox 140+ shows in the install and update prompts. IP
+> `data_collection_permissions` `required: ["browsingActivity",
+> "websiteContent"]` (the selected text is website content), which
+> Firefox 140+ shows in the install and update prompts. IP
 > addresses and reserved local names (localhost, single-label hosts,
 > .local, .lokal, .internal, .intern, .lan, .home.arpa, .priv) are
 > never sent. Nothing goes to the developer or any other party.
@@ -215,8 +218,10 @@ a reviewer asks. The notes for reviewers below carry the short form.
 > of what is sent and to whom; its «Slå på» button is the explicit
 > consent.
 >
-> No API or host permission added since 1.1.0 (1.3.1 changed only the
-> data collection declaration, from `none` to `browsingActivity`).
+> No API or host permission added since 1.1.0. The data collection
+> declaration changed in 1.3.1 (from `none` to `browsingActivity`) and
+> in 1.6.1 (adds `websiteContent` for the selection lookup's text,
+> which was already sent; no new data flow).
 > Annual-report PDFs and announcements are ordinary user-clicked
 > links. A welcome page opens once on install, not on update, and
 > makes no network requests. Schibsted Grotesk is bundled locally (SIL

@@ -92,9 +92,10 @@ or cookies. IP addresses and reserved local names (`localhost`, names
 without a dot, endings like `.local` or `.lan`) are never sent; other
 names that only work on a private network are looked up like any other
 site. Nothing goes to the developer. Firefox declares this as
-`browsingActivity` data collection; the Chrome Web Store as web
-history, plus website content for the selected text you choose to
-look up. [PRIVACY.md](PRIVACY.md) has the details.
+`browsingActivity` data collection and the Chrome Web Store as web
+history; both add website content for the selected text you choose
+to look up (`websiteContent` on Firefox).
+[PRIVACY.md](PRIVACY.md) has the details.
 
 ## Tests
 

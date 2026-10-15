@@ -8,6 +8,10 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ### Changed
 
+- `[firefox]` The add-on now also declares `websiteContent` data
+  collection: the text you select and look up with «Slå opp «…» i
+  brreg-snap» goes to data.brreg.no. Firefox asks once on update.
+
 - The welcome page leads with the lookup itself: «brreg-snap slår opp
   bedriften bak siden i Brønnøysundregistrene: org.nr, status, ledelse,
   regnskap, konsern og eventuelle varsler.», instead of a line that

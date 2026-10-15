@@ -75,13 +75,15 @@ export const CSP =
 
 /**
  * Firefox's install prompt shows this; it must say what PRIVACY.md and
- * the store forms say (the visited site's domain goes to data.brreg.no).
- * `required`, not `optional`: every click lookup sends the domain.
+ * the store forms say: the visited site's domain goes to data.brreg.no
+ * (`browsingActivity`), and so does text the user selects and looks up
+ * (`websiteContent`). `required`, not `optional`: every click lookup
+ * sends the domain. Order matters (exact JSON match).
  * Chrome has no gecko block (the CWS privacy form declares it).
  * @type {Record<Target, unknown>}
  */
 export const DATA_COLLECTION = {
-  firefox: { required: ['browsingActivity'] },
+  firefox: { required: ['browsingActivity', 'websiteContent'] },
   chrome: undefined,
 };
 

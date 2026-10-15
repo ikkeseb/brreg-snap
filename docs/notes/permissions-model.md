@@ -167,29 +167,34 @@ flow. If we ever target Android, the entire surface needs a re-think,
 not a manifest tweak.
 
 <!-- SECTION: data-collection-declaration -->
-## Firefox data collection is `browsingActivity`, required
+## Firefox data collection is `browsingActivity` + `websiteContent`, required
 
 Every lookup sends the site's registrable domain, and a name label
 derived from it, to data.brreg.no. Mozilla counts any data "handled outside of the
 add-on or the local browser" as transmission, a public government API
-included, and its taxonomy puts domains under `browsingActivity`. So
+included, and its taxonomy puts domains under `browsingActivity`. The
+selection lookup («Slå opp «…» i brreg-snap» and its keyboard command)
+also sends text the user selected on the page (at most 100 characters),
+and Mozilla defines `websiteContent` as "anything visible on a website
+— such as text, images, videos, and links", with no exemption for a
+lookup the user starts. So
 `browser_specific_settings.gecko.data_collection_permissions` is
-exactly `{"required": ["browsingActivity"]}`, pinned by
-`tests/manifest.test.ts` and the CI dist check. PRIVACY.md § Store
-declarations and the CWS privacy form («Web history») say the same
-thing; change all three together. CWS also ticks «Website content»
-for the selected text a user chooses to look up (its User Data FAQ
-counts data captured from a page); the Firefox list doesn't carry an
-equivalent yet, an open maintainer decision.
+exactly `{"required": ["browsingActivity", "websiteContent"]}` (the
+maintainer's decision for 1.6.1), pinned by `tests/manifest.test.ts`
+and the CI dist check. PRIVACY.md § Store declarations and the CWS
+privacy form («Web history» + «Website content») say the same thing;
+change all three together.
 
 - Required, not optional. Optional types are off until the user opts
-  in, so click lookups would have to stop until then. `none` plus an
+  in, so click lookups (or selection lookups, for `websiteContent`)
+  would have to stop until then; there is no in-extension opt-in. `none` plus an
   optional type would make the install prompt say the extension
   "doesn't require data collection" while every click sends a domain.
 - Adding a required type re-prompts existing users on Firefox 140+
   («New required data collection»). The update waits until they
   accept; the old version keeps running. Treat any change to the list
-  like adding a permission.
+  like adding a permission. Adding `websiteContent` in 1.6.1 costs
+  existing Firefox users that one prompt, an accepted cost.
 - Firefox 115–139 ignore the key and show the user nothing. AMO's
   linter warns about that (`KEY_FIREFOX_UNSUPPORTED_BY_MIN_VERSION`,
   since `strict_min_version` is below 140). Expected.
