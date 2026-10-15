@@ -2,7 +2,9 @@
 // path from the top parent down to the company, then its direct
 // children (capped, «Vis alle N»), every row a drill-in — then the
 // underenheter: name · address · employees · copyable org.nr, a deleted
-// one struck with «Slettet <dato>». A list capped by brreg says so
+// one struck with «Slettet <dato>». The DOM reads name, meta, org.nr
+// button at every width; below 340 px the CSS stacks the row and shows
+// the org.nr between the name and the meta. A list capped by brreg says so
 // («Viser 100 av 133 · Se alle på brreg.no ↗»).
 
 import { formatCount } from '../../format.js';
@@ -74,7 +76,7 @@ function buildKonsern(k: KonsernSection, parentName: string, handlers: EnheterHa
 
 function buildUnit(unit: UnitView, parentName: string, handlers: CopyHandlers): HTMLLIElement {
   const li = el('li', unit.gone ? 'unit unit--gone' : 'unit');
-  const text = el('span');
+  const text = el('span', 'unit__text');
   const name = el('span', 'unit__name');
   appendName(name, unit.name, parentName);
   text.appendChild(name);

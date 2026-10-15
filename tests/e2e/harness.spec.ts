@@ -93,11 +93,20 @@ for (const s of STATES) {
           rule: rgb(getComputedStyle(document.body).getPropertyValue('--rule')),
         },
         copyGap: btn && row ? row.getBoundingClientRect().right - btn.getBoundingClientRect().right : null,
+        unit: ((): { narrow: boolean; stacked: boolean } | null => {
+          // The first rendered row: a tab not on screen holds its rows unpainted.
+          const u = [...document.querySelectorAll('.unit')].find((r) => r.getClientRects().length > 0);
+          const [name, meta, orgnr] = ['.unit__name', '.unit__meta', '.orgnr'].map((sel) => u?.querySelector(sel)?.getBoundingClientRect());
+          if (!name || !meta || !orgnr) return null;
+          return { narrow: innerWidth <= 340, stacked: orgnr.top >= name.bottom - 1 && meta.top >= orgnr.bottom - 1 };
+        })(),
       };
     });
     if (look.search) expect.soft(look.cancelRule, 'search field: the engine clear button is hidden').toBe(true);
     if (look.track) expect.soft(look.track.bg, 'equity track in --rule').toBe(look.track.rule);
     if (look.copyGap !== null) expect.soft(Math.abs(look.copyGap), '«Kopier sammendrag» pinned right').toBeLessThan(1);
+    // An underenhet row stacks name / org.nr / meta below 340 px only.
+    if (look.unit) expect.soft(look.unit.stacked, 'underenhet row stacked exactly when narrow').toBe(look.unit.narrow);
 
     await page.screenshot({
       path: join(testInfo.project.outputDir, 'screenshots', testInfo.project.name, `${s.name}.png`),
