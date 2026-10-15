@@ -5,11 +5,21 @@ the register has anything to warn you about.
 
 [![Firefox Add-ons](https://img.shields.io/amo/v/brreg-snap?label=Firefox%20Add-ons)](https://addons.mozilla.org/firefox/addon/brreg-snap/)
 [![Chrome Web Store](https://img.shields.io/chrome-web-store/v/mccggmiialopdaaokhakeijmbafhdmli?label=Chrome%20Web%20Store)](https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokhakeijmbafhdmli)
+[![CI](https://github.com/ikkeseb/brreg-snap/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ikkeseb/brreg-snap/actions/workflows/ci.yml?query=branch%3Amain)
 
 brreg-snap is a browser extension for Firefox and Chrome. It looks the
 site up in [Brønnøysundregistrene](https://data.brreg.no/) (the
 Brønnøysund Register Centre) and answers two questions: who is behind
 this site, and are they OK?
+
+## Install
+
+- Firefox 115 or later: [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/brreg-snap/)
+- Chrome 116 or later: [Chrome Web Store](https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokhakeijmbafhdmli)
+
+The stores are the only install channel. GitHub Releases carry the
+unsigned build artifacts and the source zip for each tag, for review
+and reproducible builds.
 
 ## What it does
 
@@ -84,6 +94,9 @@ What this rules out:
 declarations, so a change that adds a host, a content script or a
 permission fails `pnpm verify`.
 
+Found a way around any of this? Report it privately, as
+[SECURITY.md](SECURITY.md) describes.
+
 ## Privacy
 
 To find the company, the extension sends data.brreg.no the site's
@@ -100,7 +113,8 @@ data collection, the Chrome Web Store as web history.
 what is stored on your device.
 
 Support: [sebastian@nuez.no](mailto:sebastian@nuez.no) or a GitHub
-issue.
+issue. Security reports go privately, through
+[SECURITY.md](SECURITY.md).
 
 ## Develop
 
@@ -121,10 +135,6 @@ pnpm verify     # the full gate: typecheck, lint, tests, both builds
 
 Open an issue before a non-trivial change. PRs that add content
 scripts, add hosts or relax the CSP will be closed.
-
-GitHub Releases carry the unsigned build artifacts and the source zip
-for each tag. They are not an install channel: install from the
-stores.
 
 ## License
 
