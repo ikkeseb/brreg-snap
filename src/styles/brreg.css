@@ -174,7 +174,7 @@
 
 
 /* ---------- masthead ---------------------------------------------------
-   popup: mark · looked-up host · search icon button
+   popup: mark · looked-up host (none on the no-site state) · search icon button
    panel: mark · search field · Auto-oppdater switch */
 .mast {
   display: flex; align-items: center; gap: 10px;
@@ -192,6 +192,8 @@
   cursor: pointer; transition: background-color var(--t-fast) var(--ease);
 }
 .icon-btn:hover { background: var(--paper-2); }
+/* Right-aligned with or without the host label before it. */
+.mast .icon-btn { margin-left: auto; }
 
 /* search field: the <label> is the box, the input is borderless inside */
 .search {

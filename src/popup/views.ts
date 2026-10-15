@@ -74,8 +74,8 @@ export interface MastHandlers {
   onSearch: () => void;
 }
 
-function mast(roots: Roots, host: string | undefined, search: boolean, handlers: MastHandlers): Masthead {
-  return renderMasthead(roots.mast, { kind: 'popup', host, search }, { onSearch: handlers.onSearch });
+function mast(roots: Roots, host: string | undefined, search: boolean, handlers: MastHandlers, markOnly = false): Masthead {
+  return renderMasthead(roots.mast, { kind: 'popup', host, search, markOnly }, { onSearch: handlers.onSearch });
 }
 
 // --- loading ------------------------------------------------------------
@@ -242,8 +242,9 @@ export interface EmptyHandlers extends MastHandlers {
 export function paintEmpty(roots: Roots, data: EmptyPaint, handlers: EmptyHandlers): SearchView {
   const { kind } = data;
   const host = 'host' in kind ? kind.host : undefined;
-  // The search field is on screen in every empty kind: no icon.
-  mast(roots, host, false, handlers);
+  // The search field is on screen in every empty kind: no icon. The
+  // no-site heading says there is no site: the mark alone above it.
+  mast(roots, host, false, handlers, kind.kind === 'no-site');
   setState(roots, 'empty', kind.kind === 'degraded' ? 'warn' : 'empty');
   const site = data.site ?? '';
   let lead: SearchViewLead;

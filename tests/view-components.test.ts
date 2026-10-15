@@ -124,12 +124,20 @@ describe('masthead', () => {
     expect(mast.searchButton!.getAttribute('aria-label')).toBe(COPY.searchLabel);
   });
 
-  it('popup without a host says so and can hide the search button', () => {
+  it('popup without a host says so, or shows the mark alone on the no-site state, and can hide the search button', () => {
     const header = document.createElement('header');
     const mast = renderMasthead(header, { kind: 'popup', search: false });
     expect(header.querySelector('.mast__site')?.textContent).toBe(COPY.noSite);
     expect(mast.searchButton).toBeUndefined();
     expect(header.querySelector('.icon-btn')).toBeNull();
+    // The no-site empty state: the mark alone.
+    const bare = document.createElement('header');
+    renderMasthead(bare, { kind: 'popup', search: false, markOnly: true });
+    expect([...bare.children].map((c) => c.getAttribute('class'))).toEqual(['mast__mark']);
+    // With the search button and no label, the button is still the last child.
+    const withSearch = document.createElement('header');
+    renderMasthead(withSearch, { kind: 'popup', search: true, markOnly: true });
+    expect([...withSearch.children].map((c) => c.getAttribute('class'))).toEqual(['mast__mark', 'icon-btn']);
   });
 
   it('panel: search field + the auto-sync switch', () => {

@@ -10,7 +10,8 @@ export const COPY = {
   // Every search field, popup and panel alike.
   searchPlaceholder: 'Navn eller org.nr',
   searchHint: 'Org.nr kan limes inn med eller uten mellomrom.',
-  // Masthead when the tab has no address to look up.
+  // Masthead when the tab has no address to look up (the no-site empty
+  // state shows the mark alone: its heading says it).
   noSite: 'Ingen nettside',
 
   // identity
