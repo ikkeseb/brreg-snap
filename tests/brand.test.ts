@@ -1,14 +1,26 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
-import { ICONS, iconPath, pathData, readMaster, UI_MARK } from '../scripts/generate-icons.mjs';
+import {
+  ICONS,
+  iconPath,
+  LOCK_FILE,
+  lockedPaths,
+  pathData,
+  readMaster,
+  sha256,
+  UI_MARK,
+} from '../scripts/generate-icons.mjs';
 import { MARK } from '../src/lib/view/mark-data.js';
 
 // The brand pipeline (assets/brand/README.md): `pnpm icons` renders
-// public/icons/ and src/lib/view/mark-data.ts from the masters. These
-// pin its outputs to what the manifests reference and to the masters,
-// so a swapped master that was not regenerated, or a manifest icon the
-// generator does not write, fails here.
+// public/icons/ and src/lib/view/mark-data.ts from the masters and
+// records the sha256 of every master and output in icons.lock.json.
+// These check that the manifests reference only icons the generator
+// writes, and that every master and output is byte-for-byte the file
+// the last `pnpm icons` run read or wrote (the lock), so a swapped
+// master or a hand-edited output that was not regenerated fails here.
+// Nothing is rendered: whether the PNGs look right is a human check.
 
 interface IconManifest {
   icons?: Record<string, string>;
@@ -51,6 +63,13 @@ describe.each(['firefox', 'chrome'] as const)('manifest.%s icons', (target) => {
 });
 
 describe('generated files', () => {
+  it(`every master and output matches ${LOCK_FILE} (else run pnpm icons)`, () => {
+    const lock = JSON.parse(readFileSync(LOCK_FILE, 'utf8')) as Record<string, string>;
+    expect(Object.keys(lock), `${LOCK_FILE} is out of date: run pnpm icons`).toEqual(lockedPaths());
+    const stale = lockedPaths().filter((path) => sha256(path) !== lock[path]);
+    expect(stale, `differs from ${LOCK_FILE}: run pnpm icons (then review the PNGs)`).toEqual([]);
+  });
+
   it.each(generated)('public/icons/icon-%i.png exists at its size', (size) => {
     expect(pngSize(`public/${iconPath(size)}`)).toEqual([size, size]);
   });
@@ -64,12 +83,11 @@ describe('generated files', () => {
     }
   });
 
-  it('the in-UI mark carries the masters it names (regenerate after a swap)', () => {
-    expect(MARK.drawings.map((m) => [m.source, m.scale])).toEqual(
-      UI_MARK.map((m) => [m.source, m.scale]),
-    );
+  it('the in-UI mark carries the paths of the master for each scale', () => {
+    expect(MARK.drawings.map((m) => m.scale)).toEqual(UI_MARK.map((m) => m.scale));
+    const source = new Map(UI_MARK.map((m) => [m.scale, m.source]));
     for (const drawing of MARK.drawings) {
-      expect(drawing.d).toEqual(pathData(readMaster(drawing.source)));
+      expect(drawing.d).toEqual(pathData(readMaster(source.get(drawing.scale)!)));
     }
   });
 

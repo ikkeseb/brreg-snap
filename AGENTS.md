@@ -57,7 +57,7 @@ pnpm smoke                      # Playwright: harness states x widths x themes +
 pnpm smoke:record               # re-record tests/e2e/fixtures/ from the live API; review the diff
 pnpm test:live                  # live brreg canary: API contracts + resolver corpus (network; not in the gate)
 pnpm preview                    # the built pages in a plain tab against the live API (scripts/preview/README.md)
-pnpm icons                      # brand masters → public/icons/ + the in-UI mark (assets/brand/README.md); needs the smoke's Chromium
+pnpm icons                      # brand masters → public/icons/ + the in-UI mark + the hash lock (assets/brand/README.md); needs the smoke's Chromium
 pnpm dev                        # the real extension in a Firefox profile (dev:chrome for Chromium)
 pnpm release X.Y.Z [--dry-run]  # then --tag; docs/release.md
 pnpm store-status [--deep]      # live AMO/CWS versions vs the tags
@@ -91,7 +91,7 @@ note before reading the source file.
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
 | Trust view: answer priority, signals (deadline-aware regnskap, rekonstruksjon, NUF), merknader (påtegninger), endringer + the change feed | `src/lib/trust/*.ts`, `src/lib/brreg-endringer.ts`, `company-load.ts` | `docs/notes/trust.md`             |
 | Stores: store-status probe + verdict rules, what AMO/CWS change in a package; listing text lives in `docs/amo-submission.md` / `docs/cws-submission.md` (the kit renders from their anchors) | `scripts/store-status*.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
-| UI system: the loudness rule, tokens + type scale, font + CSP, the component inventory (module → API → markup), the a11y contract, the popup's 600 px budget, the Økonomi trend, deviations from the original design, the panel's search view + compact head + tab landing, the badge rule, the welcome page | `src/styles/brreg.css`, `src/lib/view/{trust-view,dossier-view,trend,copy}.ts`, `src/lib/view/components/*.ts`, `src/popup/views.ts`, `src/details/{painter,tabs}.ts`, `src/welcome/` | `docs/notes/ui.md`                |
+| UI system: the loudness rule, tokens + type scale, font + CSP, the component inventory (module → API → markup), the a11y contract, the popup's 600 px budget, the Økonomi trend, deviations from the original design, the panel's search view + compact head + tab landing, the badge rule, the welcome page, the brand mark + icon pipeline | `src/styles/brreg.css`, `src/lib/view/{trust-view,dossier-view,trend,copy}.ts`, `src/lib/view/components/*.ts`, `src/popup/views.ts`, `src/details/{painter,tabs}.ts`, `src/welcome/`, `scripts/generate-icons.mjs`, `src/lib/view/mark-data.ts`, `assets/brand/` | `docs/notes/ui.md`                |
 
 UI work starts in `docs/notes/ui.md`. Three rules bite most often:
 every user-facing string lives in `src/lib/view/copy.ts`; no `style`

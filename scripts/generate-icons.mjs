@@ -1,16 +1,21 @@
-// Renders every shipped brand file from the masters in assets/brand/:
+// Renders every shipped brand file from the masters in assets/brand/.
+// One command, three kinds of output, two of them outside public/icons/:
 //
 //   public/icons/icon-<size>.png   the manifests' icons (ICONS below)
 //   src/lib/view/mark-data.ts      the in-UI mark's paths (UI_MARK below)
+//   assets/brand/icons.lock.json   sha256 of every master read and every
+//                                  file above (tests/brand.test.ts)
 //
 //   pnpm icons
 //
-// Each master is drawn for its size (assets/brand/README.md), so a size
-// is rendered from its own file, never scaled from another. Playwright's
+// Each size is rendered from the master assets/brand/README.md assigns
+// it: 16, 32 and 128 from their own drawing, 48 from mark.svg scaled
+// down (off its grid). Playwright's
 // Chromium rasterises (already the smoke's browser, so no image library
 // enters the toolchain): one page per size at 1 CSS px per pixel, on a
 // transparent ground. Once: `pnpm exec playwright install chromium`.
 
+import { createHash } from 'node:crypto';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -18,6 +23,7 @@ const ROOT = resolve(import.meta.dirname, '..');
 export const BRAND_DIR = resolve(ROOT, 'assets', 'brand');
 const ICON_DIR = resolve(ROOT, 'public', 'icons');
 export const MARK_MODULE = resolve(ROOT, 'src', 'lib', 'view', 'mark-data.ts');
+export const LOCK_FILE = 'assets/brand/icons.lock.json';
 
 /**
  * Icon size (px) → the master drawn for it. Every size a manifest
@@ -56,6 +62,28 @@ export function pathData(svg) {
 
 /** @param {string} file */
 export const readMaster = (file) => readFileSync(resolve(BRAND_DIR, file), 'utf8');
+
+/**
+ * Repo-relative paths the lock pins, sorted: every master the generator
+ * reads and every file it writes (the lock itself aside).
+ * @returns {string[]}
+ */
+export function lockedPaths() {
+  const masters = new Set([...Object.values(ICONS), ...UI_MARK.map((m) => m.source)]);
+  return [
+    ...[...masters].map((file) => `assets/brand/${file}`),
+    ...Object.keys(ICONS).map((size) => `public/${iconPath(Number(size))}`),
+    'src/lib/view/mark-data.ts',
+  ].sort();
+}
+
+/**
+ * sha256 (hex) of a file's bytes. .gitattributes keeps the text files LF
+ * and the PNGs binary in every checkout, so the hashes match across
+ * machines.
+ * @param {string} path repo-relative
+ */
+export const sha256 = (path) => createHash('sha256').update(readFileSync(resolve(ROOT, path))).digest('hex');
 
 /**
  * The master as a <svg> drawn at size×size CSS px (its own width/height
@@ -103,7 +131,6 @@ async function main() {
       const x1 = Math.ceil(box.x + box.width - 1e-6);
       const y1 = Math.ceil(box.y + box.height - 1e-6);
       drawings.push({
-        source,
         scale,
         viewBox: `${x0} ${y0} ${x1 - x0} ${y1 - y0}`,
         width: (x1 - x0) / scale,
@@ -114,12 +141,11 @@ async function main() {
     await page.close();
     const width = Math.max(...drawings.map((m) => m.width));
     const height = Math.max(...drawings.map((m) => m.height));
-    const placed = drawings.map(({ source, ...m }) => ({
+    const placed = drawings.map((m) => ({
       ...m,
       // Centred in the shared box; whole CSS px when the sizes allow.
       x: (width - m.width) / 2,
       y: (height - m.height) / 2,
-      source,
     }));
     writeFileSync(
       MARK_MODULE,
@@ -136,7 +162,6 @@ export interface MarkDrawing {
   width: number;
   height: number;
   d: readonly string[];
-  source: string;
 }
 
 export const MARK: { width: number; height: number; drawings: readonly MarkDrawing[] } = ${JSON.stringify(
@@ -147,6 +172,10 @@ export const MARK: { width: number; height: number; drawings: readonly MarkDrawi
 `,
     );
     console.log(`${UI_MARK.map((m) => m.source).join(' + ')} → src/lib/view/mark-data.ts (${width}×${height} CSS px)`);
+
+    const lock = Object.fromEntries(lockedPaths().map((path) => [path, sha256(path)]));
+    writeFileSync(resolve(ROOT, LOCK_FILE), `${JSON.stringify(lock, null, 2)}\n`);
+    console.log(`${Object.keys(lock).length} hashes → ${LOCK_FILE}`);
   } finally {
     await browser.close();
   }
