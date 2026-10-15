@@ -7,7 +7,8 @@
 
 import { registrableDomain } from '../../hostname-score.js';
 import { COPY } from '../copy.js';
-import { button, el, icon, svgUse } from './dom.js';
+import { MARK } from '../mark-data.js';
+import { button, el, icon } from './dom.js';
 
 export type MastheadData =
   | {
@@ -43,6 +44,37 @@ export interface Masthead {
   searchButton?: HTMLButtonElement;
 }
 
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+// The brand mark, inline: one <svg> holding a nested <svg> per drawing
+// (the 16 px and the 32 px one, mark-data.ts), and brreg.css shows the
+// one drawn for the screen's pixel density. Decorative by default; the
+// masthead names it. Sizes are attributes, not style (CSP).
+export function brandMark(className = 'mast__mark'): SVGSVGElement {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('class', className);
+  svg.setAttribute('viewBox', `0 0 ${MARK.width} ${MARK.height}`);
+  svg.setAttribute('width', String(MARK.width));
+  svg.setAttribute('height', String(MARK.height));
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  for (const drawing of MARK.drawings) {
+    const inner = document.createElementNS(SVG_NS, 'svg');
+    inner.setAttribute('class', `mark--x${drawing.scale}`);
+    inner.setAttribute('viewBox', drawing.viewBox);
+    for (const key of ['x', 'y', 'width', 'height'] as const) {
+      inner.setAttribute(key, String(drawing[key]));
+    }
+    for (const d of drawing.d) {
+      const path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('d', d);
+      inner.appendChild(path);
+    }
+    svg.appendChild(inner);
+  }
+  return svg;
+}
+
 // «www.<b>dnb.no</b>»: the registrable domain is what the lookup keyed
 // on, so it is the part in ink.
 export function appendSiteLabel(container: HTMLElement, host: string): void {
@@ -62,7 +94,7 @@ export function renderMasthead(
   handlers: MastheadHandlers = {},
 ): Masthead {
   container.replaceChildren();
-  const mark = svgUse('mark', 'mast__mark');
+  const mark = brandMark();
   mark.removeAttribute('aria-hidden');
   mark.setAttribute('role', 'img');
   mark.setAttribute('aria-label', COPY.brand);

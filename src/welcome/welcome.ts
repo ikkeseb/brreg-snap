@@ -13,9 +13,9 @@ import '../lib/platform/globals.js';
 import { formatOrgnr } from '../lib/format.js';
 import { isFirefox } from '../lib/platform/engine.js';
 import { buildAnswer } from '../lib/view/components/answer.js';
-import { button, el, glyph, link, svgUse } from '../lib/view/components/dom.js';
+import { button, el, glyph, link } from '../lib/view/components/dom.js';
 import { buildLedger } from '../lib/view/components/ledger.js';
-import { appendSiteLabel } from '../lib/view/components/masthead.js';
+import { appendSiteLabel, brandMark } from '../lib/view/components/masthead.js';
 import { COPY, SUPPORT_EMAIL } from '../lib/view/copy.js';
 import type { AnswerView, LedgerRow } from '../lib/view/trust-view.js';
 
@@ -109,7 +109,7 @@ function buildExample(ex: Example): HTMLElement {
   card.setAttribute('aria-hidden', 'true');
 
   const site = el('div', 'example__site');
-  site.appendChild(svgUse('mark', 'mast__mark'));
+  site.appendChild(brandMark());
   const host = el('span', 'mast__site');
   appendSiteLabel(host, ex.host);
   site.appendChild(host);
@@ -260,7 +260,7 @@ function buildWays(commands: Command[]): HTMLElement {
 
 function paintMast(mast: HTMLElement): void {
   mast.replaceChildren();
-  mast.appendChild(svgUse('mark', 'mast__mark'));
+  mast.appendChild(brandMark());
   mast.appendChild(el('span', 'mast__brand', COPY.brand));
 }
 

@@ -1,116 +1,155 @@
-// Downsamples the source brand PNG to the manifest icon sizes
-// (16, 32, 48, 128) using box-filter area averaging.
+// Renders every shipped brand file from the masters in assets/brand/:
 //
-//   node scripts/generate-icons.mjs <path-to-brand-b.png>
+//   public/icons/icon-<size>.png   the manifests' icons (ICONS below)
+//   src/lib/view/mark-data.ts      the in-UI mark's paths (UI_MARK below)
 //
-// Source: brand-b.png, the high-resolution "B" mark (RGBA), passed as
-// the one argument. The maintainer keeps it outside the public tree.
-// Output: public/icons/icon-{size}.png — RGBA PNGs consumed by the
-// extension manifest.
+//   pnpm icons
+//
+// Each master is drawn for its size (assets/brand/README.md), so a size
+// is rendered from its own file, never scaled from another. Playwright's
+// Chromium rasterises (already the smoke's browser, so no image library
+// enters the toolchain): one page per size at 1 CSS px per pixel, on a
+// transparent ground. Once: `pnpm exec playwright install chromium`.
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { PNG } from 'pngjs';
+import { resolve } from 'node:path';
 
-const SIZES = [16, 32, 48, 128];
+const ROOT = resolve(import.meta.dirname, '..');
+export const BRAND_DIR = resolve(ROOT, 'assets', 'brand');
+const ICON_DIR = resolve(ROOT, 'public', 'icons');
+export const MARK_MODULE = resolve(ROOT, 'src', 'lib', 'view', 'mark-data.ts');
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = resolve(__dirname, '..');
-const OUT_DIR = resolve(REPO_ROOT, 'public', 'icons');
+/**
+ * Icon size (px) → the master drawn for it. Every size a manifest
+ * references must be here (tests/brand.test.ts).
+ * @type {Record<number, string>}
+ */
+export const ICONS = {
+  16: 'mark-16.svg',
+  32: 'mark-32.svg',
+  48: 'mark.svg',
+  128: 'mark-128.svg',
+};
 
-if (!process.argv[2]) {
-  console.error('usage: node scripts/generate-icons.mjs <path-to-brand-b.png>');
-  process.exit(1);
-}
-const SOURCE = resolve(process.argv[2]);
+/**
+ * The in-UI mark: one drawing per pixel density. `scale` is master units
+ * per CSS px, the density the drawing is for: there, one unit is one
+ * device px (the masthead CSS in brreg.css picks one by resolution).
+ * @type {{ source: string, scale: number }[]}
+ */
+export const UI_MARK = [
+  { source: 'mark-16.svg', scale: 1 },
+  { source: 'mark-32.svg', scale: 2 },
+];
 
-const source = PNG.sync.read(readFileSync(SOURCE));
-const { width: srcW, height: srcH, data: srcData } = source;
+/** @param {number} size */
+export const iconPath = (size) => `icons/icon-${size}.png`;
 
-// Find the bounding box of non-transparent pixels and crop to that
-// (squared, with a small margin). The source PNG has wide transparent
-// padding around the B mark; without this the glyph occupies ~50% of
-// the icon area and reads as a smudge at 16px. Pad by ~6% to keep the
-// glyph from kissing the edges.
-const ALPHA_THRESHOLD = 8;
-const PADDING_PCT = 0.06;
-let bboxMinX = srcW, bboxMinY = srcH, bboxMaxX = -1, bboxMaxY = -1;
-for (let y = 0; y < srcH; y++) {
-  for (let x = 0; x < srcW; x++) {
-    const alpha = srcData[(y * srcW + x) * 4 + 3];
-    if (alpha < ALPHA_THRESHOLD) continue;
-    if (x < bboxMinX) bboxMinX = x;
-    if (x > bboxMaxX) bboxMaxX = x;
-    if (y < bboxMinY) bboxMinY = y;
-    if (y > bboxMaxY) bboxMaxY = y;
-  }
-}
-if (bboxMaxX < 0) throw new Error('source PNG has no visible pixels');
-const bboxW = bboxMaxX - bboxMinX + 1;
-const bboxH = bboxMaxY - bboxMinY + 1;
-const bboxSide = Math.max(bboxW, bboxH);
-const square = Math.ceil(bboxSide * (1 + 2 * PADDING_PCT));
-const bboxCenterX = bboxMinX + bboxW / 2;
-const bboxCenterY = bboxMinY + bboxH / 2;
-const cropX = Math.round(bboxCenterX - square / 2);
-const cropY = Math.round(bboxCenterY - square / 2);
-
-function sampleSource(x, y) {
-  const sx = cropX + x;
-  const sy = cropY + y;
-  if (sx < 0 || sx >= srcW || sy < 0 || sy >= srcH) return [0, 0, 0, 0];
-  const off = (sy * srcW + sx) * 4;
-  return [srcData[off], srcData[off + 1], srcData[off + 2], srcData[off + 3]];
+/**
+ * The `d` of every <path> in a fill-only master, in document order.
+ * @param {string} svg
+ * @returns {string[]}
+ */
+export function pathData(svg) {
+  return [...svg.matchAll(/<path\b[^>]*?\sd="([^"]+)"/g)].map((m) => m[1]);
 }
 
-function downsample(size) {
-  const out = new PNG({ width: size, height: size, colorType: 6 });
-  const scale = square / size;
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      const x0 = Math.floor(x * scale);
-      const y0 = Math.floor(y * scale);
-      const x1 = Math.floor((x + 1) * scale);
-      const y1 = Math.floor((y + 1) * scale);
-      let r = 0, g = 0, b = 0, a = 0, n = 0;
-      for (let sy = y0; sy < y1; sy++) {
-        for (let sx = x0; sx < x1; sx++) {
-          const [sr, sg, sb, sa] = sampleSource(sx, sy);
-          // Premultiply alpha so semi-transparent edges blend cleanly
-          // against the destination. Un-premultiply at the end.
-          const fa = sa / 255;
-          r += sr * fa;
-          g += sg * fa;
-          b += sb * fa;
-          a += sa;
-          n += 1;
-        }
-      }
-      if (n === 0) continue;
-      const aAvg = a / n;
-      const off = (y * size + x) * 4;
-      if (aAvg === 0) {
-        out.data[off] = 0;
-        out.data[off + 1] = 0;
-        out.data[off + 2] = 0;
-        out.data[off + 3] = 0;
-      } else {
-        const aFactor = (aAvg / 255) * n;
-        out.data[off] = Math.round(r / aFactor);
-        out.data[off + 1] = Math.round(g / aFactor);
-        out.data[off + 2] = Math.round(b / aFactor);
-        out.data[off + 3] = Math.round(aAvg);
-      }
+/** @param {string} file */
+export const readMaster = (file) => readFileSync(resolve(BRAND_DIR, file), 'utf8');
+
+/**
+ * The master as a <svg> drawn at size×size CSS px (its own width/height
+ * dropped, the viewBox kept).
+ * @param {string} svg
+ * @param {number} size
+ */
+function sized(svg, size) {
+  return svg
+    .replace(/\s(width|height)="[^"]*"/g, '')
+    .replace(/<svg\b/, `<svg width="${size}" height="${size}"`);
+}
+
+async function main() {
+  const { chromium } = await import('@playwright/test');
+  const browser = await chromium.launch();
+  try {
+    mkdirSync(ICON_DIR, { recursive: true });
+    for (const [size, file] of Object.entries(ICONS)) {
+      const px = Number(size);
+      const page = await browser.newPage({ viewport: { width: px, height: px }, deviceScaleFactor: 1 });
+      await page.setContent(
+        `<!doctype html><style>html,body{margin:0;background:transparent}svg{display:block}</style>${sized(readMaster(file), px)}`,
+      );
+      const png = await page.screenshot({ omitBackground: true, clip: { x: 0, y: 0, width: px, height: px } });
+      await page.close();
+      const out = resolve(ROOT, 'public', iconPath(px));
+      writeFileSync(out, png);
+      console.log(`${file} → public/${iconPath(px)} (${png.length} bytes)`);
     }
-  }
-  return PNG.sync.write(out);
+
+    // The UI mark: each drawing cropped to its ink, rounded out to whole
+    // master units so the crop stays on the pixel grid.
+    const page = await browser.newPage();
+    const drawings = [];
+    for (const { source, scale } of UI_MARK) {
+      const svg = readMaster(source);
+      await page.setContent(svg);
+      const box = await page.locator('svg').evaluate((el) => {
+        const b = /** @type {SVGGraphicsElement} */ (/** @type {unknown} */ (el)).getBBox();
+        return { x: b.x, y: b.y, width: b.width, height: b.height };
+      });
+      const x0 = Math.floor(box.x + 1e-6);
+      const y0 = Math.floor(box.y + 1e-6);
+      const x1 = Math.ceil(box.x + box.width - 1e-6);
+      const y1 = Math.ceil(box.y + box.height - 1e-6);
+      drawings.push({
+        source,
+        scale,
+        viewBox: `${x0} ${y0} ${x1 - x0} ${y1 - y0}`,
+        width: (x1 - x0) / scale,
+        height: (y1 - y0) / scale,
+        d: pathData(svg),
+      });
+    }
+    await page.close();
+    const width = Math.max(...drawings.map((m) => m.width));
+    const height = Math.max(...drawings.map((m) => m.height));
+    const placed = drawings.map(({ source, ...m }) => ({
+      ...m,
+      // Centred in the shared box; whole CSS px when the sizes allow.
+      x: (width - m.width) / 2,
+      y: (height - m.height) / 2,
+      source,
+    }));
+    writeFileSync(
+      MARK_MODULE,
+      `// Generated by scripts/generate-icons.mjs from assets/brand/ (pnpm icons).
+// Do not edit: change the master and regenerate.
+
+export interface MarkDrawing {
+  // Master units per CSS px: the pixel density this drawing is for.
+  scale: number;
+  viewBox: string;
+  // Placement in the shared box, CSS px.
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  d: readonly string[];
+  source: string;
 }
 
-mkdirSync(OUT_DIR, { recursive: true });
-for (const size of SIZES) {
-  const png = downsample(size);
-  const path = resolve(OUT_DIR, `icon-${size}.png`);
-  writeFileSync(path, png);
-  console.log(`wrote ${path} (${png.length} bytes)`);
+export const MARK: { width: number; height: number; drawings: readonly MarkDrawing[] } = ${JSON.stringify(
+        { width, height, drawings: placed },
+        null,
+        2,
+      ).replace(/"(\w+)":/g, '$1:')};
+`,
+    );
+    console.log(`${UI_MARK.map((m) => m.source).join(' + ')} → src/lib/view/mark-data.ts (${width}×${height} CSS px)`);
+  } finally {
+    await browser.close();
+  }
 }
+
+if (resolve(process.argv[1] ?? '') === resolve(import.meta.filename)) await main();

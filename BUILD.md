@@ -117,7 +117,8 @@ diff -r mine ci                             # expect no output
    under `src/` to JavaScript, copies the Firefox manifest
    (`public/manifest.firefox.json` → `manifest.json`, stamping its
    `version` field from `package.json` — see Versioning above), the
-   toolbar icons and the bundled Schibsted Grotesk font with its OFL
+   toolbar icons (committed PNGs: `pnpm icons` renders them from
+   `assets/brand/`, outside the build) and the bundled Schibsted Grotesk font with its OFL
    notice (`public/fonts/` → `fonts/`), relocates the popup, details
    and welcome HTML entries to their packaged paths, and writes
    everything to `dist-firefox/`. The icon copy leaves out the

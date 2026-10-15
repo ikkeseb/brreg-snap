@@ -184,9 +184,6 @@ importers:
       happy-dom:
         specifier: ^20.14.5
         version: 20.14.5
-      pngjs:
-        specifier: ^7.0.0
-        version: 7.0.0
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -1525,10 +1522,6 @@ packages:
     resolution: {integrity: sha512-+7ziBLidS4NaNCdt57SUDT+wYmmd5fmiQejUic/kb+YsYSCPyOOE9sebzMjNmQrsnNpDJqd4WHvV/8lfKfUDUg==}
     engines: {node: '>=20'}
     hasBin: true
-
-  pngjs@7.0.0:
-    resolution: {integrity: sha512-LKWqWJRhstyYo9pGvgor/ivk2w94eSjE3RGVuzLGlr3NmD8bf7RcYGze1mNdEHRP6TRP6rMuDHk5t44hnTRyow==}
-    engines: {node: '>=14.19.0'}
 
   postcss@8.5.28:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
@@ -3314,8 +3307,6 @@ snapshots:
   playwright@1.63.0:
     dependencies:
       playwright-core: 1.63.0
-
-  pngjs@7.0.0: {}
 
   postcss@8.5.28:
     dependencies:

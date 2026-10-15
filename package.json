@@ -38,6 +38,7 @@
     "smoke": "pnpm run build:chrome && playwright test",
     "preview": "pnpm run build:chrome && node scripts/preview/serve.mjs",
     "smoke:record": "node tests/e2e/record.mjs",
+    "icons": "node scripts/generate-icons.mjs",
     "prepare": "node scripts/install-hooks.mjs",
     "release": "node scripts/release.mjs",
     "store-status": "node scripts/store-status.mjs"
@@ -49,7 +50,6 @@
     "@types/node": "^24.19.1",
     "eslint": "^10.12.0",
     "happy-dom": "^20.14.5",
-    "pngjs": "^7.0.0",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.0",
     "vite": "^8.3.2",
