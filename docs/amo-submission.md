@@ -1,9 +1,12 @@
 # AMO submission content
 
-Source of truth for the metadata to paste into the AMO submission
-form. Norwegian (`nb-NO`) is the primary locale since the audience
-is Norwegian users; English (`en-US`) is provided as a secondary
-fallback because AMO requires at least one English locale.
+Source of truth for the AMO listing and submission metadata. The
+publish workflow sends the reviewer notes with every version and,
+when asked, the listing text, categories and privacy policy
+(`docs/release.md`); the rest is entered by hand. Norwegian (`nb-NO`)
+is the primary locale since the audience is Norwegian users; English
+(`en-US`) is provided as a secondary fallback because AMO requires at
+least one English locale.
 
 ---
 
@@ -24,10 +27,20 @@ digests. Never a local build. The flow and the manual fallback:
 
 ## Categories
 
-- **Firefox**: `Search Tools` — a company lookup in a public
-  registry.
-- **Firefox for Android**: not listed. The extension uses
-  `sidebar_action`, which is desktop-only.
+<!-- SECTION: categories -->
+### Firefox (slugs, one per line; the listing sync sends them)
+
+> search-tools
+> privacy-security
+
+`Search Tools`: a company lookup in a public registry. `Privacy &
+Security`: it checks who is behind a site. At most 3; `other` only
+alone. Slugs: <https://mozilla.github.io/addons-server/topics/api/categories.html>.
+
+### Firefox for Android
+
+Not listed. The extension uses `sidebar_action`, which is
+desktop-only.
 
 ## License
 
@@ -46,8 +59,8 @@ The field keeps every newline and renders only a Markdown subset
 (emphasis, links, code, lists): no headings, no tables. So it gets a
 reflowed copy of `PRIVACY.md`, not the file itself: `pnpm release`
 renders it into the version's submission kit (one line per paragraph,
-headings as bold lines, tables as lists). Paste that on every
-submission where `PRIVACY.md` changed.
+headings as bold lines, tables as lists). The listing sync sends it
+under `nb-NO`, the add-on's default locale.
 
 ## Data collection
 
@@ -75,11 +88,11 @@ notes for reviewers below say how consent works there.
 
 > Brønnøysundregistrene, rett fra nettsiden du er på. Ett klikk slår opp bedriften bak siden: organisasjonsnummer, status og det viktigste fra registeret.
 >
-> • Se hvordan siden henger sammen med bedriften: registrert hjemmeside, et org.nr siden selv oppgir, eller bare et navnetreff.
+> • Se hvordan siden henger sammen med bedriften: registrert hjemmeside, et organisasjonsnummer siden selv oppgir, eller bare et navnetreff.
 > • Sidepanelet går dypere: roller, adresser, næring og formål, konsern og underenheter, nøkkeltall som omsetning og resultat over flere år der de åpne dataene har dem, og lenker til årsregnskap og kunngjøringer.
 > • Varsler i registeret, som konkurs, avvikling eller manglende regnskap, vises tydelig. Ingen varsler er likevel ingen garanti.
-> • Søk på navn eller org.nr, slå opp markert tekst med høyreklikk, eller bruk en hurtigtast.
-> • Velg en annen bedrift ved feil treff, og kopier org.nr eller et sammendrag.
+> • Søk på navn eller organisasjonsnummer, slå opp markert tekst med høyreklikk, eller bruk en hurtigtast.
+> • Velg en annen bedrift ved feil treff, og kopier organisasjonsnummeret eller et sammendrag.
 >
 > Med «Auto-oppdater» følger et åpent sidepanel fanen du ser på. Du får først en forklaring, deretter spør nettleseren om tilgang til faner. Slår du det av, gis tilgangen tilbake.
 >
@@ -122,8 +135,8 @@ notes for reviewers below say how consent works there.
 <!-- SECTION: permission-justifications -->
 ## Permission justifications
 
-These are pasted into the "Notes for Reviewers" field. One line per
-permission, explaining why each is necessary.
+Why each permission is necessary, one line each: the reference when
+a reviewer asks. The notes for reviewers below carry the short form.
 
 - **`activeTab`** — Reads the URL and title of the active tab only
   when the user clicks the toolbar icon, the sidebar icon, or a
@@ -171,62 +184,56 @@ permission, explaining why each is necessary.
 <!-- SECTION: reviewer-notes -->
 ## Notes for reviewers
 
-> This add-on is a popup and sidebar company lookup tool for
-> Norwegian users. It has no content scripts and only contacts
-> `data.brreg.no`, the public API of the Norwegian Brønnøysund
-> Register Centre.
+> A popup and sidebar company lookup for Norwegian users. No content
+> scripts; the only host it contacts is `data.brreg.no`, the public
+> API of the Norwegian Brønnøysund Register Centre.
 >
 > Data collection: to find the company behind the current site, the
 > add-on sends data.brreg.no an organisation number found in the page
 > address or title or, if there is none, the site's registrable
 > domain (`dnb.no` for `nettbank.dnb.no`; subdomains are not sent,
 > except a site's own name on some known hosting platforms, such as
-> `firma.github.io`) and a name label derived from it. Text typed in
-> the search box or explicitly selected for a right-click lookup is
-> sent as a search. Selected text is limited to 100 characters; if it
-> contains exactly one valid organisation number, only that number is
-> sent. The manifest therefore declares
-> `data_collection_permissions` with `required: ["browsingActivity"]`,
+> `firma.github.io`) and a name label derived from it. Search-box
+> text and text explicitly selected for a right-click lookup are sent
+> as a search (a selection: at most 100 characters, and only the
+> number when it holds exactly one valid organisation number). Hence
+> `data_collection_permissions` `required: ["browsingActivity"]`,
 > which Firefox 140+ shows in the install and update prompts. IP
 > addresses and reserved local names (localhost, single-label hosts,
-> and TLDs such as .local, .lokal, .internal, .intern, .lan,
-> .home.arpa, .priv) are never sent. Nothing goes to the developer or
-> any other party.
+> .local, .lokal, .internal, .intern, .lan, .home.arpa, .priv) are
+> never sent. Nothing goes to the developer or any other party.
 >
-> Lookups run when the user clicks the toolbar button, opens the
-> sidebar, uses a keyboard shortcut or context-menu item, or searches,
-> and, only if the user turns on "Auto-oppdater" and grants `tabs`, on
-> every tab switch or new page while a brreg-snap sidebar is open.
+> Lookups run on a click of the toolbar button, the sidebar, a
+> keyboard shortcut, a context-menu item or a search, and, only if the
+> user turns on "Auto-oppdater" and grants `tabs`, on every tab switch
+> or new page while a brreg-snap sidebar is open.
 >
-> Firefox 115–139 ignore the manifest declaration. There, each click
-> lookup is a direct, immediate result of a single deliberate user
-> command on a clearly labelled control, and this listing says what
-> is sent (implicit consent under the add-on policies). "Auto-oppdater"
-> is the only lookup not tied to a click: before it asks for `tabs`,
-> the sidebar shows its own disclosure of what is sent and to whom,
-> and its «Slå på» button is the explicit consent.
+> Firefox 115–139 ignore the declaration. There, each click lookup is
+> the direct result of one deliberate command on a clearly labelled
+> control, and the listing says what is sent (implicit consent under
+> the add-on policies). "Auto-oppdater" first shows its own disclosure
+> of what is sent and to whom; its «Slå på» button is the explicit
+> consent.
 >
-> No API or host permission has been added since 1.1.0; 1.3.1
-> changed only the data collection declaration, from `none` to
-> `browsingActivity`. Every request,
-> including the group-structure, recent-change and annual-report-year
-> lookups, goes to data.brreg.no.
-> Annual-report PDFs and announcements are ordinary user-clicked links.
-> A welcome page opens once on installation, not on update; it makes no
-> network requests. Schibsted Grotesk is bundled locally under the SIL
-> Open Font License, included at fonts/OFL.txt. "Rapporter feil treff"
-> is a mailto link that opens the user's email app and sends nothing
-> automatically.
+> No API or host permission added since 1.1.0 (1.3.1 changed only the
+> data collection declaration, from `none` to `browsingActivity`).
+> Annual-report PDFs and announcements are ordinary user-clicked
+> links. A welcome page opens once on install, not on update, and
+> makes no network requests. Schibsted Grotesk is bundled locally (SIL
+> Open Font License, fonts/OFL.txt). "Rapporter feil treff" is a
+> mailto link and sends nothing itself.
 >
-> The build uses Vite's default minifier (Oxc). Source maps are
-> excluded from the package; the complete original source is the
-> attached source zip (`git archive` of tag `v<version>`). Build
-> instructions are in `BUILD.md` at the repo root — reproduction is
-> `pnpm install --frozen-lockfile && pnpm package` with Node 24
-> (`.node-version`; `engines` allows `^22.13 || ^24 || >=26`) and
-> pnpm 12.10.1 (pinned via the `packageManager` field). The
-> unzipped package matches the CI build attached to the GitHub
-> Release for `v<version>`.
+> To test: open https://www.dnb.no and click the toolbar button (the
+> popup shows DNB BANK ASA), then open the sidebar; "Auto-oppdater" in
+> its header asks for `tabs`.
+>
+> Build: Vite's default minifier (Oxc); no source maps in the package.
+> The attached source zip is `git archive` of tag `v<version>`;
+> instructions in `BUILD.md` at the repo root. Reproduce with
+> `pnpm install --frozen-lockfile && pnpm package` on Node 24
+> (`.node-version`) and pnpm 12.10.1 (`packageManager`). The unzipped
+> package matches the CI build attached to the GitHub Release for
+> `v<version>`.
 >
 > The listing privacy policy matches `PRIVACY.md`.
 

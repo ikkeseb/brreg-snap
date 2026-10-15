@@ -6,8 +6,18 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { AMO_API, publishAmo } from '../scripts/lib/amo.mjs';
+import {
+  AMO_API,
+  amoLengthErrors,
+  amoListingTexts,
+  amoVersionTexts,
+  listingChanges,
+  parseAmoCategories,
+  publishAmo,
+  syncAmoListing,
+} from '../scripts/lib/amo.mjs';
 import { CWS_SCOPE, cwsAuthKind, publishCws, TOKEN_URL } from '../scripts/lib/cws.mjs';
+import { diffLines } from '../scripts/lib/publish.mjs';
 
 // The store publishers against a fake fetch: request order, URLs, bodies
 // and auth headers, plus the skip and dry-run paths. Every credential
@@ -160,6 +170,178 @@ describe('publishAmo', () => {
       expect(plan).not.toContain('user:1:2');
     }
   });
+});
+
+describe('AMO texts from the kit', () => {
+  const kit = {
+    'release_notes.nb-NO': 'Første linje\nfortsetter.\n\nNytt avsnitt.',
+    'release_notes.en-US': 'English.',
+    approval_notes: 'Notes\nwrapped.',
+    'summary.nb-NO': 'Kort.',
+    'summary.en-US': 'Short.',
+    'description.nb-NO': 'Avsnitt.\n\n• Punkt en.\n• Punkt to.',
+    'description.en-US': 'Paragraph.\n\n• One.\n• Two.',
+    privacy_policy: '**Policy**\n\nText.',
+    categories: 'search-tools\nprivacy-security',
+  };
+
+  it('version texts are reflowed per locale, as publishAmo sends them', () => {
+    expect(amoVersionTexts(kit)).toEqual({
+      release_notes: { 'nb-NO': 'Første linje fortsetter.\n\nNytt avsnitt.', 'en-US': 'English.' },
+      approval_notes: 'Notes wrapped.',
+    });
+    expect(() => amoVersionTexts({ ...kit, approval_notes: '' })).toThrow(/approval_notes missing or empty/);
+  });
+
+  it('listing texts: the manifest name for both locales, kit text as is, nb-NO policy', () => {
+    expect(amoListingTexts(kit, 'brreg-snap – oppslag')).toEqual({
+      addon: {
+        name: { 'nb-NO': 'brreg-snap – oppslag', 'en-US': 'brreg-snap – oppslag' },
+        summary: { 'nb-NO': 'Kort.', 'en-US': 'Short.' },
+        description: { 'nb-NO': 'Avsnitt.\n\n• Punkt en.\n• Punkt to.', 'en-US': 'Paragraph.\n\n• One.\n• Two.' },
+        categories: ['search-tools', 'privacy-security'],
+      },
+      policy: { privacy_policy: { 'nb-NO': '**Policy**\n\nText.' } },
+    });
+    const { 'summary.en-US': _, ...old } = kit;
+    expect(() => amoListingTexts(old, 'x')).toThrow(/summary\.en-US missing.*use the kit from main/);
+    const { categories: __, ...noCategories } = kit;
+    expect(() => amoListingTexts(noCategories, 'x')).toThrow(/categories missing/);
+  });
+
+  it('the kit decides the categories, checked as AMO checks them', () => {
+    expect(amoListingTexts({ ...kit, categories: 'shopping' }, 'x').addon.categories).toEqual(['shopping']);
+    expect(parseAmoCategories(' search-tools\n\nprivacy-security \n')).toEqual(['search-tools', 'privacy-security']);
+    expect(() => parseAmoCategories('search-tools\nSearch Tools')).toThrow(/unknown slug Search, Tools/);
+    expect(() => parseAmoCategories('')).toThrow(/1 to 3 slugs, got 0/);
+    expect(() => parseAmoCategories('tabs bookmarks shopping appearance')).toThrow(/1 to 3 slugs, got 4/);
+    expect(() => parseAmoCategories('tabs tabs')).toThrow(/twice/);
+    expect(() => parseAmoCategories('other\ntabs')).toThrow(/"other" only alone/);
+    expect(parseAmoCategories('other')).toEqual(['other']);
+  });
+
+  it('the length guard names field, length and limit, per locale, in code points', () => {
+    const ok = 'a'.repeat(3000);
+    expect(amoLengthErrors({ approval_notes: ok, categories: ['x'.repeat(9999)] })).toEqual([]);
+    expect(amoLengthErrors({ approval_notes: `${ok}b` })).toEqual(['approval_notes: 3001 characters, AMO allows 3000']);
+    // 50 code points, 100 UTF-16 units: AMO counts like Python's len().
+    expect(amoLengthErrors({ name: { 'nb-NO': '𝔟'.repeat(50) } })).toEqual([]);
+    expect(amoLengthErrors({ name: { 'nb-NO': 'ø'.repeat(51), 'en-US': 'ok' }, summary: { 'en-US': 's'.repeat(251) } })).toEqual([
+      'name.nb-NO: 51 characters, AMO allows 50',
+      'summary.en-US: 251 characters, AMO allows 250',
+    ]);
+  });
+});
+
+describe('syncAmoListing', () => {
+  const secret = 'test-secret-not-real';
+  const listing = {
+    addon: {
+      name: { 'nb-NO': 'Navn', 'en-US': 'Navn' },
+      summary: { 'nb-NO': 'Kort.', 'en-US': 'Short.' },
+      description: { 'nb-NO': 'Ny tekst.\n\n• Punkt.', 'en-US': 'Text.' },
+      categories: ['search-tools', 'privacy-security'],
+    },
+    policy: { privacy_policy: { 'nb-NO': 'Policy.' } },
+  };
+  const live = {
+    name: { 'nb-NO': 'Navn', 'en-US': 'Gammelt' },
+    summary: { 'nb-NO': 'Kort.', 'en-US': 'Short.' },
+    description: { 'nb-NO': 'Gammel <a href="https://outgoing/x" rel="nofollow">tekst</a>.\n\n• Punkt.', 'en-US': 'Text.' },
+    categories: ['search-tools'],
+  };
+  const base = {
+    guid: 'brreg-snap@ikkeseb.github.io',
+    listing,
+    env: { AMO_JWT_ISSUER: 'user:1:2', AMO_JWT_SECRET: secret },
+    now: () => NOW,
+    log: () => {},
+  };
+  const addonUrl = `${AMO_API}addon/brreg-snap@ikkeseb.github.io/`;
+
+  it('reads the live listing, then patches the add-on and the privacy policy as JSON', async () => {
+    const { fetch, calls } = fakeFetch([
+      { json: live },
+      { json: { eula: null, privacy_policy: { 'nb-NO': 'Policy.' } } },
+      { json: {} },
+      { json: {} },
+    ]);
+    expect(await syncAmoListing({ ...base, fetch, dryRun: false })).toEqual({ status: 'synced' });
+    expect(calls.map((c) => `${c.method} ${c.url}`)).toEqual([
+      `GET ${addonUrl}`,
+      `GET ${addonUrl}eula_policy/`,
+      `PATCH ${addonUrl}`,
+      `PATCH ${addonUrl}eula_policy/`,
+    ]);
+    for (const c of calls.slice(0, 2)) expect(c.headers.Authorization).toBeUndefined();
+    for (const c of calls.slice(2)) {
+      expect(c.headers.Authorization).toMatch(/^JWT [\w-]+\.[\w-]+\.[\w-]+$/);
+      expect(c.headers['Content-Type']).toBe('application/json');
+    }
+    expect(JSON.parse(calls[2]!.body as string)).toEqual(listing.addon);
+    expect(JSON.parse(calls[3]!.body as string)).toEqual(listing.policy);
+  });
+
+  it('dry run: plan and diff from public GETs only, no write, no credential', async () => {
+    for (const env of [base.env, {}]) {
+      const { fetch, calls } = fakeFetch([{ json: live }, { json: { privacy_policy: null } }]);
+      const lines: string[] = [];
+      const res = await syncAmoListing({ ...base, env, fetch, dryRun: true, log: (l) => lines.push(l) });
+      expect(res).toEqual({ status: 'planned' });
+      expect(calls.map((c) => c.method)).toEqual(['GET', 'GET']);
+      for (const c of calls) expect(c.headers.Authorization).toBeUndefined();
+      const plan = lines.join('\n');
+      expect(plan).toContain(`PATCH ${addonUrl}`);
+      expect(plan).toContain('lengths (AMO limit): name.nb-NO 4/50, name.en-US 4/50, summary.nb-NO 5/250');
+      expect(plan).toContain('"categories": [');
+      expect(plan).toContain('categories: search-tools → search-tools, privacy-security');
+      expect(plan).toMatch(/name\.en-US:\n\s+-Gammelt\n\s+\+Navn/);
+      expect(plan).toContain('summary.nb-NO: unchanged');
+      expect(plan).toContain('-Gammel tekst.');
+      expect(plan).toContain('privacy_policy.nb-NO: (not set on AMO)');
+      expect(plan).not.toContain(secret);
+      expect(plan).not.toContain('user:1:2');
+    }
+  });
+
+  it('a failed read of the live listing stops before any PATCH, dry run or not', async () => {
+    for (const dryRun of [true, false]) {
+      // 4xx from the add-on GET, then from the eula_policy GET.
+      for (const replies of [[{ status: 403, json: { detail: 'no' } }], [{ json: live }, { status: 404, json: {} }]]) {
+        const sent = replies.length;
+        const { fetch, calls } = fakeFetch(replies);
+        await expect(syncAmoListing({ ...base, fetch, dryRun })).rejects.toThrow(
+          /could not read the live listing, so nothing was sent\.\nGET .* HTTP 40[34]/,
+        );
+        expect(calls.every((c) => c.method === 'GET')).toBe(true);
+        expect(calls).toHaveLength(sent);
+      }
+    }
+  });
+
+  it('skips without a request when a secret is missing', async () => {
+    const { fetch } = fakeFetch([]);
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const res = await syncAmoListing({ ...base, env: { AMO_JWT_SECRET: secret }, fetch, dryRun: false });
+    expect(res).toEqual({ status: 'skipped', reason: 'AMO_JWT_ISSUER not set in the store-publish environment' });
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('says so when the text went up but the privacy policy did not', async () => {
+    const { fetch } = fakeFetch([{ json: live }, { json: {} }, { json: {} }, { status: 400, json: { privacy_policy: ['bad'] } }]);
+    await expect(syncAmoListing({ ...base, fetch, dryRun: false })).rejects.toThrow(/updated, but the privacy policy was not/);
+  });
+
+  it('listingChanges reads v5 flat categories and the older per-app object', () => {
+    const sent = { categories: ['search-tools'] };
+    expect(listingChanges({ categories: ['search-tools'] }, sent)).toEqual(['categories: unchanged']);
+    expect(listingChanges({ categories: { firefox: ['other'] } }, sent)).toEqual(['categories: other → search-tools']);
+  });
+});
+
+it('diffLines marks removed, added and shared lines', () => {
+  expect(diffLines('a\nb\nc', 'a\nB\nc\nd')).toEqual([' a', '-b', '+B', ' c', '+d']);
+  expect(diffLines('same', 'same')).toEqual([' same']);
 });
 
 describe('publishCws', () => {

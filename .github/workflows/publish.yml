@@ -13,6 +13,13 @@ name: Publish to stores
 # as submitted for this version is skipped too. After a real submission
 # the job tags `amo-submission-X.Y.Z` / `cws-submission-X.Y.Z` (annotated,
 # on the vX.Y.Z commit, with the digests).
+#
+# The AMO texts come from the kit at the tag. Two opt-in inputs, both off
+# by default: `kit_from_main` reads the kit from this ref instead (only
+# `main` can reach the environment) for a version whose tagged kit AMO
+# rejected; the `verify` job puts its diff against the tag's kit in its
+# log and job summary, before the approval. `amo_listing` also sends the
+# AMO listing text, whether or not the version is already up.
 
 on:
   workflow_dispatch:
@@ -32,6 +39,16 @@ on:
         required: true
         type: boolean
         default: true
+      kit_from_main:
+        description: AMO kit from main, not the tag (a corrected kit; the run shows its diff against the tag's)
+        required: true
+        type: boolean
+        default: false
+      amo_listing:
+        description: Also send the AMO listing text (name, summary, description, categories, privacy policy)
+        required: true
+        type: boolean
+        default: false
 
 permissions: {}
 
@@ -74,6 +91,46 @@ jobs:
           gh release download "v$VERSION" --repo "$GITHUB_REPOSITORY" --pattern '*.zip' --dir assets
           node scripts/verify-package.mjs "$VERSION" assets
 
+      # Here, not in `publish`: this job ends before the approval is
+      # asked, so the approver reads exactly what differs from what was
+      # tagged first. Both jobs check out the same commit. Five backticks:
+      # the kit's own fences can't close the summary's block.
+      - name: Kit from main (diff against the tag's)
+        if: inputs.kit_from_main && inputs.stores != 'cws'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          kit="docs/submission-kit/$VERSION/amo.md"
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error::kit_from_main runs only on main, not $GITHUB_REF"
+            exit 1
+          fi
+          if [ ! -f "$kit" ]; then
+            echo "::error::$kit is not on main (main keeps only the latest kit)"
+            exit 1
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/contents/$kit?ref=v$VERSION" \
+            -H 'Accept: application/vnd.github.raw' > "$RUNNER_TEMP/amo-tag.md"
+          status=0
+          diff -u --label "v$VERSION:$kit" --label "main@${GITHUB_SHA::7}:$kit" \
+            "$RUNNER_TEMP/amo-tag.md" "$kit" > "$RUNNER_TEMP/amo-kit.diff" || status=$?
+          if [ "$status" -gt 1 ]; then exit "$status"; fi
+          echo "AMO kit from main@${GITHUB_SHA::7}, not from v$VERSION. Diff (tag -> used):"
+          cat "$RUNNER_TEMP/amo-kit.diff"
+          {
+            echo "### AMO kit from \`main\` (${GITHUB_SHA::7}), not from \`v$VERSION\`"
+            echo
+            if [ "$status" = 0 ]; then
+              echo "Identical to the tag's kit."
+            else
+              echo "Diff, tag → used:"
+              echo
+              echo '`````diff'
+              cat "$RUNNER_TEMP/amo-kit.diff"
+              echo '`````'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
   publish:
     needs: verify
     runs-on: ubuntu-latest
@@ -85,6 +142,8 @@ jobs:
       VERSION: ${{ inputs.version }}
       STORES: ${{ inputs.stores }}
       DRY_RUN: ${{ inputs.dry_run }}
+      KIT_FROM_MAIN: ${{ inputs.kit_from_main }}
+      AMO_LISTING: ${{ inputs.amo_listing }}
     steps:
       - name: Check the version input
         run: |
@@ -94,7 +153,8 @@ jobs:
           fi
 
       # Scripts from this ref; the submission kit is read from the tag
-      # (git show vX.Y.Z:...), hence the full history with tags.
+      # (git show vX.Y.Z:...) unless kit_from_main, hence the full history
+      # with tags.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -137,6 +197,28 @@ jobs:
             fi
             echo "$store=$run" >> "$GITHUB_OUTPUT"
           done
+          # The listing doesn't depend on the version: no tag check.
+          listing=false
+          if [ "$AMO_LISTING" = true ]; then
+            if [ "$STORES" = cws ]; then
+              echo "::notice::amo_listing ignored: stores is cws."
+            else
+              listing=true
+            fi
+          fi
+          echo "amo_listing=$listing" >> "$GITHUB_OUTPUT"
+
+      # The kit diff is in the verify job's log and summary, readable
+      # before this job is approved; here only the ref is checked again.
+      - name: Kit from main
+        id: kit
+        if: env.KIT_FROM_MAIN == 'true' && (steps.plan.outputs.amo == 'true' || steps.plan.outputs.amo_listing == 'true')
+        run: |
+          if [ "$GITHUB_REF" != refs/heads/main ]; then
+            echo "::error::kit_from_main runs only on main, not $GITHUB_REF"
+            exit 1
+          fi
+          echo "AMO kit: docs/submission-kit/$VERSION/amo.md at ${GITHUB_SHA::7} (diff: the verify job)"
 
       - name: AMO
         id: amo
@@ -146,6 +228,20 @@ jobs:
           AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
         run: |
           args=("$VERSION" assets)
+          if [ "$KIT_FROM_MAIN" = true ]; then args+=(--kit "docs/submission-kit/$VERSION/amo.md"); fi
+          if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
+          node scripts/publish-amo.mjs "${args[@]}"
+
+      # Independent of the version step and the amo-submission tag, so a
+      # listing can be fixed for a version that is already up.
+      - name: AMO listing
+        if: ${{ !cancelled() && steps.plan.outputs.amo_listing == 'true' && steps.kit.outcome != 'failure' }}
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          args=("$VERSION" assets --listing)
+          if [ "$KIT_FROM_MAIN" = true ]; then args+=(--kit "docs/submission-kit/$VERSION/amo.md"); fi
           if [ "$DRY_RUN" = true ]; then args+=(--dry-run); fi
           node scripts/publish-amo.mjs "${args[@]}"
 
