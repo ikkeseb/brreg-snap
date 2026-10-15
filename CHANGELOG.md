@@ -70,6 +70,15 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   will, so the rows no longer jump when it fills in. A short company
   (a deleted one's Registrering) no longer scrolls into blank space
   before you use its tabs.
+- Choosing a company from the picker, a search or the recent list
+  with the keyboard puts focus on the result, and a failed lookup puts
+  it on the error; «Oppdater» in the popup keeps focus on itself.
+- At narrow panel widths a «·» no longer starts a line, a postcode
+  stays with its place, a legal form («AS») or a count is no longer
+  left alone on a line, and «Rapporter feil treff» stays at the right.
+  In the picker, every row's tag sits in the same place.
+- An amount too small for the Økonomi trend's unit («<0,1») reads
+  exactly on hover and to screen readers («12 345 kr»), not rounded.
 
 ## [1.5.0] — 2026-10-06
 
