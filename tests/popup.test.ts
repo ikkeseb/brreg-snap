@@ -388,11 +388,18 @@ describe('popup controller — search view, error, refresh', () => {
 
   it('no address to look up: the empty state, no badge, no site', async () => {
     mocks.resolveTabContext.mockResolvedValue({});
+    mocks.getRecent.mockResolvedValue([{ orgnr: '984851006', navn: 'DNB BANK ASA', ts: 1 }]);
     await boot({ id: 7, windowId: 1, url: '', title: '' });
     await waitState('empty');
     expect(document.querySelector('h1')?.textContent).toBe('Ingen nettside å slå opp');
-    expect(document.querySelector('.mast__site')?.textContent).toBe('Ingen nettside');
+    // The masthead is the mark alone; the heading says there is no site.
+    expect(document.querySelector('.mast__site')).toBeNull();
+    expect(document.querySelector('.mast__mark')).not.toBeNull();
     expect(document.body.dataset.answer).toBe('empty');
+    // A pick from there: no heading says it any more, the masthead does.
+    document.querySelector<HTMLButtonElement>('button.recent')!.click();
+    await waitState('result');
+    expect(document.querySelector('.mast__site')?.textContent).toBe('Ingen nettside');
   });
 });
 

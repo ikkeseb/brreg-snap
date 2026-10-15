@@ -48,6 +48,8 @@ for (const s of STATES) {
     if (s.surface === 'popup') {
       const height = await page.evaluate(() => document.body.getBoundingClientRect().height);
       expect.soft(height, 'popup within the 600 px budget').toBeLessThanOrEqual(600);
+      // The no-site empty state: the masthead is the mark alone.
+      if (!s.path.includes('taburl=') && s.state === 'empty') await expect.soft(page.locator('.mast__site')).toHaveCount(0);
     }
     const stampOverflow = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLElement>('.stamp-word')].some((w) => {

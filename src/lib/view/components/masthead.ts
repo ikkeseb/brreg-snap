@@ -1,6 +1,7 @@
 // Masthead: the brand mark, then per surface
-//   popup — the looked-up host (registrable domain in <b>) and the
-//           search icon button that opens the search view
+//   popup — the looked-up host (registrable domain in <b>; «Ingen
+//           nettside» without one, nothing on the no-site empty state)
+//           and the search icon button that opens the search view
 //   panel — the search field and the Auto-oppdater switch
 // <header class="mast"> is the container; the caller owns it.
 
@@ -13,6 +14,9 @@ export type MastheadData =
       kind: 'popup';
       // The tab's hostname; undefined = nothing to look up.
       host?: string;
+      // The no-site empty state: its heading already says there is no
+      // site, so the masthead is the mark alone.
+      markOnly?: boolean;
       // Whether the search icon button is shown (hidden while the
       // search view itself is open).
       search: boolean;
@@ -66,10 +70,12 @@ export function renderMasthead(
   const out: Masthead = {};
 
   if (data.kind === 'popup') {
-    const site = el('span', 'mast__site');
-    if (data.host) appendSiteLabel(site, data.host);
-    else site.textContent = COPY.noSite;
-    container.appendChild(site);
+    if (!data.markOnly) {
+      const site = el('span', 'mast__site');
+      if (data.host) appendSiteLabel(site, data.host);
+      else site.textContent = COPY.noSite;
+      container.appendChild(site);
+    }
     if (data.search) {
       const btn = button('icon-btn');
       btn.setAttribute('aria-label', COPY.searchLabel);
