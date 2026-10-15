@@ -224,7 +224,7 @@ permission, explaining why each is necessary.
 
 ## Screenshots
 
-Upload the five `docs/screenshots/v1.4-*.png` files in numerical
+Upload the five `docs/screenshots/0*.png` files in numerical
 order (1280×800, RGB PNG). What they show and how they were made:
 `docs/screenshots/README.md`.
 

@@ -29,7 +29,7 @@ dashboard after submission — get it right in the zip.
   (rendered from `assets/brand/mark-128.svg`, art inside the centred
   96 px; the one blue reads on light and dark).
 - **Screenshots:** 1–5, **1280×800** (preferred) or 640×400, PNG/JPEG,
-  square corners, full-bleed, showing the real UI. Upload the five `docs/screenshots/v1.4-*.png`
+  square corners, full-bleed, showing the real UI. Upload the five `docs/screenshots/0*.png`
   files in numerical order. Fixture data and provenance:
   `docs/screenshots/README.md`.
 - **Description:** plain text. CWS does not render Markdown, so no

@@ -61,7 +61,7 @@ tab.
 On install, a welcome page opens once to show how to use it. It makes
 no network request.
 
-![brreg-snap popup on dnb.no: DNB BANK ASA, no warnings in the register, dnb.no is its registered website (example data)](docs/screenshots/v1.4-01-lookup.png)
+![brreg-snap popup on dnb.no: DNB BANK ASA, no warnings in the register, dnb.no is its registered website (example data)](docs/screenshots/01-lookup.png)
 
 ## Security model
 
