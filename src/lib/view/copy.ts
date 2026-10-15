@@ -7,8 +7,8 @@
 export const COPY = {
   brand: 'brreg-snap',
   searchLabel: 'Søk etter selskap',
-  searchPlaceholderPanel: 'Navn eller org.nr',
-  searchPlaceholder: 'Bedriftsnavn eller org.nr',
+  // Every search field, popup and panel alike.
+  searchPlaceholder: 'Navn eller org.nr',
   searchHint: 'Org.nr kan limes inn med eller uten mellomrom.',
   // Masthead when the tab has no address to look up.
   noSite: 'Ingen nettside',
@@ -24,6 +24,8 @@ export const COPY = {
   brregLink: 'brreg.no',
   eyebrowUrl: 'Org.nr funnet i nettadressen',
   eyebrowTitle: 'Org.nr funnet i sidetittelen',
+  // A sole proprietorship's owner: the register's primary person (INNH).
+  innehaver: 'Innehaver',
   dagligLeder: 'Daglig leder',
   styreleder: 'Styreleder',
   dagligLederOgStyreleder: 'Daglig leder og styreleder',
@@ -56,6 +58,15 @@ export const COPY = {
   foundViaName: 'Funnet via navnet',
   notRegisteredFor: (site: string) => `${site} er ikke registrert`,
   naering: 'Næring',
+  // The ledger's row labels, as the trust derivations write them
+  // (src/lib/trust/ keeps its own wording): the skeleton shows these.
+  ledgerLabels: {
+    kobling: 'Kobling',
+    status: 'Status',
+    alder: 'Alder',
+    ansatte: 'Ansatte',
+    regnskap: 'Regnskap',
+  },
   // A late filing names the year that is missing, not just the last one.
   regnskapLate: (expected: string) => `${expected} ikke levert`,
   regnskapLateLast: (year: string) => `· siste er ${year}`,
@@ -90,6 +101,36 @@ export const COPY = {
   registrering: 'Registrering',
   ledelse: 'Ledelse',
   kontakt: 'Kontakt',
+  // Oversikt: the definition rows (dossier-view.ts)
+  organisasjonsform: 'Organisasjonsform',
+  stiftet: 'Stiftet',
+  registrert: 'Registrert',
+  aktivitet: 'Aktivitet',
+  formaal: 'Formål',
+  tidligereNavn: 'Tidligere navn',
+  until: (date: string) => `til ${date}`,
+  overordnetEnhet: 'Overordnet enhet',
+  orgnrRef: (spaced: string) => `Org.nr ${spaced}`,
+  // A status flag's date row («Konkurs åpnet 26. aug. 2026»), keyed by
+  // the flag's label; any other flag is its own label.
+  statusDateLabel: {
+    Konkurs: 'Konkurs åpnet',
+    'Under avvikling': 'Avvikling fra',
+    Rekonstruksjon: 'Rekonstruksjon fra',
+  } as Record<string, string>,
+  revisor: 'Revisor',
+  regnskapsforer: 'Regnskapsfører',
+  bostyrer: 'Bostyrer',
+  forretningsadresse: 'Forretningsadresse',
+  postadresse: 'Postadresse',
+  telefon: 'Telefon',
+  mobil: 'Mobil',
+  epost: 'E-post',
+  hjemmeside: 'Hjemmeside',
+  // Personer: what follows a name
+  born: (year: string) => `f. ${year}`,
+  dead: 'død',
+  deleted: 'slettet',
   merknadHead: (n: number) => (n === 1 ? 'Merknad i registeret' : 'Merknader i registeret'),
   innfort: 'Innført ',
   endretNylig: 'Endret nylig',
@@ -111,6 +152,13 @@ export const COPY = {
   filedLatest: 'Siste innsendte årsregnskap',
   resultatGroup: 'Resultat',
   balanseGroup: 'Balanse',
+  driftsinntekter: 'Driftsinntekter',
+  driftsresultat: 'Driftsresultat',
+  resultatFoerSkatt: 'Resultat før skatt',
+  aarsresultat: 'Årsresultat',
+  sumEiendeler: 'Sum eiendeler',
+  egenkapital: 'Egenkapital',
+  egenkapitalandel: 'Egenkapitalandel',
   egenkapitalLegend: (amount: string) => `Egenkapital ${amount}`,
   gjeldLegend: (amount: string) => `Gjeld ${amount}`,
   honestSingleYear: 'Viser bare siste års tall.',
@@ -118,8 +166,6 @@ export const COPY = {
   honestPdf: ' Eldre år finnes som PDF.',
   // The trend: the company's own figures over the years brreg served.
   trendTitle: (from: string, to: string) => `Utvikling ${from}–${to}`,
-  driftsinntekter: 'Driftsinntekter',
-  aarsresultat: 'Årsresultat',
   trendMissing: '–',
   // The row header's accessible name: the unit beside the label is
   // only «mrd» on screen. «Driftsinntekter, milliarder NOK».
@@ -232,14 +278,30 @@ export const COPY = {
   noHits: 'Ingen treff.',
   searchFailed: 'Søket feilet.',
   hitCount: (n: number) => (n === 1 ? '1 treff.' : `${n} treff.`),
+  invalidOrgnr: (digits: string) => `${digits} er ikke et gyldig org.nr.`,
   avdelingAv: (parent: string) => ` — avdeling av ${parent}`,
   forgetSite: (site: string) => `Glem valget for ${site}`,
   backToSite: (site: string) => `Tilbake til treffet for ${site}`,
   degradedSupport: (site: string) =>
     `${site} kunne ikke sjekkes. Det sier ingenting om nettstedet.`,
 
-  // error
+  // error (lib/ui/error-message.ts maps the failure; the manual search
+  // says the not-found and deleted-branch sentences too)
   noAnswerHead: 'Fikk ikke svar fra Brønnøysundregistrene',
+  noAnswerSupport: (what: string) => `${what} Det sier ingenting om selskapet.`,
+  notFoundHead: 'Fant ikke noe selskap med dette org.nr',
+  notFound: (orgnr: string) => `Fant ikke noe selskap med org.nr ${orgnr}.`,
+  deletedAvdelingHead: 'Underenheten er slettet',
+  deletedAvdeling: (orgnr: string, navn: string, when?: string) =>
+    `${orgnr} er underenheten ${navn}, som er slettet${when ? ` ${when}` : ''}.`,
+  tooManyHead: 'For mange oppslag på kort tid',
+  tooMany: 'For mange oppslag på kort tid. Vent litt og prøv igjen.',
+  timedOut: 'Brønnøysundregistrene svarte ikke i tide. Prøv igjen.',
+  offline: 'Fikk ikke kontakt med Brønnøysundregistrene. Sjekk nettverkstilkoblingen og prøv igjen.',
+  checkNetwork: 'Sjekk nettverkstilkoblingen og prøv igjen.',
+  brregDown: 'Brønnøysundregistrene har tekniske problemer akkurat nå. Prøv igjen om litt.',
+  badResponse: 'Brønnøysundregistrene ga et uventet svar. Prøv igjen om litt.',
+  genericFailure: 'Noe gikk galt under oppslaget. Prøv igjen.',
   retry: 'Prøv igjen',
   contextFor: 'Oppslag for ',
   contextOrgnr: 'Oppslag på org.nr ',

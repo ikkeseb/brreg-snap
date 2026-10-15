@@ -372,6 +372,15 @@ describe('result: the dossier', () => {
     expect(gone.querySelector('.unit__meta')?.textContent).toBe('Slettet 3. feb. 2025');
   });
 
+  it('a failed roller fetch: Ledelse says it in the Personer tab\'s sentence, not as a data row', () => {
+    const { painter } = setup();
+    painter.result(resultPaint({ ...konkurs(), roller: undefined }));
+    const ledelse = qa('#panel-oversikt .section').find((sec) => sec.querySelector('.section__head')?.textContent === 'Ledelse')!;
+    expect(ledelse.querySelector('dl')).toBeNull();
+    expect(ledelse.querySelector('p.section__text')?.textContent).toBe('Kunne ikke hente roller. Prøv igjen senere.');
+    expect(q('#panel-personer p.section__text')?.textContent).toBe('Kunne ikke hente roller. Prøv igjen senere.');
+  });
+
   it('merknader and «Endret nylig» come after the ledger, before the tabs', () => {
     const { painter } = setup();
     const company: CompanyData = {
@@ -597,12 +606,16 @@ describe('loading, error, empty, picker', () => {
   it('loading: the skeleton, main inert and busy, the live region says «Henter»', async () => {
     vi.useFakeTimers();
     const { painter, live } = setup();
-    painter.loading('923609016');
+    painter.loading('923609016', { kobling: true });
     expect(app().dataset.state).toBe('loading');
     expect(app().hasAttribute('inert')).toBe(true);
     expect(app().getAttribute('aria-busy')).toBe('true');
     expect(q('.answer--loading')).not.toBeNull();
     expect(qa('.ledger-row dt').map((d) => d.textContent)).toEqual(['Kobling', 'Status', 'Alder', 'Ansatte', 'Regnskap']);
+    // No site in play (a recent, a drill-in, an org.nr): the result has
+    // no Kobling row, so neither has the skeleton.
+    painter.loading('923609016', { kobling: false });
+    expect(qa('.ledger-row dt').map((d) => d.textContent)).toEqual(['Status', 'Alder', 'Ansatte', 'Regnskap']);
     expect(q('[role="tablist"]')).toBeNull();
     expect(q('.foot')?.textContent).toContain('Henter …');
     await vi.advanceTimersByTimeAsync(0);
@@ -611,7 +624,7 @@ describe('loading, error, empty, picker', () => {
 
   it('error: the org.nr context, a warn band (never a stamp) with «Prøv igjen» only when retry is possible', () => {
     const { painter, intents } = setup();
-    painter.loading('984851006');
+    painter.loading('984851006', { kobling: false });
     painter.error(new TypeError('Failed to fetch'), { retry: true, focus: true });
     expect(app().dataset.state).toBe('error');
     expect(document.body.dataset.answer).toBe('warn');
@@ -769,7 +782,7 @@ describe('the masthead search view', () => {
     await vi.waitFor(() => expect(q('.results button.recent')).not.toBeNull());
     q<HTMLButtonElement>('.results button.recent')!.click();
     expect(intents.manual).toHaveBeenCalledWith('923609016');
-    painter.loading('923609016');
+    painter.loading('923609016', { kobling: false });
     expect(app().dataset.state).toBe('loading');
     expect(roots.search.value).toBe('');
   });
@@ -777,7 +790,7 @@ describe('the masthead search view', () => {
   it('a search opened over a load is operable: inert and busy step aside with the skeleton', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const { painter, roots } = setup();
-    painter.loading('923609016');
+    painter.loading('923609016', { kobling: false });
     expect(app().hasAttribute('inert')).toBe(true);
     roots.search.value = 'equinor';
     roots.search.dispatchEvent(new Event('input'));

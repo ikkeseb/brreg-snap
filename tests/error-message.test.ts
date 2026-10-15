@@ -27,7 +27,7 @@ describe('describeLoadError', () => {
   it('maps the 404 no-entity message and carries the orgnr through', () => {
     expect(
       describeLoadError(new Error('No entity found for orgnr 933004708.')),
-    ).toBe('Fant ingen bedrift med organisasjonsnummer 933004708.');
+    ).toBe('Fant ikke noe selskap med org.nr 933004708.');
   });
 
   it('maps 429 to a rate-limit message', () => {
@@ -69,9 +69,9 @@ describe('describeLoadError', () => {
 
 describe('describeLoadFailure', () => {
   it('a network failure is a calm «no answer» that says nothing about the company', async () => {
-    const { describeLoadFailure, NO_ANSWER_HEAD } = await import('../src/lib/ui/error-message.js');
+    const { describeLoadFailure } = await import('../src/lib/ui/error-message.js');
     const f = describeLoadFailure(new TypeError('Failed to fetch'));
-    expect(f.head).toBe(NO_ANSWER_HEAD);
+    expect(f.head).toBe('Fikk ikke svar fra Brønnøysundregistrene');
     // What to do, not the headline once more.
     expect(f.support).toBe('Sjekk nettverkstilkoblingen og prøv igjen. Det sier ingenting om selskapet.');
     expect(f.retry).toBe(true);
@@ -88,7 +88,7 @@ describe('describeLoadFailure', () => {
   it('a not-found is permanent: no retry', async () => {
     const { describeLoadFailure } = await import('../src/lib/ui/error-message.js');
     const f = describeLoadFailure(new Error('No entity found for orgnr 123456785.'));
-    expect(f).toMatchObject({ head: 'Fant ingen bedrift med dette org.nr', retry: false });
+    expect(f).toMatchObject({ head: 'Fant ikke noe selskap med dette org.nr', retry: false });
     expect(f.support).toContain('123456785');
   });
 });

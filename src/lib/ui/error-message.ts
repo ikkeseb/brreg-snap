@@ -3,10 +3,12 @@
 // fetch") are developer-speak; the user needs to know whether the
 // problem is their network, brreg, or the orgnr — and whether retrying
 // helps. Keyed on error name + the stable message strings thrown by
-// src/lib/brreg.ts (same repo, covered by tests).
+// src/lib/brreg.ts (same repo, covered by tests). The sentences are
+// COPY keys (src/lib/view/copy.ts).
 
 import { DeletedAvdelingError } from '../company-load.js';
-import { formatDateNumeric } from '../format.js';
+import { formatDateNo } from '../format.js';
+import { COPY } from '../view/copy.js';
 
 export function describeLoadError(err: unknown): string {
   const name = err instanceof Error ? err.name : '';
@@ -14,42 +16,41 @@ export function describeLoadError(err: unknown): string {
 
   if (err instanceof DeletedAvdelingError) {
     const { navn, organisasjonsnummer, slettedato } = err.avdeling;
-    const when = formatDateNumeric(slettedato);
-    return `${organisasjonsnummer} er underenheten ${navn}, som er slettet${when ? ` ${when}` : ''}.`;
+    return COPY.deletedAvdeling(organisasjonsnummer, navn, formatDateNo(slettedato));
   }
 
   // AbortSignal.timeout() rejects with TimeoutError (spec) — some
   // engines have shipped AbortError for it, so accept both.
   if (name === 'TimeoutError' || name === 'AbortError') {
-    return 'Brønnøysundregistrene svarte ikke i tide. Prøv igjen.';
+    return COPY.timedOut;
   }
 
   // fetch() network failure (offline, DNS, blocked) is a TypeError.
   if (err instanceof TypeError) {
-    return 'Fikk ikke kontakt med Brønnøysundregistrene. Sjekk nettverkstilkoblingen og prøv igjen.';
+    return COPY.offline;
   }
 
   const orgnrMatch = message.match(/^No entity found for orgnr (\d{9})\./);
   if (orgnrMatch) {
-    return `Fant ingen bedrift med organisasjonsnummer ${orgnrMatch[1]}.`;
+    return COPY.notFound(orgnrMatch[1]!);
   }
 
   const statusMatch = message.match(/returned (\d{3})\./);
   if (statusMatch) {
     const status = Number(statusMatch[1]);
     if (status === 429) {
-      return 'For mange oppslag på kort tid. Vent litt og prøv igjen.';
+      return COPY.tooMany;
     }
     if (status >= 500) {
-      return 'Brønnøysundregistrene har tekniske problemer akkurat nå. Prøv igjen om litt.';
+      return COPY.brregDown;
     }
   }
 
   if (message.includes('unexpected response shape')) {
-    return 'Brønnøysundregistrene ga et uventet svar. Prøv igjen om litt.';
+    return COPY.badResponse;
   }
 
-  return 'Noe gikk galt under oppslaget. Prøv igjen.';
+  return COPY.genericFailure;
 }
 
 // The error state's answer band (always warn, never the danger stamp:
@@ -62,30 +63,20 @@ export interface LoadFailure {
   retry: boolean;
 }
 
-export const NO_ANSWER_HEAD = 'Fikk ikke svar fra Brønnøysundregistrene';
-
 export function describeLoadFailure(err: unknown): LoadFailure {
   const text = describeLoadError(err);
   if (err instanceof DeletedAvdelingError) {
-    return { head: 'Underenheten er slettet', support: text, retry: false };
+    return { head: COPY.deletedAvdelingHead, support: text, retry: false };
   }
   const message = err instanceof Error ? err.message : '';
   if (/^No entity found for orgnr \d{9}\./.test(message)) {
-    return {
-      head: 'Fant ingen bedrift med dette org.nr',
-      support: text,
-      retry: false,
-    };
+    return { head: COPY.notFoundHead, support: text, retry: false };
   }
   if (/returned 429\./.test(message)) {
-    return { head: 'For mange oppslag på kort tid', support: text, retry: true };
+    return { head: COPY.tooManyHead, support: text, retry: true };
   }
   // A network failure's own sentence only repeats the headline: say
   // what to do instead.
-  const what = err instanceof TypeError ? 'Sjekk nettverkstilkoblingen og prøv igjen.' : text;
-  return {
-    head: NO_ANSWER_HEAD,
-    support: `${what} Det sier ingenting om selskapet.`,
-    retry: true,
-  };
+  const what = err instanceof TypeError ? COPY.checkNetwork : text;
+  return { head: COPY.noAnswerHead, support: COPY.noAnswerSupport(what), retry: true };
 }

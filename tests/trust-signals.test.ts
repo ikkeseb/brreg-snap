@@ -95,7 +95,7 @@ describe('deriveSignals — status', () => {
     const s = signal(konkursEnhet, undefined, 'status');
     expect(s).toMatchObject({
       value: 'Konkurs',
-      detail: 'siden 26.08.2026',
+      detail: 'siden 26. aug. 2026',
       tone: 'danger',
     });
   });
@@ -110,7 +110,7 @@ describe('deriveSignals — status', () => {
 
   it('dates a deletion (live SlettetEnhet)', () => {
     const s = signal(slettetEnhet, undefined, 'status');
-    expect(s).toMatchObject({ value: 'Slettet', detail: '15.09.2026' });
+    expect(s).toMatchObject({ value: 'Slettet', detail: '15. sep. 2026' });
   });
 
   it('turns the other green cells neutral under a danger status', () => {
@@ -453,7 +453,7 @@ describe('deriveSignals — rekonstruksjon and foreign entities', () => {
       key: 'status',
       label: 'Status',
       value: 'Rekonstruksjon',
-      detail: 'siden 02.09.2026',
+      detail: 'siden 2. sep. 2026',
       tone: 'warn',
     });
   });
@@ -505,7 +505,7 @@ describe('deriveSignals — rekonstruksjon and foreign entities', () => {
       undefined,
       'status',
     );
-    expect(s?.detail).toBe('siden 02.01.2026');
+    expect(s?.detail).toBe('siden 2. jan. 2026');
   });
 
   it('says nothing foreign about a Norwegian AS', () => {

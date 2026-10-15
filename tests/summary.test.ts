@@ -77,7 +77,7 @@ describe('buildSummary', () => {
         enhet: konkurs,
         answer,
         signals: [
-          { key: 'status', label: 'Status', value: 'Konkurs', detail: 'siden 26.08.2026', tone: 'danger' },
+          { key: 'status', label: 'Status', value: 'Konkurs', detail: 'siden 26. aug. 2026', tone: 'danger' },
         ],
         roller: konkursRoller,
       }),
@@ -86,7 +86,7 @@ describe('buildSummary', () => {
       '1VASK AS (org.nr 915 330 193)',
       'Advarsel: Konkurs siden 26. aug. 2026',
       'Bostyrer: Adv. Ola Nordmann',
-      'Status: Konkurs (siden 26.08.2026)',
+      'Status: Konkurs (siden 26. aug. 2026)',
       'Daglig leder: Lars Moe · Styreleder: Kari Nordmann',
     ]);
   });

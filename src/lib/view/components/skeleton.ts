@@ -3,19 +3,23 @@
 // caller marks the surface busy (aria-busy) and inert, and announces
 // «Henter …» through the live region.
 
+import { COPY } from '../copy.js';
 import type { Surface } from '../trust-view.js';
 import { buildAnswerLoading } from './answer.js';
 import { el } from './dom.js';
 
 const LEDGER_LABELS: Array<[label: string, value: string, detail?: string]> = [
-  ['Kobling', 'sk--l', 'sk--xs'],
-  ['Status', 'sk--s'],
-  ['Alder', 'sk--s'],
-  ['Ansatte', 'sk--xs'],
-  ['Regnskap', 'sk--s', 'sk--l'],
+  [COPY.ledgerLabels.kobling, 'sk--l', 'sk--xs'],
+  [COPY.ledgerLabels.status, 'sk--s'],
+  [COPY.ledgerLabels.alder, 'sk--s'],
+  [COPY.ledgerLabels.ansatte, 'sk--xs'],
+  [COPY.ledgerLabels.regnskap, 'sk--s', 'sk--l'],
 ];
 
-export function buildSkeleton(surface: Surface): DocumentFragment {
+// `kobling`: whether the result will carry a Kobling row (the panel
+// knows from the load: koblingInPlay). The popup keeps five rows either
+// way — næring fills in when there is no Kobling row.
+export function buildSkeleton(surface: Surface, opts: { kobling: boolean } = { kobling: true }): DocumentFragment {
   const frag = document.createDocumentFragment();
 
   const ident = el('div', 'ident');
@@ -41,7 +45,7 @@ export function buildSkeleton(surface: Surface): DocumentFragment {
 
   const dl = el('dl', 'ledger');
   dl.setAttribute('aria-hidden', 'true');
-  for (const [label, value, detail] of LEDGER_LABELS) {
+  for (const [label, value, detail] of opts.kobling ? LEDGER_LABELS : LEDGER_LABELS.slice(1)) {
     const row = el('div', 'ledger-row');
     const dt = el('dt');
     dt.appendChild(el('span', 'sk sk--glyph'));

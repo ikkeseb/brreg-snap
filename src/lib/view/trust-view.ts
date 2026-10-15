@@ -588,6 +588,9 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   // company is the site's claim, not its identity (no danger answer
   // carries leaders; the bostyrer is in the stamp).
   if (surface === 'popup' && roller && answerView.tone !== 'danger') {
+    // An ENK has no DAGL / LEDE: its owner is the one person to name.
+    const innh = findRoleHolder(roller, 'INNH');
+    if (innh) identity.leaders.push({ label: COPY.innehaver, name: innh });
     const dagl = findRoleHolder(roller, 'DAGL');
     const lede = findRoleHolder(roller, 'LEDE');
     // One person in both roles gets one line, not the name twice.

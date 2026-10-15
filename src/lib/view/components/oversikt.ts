@@ -1,5 +1,6 @@
 // The Oversikt tab: Registrering · Ledelse · Kontakt as definition
-// lists (dossier-view.ts builds the rows). A row's value is plain
+// lists (dossier-view.ts builds the rows); a failed roller fetch makes
+// Ledelse a `p.section__text` sentence. A row's value is plain
 // lines, a link (hjemmeside, e-post) or a drill-in into another
 // registered entity (revisor, overordnet enhet).
 //   <section class="section"><h3 class="section__head">Registrering</h3>
@@ -91,10 +92,19 @@ function defSection(head: string, rows: readonly DefRow[], handlers: DrillHandle
   return sec;
 }
 
+// A failed roller fetch is a sentence, the same one the Personer tab
+// says, never a row that reads like data.
+function ledelseSection(rows: DossierView['ledelse'], handlers: DrillHandlers): HTMLElement | undefined {
+  if (rows !== 'failed') return defSection(COPY.ledelse, rows, handlers);
+  const sec = section(COPY.ledelse);
+  sec.appendChild(el('p', 'section__text', COPY.rollerFailed));
+  return sec;
+}
+
 export function buildOversikt(dossier: DossierView, handlers: DrillHandlers): HTMLElement[] {
   return [
     defSection(COPY.registrering, dossier.registrering, handlers),
-    defSection(COPY.ledelse, dossier.ledelse, handlers),
+    ledelseSection(dossier.ledelse, handlers),
     defSection(COPY.kontakt, dossier.kontakt, handlers),
   ].filter((s): s is HTMLElement => s !== undefined);
 }

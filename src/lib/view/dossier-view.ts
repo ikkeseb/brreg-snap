@@ -119,7 +119,8 @@ export interface EnheterView {
 
 export interface DossierView {
   registrering: DefRow[];
-  ledelse: DefRow[];
+  // 'failed': the roller fetch failed; the section says so in a sentence.
+  ledelse: DefRow[] | 'failed';
   kontakt: DefRow[];
   personer: PersonGroup[] | 'failed';
   personCount?: number;
@@ -169,45 +170,39 @@ function present<T>(rows: Array<T | undefined>): T[] {
   return rows.filter((r): r is T => r !== undefined);
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  Konkurs: 'Konkurs åpnet',
-  'Under avvikling': 'Avvikling fra',
-  Rekonstruksjon: 'Rekonstruksjon fra',
-};
-
 function registrering(enhet: Enhet): DefRow[] {
   const naering = enhet.naeringskode1;
   const rows: Array<DefRow | undefined> = [
-    text('Organisasjonsform', enhet.organisasjonsform?.beskrivelse),
-    text('Stiftet', formatDateNo(enhet.stiftelsesdato)),
-    text('Registrert', formatDateNo(enhet.registreringsdatoEnhetsregisteret)),
+    text(COPY.organisasjonsform, enhet.organisasjonsform?.beskrivelse),
+    text(COPY.stiftet, formatDateNo(enhet.stiftelsesdato)),
+    text(COPY.registrert, formatDateNo(enhet.registreringsdatoEnhetsregisteret)),
   ];
   for (const flag of deriveStatusFlags(enhet)) {
     const date = formatDateNo(flag.since);
     if (!date) continue;
-    rows.push(text(STATUS_LABEL[flag.label] ?? flag.label, flag.reason ? `${date} (${flag.reason})` : date));
+    rows.push(text(COPY.statusDateLabel[flag.label] ?? flag.label, flag.reason ? `${date} (${flag.reason})` : date));
   }
   rows.push(
     naering?.beskrivelse
-      ? text('Næring', naering.beskrivelse, naering.kode)
-      : text('Næring', naering?.kode),
+      ? text(COPY.naering, naering.beskrivelse, naering.kode)
+      : text(COPY.naering, naering?.kode),
   );
   // Formål only when it adds something to Aktivitet.
   const aktivitet = enhet.aktivitet?.join(' ');
   const formaal = enhet.vedtektsfestetFormaal?.join(' ');
-  rows.push(longText('Aktivitet', aktivitet));
-  if (!sameText(aktivitet, formaal)) rows.push(longText('Formål', formaal));
+  rows.push(longText(COPY.aktivitet, aktivitet));
+  if (!sameText(aktivitet, formaal)) rows.push(longText(COPY.formaal, formaal));
   const previous = [...(enhet.historiskeNavn ?? [])]
     .filter((h) => h.navn?.trim())
     .sort((a, b) => (b.tilDato ?? '').localeCompare(a.tilDato ?? ''))[0];
   if (previous?.navn) {
     const until = formatDateNo(previous.tilDato?.slice(0, 10));
-    rows.push(text('Tidligere navn', previous.navn, until ? `til ${until}` : undefined));
+    rows.push(text(COPY.tidligereNavn, previous.navn, until ? COPY.until(until) : undefined));
   }
   if (enhet.overordnetEnhet) {
     rows.push({
-      label: 'Overordnet enhet',
-      drill: { text: `Org.nr ${spaced(enhet.overordnetEnhet)}`, orgnr: enhet.overordnetEnhet },
+      label: COPY.overordnetEnhet,
+      drill: { text: COPY.orgnrRef(spaced(enhet.overordnetEnhet)), orgnr: enhet.overordnetEnhet },
     });
   }
   return present(rows);
@@ -232,14 +227,15 @@ function roleRow(label: string, role: Rolle | undefined): DefRow | undefined {
   return { label, lines: [name] };
 }
 
-function ledelse(roller: RollerResponse | undefined): DefRow[] {
-  if (!roller) return [{ label: 'Roller', lines: ['Kunne ikke hentes'] }];
+function ledelse(roller: RollerResponse | undefined): DefRow[] | 'failed' {
+  if (!roller) return 'failed';
   return present([
-    roleRow('Daglig leder', currentRole(roller, 'DAGL')),
-    roleRow('Styreleder', currentRole(roller, 'LEDE')),
-    roleRow('Revisor', currentRole(roller, 'REVI')),
-    roleRow('Regnskapsfører', currentRole(roller, 'REGN')),
-    roleRow('Bostyrer', currentRole(roller, 'BOBE')),
+    roleRow(COPY.innehaver, currentRole(roller, 'INNH')),
+    roleRow(COPY.dagligLeder, currentRole(roller, 'DAGL')),
+    roleRow(COPY.styreleder, currentRole(roller, 'LEDE')),
+    roleRow(COPY.revisor, currentRole(roller, 'REVI')),
+    roleRow(COPY.regnskapsforer, currentRole(roller, 'REGN')),
+    roleRow(COPY.bostyrer, currentRole(roller, 'BOBE')),
   ]);
 }
 
@@ -260,22 +256,22 @@ function kontakt(enhet: Enhet): DefRow[] {
   const business = addressLines(enhet.forretningsadresse);
   const postal = addressLines(enhet.postadresse);
   const rows: Array<DefRow | undefined> = [
-    business.length > 0 ? { label: 'Forretningsadresse', lines: business } : undefined,
+    business.length > 0 ? { label: COPY.forretningsadresse, lines: business } : undefined,
     postal.length > 0 && postal.join('|') !== business.join('|')
-      ? { label: 'Postadresse', lines: postal }
+      ? { label: COPY.postadresse, lines: postal }
       : undefined,
-    text('Telefon', enhet.telefon),
-    text('Mobil', enhet.mobil),
+    text(COPY.telefon, enhet.telefon),
+    text(COPY.mobil, enhet.mobil),
   ];
   if (enhet.epostadresse) {
     rows.push({
-      label: 'E-post',
+      label: COPY.epost,
       link: { text: enhet.epostadresse, href: `mailto:${enhet.epostadresse}`, external: false },
     });
   }
   if (enhet.hjemmeside) {
     rows.push({
-      label: 'Hjemmeside',
+      label: COPY.hjemmeside,
       link: {
         text: enhet.hjemmeside.replace(/^https?:\/\//i, '').replace(/\/$/, ''),
         href: hjemmesideHref(enhet.hjemmeside),
@@ -288,7 +284,7 @@ function kontakt(enhet: Enhet): DefRow[] {
 
 function birthYear(role: Rolle): string | undefined {
   const year = role.person?.fodselsdato?.slice(0, 4);
-  return year && /^\d{4}$/.test(year) ? `f. ${year}` : undefined;
+  return year && /^\d{4}$/.test(year) ? COPY.born(year) : undefined;
 }
 
 function personer(roller: RollerResponse | undefined): PersonGroup[] | 'failed' {
@@ -308,8 +304,8 @@ function personer(roller: RollerResponse | undefined): PersonGroup[] | 'failed' 
         continue;
       }
       let label = gone ? COPY.avregistrert : roleText === title ? (birthYear(role) ?? '') : roleText;
-      if (role.person?.erDoed || role.bostyrer?.erDoed) label = label ? `${label} · død` : 'død';
-      if (role.enhet?.erSlettet) label = label ? `${label} · slettet` : 'slettet';
+      if (role.person?.erDoed || role.bostyrer?.erDoed) label = label ? `${label} · ${COPY.dead}` : COPY.dead;
+      if (role.enhet?.erSlettet) label = label ? `${label} · ${COPY.deleted}` : COPY.deleted;
       if (role.bostyrer) {
         const addr = formatAddress(role.bostyrer.postadresse);
         if (addr) label = label ? `${label} · ${addr}` : addr;
@@ -356,18 +352,18 @@ function newerFiledYear(latest: KeyFigures, regnskapSignal: Signal | undefined):
 
 function figuresOf(latest: KeyFigures, regnskapSignal: Signal | undefined): OkonomiFigures {
   const resultat = present([
-    figRow('Driftsinntekter', latest.driftsinntekter),
-    figRow('Driftsresultat', latest.driftsresultat),
-    figRow('Resultat før skatt', latest.resultatFoerSkatt),
-    figRow('Årsresultat', latest.aarsresultat, { total: true }),
+    figRow(COPY.driftsinntekter, latest.driftsinntekter),
+    figRow(COPY.driftsresultat, latest.driftsresultat),
+    figRow(COPY.resultatFoerSkatt, latest.resultatFoerSkatt),
+    figRow(COPY.aarsresultat, latest.aarsresultat, { total: true }),
   ]);
   const share = formatPercent(latest.egenkapitalandel);
   const balanse = present([
-    figRow('Sum eiendeler', latest.sumEiendeler),
-    figRow('Egenkapital', latest.egenkapital),
+    figRow(COPY.sumEiendeler, latest.sumEiendeler),
+    figRow(COPY.egenkapital, latest.egenkapital),
     share
       ? {
-          label: 'Egenkapitalandel',
+          label: COPY.egenkapitalandel,
           amount: share,
           unit: '',
           total: true,
@@ -509,7 +505,7 @@ function enheter(company: CompanyData): EnheterView {
         if (ref.orgnr === parentOrgnr && konsern.parent?.grunnlag) {
           notes.push(COPY.ownerStake(konsern.parent.grunnlag));
         }
-        if (!self) notes.unshift(`Org.nr ${spaced(ref.orgnr)}`);
+        if (!self) notes.unshift(COPY.orgnrRef(spaced(ref.orgnr)));
         return { ...ref, self, note: notes.join(' · ') };
       }),
       children: konsern.children.map((c) => ({

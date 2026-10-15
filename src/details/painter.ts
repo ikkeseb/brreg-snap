@@ -549,14 +549,14 @@ export function createPanelPainter(
   // --- the painter -----------------------------------------------------------
 
   return {
-    loading(orgnr): void {
+    loading(orgnr, opts): void {
       paintId += 1;
       closeSearch(false);
       lastOrgnr = orgnr;
       shown = undefined;
       watchIdent(undefined);
       setState('loading', 'loading');
-      main.replaceChildren(buildPanelSkeleton());
+      main.replaceChildren(buildPanelSkeleton(opts));
       renderFooter(foot, { loading: true });
       live.announce(COPY.loadingOrgnr(orgnrText(orgnr).spaced));
     },
@@ -765,8 +765,8 @@ export function createPanelPainter(
 // geometry, then the konsern row, the tabs and the first section, so
 // the layout that lands is the layout that shimmered. Static text only:
 // the tabs are not a tablist (main is inert meanwhile).
-export function buildPanelSkeleton(): DocumentFragment {
-  const frag = buildSkeleton('panel');
+export function buildPanelSkeleton(opts: { kobling: boolean }): DocumentFragment {
+  const frag = buildSkeleton('panel', opts);
   const konsern = el('div', 'konsern');
   konsern.appendChild(el('span', 'sk sk--icon'));
   const text = el('span', 'konsern__text');
@@ -787,10 +787,10 @@ export function buildPanelSkeleton(): DocumentFragment {
   sec.setAttribute('aria-hidden', 'true');
   const dl = el('dl');
   for (const [label, width] of [
-    ['Organisasjonsform', 'sk--m'],
-    ['Stiftet', 'sk--s'],
-    ['Registrert', 'sk--s'],
-    ['Næring', 'sk--l'],
+    [COPY.organisasjonsform, 'sk--m'],
+    [COPY.stiftet, 'sk--s'],
+    [COPY.registrert, 'sk--s'],
+    [COPY.naering, 'sk--l'],
   ] as const) {
     const row = el('div', 'def-row');
     row.appendChild(el('dt', undefined, label));

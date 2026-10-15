@@ -88,7 +88,7 @@ export function renderMasthead(
   input.type = 'search';
   input.autocomplete = 'off';
   input.spellcheck = false;
-  input.placeholder = COPY.searchPlaceholderPanel;
+  input.placeholder = COPY.searchPlaceholder;
   input.setAttribute('aria-label', COPY.searchLabel);
   if (data.query) input.value = data.query;
   field.appendChild(input);

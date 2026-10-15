@@ -178,7 +178,7 @@ describe('manual search', () => {
     await type('984851006');
     await vi.waitFor(() =>
       expect(resultsEl.textContent).toBe(
-        'Fant ingen enhet med organisasjonsnummer 984851006.',
+        'Fant ikke noe selskap med org.nr 984851006.',
       ),
     );
     expect(hits()).toHaveLength(0);
@@ -190,7 +190,7 @@ describe('manual search', () => {
     await type('923609017');
     await vi.waitFor(() =>
       expect(resultsEl.textContent).toBe(
-        '923609017 er ikke et gyldig organisasjonsnummer.',
+        '923609017 er ikke et gyldig org.nr.',
       ),
     );
     expect(fetchMock).not.toHaveBeenCalled();

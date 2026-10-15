@@ -2,7 +2,7 @@
 // states: 250ms debounce, monotonic runId so out-of-order responses
 // drop, min 2 chars, capped to 100 before reaching brreg.
 //
-// The placeholder promises «Bedriftsnavn eller 9-sifret orgnr», and
+// The placeholder promises «Navn eller org.nr», and
 // brreg's name search can't keep the second half: navn=923609016 has
 // no hits, and "923 609 016" fuzzy-matches unrelated names. So an
 // orgnr-shaped query is looked up directly instead (lookupOrgnr), which
@@ -76,13 +76,13 @@ async function findByOrgnr(orgnr: string): Promise<SearchRows> {
     if (err instanceof DeletedAvdelingError) {
       return {
         kind: 'note',
-        text: `${orgnr} er underenheten ${err.avdeling.navn}, som er slettet.`,
+        text: COPY.deletedAvdeling(orgnr, err.avdeling.navn),
       };
     }
     if (isNotFoundError(err)) {
       return {
         kind: 'note',
-        text: `Fant ingen enhet med organisasjonsnummer ${orgnr}.`,
+        text: COPY.notFound(orgnr),
       };
     }
     throw err;
@@ -94,7 +94,7 @@ async function find(query: string): Promise<SearchRows> {
   if (parsed?.kind === 'invalid') {
     return {
       kind: 'note',
-      text: `${parsed.digits} er ikke et gyldig organisasjonsnummer.`,
+      text: COPY.invalidOrgnr(parsed.digits),
     };
   }
   if (parsed) return findByOrgnr(parsed.orgnr);
