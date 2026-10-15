@@ -4,7 +4,7 @@
 // test-results/screenshots/<project>/<state>.png.
 import { join } from 'node:path';
 import { expect, test } from '@playwright/test';
-import { assertInvariants, watchPage } from './invariants';
+import { assertInvariants, settle, watchPage } from './invariants';
 import { STATES } from './states.mjs';
 
 for (const s of STATES) {
@@ -22,7 +22,7 @@ for (const s of STATES) {
       }
     }
     await expect(app).toHaveAttribute('data-state', s.state);
-    await page.waitForLoadState('networkidle');
+    await settle(page, watch);
     if (s.state === 'search') await expect(page.locator('.results button.recent').first()).toBeVisible();
 
     if (s.state === 'result') {

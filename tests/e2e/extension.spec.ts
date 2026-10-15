@@ -7,7 +7,7 @@
 import { join, resolve } from 'node:path';
 import { test as base, chromium, expect, type BrowserContext, type Worker } from '@playwright/test';
 import { fixtureReply, loadFixtures } from '../../scripts/preview/fixtures.mjs';
-import { assertInvariants, watchPage } from './invariants';
+import { assertInvariants, settle, watchPage } from './invariants';
 import { openNative, type NativeBrowser } from './native';
 
 const dist = resolve('dist-chrome');
@@ -78,7 +78,7 @@ test('panel renders a company', async ({ context, extensionId }, testInfo) => {
   await page.goto(`chrome-extension://${extensionId}/details/details.html?orgnr=984851006`);
   await expect(page.locator('main#app')).toHaveAttribute('data-state', 'result');
   await expect(page.getByRole('heading', { level: 2 }).first()).toBeVisible();
-  await page.waitForLoadState('networkidle');
+  await settle(page, watch);
   await page.screenshot({
     path: join(testInfo.project.outputDir, 'screenshots', 'extension', 'details-dnb.png'),
     fullPage: true,
@@ -95,7 +95,7 @@ test('popup page renders', async ({ context, extensionId }, testInfo) => {
   const watch = await watchPage(page);
   await page.goto(`chrome-extension://${extensionId}/popup/popup.html`);
   await expect(page.locator('main#app')).toHaveAttribute('data-state', 'empty');
-  await page.waitForLoadState('networkidle');
+  await settle(page, watch);
   await page.screenshot({
     path: join(testInfo.project.outputDir, 'screenshots', 'extension', 'popup.png'),
     fullPage: true,

@@ -29,7 +29,7 @@ export interface NativeTarget {
   evaluate<T>(expression: string): Promise<T>;
   /** A real (trusted) left click at the element's centre: carries a user gesture. */
   click(selector: string): Promise<void>;
-  /** Resolves once the rendered text held still for half a second (a Page's networkidle). */
+  /** Resolves once the rendered text held still for half a second (a Page's `settle`, invariants.ts). */
   settle(): Promise<void>;
   screenshot(path: string): Promise<void>;
 }
