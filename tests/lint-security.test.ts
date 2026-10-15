@@ -1,31 +1,37 @@
-import { ESLint } from 'eslint';
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import { ESLint, type Linter } from 'eslint';
+import tseslint from 'typescript-eslint';
+import { describe, expect, it } from 'vitest';
+import { srcSecurityConfigs, srcSecurityRules } from '../eslint.config.js';
 
 // The src security rules in eslint.config.js (AGENTS.md § Security
-// constraints), run through the REAL config: each snippet is linted as
-// if it were the content of an existing src file, so the type-aware
-// setup, the file globs and the rule options are all the ones `pnpm
-// lint` uses. Only the security rules' findings count here.
+// constraints). Each snippet is linted as if it were the content of an
+// existing src file. The rules need no type information, so the cases
+// run through `fast`: the very blocks the real config spreads in
+// (srcSecurityConfigs, same globs, same rule objects) behind the
+// TypeScript parser without a project. That keeps each case a plain
+// parse instead of a type-aware lint. `real` is the config `pnpm lint`
+// uses; the canaries, the file-type cases and the rule comparison at
+// the end hold the two together, so a drift in globs, rule options or
+// the type-aware setup still fails here. Only the security rules'
+// findings count.
 
-const SECURITY_RULES = new Set([
-  'no-eval',
-  'no-new-func',
-  'no-restricted-globals',
-  'no-restricted-syntax',
-]);
+const SECURITY_RULES = new Set(Object.keys(srcSecurityRules));
 
-let eslint: ESLint;
-// Every case is a type-aware lint: well under a second on a quiet
-// machine, past vitest's 5 s default on a loaded one, which then blocks
-// the pre-push gate. The first lintText builds the program cold, so
-// it's paid here, under the hook's own timeout.
-vi.setConfig({ testTimeout: 30_000 });
-beforeAll(async () => {
-  eslint = new ESLint({ cwd: process.cwd() });
-  await eslint.lintText('', { filePath: 'src/lib/orgnr.ts' });
-}, 120_000);
+const fast = new ESLint({
+  cwd: process.cwd(),
+  overrideConfigFile: true,
+  overrideConfig: [
+    { files: ['**/*.ts'], languageOptions: { parser: tseslint.parser } },
+    ...srcSecurityConfigs,
+  ],
+});
+const real = new ESLint({ cwd: process.cwd() });
 
-async function findings(code: string, filePath = 'src/lib/orgnr.ts'): Promise<string[]> {
+async function findings(
+  code: string,
+  filePath = 'src/lib/orgnr.ts',
+  eslint = fast,
+): Promise<string[]> {
   const [result] = await eslint.lintText(code, { filePath });
   return (result?.messages ?? [])
     .filter((m) => m.fatal === true || SECURITY_RULES.has(m.ruleId ?? ''))
@@ -124,11 +130,72 @@ describe('src security lint: zero runtime dependencies', () => {
   });
 });
 
+// These need no type information in the real config either, so they run
+// through `real`: a later block or ignore that exempts one extension fails here.
+const NOT_TS = ['js', 'mjs', 'cjs', 'jsx', 'tsx', 'mts', 'cts'].map((ext) => `src/lib/probe.${ext}`);
+
 describe('src is TypeScript only', () => {
-  it.each(['src/lib/probe.js', 'src/lib/probe.mjs', 'src/lib/probe.cjs', 'src/lib/probe.tsx', 'src/lib/probe.jsx', 'src/lib/probe.mts'])(
-    'rejects %s',
-    async (file) => {
-      expect(await findings('export const x = 1;\n', file)).not.toEqual([]);
-    },
-  );
+  it.each(NOT_TS)('rejects %s (real config)', async (file) => {
+    expect(await findings('export const x = 1;\n', file, real)).toContain(
+      'no-restricted-syntax: src is TypeScript only: use a .ts file.',
+    );
+  });
+});
+
+describe('the fast path stays the real config', () => {
+  // Type-aware: the first lint builds the TypeScript program cold, about
+  // a second on a quiet machine and several on a loaded one.
+  const typeAware = { timeout: 20_000 };
+
+  // One per rule family, linted through `real` exactly as `pnpm lint`
+  // would: the named rule must fire, and `fast` must report the same.
+  // (The TypeScript-only family already runs through `real` above.)
+  it.each([
+    ['no-eval', 'eval', 'src/lib/orgnr.ts', header + 'eval(v);'],
+    ['no-eval', 'indirect eval', 'src/lib/orgnr.ts', header + '(0, eval)(v);'],
+    ['no-new-func', 'new Function', 'src/lib/orgnr.ts', header + 'new Function(v);'],
+    ['no-restricted-globals', 'aliased Function', 'src/lib/orgnr.ts', header + 'const F = Function; void F;'],
+    ['no-restricted-syntax', 'an HTML sink', 'src/lib/orgnr.ts', header + 'el.innerHTML = v;'],
+    ['no-restricted-syntax', '.constructor', 'src/lib/orgnr.ts', header + 'void (() => undefined).constructor;'],
+    ['no-restricted-syntax', 'a package import', 'src/lib/orgnr.ts', "import x from 'not-a-dependency'; void x;"],
+  ])('real config: %s fires on %s', typeAware, async (rule, _name, file, code) => {
+    const got = await findings(code, file, real);
+    expect(got.some((f) => f.startsWith(`${rule}: `))).toBe(true);
+    expect(await findings(code, file)).toEqual(got);
+  });
+
+  it('real config: a clean src file has no findings', typeAware, async () => {
+    expect(
+      await findings(header + "el.textContent = v; el.setAttribute('aria-label', v);", 'src/lib/orgnr.ts', real),
+    ).toEqual([]);
+  });
+
+  // What the computed config feeds the security rules: their settings,
+  // and for the .ts paths (whose cases run through `fast`) everything
+  // else that changes how they behave, such as globals (which scope-aware
+  // rules like no-eval consult), sourceType, linterOptions and settings.
+  // The parser and its options differ on purpose; plugins only add rules.
+  // The non-.ts paths compare rules only: their cases run through `real`,
+  // and the real config gives them the tooling's Node globals.
+  async function computed(eslint: ESLint, file: string, full: boolean) {
+    // undefined when the file is ignored or matches no block.
+    const config = (await eslint.calculateConfigForFile(file)) as Linter.Config | undefined;
+    expect(config).toBeDefined();
+    const rules = Object.fromEntries(
+      Object.entries(config?.rules ?? {}).filter(([id]) => SECURITY_RULES.has(id)),
+    );
+    if (!full) return { rules };
+    const { parser: _parser, parserOptions: _parserOptions, ...languageOptions } = config?.languageOptions ?? {};
+    const { rules: _rules, plugins: _plugins, languageOptions: _languageOptions, ...rest } = config ?? {};
+    return { rules, languageOptions, ...rest };
+  }
+
+  it.each([
+    ...['src/lib/orgnr.ts', 'src/details/main.ts'].map((file) => [file, true] as const),
+    ...NOT_TS.map((file) => [file, false] as const),
+  ])('applies the same security config as the real config to %s', async (file, full) => {
+    const [f, r] = await Promise.all([computed(fast, file, full), computed(real, file, full)]);
+    expect(f.rules).not.toEqual({});
+    expect(f).toEqual(r);
+  });
 });
