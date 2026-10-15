@@ -110,8 +110,10 @@ let currentView: TrustView | undefined;
 let loadRunId = 0;
 const claim = (): number => ++loadRunId;
 const stale = (id: number): boolean => id !== loadRunId;
-// «Prøv igjen» in the error state re-runs the last load.
-let lastLoad: (() => void) | undefined;
+// Re-runs the last load: «Prøv igjen» in the error state (a user's
+// retry, so it takes focus), «Oppdater», the search view closed over a
+// load. Without an argument it keeps the focus rule the load began with.
+let lastLoad: ((focus?: boolean) => void) | undefined;
 // Re-paints the state on screen without fetching: what the search view
 // (opened from the masthead over any state) returns to.
 let repaint: (() => void) | undefined;
@@ -329,7 +331,7 @@ async function showEmpty(kind: EmptyKind, opts: { focus: boolean }): Promise<voi
   if (opts.focus) focusElement(kind.kind === 'search' ? view.input : view.heading);
 }
 
-async function showError(err: unknown): Promise<void> {
+async function showError(err: unknown, opts: { focus: boolean }): Promise<void> {
   const myRunId = claim();
   dropSearch();
   currentView = undefined;
@@ -345,7 +347,7 @@ async function showError(err: unknown): Promise<void> {
     : site()
       ? { label: COPY.contextFor, strong: site()! }
       : undefined;
-  const paint = (): void => {
+  const paint = (): ReturnType<typeof paintError> =>
     paintError(
       roots,
       {
@@ -356,14 +358,16 @@ async function showError(err: unknown): Promise<void> {
       },
       {
         onSearch,
-        onRetry: () => lastLoad?.(),
+        onRetry: () => lastLoad?.(true),
         onSelect: (orgnr) => void loadAndRender(orgnr, 'manual', { focus: true }),
       },
     );
-  };
-  paint();
+  const answer = paint();
   repaint = paint;
   badge(undefined);
+  // The band's heading is the outcome of a pick or a retry: the button
+  // that started it is gone.
+  if (opts.focus) focusElement(answer.heading);
 }
 
 // --- search view (from the masthead, over any state) ------------------------
@@ -407,7 +411,7 @@ async function loadAndRender(
   currentOrgnr = orgnr;
   requestedOrgnr = orgnr;
   if (method !== undefined) currentMethod = method;
-  lastLoad = () => void loadAndRender(orgnr, method, opts);
+  lastLoad = (focus = opts.focus) => void loadAndRender(orgnr, method, { focus });
   showLoading(orgnr);
   syncSidebar(orgnr);
   try {
@@ -434,7 +438,7 @@ async function loadAndRender(
     showResult(view, { focus: opts.focus, reveal: true });
   } catch (err) {
     if (stale(myRunId)) return;
-    await showError(err);
+    await showError(err, opts);
   }
 }
 
@@ -544,7 +548,7 @@ async function init(opts: { focus: boolean }): Promise<void> {
     );
   } catch (err) {
     if (stale(myRunId)) return;
-    await showError(err);
+    await showError(err, opts);
   }
 }
 

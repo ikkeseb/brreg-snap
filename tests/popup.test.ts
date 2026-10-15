@@ -327,9 +327,28 @@ describe('popup controller — search view, error, refresh', () => {
     expect(document.querySelector('.answer--warn h2')?.textContent).toBe('Fikk ikke svar fra Brønnøysundregistrene');
     expect(document.querySelector('.context')?.textContent).toBe('Oppslag på org.nr 984 851 006');
     expect(mocks.setTrustBadge).toHaveBeenLastCalledWith(7, undefined);
+    // The initial load is not the user's: focus stays where the browser put it.
+    expect(document.activeElement).toBe(document.body);
     byText('Prøv igjen')!.click();
     await waitState('result');
     expect(mocks.loadCompany).toHaveBeenCalledTimes(2);
+  });
+
+  it('a retry or a pick that fails again moves focus to the error band', async () => {
+    mocks.getRecent.mockResolvedValue([{ orgnr: '984851006', navn: 'DNB BANK ASA', ts: 1 }]);
+    mocks.loadCompany.mockRejectedValue(new TypeError('Failed to fetch'));
+    await boot();
+    await waitState('error');
+    const band = () => document.querySelector('.answer--warn h2');
+
+    byText('Prøv igjen')!.click();
+    await vi.waitFor(() => expect(document.activeElement).toBe(band()));
+    expect(mocks.loadCompany).toHaveBeenCalledTimes(2);
+
+    // A recent picked from the error state, failing too.
+    document.querySelector<HTMLButtonElement>('button.recent')!.click();
+    await vi.waitFor(() => expect(mocks.loadCompany).toHaveBeenCalledTimes(3));
+    await vi.waitFor(() => expect(document.activeElement).toBe(band()));
   });
 
   it('a not-found orgnr offers no retry', async () => {

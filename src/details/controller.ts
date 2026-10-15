@@ -183,8 +183,10 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     const run = loads.begin();
     currentOrgnr = orgnr;
     if (method !== undefined) currentMethod = method;
+    // «Prøv igjen» is a user-initiated transition: the result (or the
+    // error band again) takes focus from the button it tore down.
     lastLoad = () => {
-      void loadOrgnr(orgnr, method);
+      void loadOrgnr(orgnr, method, { focus: 'heading' });
     };
     const host = currentHost;
     leaveResult();
@@ -442,7 +444,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     pick(host, orgnr): void {
       if (!pickerStillShown(host)) return;
       history.setOrgnr(orgnr, 'host-pick', host, { push: false, tabId: followedTabId });
-      void loadOrgnr(orgnr, 'host-pick');
+      void loadOrgnr(orgnr, 'host-pick', { focus: 'heading' });
     },
 
     none(host): void {
@@ -471,7 +473,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   function loadPick(orgnr: string): void {
     currentHost = undefined;
     history.setOrgnr(orgnr, 'manual', undefined, { push: false, tabId: followedTabId });
-    void loadOrgnr(orgnr, 'manual');
+    void loadOrgnr(orgnr, 'manual', { focus: 'heading' });
   }
 
   const painter = deps.painter(intents);

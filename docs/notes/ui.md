@@ -199,11 +199,13 @@ the welcome page it is `aria-hidden`, beside the brand name in text.
   word loses its red there, so the kicker's ✕ and word are what mark
   the verdict.
 - Focus moves only on a user-initiated transition (a pick, a search, a
-  retry, a drill-in), to the result heading or the first picker row;
-  a background repaint (auto-sync) never moves it. One focus style
-  everywhere: the amber ring on `:focus-visible`; the search box
-  carries it for its input, the verdict too (on its tint the ring
-  measures 4.8 light / 8.0 dark against WCAG 1.4.11's 3:1, § tokens).
+  retry, a drill-in), to the result heading (the error band's when the
+  load fails) or the first picker row, and in the panel only while its
+  window has focus; a background repaint (auto-sync) never moves it.
+  One focus style everywhere: the amber ring on `:focus-visible`; the
+  search box carries it for its input, the verdict too (on its tint the
+  ring measures 4.8 light / 8.0 dark against WCAG 1.4.11's 3:1,
+  § tokens).
 - A background rebuild must not drop focus either: the panel's 30 s
   freshness tick rewrites the footer's text node in place
   (`renderFooter(...).tick`), and a same-view keep (provenance) that

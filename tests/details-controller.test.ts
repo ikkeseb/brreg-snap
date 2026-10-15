@@ -505,10 +505,12 @@ describe('«Oppdater» and «Prøv igjen»', () => {
     await settle();
     expect(painter.error).toHaveBeenCalledWith(expect.any(Error), { retry: true, focus: false });
 
+    // The retry is the user's: its result takes focus from the torn-down button.
     intents.retry();
     await settle();
     expect(deps.loadCompany).toHaveBeenCalledTimes(2);
     expect(painter.result).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(painter.result).mock.calls[0]![0].focus).toBe('heading');
   });
 
   it('a not-found offers no retry', async () => {
@@ -549,13 +551,46 @@ describe('focus', () => {
     expect(results()[1]!.focus).toBe('none');
   });
 
-  it('a manual pick clears the host and moves no focus', async () => {
+  it('a manual pick clears the host', async () => {
     const { controller, intents, results, deps } = setup();
     await controller.probe('example.com');
     intents.manual(DNB);
     await settle();
-    expect(results()[0]).toMatchObject({ method: 'manual', host: undefined, focus: 'none' });
+    expect(results()[0]).toMatchObject({ method: 'manual', host: undefined });
     expect(deps.history.current()).toEqual({ orgnr: DNB, method: 'manual', host: undefined });
+  });
+
+  it('every pick (picker row, search hit, recent) focuses the result only when the panel window has focus', async () => {
+    for (const has of [true, false]) {
+      const { controller, intents, results, focus } = setup({
+        searchHost: async () => ({ band: 'picker', candidates: CANDIDATES, complete: true }),
+      });
+      await controller.probe('example.com');
+      focus.has = has;
+      intents.pick('example.com', DNB);
+      await settle();
+      intents.manual(EQUINOR);
+      await settle();
+      intents.recent(DNB);
+      await settle();
+      expect(results().map((r) => [r.method, r.focus])).toEqual([
+        ['host-pick', has ? 'heading' : 'none'],
+        ['manual', has ? 'heading' : 'none'],
+        ['manual', has ? 'heading' : 'none'],
+      ]);
+    }
+  });
+
+  it('a pick that fails focuses the error band only when the panel window has focus', async () => {
+    for (const has of [true, false]) {
+      const { controller, intents, deps, painter, focus } = setup();
+      vi.mocked(deps.loadCompany).mockRejectedValueOnce(new Error('network'));
+      await controller.probe('example.com');
+      focus.has = has;
+      intents.manual(DNB);
+      await settle();
+      expect(painter.error).toHaveBeenCalledWith(expect.any(Error), { retry: true, focus: has });
+    }
   });
 });
 
