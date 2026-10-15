@@ -29,6 +29,7 @@ import {
   renderRecents,
   renderSearchView,
   type SearchView,
+  type SearchViewLead,
 } from '../lib/view/components/search.js';
 import { renderSkeleton } from '../lib/view/components/skeleton.js';
 
@@ -246,47 +247,44 @@ export function paintEmpty(roots: Roots, data: EmptyPaint, handlers: EmptyHandle
   mast(roots, host, false, handlers);
   setState(roots, 'empty', kind.kind === 'degraded' ? 'warn' : 'empty');
   const site = data.site ?? '';
-  let head: string;
+  let lead: SearchViewLead;
   let text: string | undefined;
   switch (kind.kind) {
     case 'no-site':
-      head = COPY.emptyNoSite;
+      lead = { head: COPY.emptyNoSite };
       text = COPY.emptyNoSiteText;
       break;
     case 'no-match':
-      head = COPY.emptyNoMatch(site);
+      lead = { head: COPY.emptyNoMatch(site) };
       text = COPY.emptyNoMatchText;
       break;
-    case 'degraded':
-      head = COPY.emptyDegraded(site);
-      text = COPY.emptyNoMatchText;
+    case 'degraded': {
+      // The error leads: its band is the answer, the search the way on.
+      const error: ErrorAnswer = {
+        head: COPY.noAnswerHead,
+        support: COPY.degradedSupport(site),
+        retry: true,
+      };
+      lead = { band: buildErrorAnswer(error, { onRetry: handlers.onRetry }) };
+      text = COPY.emptyDegradedText;
       break;
+    }
     case 'none':
-      head = COPY.emptyNone(site);
+      lead = { head: COPY.emptyNone(site) };
       text = COPY.emptyNoneText;
       break;
     default:
-      head = COPY.searchHead;
+      lead = { head: COPY.searchHead };
       text = COPY.searchText;
       break;
-  }
-  const after: Node[] = [];
-  if (kind.kind === 'degraded') {
-    const error: ErrorAnswer = {
-      head: COPY.noAnswerHead,
-      support: COPY.degradedSupport(site),
-      retry: true,
-    };
-    after.push(buildErrorAnswer(error, { onRetry: handlers.onRetry }).section);
   }
   const view = renderSearchView(
     roots.main,
     {
-      head,
+      ...lead,
       text,
       hint: true,
       recents: data.recents,
-      after,
       ...(data.forgetSite ? { forgetSite: data.forgetSite } : {}),
       ...(kind.kind === 'search' ? { back: kind.back } : {}),
     },

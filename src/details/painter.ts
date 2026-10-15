@@ -653,17 +653,20 @@ export function createPanelPainter(
       const site = host ? siteName(host) : undefined;
 
       const empty = el('div', 'empty');
-      const heading = el('h1', undefined, site ? (degraded ? COPY.emptyDegraded(site) : COPY.emptyNoMatch(site)) : COPY.emptyNoSite);
-      const text = el('p', undefined, site ? COPY.emptyNoMatchText : COPY.emptyPanelText);
-      empty.append(heading, text);
-      main.replaceChildren(empty);
+      const heading = el('h1', undefined, site ? COPY.emptyNoMatch(site) : COPY.emptyNoSite);
+      const text = el('p', undefined, site && !degraded ? COPY.emptyNoMatchText : COPY.emptyPanelText);
       if (degraded && site) {
-        main.appendChild(
-          buildErrorAnswer(
-            { head: COPY.noAnswerHead, support: COPY.degradedSupport(site), retry: true },
-            { onRetry: () => intents.retry() },
-          ).section,
+        // The error leads: its band is the answer (no h1 repeats it),
+        // the masthead field the way on.
+        const band = buildErrorAnswer(
+          { head: COPY.noAnswerHead, support: COPY.degradedSupport(site), retry: true },
+          { onRetry: () => intents.retry() },
         );
+        empty.append(text);
+        main.replaceChildren(band.section, empty);
+      } else {
+        empty.append(heading, text);
+        main.replaceChildren(empty);
       }
       const list = buildListSection(COPY.recents);
       list.section.hidden = true;

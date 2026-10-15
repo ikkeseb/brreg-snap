@@ -136,7 +136,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   // load's result standing.
   let shownLoad: LoadToken | undefined;
   // Re-trigger for the «Prøv igjen» button in the full error state, or
-  // under a degraded empty state (the host search failed).
+  // in a degraded empty state (the host search failed).
   let lastLoad: (() => void) | undefined;
   // The group tree of the last company loaded (company-load.ts). A
   // drill-in within the same konsern derives its place from it instead
@@ -282,7 +282,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     currentHost = view.host;
     currentOrgnr = undefined;
     history.clearOrgnr();
-    // «Prøv igjen» under a degraded empty state re-runs the host search.
+    // «Prøv igjen» in a degraded empty state re-runs the host search.
     if (view.degraded && view.host) {
       const host = view.host;
       lastLoad = () => {

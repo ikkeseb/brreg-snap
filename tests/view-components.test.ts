@@ -770,15 +770,13 @@ describe('search view + recents', () => {
     expect(view.back).toBeUndefined();
   });
 
-  it('the back affordance, «Glem valget» and a banner between the block and the lists', () => {
+  it('the back affordance and «Glem valget»', () => {
     const main = document.createElement('main');
     const onBack = vi.fn();
     const onForget = vi.fn();
-    const banner = document.createElement('section');
-    banner.className = 'answer answer--warn';
     const view = renderSearchView(
       main,
-      { head: 'x', recents: [], forgetSite: 'dnb.no', back: 'Tilbake til DNB BANK ASA', after: [banner] },
+      { head: 'x', recents: [], forgetSite: 'dnb.no', back: 'Tilbake til DNB BANK ASA' },
       { onSelect: vi.fn(), announce: vi.fn(), onBack, onForget },
     );
     expect(view.back?.textContent).toBe('Tilbake til DNB BANK ASA');
@@ -788,8 +786,22 @@ describe('search view + recents', () => {
     expect(forget.textContent).toBe('Glem valget for dnb.no');
     forget.click();
     expect(onForget).toHaveBeenCalledOnce();
-    expect([...main.children].map((c) => c.className)).toEqual(['back', 'empty', 'answer answer--warn', 'section', 'section']);
+    expect([...main.children].map((c) => c.className)).toEqual(['back', 'empty', 'section', 'section']);
     expect(view.recents.section.hidden).toBe(true);
+  });
+
+  it('a band leads the view in place of the head, and its heading is the one focus lands on', () => {
+    const main = document.createElement('main');
+    const band = buildErrorAnswer({ head: COPY.noAnswerHead, support: 'x', retry: true }, { onRetry: vi.fn() });
+    const view = renderSearchView(
+      main,
+      { band, text: COPY.emptyDegradedText, recents: [] },
+      { onSelect: vi.fn(), announce: vi.fn() },
+    );
+    expect([...main.children].map((c) => c.className)).toEqual(['answer answer--warn', 'empty', 'section', 'section']);
+    expect(main.querySelector('h1')).toBeNull();
+    expect(view.heading).toBe(band.heading);
+    expect(main.querySelector('.empty > p')?.textContent).toBe(COPY.emptyDegradedText);
   });
 
   it('the recents section hides when empty; entry rows carry a sub line', () => {

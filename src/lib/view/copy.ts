@@ -266,8 +266,9 @@ export const COPY = {
   emptyNoSiteText: 'Denne fanen har ingen adresse. Søk etter et selskap i stedet.',
   emptyPanelText: 'Søk etter et selskap i feltet over, eller åpne et du har sett.',
   emptyNoMatch: (site: string) => `Fant ikke selskapet bak ${site}`,
-  // The hostname search failed: «couldn't check», never «no match».
-  emptyDegraded: (site: string) => `Fikk ikke sjekket ${site}`,
+  // The hostname search failed: the error band leads («couldn't check»,
+  // never «no match»), this line under it.
+  emptyDegradedText: 'Søk etter et selskap i stedet.',
   emptyNoMatchText: 'Søk etter riktig selskap, eller åpne et du har sett.',
   emptyNone: (site: string) => `Du valgte «Ingen av disse» for ${site}`,
   emptyNoneText: 'Søk etter riktig selskap.',
