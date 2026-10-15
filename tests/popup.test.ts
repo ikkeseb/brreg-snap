@@ -42,7 +42,7 @@ vi.mock('../src/lib/hostname-search.js', async (importOriginal) => ({
   forgetHost: mocks.forgetHost,
   setPickerChoice: mocks.setPickerChoice,
 }));
-vi.mock('../src/lib/ui/picker.js', () => ({ rejectChoice: mocks.rejectChoice }));
+vi.mock('../src/lib/ui/reject-flow.js', () => ({ rejectChoice: mocks.rejectChoice }));
 vi.mock('../src/lib/ui/recent.js', () => ({ getRecent: mocks.getRecent, pushRecent: mocks.pushRecent }));
 vi.mock('../src/lib/brreg.js', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../src/lib/brreg.js')>()),

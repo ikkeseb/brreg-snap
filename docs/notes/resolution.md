@@ -266,7 +266,7 @@ The picker row count is `MAX_PICKER_CANDIDATES` exported from
 keyboard shortcuts (1-4 select the corresponding row, 0 triggers
 «Ingen av disse»; Escape is not a shortcut, § picker-choice).
 Bumping the constant requires extending the digit-key handler in
-`src/lib/ui/picker.ts`, which both surfaces share.
+`src/lib/view/components/picker.ts`, which both surfaces share.
 
 <!-- SECTION: label-extraction -->
 ## Registrable domain and label (suffixes, platforms, punycode)
@@ -383,8 +383,8 @@ per-row label.
 Only a deliberate decline stores the negative choice: the «Ingen av
 disse» button or its `0` shortcut. Escape is not a shortcut: it is
 the reflex key for leaving a popup, so the picker leaves it to the
-browser and persists nothing (`src/lib/ui/picker.ts`, pinned in
-`tests/picker.test.ts`).
+browser and persists nothing (`src/lib/view/components/picker.ts`,
+pinned in `tests/view-components.test.ts`).
 
 <!-- SECTION: undo -->
 ## Undo: every remembered answer is per site and forgettable

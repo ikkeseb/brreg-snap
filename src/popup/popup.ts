@@ -35,7 +35,7 @@ import { sidebar } from '../lib/platform/sidebar.js';
 import { describeLoadFailure } from '../lib/ui/error-message.js';
 import { primaryStatusFlag } from '../lib/ui/flags.js';
 import type { ManualSearchController } from '../lib/ui/manual-search.js';
-import { rejectChoice } from '../lib/ui/picker.js';
+import { rejectChoice } from '../lib/ui/reject-flow.js';
 import { getRecent, pushRecent } from '../lib/ui/recent.js';
 import {
   hostOf,

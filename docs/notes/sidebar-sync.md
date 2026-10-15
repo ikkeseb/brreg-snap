@@ -128,7 +128,7 @@ await once it's stale. A sync message claims one even when it keeps
 the view, so an older tab event can't paint over it. Arrival order,
 not network order, decides what ends up on screen. There are no manual
 bumps to forget. Races pinned in `tests/panel-follow.test.ts` and
-`tests/picker.test.ts`. A picker choice is applied only while that picker is
+`tests/reject-flow.test.ts`. A picker choice is applied only while that picker is
 still on screen. A painter that fetches after painting checks its
 result's `isStale()`, which compares with the load on screen
 (`shownLoad`), not the token, so a sync that keeps the same company
@@ -180,7 +180,7 @@ The "Feil bedrift?" reject flow (`rejectChoice`), the debounced manual
 search (incl. inline error + "Prøv igjen" retry — manual-search
 failures never flip the panel to the full error state), the recents
 stack and the active-tab resolution cascade (`resolveTabContext`,
-`TabContext`, `ResolutionMethod`) live in `src/lib/ui/{picker,
+`TabContext`, `ResolutionMethod`) live in `src/lib/ui/{reject-flow,
 manual-search,recent,resolve-tab,flags}.ts`. The markup — picker rows
 with digit shortcuts and «Ingen av disse», search rows, the identity,
 answer and ledger — is the pure components in

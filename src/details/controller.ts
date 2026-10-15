@@ -31,7 +31,7 @@ import {
   UNKNOWN_URL_METHOD,
   type ResolutionMethod,
 } from '../lib/resolution-method.js';
-import type { RejectOutcome } from '../lib/ui/picker.js';
+import type { RejectOutcome } from '../lib/ui/reject-flow.js';
 import type { TabContext } from '../lib/ui/resolve-tab.js';
 import type { PanelHistory } from './history.js';
 import type { PanelIntents, PanelPainter, ResultFocus } from './view.js';
@@ -59,7 +59,7 @@ export interface ControllerDeps {
   invalidateCache: (orgnr: string) => Promise<void>;
   // `status`: a danger status worth a mark in the list («Konkurs»).
   pushRecent: (orgnr: string, navn: string, status?: string) => Promise<void>;
-  // lib/ui/picker.ts: the «Feil bedrift?» flow the popup shares.
+  // lib/ui/reject-flow.ts: the «Feil bedrift?» flow the popup shares.
   rejectChoice: (
     host: string,
     orgnrs: readonly string[],

@@ -20,7 +20,7 @@ const candidates: Candidate[] = [enhetDnb, enhetEquinor].map((e) => ({
 }));
 
 async function setup() {
-  const { rejectChoice } = await import('../src/lib/ui/picker.js');
+  const { rejectChoice } = await import('../src/lib/ui/reject-flow.js');
   const { createLoadSequence } = await import('../src/lib/panel-follow.js');
   const { addRejectedChoice, searchByHostnameDetailed } = await import(
     '../src/lib/hostname-search.js'
