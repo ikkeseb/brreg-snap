@@ -373,12 +373,16 @@ describe('popup controller — search view, error, refresh', () => {
     await vi.waitFor(() => expect(mocks.resolveTabContext).toHaveBeenCalledTimes(2));
   });
 
-  it('«Oppdater» drops the cache and reloads', async () => {
+  it('«Oppdater» drops the cache, reloads, and puts focus back on «Oppdater»', async () => {
     await boot();
     await waitState('result');
-    byText('Oppdater')!.click();
+    const first = byText('Oppdater')!;
+    first.click();
     await vi.waitFor(() => expect(mocks.invalidateCache).toHaveBeenCalledWith('984851006'));
     await vi.waitFor(() => expect(mocks.loadCompany).toHaveBeenCalledTimes(2));
+    // The button was torn down with the footer: focus lands on the new one.
+    await vi.waitFor(() => expect(document.activeElement).toBe(byText('Oppdater')));
+    expect(document.activeElement).not.toBe(first);
   });
 
   it('«Åpne i sidepanel» docks the panel in the popup\'s window and the konsern row opens Enheter', async () => {

@@ -110,10 +110,14 @@ let currentView: TrustView | undefined;
 let loadRunId = 0;
 const claim = (): number => ++loadRunId;
 const stale = (id: number): boolean => id !== loadRunId;
+// Where a load's paint puts focus: nowhere (false), the result heading
+// (true), or back on «Oppdater» (the button it tore down, as the panel
+// does). A failed load takes the error band's heading for either.
+type LoadFocus = boolean | 'refresh';
 // Re-runs the last load: «Prøv igjen» in the error state (a user's
 // retry, so it takes focus), «Oppdater», the search view closed over a
 // load. Without an argument it keeps the focus rule the load began with.
-let lastLoad: ((focus?: boolean) => void) | undefined;
+let lastLoad: ((focus?: LoadFocus) => void) | undefined;
 // Re-paints the state on screen without fetching: what the search view
 // (opened from the masthead over any state) returns to.
 let repaint: (() => void) | undefined;
@@ -225,7 +229,7 @@ function showResolving(rerun: () => void): void {
   roots.live.announce(COPY.loading);
 }
 
-function showResult(view: TrustView, opts: { focus: boolean; reveal: boolean }): void {
+function showResult(view: TrustView, opts: { focus: LoadFocus; reveal: boolean }): void {
   dropSearch();
   currentView = view;
   searchOpen = false;
@@ -249,7 +253,8 @@ function showResult(view: TrustView, opts: { focus: boolean; reveal: boolean }):
   const painted = paint(opts.reveal);
   repaint = () => paint(false);
   badge(view);
-  if (opts.focus) focusElement(painted.heading);
+  if (opts.focus === 'refresh') focusElement(roots.foot.querySelector('button'));
+  else if (opts.focus) focusElement(painted.heading);
 }
 
 function showPicker(candidates: Candidate[], opts: { focus: boolean }): void {
@@ -331,7 +336,7 @@ async function showEmpty(kind: EmptyKind, opts: { focus: boolean }): Promise<voi
   if (opts.focus) focusElement(kind.kind === 'search' ? view.input : view.heading);
 }
 
-async function showError(err: unknown, opts: { focus: boolean }): Promise<void> {
+async function showError(err: unknown, opts: { focus: LoadFocus }): Promise<void> {
   const myRunId = claim();
   dropSearch();
   currentView = undefined;
@@ -405,7 +410,7 @@ document.addEventListener('keydown', (ev) => {
 async function loadAndRender(
   orgnr: string,
   method: ResolutionMethod | undefined,
-  opts: { focus: boolean },
+  opts: { focus: LoadFocus },
 ): Promise<void> {
   const myRunId = claim();
   currentOrgnr = orgnr;
@@ -500,7 +505,7 @@ async function refresh(): Promise<void> {
   // enhet shown, like the panel's «Oppdater».
   const orgnrs = [...new Set([requestedOrgnr, currentOrgnr])].filter((o): o is string => o !== undefined);
   await Promise.all(orgnrs.map((o) => invalidateCache(o)));
-  lastLoad?.();
+  lastLoad?.('refresh');
 }
 
 // --- init -----------------------------------------------------------------------
