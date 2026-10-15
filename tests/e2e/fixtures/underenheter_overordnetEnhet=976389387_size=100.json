@@ -5,7 +5,7 @@
     "_embedded": {
       "underenheter": [
         {
-          "antallAnsatte": 117,
+          "antallAnsatte": 123,
           "beliggenhetsadresse": {
             "adresse": [
               "Eksempelveien 1"
@@ -59,8 +59,8 @@
             "postnummer": "5892",
             "poststed": "BERGEN"
           },
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "1995-02-23",
           "registrertIMvaregisteret": false,
           "respons_klasse": "Underenhet",
@@ -97,7 +97,7 @@
           "respons_klasse": "Underenhet"
         },
         {
-          "antallAnsatte": 43,
+          "antallAnsatte": 53,
           "beliggenhetsadresse": {
             "adresse": [
               "Eksempelveien 1"
@@ -146,8 +146,8 @@
             "postnummer": "3002",
             "poststed": "DRAMMEN"
           },
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "1995-02-22",
           "registrertIMvaregisteret": false,
           "respons_klasse": "Underenhet",
@@ -215,7 +215,7 @@
           "telefon": "00000000"
         },
         {
-          "antallAnsatte": 8,
+          "antallAnsatte": 10,
           "beliggenhetsadresse": {
             "adresse": [
               "Eksempelveien 1"
@@ -241,8 +241,8 @@
           },
           "organisasjonsnummer": "919203277",
           "overordnetEnhet": "976389387",
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "2017-06-27",
           "registrertIMvaregisteret": false,
           "respons_klasse": "Underenhet"

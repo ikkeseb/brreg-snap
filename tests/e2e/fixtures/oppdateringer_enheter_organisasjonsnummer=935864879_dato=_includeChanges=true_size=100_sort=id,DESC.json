@@ -5,6 +5,28 @@
     "_embedded": {
       "oppdaterteEnheter": [
         {
+          "dato": "2026-10-13T08:20:11.510Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/postadresse/adresse/0",
+              "value": "Eksempelveien 1"
+            },
+            {
+              "op": "remove",
+              "path": "/postadresse/adresse/1"
+            },
+            {
+              "op": "replace",
+              "path": "/postadresse/postnummer",
+              "value": "1214"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25328208,
+          "organisasjonsnummer": "935864879"
+        },
+        {
           "dato": "2026-09-01T22:00:13.920Z",
           "endringer": [
             {
@@ -84,7 +106,7 @@
     "page": {
       "number": 0,
       "size": 100,
-      "totalElements": 4,
+      "totalElements": 5,
       "totalPages": 1
     }
   }

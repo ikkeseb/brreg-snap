@@ -30,7 +30,7 @@
             {
               "op": "replace",
               "path": "/forretningsadresse/adresse/0",
-              "value": "Parkveien 55"
+              "value": "Eksempelveien 1"
             },
             {
               "op": "replace",

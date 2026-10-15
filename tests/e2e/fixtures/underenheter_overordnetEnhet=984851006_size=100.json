@@ -5,7 +5,7 @@
     "_embedded": {
       "underenheter": [
         {
-          "antallAnsatte": 16,
+          "antallAnsatte": 17,
           "beliggenhetsadresse": {
             "adresse": [
               "Eksempelveien 1"
@@ -53,8 +53,8 @@
           },
           "organisasjonsnummer": "973160834",
           "overordnetEnhet": "984851006",
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "1995-02-23",
           "registrertIMvaregisteret": false,
           "respons_klasse": "Underenhet",
@@ -234,7 +234,7 @@
           "respons_klasse": "Underenhet"
         },
         {
-          "antallAnsatte": 402,
+          "antallAnsatte": 400,
           "beliggenhetsadresse": {
             "adresse": [
               "Eksempelveien 1"
@@ -292,8 +292,8 @@
             "postnummer": "7469",
             "poststed": "TRONDHEIM"
           },
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-12",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-12",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "2004-04-29",
           "registrertIMvaregisteret": false,
           "respons_klasse": "Underenhet"

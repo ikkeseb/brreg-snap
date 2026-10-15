@@ -46,6 +46,8 @@
         }
       },
       "eiendeler": {
+        "sumFordringer": 344872,
+        "sumBankinnskuddOgKontanter": 154136,
         "sumEiendeler": 499008,
         "omloepsmidler": {
           "sumOmloepsmidler": 499008
@@ -54,20 +56,24 @@
       },
       "resultatregnskapResultat": {
         "ordinaertResultatFoerSkattekostnad": 403430,
+        "ordinaertResultatSkattekostnad": 88755,
         "aarsresultat": 314675,
         "finansresultat": {
           "nettoFinans": -18,
           "finansinntekt": {},
           "finanskostnad": {
+            "annenRentekostnad": 18,
             "sumFinanskostnad": 18
           }
         },
         "driftsresultat": {
           "driftsresultat": 403448,
           "driftsinntekter": {
+            "salgsinntekter": 705904,
             "sumDriftsinntekter": 705904
           },
           "driftskostnad": {
+            "loennskostnad": 0,
             "sumDriftskostnad": 302456
           }
         }

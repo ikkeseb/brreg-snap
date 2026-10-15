@@ -3,6 +3,177 @@
   "status": 200,
   "body": [
     {
+      "id": 4539685,
+      "journalnr": "2023727852",
+      "regnskapstype": "SELSKAP",
+      "virksomhet": {
+        "organisasjonsnummer": "915330193",
+        "organisasjonsform": "AS",
+        "morselskap": false
+      },
+      "regnskapsperiode": {
+        "fraDato": "2022-01-01",
+        "tilDato": "2022-12-31"
+      },
+      "valuta": "NOK",
+      "avviklingsregnskap": false,
+      "oppstillingsplan": "store",
+      "revisjon": {
+        "ikkeRevidertAarsregnskap": false,
+        "fravalgRevisjon": true
+      },
+      "regnkapsprinsipper": {
+        "smaaForetak": true,
+        "regnskapsregler": "regnskapslovenAlminneligRegler"
+      },
+      "egenkapitalGjeld": {
+        "sumEgenkapitalGjeld": 2429595,
+        "egenkapital": {
+          "sumEgenkapital": 154487,
+          "opptjentEgenkapital": {
+            "sumOpptjentEgenkapital": 124487
+          },
+          "innskuttEgenkapital": {
+            "sumInnskuttEgenkaptial": 30000
+          }
+        },
+        "gjeldOversikt": {
+          "sumGjeld": 2275108,
+          "kortsiktigGjeld": {
+            "sumKortsiktigGjeld": 2275108
+          },
+          "langsiktigGjeld": {
+            "sumLangsiktigGjeld": 0
+          }
+        }
+      },
+      "eiendeler": {
+        "goodwill": 0,
+        "sumVarer": 32500,
+        "sumFordringer": 2127143,
+        "sumBankinnskuddOgKontanter": 161350,
+        "sumEiendeler": 2429593,
+        "omloepsmidler": {
+          "sumOmloepsmidler": 2320993
+        },
+        "anleggsmidler": {
+          "sumAnleggsmidler": 108600
+        }
+      },
+      "resultatregnskapResultat": {
+        "ordinaertResultatFoerSkattekostnad": 757834,
+        "ordinaertResultatSkattekostnad": 169972,
+        "aarsresultat": 587862,
+        "finansresultat": {
+          "nettoFinans": -57872,
+          "finansinntekt": {
+            "sumFinansinntekter": 195
+          },
+          "finanskostnad": {
+            "annenRentekostnad": 58067,
+            "sumFinanskostnad": 58067
+          }
+        },
+        "driftsresultat": {
+          "driftsresultat": 815707,
+          "driftsinntekter": {
+            "salgsinntekter": 4348151,
+            "sumDriftsinntekter": 4348151
+          },
+          "driftskostnad": {
+            "loennskostnad": 1862469,
+            "sumDriftskostnad": 3532444
+          }
+        }
+      }
+    },
+    {
+      "id": 5437971,
+      "journalnr": "2024754446",
+      "regnskapstype": "SELSKAP",
+      "virksomhet": {
+        "organisasjonsnummer": "915330193",
+        "organisasjonsform": "AS",
+        "morselskap": false
+      },
+      "regnskapsperiode": {
+        "fraDato": "2023-01-01",
+        "tilDato": "2023-12-31"
+      },
+      "valuta": "NOK",
+      "avviklingsregnskap": false,
+      "oppstillingsplan": "store",
+      "revisjon": {
+        "ikkeRevidertAarsregnskap": false,
+        "fravalgRevisjon": true
+      },
+      "regnkapsprinsipper": {
+        "smaaForetak": true,
+        "regnskapsregler": "regnskapslovenAlminneligRegler"
+      },
+      "egenkapitalGjeld": {
+        "sumEgenkapitalGjeld": 3263033,
+        "egenkapital": {
+          "sumEgenkapital": 30233,
+          "opptjentEgenkapital": {
+            "sumOpptjentEgenkapital": 233
+          },
+          "innskuttEgenkapital": {
+            "sumInnskuttEgenkaptial": 30000
+          }
+        },
+        "gjeldOversikt": {
+          "sumGjeld": 3232799,
+          "kortsiktigGjeld": {
+            "sumKortsiktigGjeld": 3232799
+          },
+          "langsiktigGjeld": {
+            "sumLangsiktigGjeld": 0
+          }
+        }
+      },
+      "eiendeler": {
+        "goodwill": 0,
+        "sumVarer": 32500,
+        "sumFordringer": 2977716,
+        "sumInvesteringer": 0,
+        "sumBankinnskuddOgKontanter": 177217,
+        "sumEiendeler": 3263033,
+        "omloepsmidler": {
+          "sumOmloepsmidler": 3187433
+        },
+        "anleggsmidler": {
+          "sumAnleggsmidler": 75600
+        }
+      },
+      "resultatregnskapResultat": {
+        "ordinaertResultatFoerSkattekostnad": 805905,
+        "ordinaertResultatSkattekostnad": 180158,
+        "aarsresultat": 625747,
+        "finansresultat": {
+          "nettoFinans": -38536,
+          "finansinntekt": {
+            "sumFinansinntekter": 337
+          },
+          "finanskostnad": {
+            "annenRentekostnad": 38873,
+            "sumFinanskostnad": 38873
+          }
+        },
+        "driftsresultat": {
+          "driftsresultat": 844441,
+          "driftsinntekter": {
+            "salgsinntekter": 4591201,
+            "sumDriftsinntekter": 4591201
+          },
+          "driftskostnad": {
+            "loennskostnad": 2370864,
+            "sumDriftskostnad": 3746760
+          }
+        }
+      }
+    },
+    {
       "id": 6336195,
       "journalnr": "2025764156",
       "regnskapstype": "SELSKAP",
@@ -48,6 +219,11 @@
         }
       },
       "eiendeler": {
+        "goodwill": 0,
+        "sumVarer": 32500,
+        "sumFordringer": 2247047,
+        "sumInvesteringer": 0,
+        "sumBankinnskuddOgKontanter": 218800,
         "sumEiendeler": 2540946,
         "omloepsmidler": {
           "sumOmloepsmidler": 2498346
@@ -58,6 +234,7 @@
       },
       "resultatregnskapResultat": {
         "ordinaertResultatFoerSkattekostnad": 892908,
+        "ordinaertResultatSkattekostnad": 199927,
         "aarsresultat": 692981,
         "finansresultat": {
           "nettoFinans": -199248,
@@ -65,15 +242,18 @@
             "sumFinansinntekter": 600
           },
           "finanskostnad": {
+            "annenRentekostnad": 199848,
             "sumFinanskostnad": 199848
           }
         },
         "driftsresultat": {
           "driftsresultat": 1092156,
           "driftsinntekter": {
+            "salgsinntekter": 4859032,
             "sumDriftsinntekter": 4859032
           },
           "driftskostnad": {
+            "loennskostnad": 2657420,
             "sumDriftskostnad": 3766876
           }
         }

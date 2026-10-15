@@ -5,7 +5,7 @@
     "timestamp": "2026-01-01T00:00:00.000+0000",
     "status": "500",
     "error": "Internal Server Error",
-    "message": "An error occurred while processing the request.",
+    "message": "Regnskapet inneholder en oppstillingsplan som ikke er stottet (BANK)",
     "path": "/regnskapsregisteret/regnskap/984851006",
     "trace": "recorded"
   }

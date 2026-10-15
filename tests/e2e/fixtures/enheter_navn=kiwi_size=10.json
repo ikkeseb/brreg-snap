@@ -203,7 +203,7 @@
             "Levere kjedebaserte fellesfunksjoner for den daglige og operative",
             "driften av alle butikker tilknyttet Kiwi-konseptet."
           ],
-          "antallAnsatte": 145,
+          "antallAnsatte": 144,
           "epostadresse": "post@example.no",
           "erIKonsern": true,
           "forretningsadresse": {
@@ -260,8 +260,8 @@
             "postnummer": "3412",
             "poststed": "LIERSTRANDA"
           },
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-13",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "2002-11-25",
           "registreringsdatoForetaksregisteret": "2002-11-25",
           "registreringsdatoMerverdiavgiftsregisteret": "2003-07-01",
@@ -477,7 +477,7 @@
             "Å drive catering, salg av mat og drikke og annet som naturlig hører",
             "sammen med dette, samt investering i andre selskaper."
           ],
-          "antallAnsatte": 8,
+          "antallAnsatte": 9,
           "erIKonsern": false,
           "forretningsadresse": {
             "adresse": [
@@ -529,8 +529,8 @@
             "postnummer": "9910",
             "poststed": "BJØRNEVATN"
           },
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-13",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "2016-11-28",
           "registreringsdatoForetaksregisteret": "2016-11-28",
           "registreringsdatoMerverdiavgiftsregisteret": "2017-01-01",
@@ -557,7 +557,7 @@
             "Drive dagligvarevirksomhet innenfor Kiwi-kjeden i definert region,",
             "samt alt som står i forbindelse med dette."
           ],
-          "antallAnsatte": 779,
+          "antallAnsatte": 754,
           "epostadresse": "post@example.no",
           "erIKonsern": true,
           "forretningsadresse": {
@@ -619,8 +619,8 @@
             "postnummer": "3412",
             "poststed": "LIERSTRANDA"
           },
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-13",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "2000-04-13",
           "registreringsdatoForetaksregisteret": "2000-04-13",
           "registreringsdatoMerverdiavgiftsregisteret": "2000-03-01",
@@ -652,7 +652,7 @@
             "Dagligvarevirksomhet innenfor Kiwi-kjeden i definert region,",
             "samt alt som står i forbindelse med dette."
           ],
-          "antallAnsatte": 1250,
+          "antallAnsatte": 1227,
           "epostadresse": "post@example.no",
           "erIKonsern": true,
           "forretningsadresse": {
@@ -712,8 +712,8 @@
             "postnummer": "3412",
             "poststed": "LIERSTRANDA"
           },
-          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-09-14",
-          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-09-10",
+          "registreringsdatoAntallAnsatteEnhetsregisteret": "2026-10-13",
+          "registreringsdatoAntallAnsatteNAVAaregisteret": "2026-10-10",
           "registreringsdatoEnhetsregisteret": "1995-02-19",
           "registreringsdatoForetaksregisteret": "1989-09-28",
           "registreringsdatoFrivilligMerverdiavgiftsregisteret": "2014-01-18",
@@ -746,7 +746,7 @@
     "page": {
       "number": 0,
       "size": 10,
-      "totalElements": 83,
+      "totalElements": 84,
       "totalPages": 9
     }
   }

@@ -90,36 +90,13 @@
           "endringstype": "Endring",
           "oppdateringsid": 24585640,
           "organisasjonsnummer": "915330193"
-        },
-        {
-          "dato": "2026-04-14T22:05:20.554Z",
-          "endringer": [
-            {
-              "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-04-14"
-            },
-            {
-              "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 9
-            },
-            {
-              "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-04-10"
-            }
-          ],
-          "endringstype": "Endring",
-          "oppdateringsid": 24145236,
-          "organisasjonsnummer": "915330193"
         }
       ]
     },
     "page": {
       "number": 0,
       "size": 100,
-      "totalElements": 5,
+      "totalElements": 4,
       "totalPages": 1
     }
   }

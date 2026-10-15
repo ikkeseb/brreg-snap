@@ -5,6 +5,29 @@
     "_embedded": {
       "oppdaterteEnheter": [
         {
+          "dato": "2026-10-13T22:11:00.286Z",
+          "endringer": [
+            {
+              "op": "replace",
+              "path": "/antallAnsatte",
+              "value": 1589
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
+              "value": "2026-10-13"
+            },
+            {
+              "op": "replace",
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
+              "value": "2026-10-10"
+            }
+          ],
+          "endringstype": "Endring",
+          "oppdateringsid": 25352227,
+          "organisasjonsnummer": "976389387"
+        },
+        {
           "dato": "2026-09-14T22:07:43.471Z",
           "endringer": [
             {
@@ -117,29 +140,6 @@
           ],
           "endringstype": "Endring",
           "oppdateringsid": 24412987,
-          "organisasjonsnummer": "976389387"
-        },
-        {
-          "dato": "2026-04-14T22:06:25.674Z",
-          "endringer": [
-            {
-              "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-04-14"
-            },
-            {
-              "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 1796
-            },
-            {
-              "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-04-10"
-            }
-          ],
-          "endringstype": "Endring",
-          "oppdateringsid": 24150338,
           "organisasjonsnummer": "976389387"
         }
       ]
