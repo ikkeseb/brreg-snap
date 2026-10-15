@@ -264,6 +264,8 @@ describe('popup controller — result', () => {
     await waitState('picker');
     expect(mocks.rejectChoice).toHaveBeenCalledWith('www.dnb.no', ['984851006'], 'DNB', expect.any(Function));
     expect(document.body.dataset.answer).toBe('pick');
+    // «Eller søk selv» starts empty: the rows are the search for the name.
+    expect(document.querySelector<HTMLInputElement>('.pick-search input')?.value).toBe('');
     const first = document.querySelector<HTMLButtonElement>('button.pick')!;
     expect(document.activeElement).toBe(first);
     expect(mocks.setTrustBadge).toHaveBeenLastCalledWith(7, undefined);

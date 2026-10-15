@@ -182,7 +182,6 @@ export function paintResult(roots: Roots, view: TrustView, handlers: ResultHandl
 export interface PickerPaint {
   host: string;
   site: string;
-  query: string;
   candidates: readonly Candidate[];
   reportHref: string;
 }
@@ -198,7 +197,7 @@ export function paintPicker(roots: Roots, data: PickerPaint, handlers: PickerHan
   setState(roots, 'picker', 'pick');
   const picker = renderPicker(
     roots.main,
-    { site: data.site, candidates: data.candidates, query: data.query },
+    { site: data.site, candidates: data.candidates },
     {
       onPick: handlers.onPick,
       onNone: handlers.onNone,

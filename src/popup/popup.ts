@@ -17,7 +17,6 @@ import {
   type CompanyData,
 } from '../lib/company-load.js';
 import { writeClipboard } from '../lib/copy-orgnr.js';
-import { hostnameLabel } from '../lib/hostname-score.js';
 import {
   forgetHost,
   getRememberedChoice,
@@ -264,7 +263,6 @@ function showPicker(candidates: Candidate[], opts: { focus: boolean }): void {
       {
         host: h,
         site: siteName(h),
-        query: hostnameLabel(h) ?? siteName(h),
         candidates,
         reportHref: report(),
       },
