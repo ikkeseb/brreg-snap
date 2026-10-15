@@ -28,16 +28,16 @@ unsigned packages to compare against: `brreg-snap-<version>.zip`
   the supported ranges of Vite 8, Vitest 5 and ESLint 10). CI builds
   the release with the version in `.node-version` (24); tested on
   v24.20.0.
-- **pnpm**: 10.33.0 (pinned via the `packageManager` field in
+- **pnpm**: 12.10.1 (pinned via the `packageManager` field in
   `package.json`).
 
 Install Node from <https://nodejs.org/> and pnpm via
-`npm install -g pnpm@10.33.0` or
+`npm install -g pnpm@12.10.1` or
 [corepack](https://nodejs.org/api/corepack.html):
 
 ```bash
 corepack enable
-corepack prepare pnpm@10.33.0 --activate
+corepack prepare pnpm@12.10.1 --activate
 ```
 
 ## Reproducing the build
