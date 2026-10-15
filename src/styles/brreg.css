@@ -201,6 +201,10 @@
 }
 .search input { flex: 1; min-width: 0; padding: 0; border: 0; background: none; outline: none; color: var(--ink); }
 .search input::placeholder { color: var(--ink-3); opacity: 1; }
+/* Chromium's own clear «×» is the one thing not drawn in a token (blue in
+   light, white in dark); Firefox never shows one. Escape and select-all
+   still clear the field. */
+.search input::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
 .search:focus-within { outline: 2px solid var(--amber); outline-offset: 2px; }
 /* the box carries the ring; the input inside must not draw a second one */
 .app .search input:focus-visible { outline: none; }
@@ -249,10 +253,11 @@
 .ident__leaders b { color: var(--ink); }
 /* «Avdeling: <navn> (org.nr)»: the orgnr looked up was a branch */
 .ident__note { margin-top: 4px; color: var(--ink-2); }
-/* panel: quiet registry flags + «Kopier sammendrag», one line at ≥ 340 px */
+/* panel: quiet registry flags + «Kopier sammendrag», one line at ≥ 340 px;
+   the button sits right whether or not there are flags before it */
 .ident__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; margin-top: 6px; }
 .ident__flags { font: var(--t-cap); font-weight: 500; color: var(--ink-3); }
-.ident__row .text-btn { font: var(--t-cap); font-weight: 500; }
+.ident__row .text-btn { margin-left: auto; font: var(--t-cap); font-weight: 500; }
 .ident__row .text-btn .icon { width: 12px; height: 12px; }
 
 /* inline text link: ink, underlined, never blue, never amber */
@@ -561,6 +566,7 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
   border: 0; border-bottom: 1px solid var(--rule); background: none; color: var(--ink-2); text-align: left; cursor: pointer;
 }
 .back b { color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.back:hover b { text-decoration: underline; text-underline-offset: 3px; }
 
 
 /* ---------- økonomi -------------------------------------------------------
@@ -580,7 +586,7 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .fig-row--total dd { font-weight: 800; }
 /* single-year equity ratio: a proportion, not a trend */
 .equity { margin-top: 10px; }
-.equity__track { display: flex; height: 6px; background: var(--skel); }
+.equity__track { display: flex; height: 6px; background: var(--rule); }
 .equity__fill { width: var(--share, 0%); background: var(--ink); }  /* --share set via el.style.setProperty */
 .fig-row[data-tone="warn"] dd { color: var(--tone); }
 .equity__legend { display: flex; justify-content: space-between; margin-top: 5px; font: var(--t-cap); font-weight: 400; color: var(--ink-3); }

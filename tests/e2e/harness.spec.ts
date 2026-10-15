@@ -56,10 +56,54 @@ for (const s of STATES) {
     );
     expect.soft(stampOverflow, 'verdict key word inside its frame').toBe(false);
 
+    // Drawn in tokens only, wherever the part is on screen: the search
+    // field has no engine «×» (Chromium paints it blue), the equity
+    // bar's track is the hairline, not the skeleton grey, and «Kopier
+    // sammendrag» sits right whether or not flags come before it.
+    const look = await page.evaluate(() => {
+      const rgb = (hex: string): string => {
+        const n = parseInt(hex.trim().slice(1), 16);
+        return `rgb(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255})`;
+      };
+      const cancelRule = [...document.styleSheets].some((sheet) =>
+        [...sheet.cssRules].some(
+          (r) =>
+            r instanceof CSSStyleRule &&
+            r.selectorText.includes('::-webkit-search-cancel-button') &&
+            r.style.getPropertyValue('appearance') === 'none',
+        ),
+      );
+      const track = document.querySelector('.equity__track');
+      const btn = document.querySelector('.ident__row .text-btn');
+      const row = btn?.closest('.ident__row');
+      return {
+        search: document.querySelector('input[type=search]') !== null,
+        cancelRule,
+        track: track && {
+          bg: getComputedStyle(track).backgroundColor,
+          rule: rgb(getComputedStyle(document.body).getPropertyValue('--rule')),
+        },
+        copyGap: btn && row ? row.getBoundingClientRect().right - btn.getBoundingClientRect().right : null,
+      };
+    });
+    if (look.search) expect.soft(look.cancelRule, 'search field: the engine clear button is hidden').toBe(true);
+    if (look.track) expect.soft(look.track.bg, 'equity track in --rule').toBe(look.track.rule);
+    if (look.copyGap !== null) expect.soft(Math.abs(look.copyGap), '«Kopier sammendrag» pinned right').toBeLessThan(1);
+
     await page.screenshot({
       path: join(testInfo.project.outputDir, 'screenshots', testInfo.project.name, `${s.name}.png`),
       fullPage: true,
     });
+
+    // Row-shaped buttons underline on hover; the back bar too. The panel
+    // keeps a hidden history «Tilbake» in the DOM beside the search
+    // view's, so take the one on screen.
+    const back = page.locator('button.back').filter({ visible: true }).first();
+    if (await back.isVisible()) {
+      await back.hover();
+      const deco = await back.locator('b').evaluate((b) => getComputedStyle(b).textDecorationLine);
+      expect.soft(deco, 'back bar underlines on hover').toContain('underline');
+    }
     await assertInvariants(page, watch);
   });
 }
