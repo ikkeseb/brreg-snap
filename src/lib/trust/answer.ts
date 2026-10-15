@@ -23,7 +23,10 @@ import { ageBasis, expectedLatestFiledYear, monthsSince } from './signals.js';
 import type { Answer, Finding, Kobling, Merknad, Signal } from './types.js';
 
 export const NO_WARNINGS_HEADLINE = 'Ingen varsler i registeret';
-export const MISMATCH_HEADLINE = 'Nettstedet er ikke koblet til selskapet';
+// The mismatch headline in parts, so the view can set the key word in
+// red while the DOM stays one sentence (stampOf in view/trust-view.ts).
+export const MISMATCH_PARTS = { pre: 'Nettstedet er', word: 'ikke koblet', rest: 'til selskapet' } as const;
+export const MISMATCH_HEADLINE = `${MISMATCH_PARTS.pre} ${MISMATCH_PARTS.word} ${MISMATCH_PARTS.rest}`;
 const ANYONE_CAN_PASTE = 'Hvem som helst kan skrive et org.nr på siden sin.';
 
 // «Konkurs siden 26. aug. 2026», «Slettet 15. sep. 2026»,

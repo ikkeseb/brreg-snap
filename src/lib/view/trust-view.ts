@@ -19,7 +19,7 @@ import { konsernLine, type Konsern } from '../konsern.js';
 import { keyFigures, latestRegnskap, regnskapGap } from '../regnskap.js';
 import { isHostDerived, type ResolutionMethod } from '../resolution-method.js';
 import { findRoleHolder } from '../roller.js';
-import { deriveAnswer, MISMATCH_HEADLINE } from '../trust/answer.js';
+import { deriveAnswer, MISMATCH_HEADLINE, MISMATCH_PARTS } from '../trust/answer.js';
 import { deriveEndringer } from '../trust/endringer.js';
 import { deriveKobling } from '../trust/kobling.js';
 import { deriveMerknader } from '../trust/merknader.js';
@@ -224,14 +224,11 @@ function eyebrowFor(method: ResolutionMethod | undefined, host: string | undefin
 // The headline split around its key word, so the DOM stays one
 // sentence («Nettstedet er ikke koblet til selskapet») while the word
 // alone is set in red (same case, same size: «ikke koblet», «Konkurs»).
-const MISMATCH_PRE = 'Nettstedet er';
-const MISMATCH_WORD = 'ikke koblet';
-const MISMATCH_REST = 'til selskapet';
 const STAMP_WORDS = ['Konkurs', 'Slettet', 'Tvangsavvikling'];
 
 export function stampOf(headline: string): StampText {
   if (headline === MISMATCH_HEADLINE) {
-    return { pre: MISMATCH_PRE, word: MISMATCH_WORD, rest: MISMATCH_REST };
+    return { ...MISMATCH_PARTS };
   }
   for (const word of STAMP_WORDS) {
     if (headline.startsWith(word)) {
