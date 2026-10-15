@@ -7,7 +7,7 @@
 // reader is not told are lookups, and nothing leaves the page.
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DIST_ROOT } from '../scripts/manifest-invariants.mjs';
+import { DIST_ROOT } from '../scripts/lib/manifest-invariants.mjs';
 import { COPY } from '../src/lib/view/copy.js';
 import { fakeBrowser, type FakeBrowser } from './helpers/fake-browser.js';
 

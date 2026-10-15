@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { findCodegen } from '../scripts/codegen-scan.mjs';
+import { findCodegen } from '../scripts/lib/codegen-scan.mjs';
 
 // verify:dist's check for runtime code generation in the built bundles
 // (AGENTS.md § Security constraints). It reads the AST, so a mention in

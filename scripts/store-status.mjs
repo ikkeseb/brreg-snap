@@ -25,7 +25,7 @@ import {
   parseUpdateCheck,
   readCwsItemId,
   readZip,
-} from './store-status-core.mjs';
+} from './lib/store-status.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = new Set(process.argv.slice(2));
@@ -49,7 +49,7 @@ const CHROME_PRODVERSION = '999.0';
 const TIMEOUT_MS = 30_000;
 const USER_AGENT = 'brreg-snap-store-status (+https://github.com/ikkeseb/brreg-snap)';
 
-/** @typedef {import('./store-status-core.mjs').Verdict} Verdict */
+/** @typedef {import('./lib/store-status.mjs').Verdict} Verdict */
 /** @type {{ label: string, value: string, status?: string }[]} */
 const rows = [];
 /** @type {{ label: string, verdict: Verdict }[]} */
@@ -77,7 +77,7 @@ function git(gitArgs) {
 /**
  * @param {string} name
  * @param {string} prefix  the part before the version, e.g. "v"
- * @returns {import('./store-status-core.mjs').TagInfo & { commit: string }}
+ * @returns {import('./lib/store-status.mjs').TagInfo & { commit: string }}
  */
 function tagInfo(name, prefix) {
   const [date, commit] = git(['log', '-1', '--format=%cI %H', `${name}^{commit}`]).split(' ');

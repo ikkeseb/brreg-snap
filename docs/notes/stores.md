@@ -1,7 +1,7 @@
 # Stores: what they serve and what they change
 
 Source: `scripts/store-status.mjs` (network, git, report),
-`scripts/store-status-core.mjs` (pure rules, tested in
+`scripts/lib/store-status.mjs` (pure rules, tested in
 `tests/store-status.test.ts`), `.github/workflows/store-status.yml`.
 
 <!-- SECTION: store-status-probe -->

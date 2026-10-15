@@ -178,5 +178,5 @@ unzip -l web-ext-artifacts/brreg-snap-<version>.zip
 Expected top-level entries: `manifest.json`, `background/`,
 `popup/`, `details/`, `welcome/`, `chunks/`, `icons/`, `fonts/`.
 `pnpm verify` (`verify:dist`) fails on any root entry outside
-`DIST_ROOT` in `scripts/manifest-invariants.mjs`, which also allows an
+`DIST_ROOT` in `scripts/lib/manifest-invariants.mjs`, which also allows an
 `assets/` directory.
