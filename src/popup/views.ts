@@ -274,8 +274,8 @@ export function paintEmpty(roots: Roots, data: EmptyPaint, handlers: EmptyHandle
       text = COPY.emptyNoneText;
       break;
     default:
+      // The head names the register; the placeholder says what to type.
       lead = { head: COPY.searchHead };
-      text = COPY.searchText;
       break;
   }
   const view = renderSearchView(

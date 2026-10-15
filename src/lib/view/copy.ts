@@ -273,7 +273,6 @@ export const COPY = {
   emptyNone: (site: string) => `Du valgte «Ingen av disse» for ${site}`,
   emptyNoneText: 'Søk etter riktig selskap.',
   searchHead: 'Søk i Brønnøysundregistrene',
-  searchText: 'Navn eller org.nr.',
   recents: 'Nylig sett',
   results: 'Treff',
   noHits: 'Ingen treff.',
