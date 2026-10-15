@@ -101,6 +101,12 @@ describe('call: a throttled request (HTTP 429)', () => {
     expect(sleep).toHaveBeenCalledTimes(3);
   });
 
+  it('reads a Retry-After HTTP-date against the injected clock', async () => {
+    const { fetch, sleep } = setup([{ status: 429, headers: { 'Retry-After': new Date(NOW + 42_000).toUTCString() } }, { json: {} }]);
+    await call(fetch, 'GET', url, { sleep, now: () => NOW });
+    expect(sleep.mock.calls).toEqual([[42_000]]);
+  });
+
   it('waits a default 30 s when the 429 names no wait', async () => {
     const { fetch, sleep } = setup([{ status: 429 }, { json: {} }]);
     await call(fetch, 'GET', url, { sleep });
@@ -185,6 +191,21 @@ describe('publishAmo', () => {
       jtis.add(claims.jti);
     }
     expect(jtis.size).toBe(calls.length);
+  });
+
+  it('waits out a throttled request on the injected clock and sleep', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const sleep = vi.fn((_ms: number) => Promise.resolve());
+    const { fetch, calls } = fakeFetch([
+      { status: 201, json: { uuid: 'u', processed: true, valid: true } },
+      { status: 429, headers: { 'Retry-After': new Date(NOW + 20_000).toUTCString() } },
+      { status: 201, json: { id: 7 } },
+      { json: {} },
+    ]);
+    await publishAmo({ ...base, fetch, dryRun: false, sleep });
+    expect(sleep.mock.calls).toEqual([[20_000]]);
+    expect(calls[2]!.body).toBe(calls[1]!.body);
+    expect(calls[2]!.headers.Authorization).not.toBe(calls[1]!.headers.Authorization);
   });
 
   it('stops before creating a version when validation fails', async () => {
@@ -342,6 +363,21 @@ describe('syncAmoListing', () => {
     expect(JSON.parse(calls[3]!.body as string)).toEqual(listing.policy);
   });
 
+  it('waits out a throttled privacy-policy PATCH on the injected sleep (the 55 s AMO named)', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const sleep = vi.fn((_ms: number) => Promise.resolve());
+    const { fetch, calls } = fakeFetch([
+      { json: live },
+      { json: { privacy_policy: null } },
+      { json: {} },
+      { status: 429, json: { detail: 'Request was throttled. Expected available in 55 seconds.' } },
+      { json: {} },
+    ]);
+    expect(await syncAmoListing({ ...base, fetch, dryRun: false, sleep })).toEqual({ status: 'synced' });
+    expect(sleep.mock.calls).toEqual([[55_000]]);
+    expect(calls.map((c) => c.method)).toEqual(['GET', 'GET', 'PATCH', 'PATCH', 'PATCH']);
+  });
+
   it('dry run: plan and diff from public GETs only, no write, no credential', async () => {
     for (const env of [base.env, {}]) {
       const { fetch, calls } = fakeFetch([{ json: live }, { json: { privacy_policy: null } }]);
@@ -416,6 +452,21 @@ describe('publishCws', () => {
     now: () => NOW,
     ...quiet,
   };
+
+  it('waits out a throttled request on the injected clock and sleep', async () => {
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    const sleep = vi.fn((_ms: number) => Promise.resolve());
+    const { fetch, calls } = fakeFetch([
+      { json: { access_token: 'at-1', expires_in: 3600 } },
+      { json: { uploadState: 'SUCCEEDED' } },
+      { status: 429, headers: { 'Retry-After': new Date(NOW + 9_000).toUTCString() } },
+      { json: { state: 'PENDING_REVIEW' } },
+    ]);
+    const res = await publishCws({ ...base, env: { ...config, CWS_SERVICE_ACCOUNT_JSON: sa }, fetch, dryRun: false, sleep });
+    expect(res).toEqual({ status: 'submitted', state: 'PENDING_REVIEW' });
+    expect(sleep.mock.calls).toEqual([[9_000]]);
+    expect(calls).toHaveLength(4);
+  });
 
   it('service account: token, upload, poll while in progress, publish', async () => {
     const { fetch, calls } = fakeFetch([

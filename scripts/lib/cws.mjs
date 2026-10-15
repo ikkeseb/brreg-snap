@@ -56,6 +56,10 @@ export async function publishCws(o) {
   const log = o.log ?? console.log;
   const now = o.now ?? Date.now;
   const sleep = o.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+  // Every request shares the injected clock, so a throttled one (HTTP 429)
+  // waits on the same sleep as the polling.
+  /** @type {(method: string, url: string, init?: Parameters<typeof call>[3]) => ReturnType<typeof call>} */
+  const send = (method, url, init) => call(o.fetch, method, url, { ...init, sleep, now });
   const pollMs = o.pollMs ?? 5000;
   const timeoutMs = o.timeoutMs ?? 10 * 60_000;
   const { kind, missing } = cwsAuthKind(o.env);
@@ -116,7 +120,7 @@ export async function publishCws(o) {
   }
   let token;
   try {
-    token = await call(o.fetch, 'POST', TOKEN_URL, {
+    token = await send('POST', TOKEN_URL, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: form.toString(),
     });
@@ -131,13 +135,13 @@ export async function publishCws(o) {
 
   // 1. Upload.
   log(`  1. upload ${described}`);
-  const up = await call(o.fetch, 'POST', `${API}/upload/v2/${item}:upload`, { headers: auth, body: o.pkg.bytes });
+  const up = await send('POST', `${API}/upload/v2/${item}:upload`, { headers: auth, body: o.pkg.bytes });
   let state = String(up.uploadState ?? '');
   const deadline = now() + timeoutMs;
   while (state === 'IN_PROGRESS' || state === 'UPLOAD_IN_PROGRESS') {
     if (now() > deadline) throw new Error(`CWS upload still in progress after ${timeoutMs / 60_000} min`);
     await sleep(pollMs);
-    const st = await call(o.fetch, 'GET', `${API}/v2/${item}:fetchStatus`, { headers: auth });
+    const st = await send('GET', `${API}/v2/${item}:fetchStatus`, { headers: auth });
     state = String(st.lastAsyncUploadState ?? '');
   }
   if (state !== 'SUCCEEDED') throw new Error(`CWS upload ended in state ${state || '(none)'}: ${JSON.stringify(up)}`);
@@ -147,7 +151,7 @@ export async function publishCws(o) {
   log(`  1. uploaded (${state}${up.crxVersion ? `, version ${up.crxVersion}` : ''})`);
 
   // 2. Submit for review; published when it passes.
-  const pub = await call(o.fetch, 'POST', `${API}/v2/${item}:publish`, {
+  const pub = await send('POST', `${API}/v2/${item}:publish`, {
     headers: { ...auth, 'Content-Type': 'application/json' },
     body: JSON.stringify(publishBody),
   });
