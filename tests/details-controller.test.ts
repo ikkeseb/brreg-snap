@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { CompanyData } from '../src/lib/company-load.js';
 import type { Candidate } from '../src/lib/hostname-search.js';
 import type { PanelView, TabFields } from '../src/lib/panel-follow.js';
-import type { RejectOutcome } from '../src/lib/ui/picker.js';
+import type { RejectOutcome } from '../src/lib/ui/reject-flow.js';
 import type { TabContext } from '../src/lib/ui/resolve-tab.js';
 import { createPanelController, PANEL_LOAD_OPTIONS, type ControllerDeps } from '../src/details/controller.js';
 import { createPanelHistory, type HistoryWindow } from '../src/details/history.js';

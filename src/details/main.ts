@@ -28,7 +28,7 @@ import {
 import { setTrustBadge } from '../lib/platform/badge.js';
 import { isFirefox } from '../lib/platform/engine.js';
 import { createTabWatcher } from '../lib/tab-sync.js';
-import { rejectChoice } from '../lib/ui/picker.js';
+import { rejectChoice } from '../lib/ui/reject-flow.js';
 import { getRecent, pushRecent } from '../lib/ui/recent.js';
 import { resolveTabContext } from '../lib/ui/resolve-tab.js';
 import { liveRegionOf } from '../lib/view/components/live.js';
