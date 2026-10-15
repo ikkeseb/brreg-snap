@@ -255,6 +255,7 @@
 .ident__leaders b { color: var(--ink); }
 /* «Avdeling: <navn> (org.nr)»: the orgnr looked up was a branch */
 .ident__note { margin-top: 4px; color: var(--ink-2); }
+.ident__note b { color: var(--ink); }
 /* panel: quiet registry flags + «Kopier sammendrag», one line at ≥ 340 px;
    the button sits right whether or not there are flags before it */
 .ident__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 2px 12px; margin-top: 6px; }

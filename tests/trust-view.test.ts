@@ -719,7 +719,7 @@ describe('buildTrustView — the panel dossier', () => {
     const v3 = view({
       company: company(enhetEquinor, { avdeling: underenhetAlta }),
     });
-    expect(v3.identity.avdeling).toMatch(/^Avdeling: .+ \(973\u00a0160\u00a0834\)$/);
+    expect(v3.identity.avdeling).toEqual({ name: underenhetAlta.navn, orgnr: '973\u00a0160\u00a0834' });
   });
 });
 

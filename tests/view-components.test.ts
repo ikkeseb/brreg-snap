@@ -249,7 +249,7 @@ describe('identity', () => {
         eyebrow: 'Org.nr funnet i sidetittelen',
         meta: 'Allmennaksjeselskap · Stavanger',
         leaders: [],
-        avdeling: 'Avdeling: EQUINOR ASA AVD ALTA (973 160 834)',
+        avdeling: { name: 'EQUINOR ASA AVD ALTA', orgnr: '973 160 834' },
       },
       copyHandlers(),
     );
@@ -264,7 +264,12 @@ describe('identity', () => {
     expect(rest.querySelector('.nw')?.textContent).toBe('Stavanger brreg.no ↗');
     expect(rest.querySelector('.nw a.link')).not.toBeNull();
     expect(div.querySelector('.ident__leaders')).toBeNull();
-    expect(div.querySelector('.ident__note')?.textContent).toMatch(/^Avdeling: /);
+    // The branch named after the company shown: its prefix recedes, the
+    // text stays the full sentence.
+    const note = div.querySelector('.ident__note')!;
+    expect(note.textContent).toBe('Avdeling: EQUINOR ASA AVD ALTA (973 160 834)');
+    expect(note.querySelector('b')?.textContent).toBe('EQUINOR ASA AVD ALTA');
+    expect(note.querySelector('b > .name-prefix')?.textContent).toBe('EQUINOR ASA ');
   });
 });
 

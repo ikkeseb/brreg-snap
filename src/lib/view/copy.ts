@@ -30,7 +30,10 @@ export const COPY = {
   dagligLeder: 'Daglig leder',
   styreleder: 'Styreleder',
   dagligLederOgStyreleder: 'Daglig leder og styreleder',
-  avdeling: (navn: string, spaced: string) => `Avdeling: ${navn} (${spaced})`,
+  // «Avdeling: DNB BANK ASA AVD ALTA (973 160 834)», the parent's
+  // prefix muted (identity.ts).
+  avdelingLabel: 'Avdeling: ',
+  avdelingOrgnr: (spaced: string) => ` (${spaced})`,
   copySummary: 'Kopier sammendrag',
   summaryCopied: 'Sammendrag kopiert',
 
