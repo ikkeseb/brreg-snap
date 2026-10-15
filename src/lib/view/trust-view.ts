@@ -457,17 +457,19 @@ function factsLine(signals: Signal[]): TextPart[] {
 }
 
 // «Morselskap i et konsern med <b>55</b> selskaper», «Del av konsern:
-// <b>EQUINOR ASA</b> (100 %)». Same words as konsernLine.
+// <b>EQUINOR ASA</b> (100 %)». Same words as konsernLine. The count and
+// «selskaper» stay on one line.
 export function konsernParts(k: Konsern): TextPart[] {
   const line = konsernLine(k);
-  const strong =
-    k.role === 'top' ? (k.groupSize + 1).toLocaleString('nb-NO') : k.top.navn;
+  const top = k.role === 'top';
+  const strong = top ? (k.groupSize + 1).toLocaleString('nb-NO') : k.top.navn;
+  const glue = top ? { nowrap: true } : {};
   const at = line.indexOf(strong);
   if (at < 0) return [{ text: line }];
   const parts: TextPart[] = [];
   if (at > 0) parts.push({ text: line.slice(0, at) });
-  parts.push({ text: strong, strong: true });
-  if (at + strong.length < line.length) parts.push({ text: line.slice(at + strong.length) });
+  parts.push({ text: strong, strong: true, ...glue });
+  if (at + strong.length < line.length) parts.push({ text: line.slice(at + strong.length), ...glue });
   return parts;
 }
 

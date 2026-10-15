@@ -729,6 +729,17 @@ describe('view helpers', () => {
     expect(konsernParts(k).map((p) => p.text).join('')).toBe(konsernLine(k));
   });
 
+  it('konsernParts keeps the group count and «selskaper» on one line', () => {
+    const k = deriveKonsern(konsernEquinor, '923609016')!;
+    expect(k.role).toBe('top');
+    const parts = konsernParts(k);
+    expect(parts.filter((p) => p.nowrap).map((p) => p.text)).toEqual([
+      (k.groupSize + 1).toLocaleString('nb-NO'),
+      ' selskaper',
+    ]);
+    expect(parts[0]!.nowrap).toBeUndefined();
+  });
+
   it('title-cases an all-caps place and leaves mixed case alone', () => {
     expect(titleCasePlace('STAVANGER')).toBe('Stavanger');
     expect(titleCasePlace('MO I RANA')).toBe('Mo i Rana');

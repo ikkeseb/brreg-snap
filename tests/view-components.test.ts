@@ -16,7 +16,7 @@ import {
   buildErrorAnswer,
 } from '../src/lib/view/components/answer.js';
 import { COPY_FEEDBACK_MS } from '../src/lib/view/components/copy-feedback.js';
-import { appendParts, glyph, icon } from '../src/lib/view/components/dom.js';
+import { appendName, appendParts, glyph, icon } from '../src/lib/view/components/dom.js';
 import { renderFooter } from '../src/lib/view/components/footer.js';
 import { renderIdentity } from '../src/lib/view/components/identity.js';
 import { buildKonsernRow } from '../src/lib/view/components/konsern.js';
@@ -78,6 +78,24 @@ describe('dom helpers', () => {
     expect(p.textContent).toBe('omsetning 68,0 mrd USD · resultat -1,2 mill kr');
     expect(p.querySelector('b.nw')?.textContent).toBe('68,0 mrd USD');
     expect(p.querySelector('.num--neg')?.textContent).toBe('-1,2 mill kr');
+  });
+
+  it('appendName keeps a legal-form suffix on the line of the word before it', () => {
+    const write = (name: string, parent?: string) => {
+      const b = document.createElement('b');
+      appendName(b, name, parent);
+      return { text: b.textContent, glued: [...b.querySelectorAll('.nw')].map((n) => n.textContent) };
+    };
+    expect(write('OPULENS NÆRING 4 AS')).toEqual({ text: 'OPULENS NÆRING 4 AS', glued: ['4 AS'] });
+    expect(write('tidligere LUNDE FASADE AS')).toEqual({ text: 'tidligere LUNDE FASADE AS', glued: ['FASADE AS'] });
+    expect(write('EQUINOR ASA')).toEqual({ text: 'EQUINOR ASA', glued: ['EQUINOR ASA'] });
+    // Under its parent: the muted prefix, then the glued tail.
+    expect(write('EQUINOR ENERGY AS', 'EQUINOR ASA')).toEqual({ text: 'EQUINOR ENERGY AS', glued: ['ENERGY AS'] });
+    // No legal form, a lone word, or a pair too long to hold a narrow column: no glue.
+    expect(write('AVD CCB SOTRA').glued).toEqual([]);
+    expect(write('Kari Nordmann').glued).toEqual([]);
+    expect(write('AS').glued).toEqual([]);
+    expect(write('PRICEWATERHOUSECOOPERS AS').glued).toEqual([]);
   });
 });
 
@@ -629,6 +647,10 @@ describe('picker', () => {
     expect(rows[0]!.querySelector('.pick__name')?.textContent).toBe('DNB BANK ASA');
     expect(rows[0]!.querySelector('.evidence')?.className).toBe('evidence evidence--strong');
     expect(rows[0]!.querySelector('.pick__right')?.textContent).toContain('ansatte');
+    // Every row: the chip first (on the name's line), the count or status under it.
+    for (const row of rows.slice(0, 2)) {
+      expect(row.querySelector('.pick__right')?.firstElementChild?.classList.contains('evidence')).toBe(true);
+    }
     expect(rows[1]!.querySelector('.evidence')?.className).toBe('evidence evidence--weak');
     expect(rows[1]!.querySelector('.status-mark')?.textContent).toBe('Konkurs');
     expect(rows[2]!.textContent).toBe(`0${COPY.none}`);

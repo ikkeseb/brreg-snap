@@ -136,7 +136,7 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 | `personer.ts` | `buildPersoner(groups \| 'failed', {onDrill})`, `buildEntityRow(name, note, onOpen, {nameNode})` | `section > div.person(--gone) > b + span.person__role`; `button.entity-row > b + small + svg.icon` |
 | `okonomi.ts` | `buildOkonomi(OkonomiView)` | `section[data-tone] > div.fig-head > h2 + span.cap` · `p.fig-status` · `div.figs > h3.fig-group + dl > div.fig-row(--total)[data-tone] > dt + dd > span.fig-row__unit` · `div.equity > .equity__track[aria-hidden] > .equity__fill` (`--share`) + `.equity__legend` (read: the only place Gjeld is said) · `div.trend > h3.fig-group.trend__head (+ `span.trend__cur` when no head above names the currency) + table.trend__table[aria-labelledby] > thead (years) + tbody > tr > th[scope=row][aria-label] (label, a space, `span.fig-row__unit`) + td (number only, `.num--neg`, `span.trend__comma`; `[title][aria-label]` on a «<0,1» cell)` + `p.trend__read` × rows (§ okonomi-trend) · `p.honest`. With no latest figures the section is `section__text` lines, then the same trend and honest line · Dokumenter: `div.doc-row > .years`, `div.ext-row` |
 | `enheter.ts` | `buildEnheter(EnheterView, parentName, {onDrill, copy, announce})`, `KONSERN_CHILDREN_SHOWN` = 20 | Konsern: `ul.konsern-path > li` (`--depth`) with `.entity-row(--self)`; `p.konsern-sub.cap` + `ul > li > button.entity-row` (hidden past 20, `p.show-all`). Underenheter: `p.units-count`, `ul > li.unit(--gone) > span > .unit__name + .unit__meta` + `button.orgnr.orgnr--sm` |
-| `picker.ts` | `renderPicker(container, {site, candidates}, {onPick, onNone, onSearchSelect, announce})` → `{heading, firstRow, input, search}` | `div.pick-head > h1 + p`; `ol.picker > li > button.pick[aria-keyshortcuts] > span.kbd + span > .pick__name + .pick__sub + span.pick__right > (.status-mark \| «N ansatte») + span.evidence(--strong hjemmeside \| --weak underside / navnetreff)`; `button.pick.pick--none > span.kbd + span.pick__label`; `div.pick-search > label.field-label + label.search--lg` (empty: the rows already are the search for the site's name, and a filled box with no hits under it reads as a search that found nothing). Digit keys 1–4 / 0 on one document listener per document (§ lifecycle below). `pickerHead` words the head by what the rows are: no row with the site registered («Fant ikke selskapet bak …»), one row that has it («Står dette selskapet bak …?»), several that have it, or one among name matches («Mulige selskaper bak …»); every evidence chip has a `title` |
+| `picker.ts` | `renderPicker(container, {site, candidates}, {onPick, onNone, onSearchSelect, announce})` → `{heading, firstRow, input, search}` | `div.pick-head > h1 + p`; `ol.picker > li > button.pick[aria-keyshortcuts] > span.kbd + span > .pick__name + .pick__sub + span.pick__right > span.evidence(--strong hjemmeside \| --weak underside / navnetreff) + (.status-mark \| «N ansatte»)` (the chip on the name's line in every row, what the row adds under it); `button.pick.pick--none > span.kbd + span.pick__label`; `div.pick-search > label.field-label + label.search--lg` (empty: the rows already are the search for the site's name, and a filled box with no hits under it reads as a search that found nothing). Digit keys 1–4 / 0 on one document listener per document (§ lifecycle below). `pickerHead` words the head by what the rows are: no row with the site registered («Fant ikke selskapet bak …»), one row that has it («Står dette selskapet bak …?»), several that have it, or one among name matches («Mulige selskaper bak …»); every evidence chip has a `title` |
 | `search.ts` | `buildSearchField` (one placeholder for every field, the masthead's too: «Navn eller org.nr»; no engine clear «×»; Escape is in the a11y contract below), `buildEntryRow`, `searchPainter`, `buildListSection(head)`, `renderRecents`, `renderSearchView(container, data, handlers)` | `div.empty > h1 + p + label.search--lg + p.hint`; a failed host check (degraded) leads with the error band instead of the h1 (its head is the answer; popup: focus lands on its h2), then one line «Søk etter et selskap i stedet.» and the field, in the panel the same band over «… i feltet over …»; `section.section > h3.section__head + ul.results \| ul > li > button.recent > span.recent__name > b (+ .status-mark, .recent__sub) + span.recent__on`; `li.results__note`; `button.back > svg.icon + b` |
 | `skeleton.ts` | `buildSkeleton(surface, {kobling})`, `renderSkeleton` | the loaded geometry with real labels and `.sk.sk--*` values, `aria-hidden`; `main` is `inert` + `aria-busy` meanwhile. The panel's ledger has the Kobling row only when the result will (`koblingInPlay`, `src/lib/trust/kobling.ts`); the popup keeps five rows (næring fills in). The popup paints it as soon as it has read the tab's host, before the resolution cascade's network round trip |
 | `live.ts` | `liveRegionOf(el)` → `{el, announce}`, `focusElement(target)` | the one `p.sr-only[aria-live=polite]` per document; `focusElement` gives a heading `tabindex=-1` |
@@ -315,6 +315,13 @@ word pokes out of a line without any scroll overflow).
   its own (at least one word that is not a legal form): «EQUINOR AS»
   under «EQUINOR ASA» keeps its whole name. The text stays the full
   name; only the node shape changes.
+- **No orphan at a line break.** A legal-form suffix stays with the
+  word before it wherever a name is written through `appendName`
+  (`.nw`, only for a pair of at most 16 characters so a long word can
+  still wrap), the konsern row's «55 selskaper» stays together, an
+  underenhet's «postnr sted» is joined by no-break spaces, the PDF
+  years' «·» trails the year before it so no line starts with one, and
+  a footer row's second item stays right when it wraps.
 - **Konsern rows are not underlined by default.** The chevron already
   says «drill in»; the underline appears on hover and keyboard focus,
   and the focus ring stays.
@@ -406,13 +413,13 @@ One sentence per row, read for the period the heading names:
   underskudd begge år, like stort / omtrent like stort / større sist /
   mindre sist», or «alle år, størst i 2024» for a deep middle); one
   clean sign change («snudde fra underskudd til overskudd i 2025»; the
-year only when the held years either side are back to back, else no
-year);
-  profit at both ends with a loss between («opp 12 %, men underskudd i
+  year only when the held years either side are back to back, else no
+  year); profit at both ends with a loss between («opp 12 %, men underskudd i
   2024»); otherwise the loss years («Årsresultat: underskudd i 2023 og
   2025.»).
 
-The honest line under it takes the trend's span («Åpne data dekker
+The honest line under it, a plain sentence like the trend's (no glyph:
+it has no tone), takes the trend's span («Åpne data dekker
 2023–2024.»); when the Enhet names a newer filed year than the API
 holds, that stays in the status line and the PDF note reads «Andre
 år» instead of «Eldre år».

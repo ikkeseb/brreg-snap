@@ -8,7 +8,7 @@
 
 import { COPY } from '../copy.js';
 import type { PersonGroup, PersonItem } from '../dossier-view.js';
-import { button, el, icon, section } from './dom.js';
+import { appendName, button, el, icon, section } from './dom.js';
 import type { DrillHandlers } from './oversikt.js';
 
 export function buildEntityRow(
@@ -20,7 +20,7 @@ export function buildEntityRow(
   const btn = button('entity-row');
   const b = el('b');
   if (opts.nameNode) opts.nameNode(b);
-  else b.textContent = name;
+  else appendName(b, name);
   btn.appendChild(b);
   if (note) btn.appendChild(el('small', undefined, note));
   btn.appendChild(icon('i-chev'));
@@ -34,7 +34,9 @@ function buildItem(item: PersonItem, handlers: DrillHandlers): HTMLElement {
     return buildEntityRow(item.name, item.role, () => handlers.onDrill(orgnr));
   }
   const row = el('div', item.gone ? 'person person--gone' : 'person');
-  row.appendChild(el('b', undefined, item.name));
+  const name = el('b');
+  appendName(name, item.name);
+  row.appendChild(name);
   if (item.role) row.appendChild(el('span', 'person__role', item.role));
   return row;
 }

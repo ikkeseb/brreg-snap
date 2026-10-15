@@ -466,7 +466,13 @@ function unitMeta(u: Underenhet): { meta: string; gone: boolean } {
     const date = formatDateNo(gone) ?? gone;
     return { meta: u.slettedato ? COPY.slettet(date) : COPY.nedlagt(date), gone: true };
   }
-  const addr = addressLines(u.beliggenhetsadresse).join(', ');
+  // «postnr sted» is one unit: never «5347» at a line end and
+  // «Ågotnes» on the next.
+  const a = u.beliggenhetsadresse;
+  const postal = a ? postalLine(a) : '';
+  const addr = addressLines(a)
+    .map((line) => (line === postal ? line.replace(/ /g, NBSP) : line))
+    .join(', ');
   const count = typeof u.antallAnsatte === 'number' && u.antallAnsatte > 0
     ? COPY.ansatte(formatCount(u.antallAnsatte)!.replace(/ /g, NBSP))
     : undefined;

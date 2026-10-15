@@ -13,7 +13,7 @@
 
 import { COPY } from '../copy.js';
 import type { EndringView, MerknadView } from '../trust-view.js';
-import { el, glyph } from './dom.js';
+import { appendName, el, glyph } from './dom.js';
 
 export function buildNotes(
   merknader: readonly MerknadView[],
@@ -64,7 +64,7 @@ export function buildNotes(
       text.appendChild(el('b', undefined, e.title));
       if (e.sub) {
         text.appendChild(el('br'));
-        text.append(e.sub);
+        appendName(text, e.sub);
       }
       li.appendChild(text);
       list.appendChild(li);

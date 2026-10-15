@@ -461,6 +461,7 @@
 .shed-2 .ident__eyebrow { display: none; }
 .shed-3 .ledger-row[data-key="kobling"][data-tone="neutral"] .ledger-row__note { display: none; }
 .foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 2px 12px; }
+.foot__row > * + * { margin-left: auto; }                /* still right when it wraps */
 .foot__row + .foot__row { margin-top: 3px; }
 .foot :is(a, button) {
   padding: 0; border: 0; background: none; font: inherit; color: var(--ink-2); cursor: pointer;
@@ -618,16 +619,16 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .trend__table tbody tr:last-child th, .trend__table tbody tr:last-child td { border-bottom-color: var(--ink); }
 .trend__read { margin-top: 8px; color: var(--ink-2); }
 .trend__read + .trend__read { margin-top: 2px; }
-.honest { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 0 10px; margin-top: 14px; color: var(--ink-2); }
-.honest .glyph { margin-top: 2.5px; }
+.honest { margin-top: 8px; color: var(--ink-2); }
 .doc-row { padding: 8px 0 9px; border-bottom: 1px solid var(--rule); }
 .doc-row__label { display: block; color: var(--ink-2); }
 .years { display: flex; flex-wrap: wrap; gap: 4px 0; margin-top: 3px; }
 .years a { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
-.years a + a::before { content: "·"; display: inline-block; padding: 0 9px; color: var(--ink-3); font-weight: 400; }
+/* the «·» trails the item before it, like punctuation: a wrapped line
+   never starts with one */
+.years > :not(:last-child)::after { content: "·"; display: inline-block; padding: 0 9px; color: var(--ink-3); font-weight: 400; }
 .years .years__more { font-weight: 400; color: var(--ink-2); }
 .years button.years__more { padding: 0; border: 0; background: none; cursor: pointer; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
-.years button.years__more::before { content: "·"; display: inline-block; padding: 0 9px; color: var(--ink-3); }
 .ext-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--rule); }
 .ext-row a { font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
 .ext-row span { color: var(--ink-3); }

@@ -13,7 +13,7 @@ import type { Candidate } from '../../hostname-search.js';
 import { MAX_PICKER_CANDIDATES } from '../../hostname-search.js';
 import type { ManualSearchController } from '../../ui/manual-search.js';
 import { COPY } from '../copy.js';
-import { button, el } from './dom.js';
+import { appendName, button, el } from './dom.js';
 import { buildSearchField, buildStatusMark, statusMarkFor, buildListSection, searchPainter } from './search.js';
 import { attachManualSearch } from '../../ui/manual-search.js';
 
@@ -52,17 +52,15 @@ function buildRow(
   btn.setAttribute('aria-keyshortcuts', key);
   btn.appendChild(el('span', 'kbd', key));
   const text = el('span');
-  text.appendChild(el('span', 'pick__name', cand.navn));
+  const name = el('span', 'pick__name');
+  appendName(name, cand.navn);
+  text.appendChild(name);
   const naering = cand.naeringskode1?.beskrivelse;
   if (naering) text.appendChild(el('span', 'pick__sub', naering));
   btn.appendChild(text);
+  // One arrangement for every row: the evidence chip on the name's
+  // line, the status mark or the head count under it.
   const right = el('span', 'pick__right');
-  const status = statusMarkFor(cand);
-  if (status) {
-    right.appendChild(buildStatusMark(status));
-  } else if (typeof cand.antallAnsatte === 'number' && cand.antallAnsatte > 0) {
-    right.append(COPY.pickAnsatte(formatCount(cand.antallAnsatte)!.replace(/ /g, '\u00a0')));
-  }
   // Only the site itself is strong evidence; a page or subdomain on it
   // (an artist page on nrk.no) reads as weak as a name match.
   const strong = cand.evidence === 'hjemmeside';
@@ -81,6 +79,12 @@ function buildRow(
       ? COPY.evidencePageTitle(site)
       : COPY.evidenceWeakTitle(site);
   right.appendChild(tag);
+  const status = statusMarkFor(cand);
+  if (status) {
+    right.appendChild(buildStatusMark(status));
+  } else if (typeof cand.antallAnsatte === 'number' && cand.antallAnsatte > 0) {
+    right.append(COPY.pickAnsatte(formatCount(cand.antallAnsatte)!.replace(/ /g, '\u00a0')));
+  }
   btn.appendChild(right);
   btn.addEventListener('click', onPick);
   li.appendChild(btn);

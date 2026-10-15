@@ -13,7 +13,7 @@ import {
 import type { RecentEntry } from '../../ui/recent.js';
 import type { SearchHit } from '../../../types/brreg.js';
 import { COPY } from '../copy.js';
-import { button, el, glyph, icon, uniqueId } from './dom.js';
+import { appendName, button, el, glyph, icon, uniqueId } from './dom.js';
 
 const NBSP = '\u00a0';
 const spaced = (digits: string): string => formatOrgnr(digits).replace(/ /g, NBSP);
@@ -82,7 +82,9 @@ export function buildEntryRow(
   const li = el('li');
   const btn = button('recent');
   const left = el('span', 'recent__name');
-  left.appendChild(el('b', undefined, entry.name));
+  const name = el('b');
+  appendName(name, entry.name);
+  left.appendChild(name);
   if (entry.status) left.appendChild(buildStatusMark(entry.status));
   if (entry.sub) left.appendChild(el('span', 'recent__sub', entry.sub));
   btn.appendChild(left);

@@ -79,12 +79,10 @@ function buildTrend(trend: TrendView): HTMLElement {
   return wrap;
 }
 
+// A plain sentence like the trend's: it says what the data covers, it
+// carries no tone.
 function buildHonest(text: string): HTMLParagraphElement {
-  const honest = el('p', 'honest');
-  honest.dataset.tone = 'neutral';
-  honest.appendChild(glyph('neutral'));
-  honest.appendChild(el('span', undefined, text));
-  return honest;
+  return el('p', 'honest', text);
 }
 
 function buildFigures(view: OkonomiView): HTMLElement {

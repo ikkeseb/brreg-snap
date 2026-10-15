@@ -26,7 +26,9 @@ function buildKonsern(k: KonsernSection, parentName: string, handlers: EnheterHa
     li.style.setProperty('--depth', String(Math.min(depth, 4)));
     if (ref.self) {
       const row = el('div', 'entity-row entity-row--self');
-      row.appendChild(el('b', undefined, ref.navn));
+      const name = el('b');
+      appendName(name, ref.navn);
+      row.appendChild(name);
       row.appendChild(el('small', undefined, ref.note));
       li.appendChild(row);
     } else {

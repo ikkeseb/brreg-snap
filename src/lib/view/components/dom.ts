@@ -160,12 +160,25 @@ function mutedPrefix(name: string, parentName: string | undefined): string | und
   return undefined;
 }
 
-export function appendName(container: HTMLElement, name: string, parentName?: string): void {
-  const prefix = mutedPrefix(name, parentName);
-  if (prefix) {
-    container.appendChild(el('span', 'name-prefix', prefix));
-    container.append(name.slice(prefix.length));
+// A legal-form suffix never sits alone on a line: «OPULENS NÆRING 4
+// AS» keeps «4 AS» together in a `.nw` span. Only a short pair is
+// glued, so a long word before the suffix («PRICEWATERHOUSECOOPERS
+// AS») can still wrap rather than overflow a narrow column.
+const GLUE_MAX = 16;
+
+function appendGlued(container: HTMLElement, text: string): void {
+  const m = /^(.*\s)?(\S+\s+(\S+))$/.exec(text);
+  if (!m || m[2]!.length > GLUE_MAX || !LEGAL_FORMS.has(m[3]!.toUpperCase())) {
+    container.append(text);
     return;
   }
-  container.append(name);
+  if (m[1]) container.append(m[1]);
+  container.appendChild(el('span', 'nw', m[2]));
+}
+
+// Writes a company name, or text that ends in one («tidligere …»).
+export function appendName(container: HTMLElement, name: string, parentName?: string): void {
+  const prefix = mutedPrefix(name, parentName);
+  if (prefix) container.appendChild(el('span', 'name-prefix', prefix));
+  appendGlued(container, name.slice(prefix?.length ?? 0));
 }

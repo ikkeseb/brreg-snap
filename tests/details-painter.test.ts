@@ -293,6 +293,9 @@ describe('result: the dossier', () => {
     expect(q('#panel-okonomi .honest')?.textContent).toBe(
       'Åpne data dekker 2023–2025. Eldre år finnes som PDF.',
     );
+    // A plain sentence like the trend's: no tone, so no glyph.
+    expect(q('#panel-okonomi .honest .glyph')).toBeNull();
+    expect(q('#panel-okonomi .honest')?.hasAttribute('data-tone')).toBe(false);
     const years = qa('#panel-okonomi .years a');
     expect(years.map((a) => a.textContent)).toEqual(['2025', '2024', '2023', '2022', '2021', '2020', '2019']);
     expect(years[0]?.getAttribute('title')).toBe('PDF, lastes ned — kan ta litt tid');
@@ -365,7 +368,7 @@ describe('result: the dossier', () => {
     // The parent's name is a quieter prefix; the text stays whole.
     expect(first.querySelector('.unit__name')?.textContent).toBe('EQUINOR ASA AVD FORUS');
     expect(first.querySelector('.unit__name .name-prefix')?.textContent).toBe('EQUINOR ASA ');
-    expect(first.querySelector('.unit__meta')?.textContent).toBe(`Forusbeen 50, 4035 Stavanger · 1${NBSP}840 ansatte`);
+    expect(first.querySelector('.unit__meta')?.textContent).toBe(`Forusbeen 50, 4035${NBSP}Stavanger · 1${NBSP}840 ansatte`);
     expect(first.querySelector('button.orgnr--sm')?.textContent).toBe(`973${NBSP}118${NBSP}402`);
     expect(first.querySelector('.orgnr__label')).toBeNull();
     const gone = units.querySelector('.unit--gone')!;
