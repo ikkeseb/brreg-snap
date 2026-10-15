@@ -109,9 +109,13 @@ one line first: version, store, what changes.
 - **AMO:** summary and description (nb-NO, en-US), and the privacy
   policy field, which gets the reflowed `PRIVACY.md` from the kit
   (AMO keeps every newline and renders no headings or tables).
-  Screenshots.
+  Screenshots. After a release that changed the logo, check the
+  listing icon and upload `public/icons/icon-128.png` if it still
+  shows the old one.
 - **CWS:** store listing description, privacy practices tab,
-  screenshots. The privacy policy URL serves `PRIVACY.md` on `main`.
+  screenshots, and the store icon (`public/icons/icon-128.png`) when
+  the logo changed. The privacy policy URL serves `PRIVACY.md` on
+  `main`.
 
 ## One-time setup (maintainer)
 
