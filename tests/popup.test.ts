@@ -160,6 +160,39 @@ describe('popup controller — result', () => {
     expect(document.querySelector('.mast__site b')?.textContent).toBe('dnb.no');
   });
 
+  it('paints the skeleton under the site\'s masthead while the tab resolves, not a blank strip', async () => {
+    const tab = deferred<unknown>();
+    mocks.resolveTabContext.mockReturnValueOnce(tab.promise);
+    await boot();
+    await vi.waitFor(() => expect(mocks.resolveTabContext).toHaveBeenCalled());
+    expect(state()).toBe('loading');
+    expect(document.querySelector('.mast__site b')?.textContent).toBe('dnb.no');
+    expect(app().querySelectorAll('.ledger-row')).toHaveLength(5);
+    expect(document.querySelector('.foot')?.textContent).toContain('Henter …');
+    await vi.waitFor(() =>
+      expect(document.getElementById('live')?.textContent).toBe('Henter fra Brønnøysundregistrene …'),
+    );
+    tab.resolve({ orgnr: '984851006', host: 'www.dnb.no', method: 'host-auto' });
+    await waitState('result');
+    expect(document.querySelector('h1')?.textContent).toBe('DNB BANK ASA');
+  });
+
+  it('the search view opened over the resolving skeleton keeps the late answer off it; Escape resolves again', async () => {
+    const tab = deferred<unknown>();
+    mocks.resolveTabContext.mockReturnValueOnce(tab.promise);
+    await boot();
+    await vi.waitFor(() => expect(state()).toBe('loading'));
+    document.querySelector<HTMLButtonElement>('.mast .icon-btn')!.click();
+    await waitState('empty');
+    tab.resolve({ orgnr: '984851006', host: 'www.dnb.no', method: 'host-auto' });
+    await new Promise((r) => setTimeout(r, 10));
+    expect(state()).toBe('empty');
+    expect(mocks.loadCompany).not.toHaveBeenCalled();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    await waitState('result');
+    expect(mocks.resolveTabContext).toHaveBeenCalledTimes(2);
+  });
+
   it('badges the tab for a danger answer on a host-derived result, and remembers the status', async () => {
     mocks.resolveTabContext.mockResolvedValue({ orgnr: '915330193', host: 'example.no', method: 'url-param' });
     mocks.loadCompany.mockResolvedValue(company(enhetKonkurs, rollerKonkurs));
