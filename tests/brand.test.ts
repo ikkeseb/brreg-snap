@@ -91,6 +91,18 @@ describe('generated files', () => {
     }
   });
 
+  // ui.md § masthead-mark: each masthead's content box is odd (40, 44,
+  // 48 px less the 1 px rule), so only an odd slot centres on a whole
+  // CSS px; each drawing sits on its own device-pixel grid.
+  it('the in-UI mark lands on whole device pixels', () => {
+    expect(Number.isInteger(MARK.width) && Number.isInteger(MARK.height)).toBe(true);
+    expect(MARK.height % 2, 'the slot height must be odd').toBe(1);
+    for (const m of MARK.drawings) {
+      const px = [m.x, m.y, m.width, m.height].map((v) => v * m.scale);
+      expect(px.every(Number.isInteger), `mark--x${m.scale} off its pixel grid`).toBe(true);
+    }
+  });
+
   it("the UI's --brand is the masters' colour", () => {
     const fills = new Set(
       Object.values(ICONS).flatMap((f) =>

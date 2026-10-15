@@ -123,7 +123,7 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 
 | Module | API | Markup contract |
 |---|---|---|
-| `masthead.ts` | `renderMasthead(container, {kind:'popup', host?, search, markOnly?} \| {kind:'panel', query?, autoSync}, handlers)` → `{input?, toggle?, searchButton?}`; `appendSiteLabel`; `brandMark()` (§ masthead-mark) | `header.mast > svg.mast__mark[role=img] > svg.mark--x1 + svg.mark--x2` + popup `span.mast__site` (`<b>` = registrable domain; «Ingen nettside» without a host; left out on the no-site empty state, `markOnly`, whose heading says it) + `button.icon-btn[aria-label]` (pinned right); panel `label.search > svg.icon + input[type=search][aria-label]` + `button.toggle[role=switch][aria-checked] > span.toggle__track` |
+| `masthead.ts` | `renderMasthead(container, {kind:'popup', host?, search, markOnly?} \| {kind:'panel', query?, autoSync}, handlers)` → `{input?, toggle?, searchButton?}`; `appendSiteLabel`; `brandMark()` (the 16×15 slot, § masthead-mark) | `header.mast > svg.mast__mark[role=img][width=16][height=15] > svg.mark--x1 + svg.mark--x2` + popup `span.mast__site` (`<b>` = registrable domain; «Ingen nettside» without a host; left out on the no-site empty state, `markOnly`, whose heading says it) + `button.icon-btn[aria-label]` (pinned right); panel `label.search > svg.icon + input[type=search][aria-label]` + `button.toggle[role=switch][aria-checked] > span.toggle__track` |
 | `identity.ts` | `renderIdentity(container, IdentityView, CopyHandlers)` → `{heading}`; `buildOrgnrButton(orgnr, handlers, {small})` | `div.ident > p.ident__over` (form · city) OR `p.ident__eyebrow` (provenance, `i-link`) · `h1.ident__name(--claim)` · `p.ident__line > button.orgnr + a.link` (with an eyebrow: `span.ident__rest > span.ident__meta` carries form · city, the link glued to its last word by `.nw`) · popup `p.ident__leaders > span × n` · `p.ident__note` (avdeling: «Avdeling: » + `b` (the branch name in ink, `appendName` against the parent) + « (org.nr)»). Panel: the painter adds `div.ident__row > p.ident__flags + button.text-btn` (Kopier sammendrag, pinned right with or without flags) |
 | `copy-feedback.ts` | `attachCopy(button, () => text, {done, label?}, {copy, announce})`, `COPY_FEEDBACK_MS` = 1400 | adds `.is-copied` (icon `.icon--copy` ⇄ `.icon--done`, the label swaps to «Kopiert») or `.is-failed`; announces «Org.nr kopiert» / «Kunne ikke kopiere» in the live region |
 | `answer.ts` | `buildAnswer(AnswerView, {onReject})` → `{section, heading}`; `buildErrorAnswer({head, support, retry}, {onRetry})`; `buildAnswerLoading()` | `section.answer.answer--ok\|--warn\|--danger[aria-labelledby] > span.answer__seal > svg.glyph` + `h2.answer__head` + `p.answer__support` + `div.answer__actions`. Danger (the framed field): `role=alert`, no seal, `span.answer__kicker > svg.glyph + «Alvorlig»` before the head, and the head is prose `span.stamp-pre? · strong.stamp-word · span.stamp-rest` |
@@ -153,19 +153,31 @@ search): the smoke and the tests key on those, not on classes.
 <!-- SECTION: masthead-mark -->
 ## The brand mark in the UI
 
-The overhand knot, landscape, in a 16×12 slot at the start of every
-masthead (popup, panel, the welcome page and its example cards).
+The overhand knot, both tails level, in a 16×15 slot at the start of
+every masthead (popup, panel, the welcome page and its example cards).
 `brandMark()` in `masthead.ts` builds it with `createElementNS`, no
 sprite: one `svg.mast__mark` holding a nested `<svg>` per drawing from
 `src/lib/view/mark-data.ts`, which `pnpm icons` generates from the
-masters (`assets/brand/README.md`). `mark--x1` is the 16 px icon's
-drawing at one CSS px per unit; `mark--x2` is the 32 px drawing at
-half that, shown from `1.5dppx` up (the masthead block in
-`src/styles/brreg.css`), so the mark lands on whole device pixels at
-1x and at 2x and shows both tails where there is room for them, as the
-toolbar does. Fractional scales (125 %, 150 %, browser zoom) get the
-nearer drawing, scaled, so there it is not pixel-crisp. Width and
-height are SVG attributes, not `style` (CSP). Colour is `--brand`, the
+masters (`assets/brand/README.md`), each drawing cropped to its ink in
+whole units. `mark--x1` is the 16 px icon's drawing (rows 0–14, so
+16×15) at one CSS px per unit; `mark--x2` is the 32 px drawing (rows
+3–28, so 16×13 CSS px, placed 1 px down to centre it) at half that,
+shown from `1.5dppx` up (the masthead block in `src/styles/brreg.css`),
+the same drawing a 2x toolbar shows. The slot's height is odd on
+purpose: every masthead is a fixed height (popup 40, panel 44, welcome
+48 px) less its 1 px rule, so its content box is odd and only an odd
+slot centres on a whole CSS px (y 12, 14 and 16). The mark therefore
+lands on whole device pixels vertically at 1x and at 2x in every
+masthead; `tests/brand.test.ts` fails when a regenerated slot is even
+or a drawing is off its pixel grid. Horizontally the popup and panel
+start at a fixed padding, but the welcome page's gutter scales with
+the viewport (`--page-gut`, `src/welcome/welcome.css`), so at some
+window widths its mark starts on a fraction of a pixel; nothing tests
+that. The welcome page's example cards sit
+wherever the text above them ends, so there the mark can land on a
+fraction of a pixel. Fractional scales (125 %, 150 %, browser zoom)
+get the nearer drawing, scaled, so there it is not pixel-crisp. Width
+and height are SVG attributes, not `style` (CSP). Colour is `--brand`, the
 masters' `#4A74FF` in both themes (3.6 light, 4.7 dark: a graphic, so
 3:1); `tests/brand.test.ts` fails when the two drift. The popup and
 panel masthead name it (`role="img"`, `aria-label` «brreg-snap»); on

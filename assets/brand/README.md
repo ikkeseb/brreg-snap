@@ -36,12 +36,15 @@ pnpm verify   # tests/brand.test.ts, below
 `tests/brand.test.ts` checks that the manifests reference only icons
 the generator writes, each PNG at its size; that every master it reads
 is fill-only; that the in-UI mark carries the 16 and 32 masters'
-paths; that `--brand` is the masters' colour; and that every master
-and output still hashes to its entry in `icons.lock.json`. A master
-swapped, or an output edited, without running `pnpm icons` therefore
-fails. The test renders nothing: whether a new PNG looks right is
-yours to check before committing.
+paths and lands on whole device pixels; that `--brand` is the masters'
+colour; and that every master and output still hashes to its entry in
+`icons.lock.json`. A master swapped, or an output edited, without
+running `pnpm icons` therefore fails. The test renders nothing:
+whether a new PNG looks right is yours to check before committing.
 
 The small drawings must keep their pixel grid (16 and 32 units square)
-for the PNGs and the in-UI mark to stay crisp. A new colour also goes
-into `--brand` in `src/styles/brreg.css`; the test fails until it does.
+for the PNGs and the in-UI mark to stay crisp, and the in-UI slot (the
+taller of the two drawings cropped to their ink) must come out an odd
+number of CSS px tall, today 16×15 (`docs/notes/ui.md`
+§ masthead-mark). A new colour also goes into `--brand` in
+`src/styles/brreg.css`; the test fails until it does.
