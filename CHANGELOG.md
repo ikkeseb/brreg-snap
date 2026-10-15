@@ -6,6 +6,8 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+## [1.6.0] — 2026-10-15
+
 ### Added
 
 - Økonomi shows how the company has done over the last few years:
@@ -592,7 +594,8 @@ name; functionality unchanged from the pre-1.0 development branch.
   `activeTab` + `storage` + `menus` + the brreg host.
 - Zero runtime dependencies in the shipped bundle.
 
-[Unreleased]: https://github.com/ikkeseb/brreg-snap/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/ikkeseb/brreg-snap/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/ikkeseb/brreg-snap/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/ikkeseb/brreg-snap/compare/v1.4.2...v1.5.0
 [1.4.2]: https://github.com/ikkeseb/brreg-snap/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/ikkeseb/brreg-snap/compare/v1.4.0...v1.4.1

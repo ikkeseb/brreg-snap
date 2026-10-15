@@ -1,6 +1,6 @@
 {
   "name": "brreg-snap",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Browser extension (Firefox + Chrome) that shows who is behind the site you're on, straight from Brønnøysundregistrene.",
   "homepage": "https://sebastian.nuez.no/lab/brreg-snap/",
   "bugs": {
