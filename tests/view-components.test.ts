@@ -116,6 +116,8 @@ describe('masthead', () => {
     const mark = header.querySelector('svg.mast__mark')!;
     expect(mark.getAttribute('role')).toBe('img');
     expect(mark.getAttribute('aria-label')).toBe('brreg-snap');
+    // one drawing per pixel density (ui.md § masthead-mark)
+    expect([...mark.querySelectorAll('svg')].map((s) => s.getAttribute('class'))).toEqual(['mark--x1', 'mark--x2']);
     const site = header.querySelector('.mast__site')!;
     expect(site.textContent).toBe('nettbank.dnb.no');
     expect(site.querySelector('b')?.textContent).toBe('dnb.no');

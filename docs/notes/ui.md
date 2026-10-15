@@ -64,7 +64,8 @@ All in `brreg.css`. Light is the default, dark comes from
 `--ink-3` (captions, neutral glyphs), `--rule` (hairline, decorative),
 `--rule-strong` (UI boundaries), `--ok`, `--warn`, `--danger` (text
 tone and the verdict's frame, kicker and key word), `--amber` (the
-focus ring only), `--brand` (the mark only), `--skel` / `--skel-hi`.
+focus ring only), `--brand` (the mark only: the logo's one blue in
+both themes, § masthead-mark), `--skel` / `--skel-hi`.
 Every text/paper pair measures ≥ 4.5:1 in both themes; each token's
 ratio against `--paper` sits beside it in `brreg.css`. The verdict's tint is `color-mix` of 7 %
 `--danger` into `--paper` (resolves to #F2E5DB light / #211915 dark),
@@ -105,7 +106,8 @@ equity bar's `--share`, the tab region's `--land`) go through
 `el.style.setProperty` (CSSOM, allowed under the shipped CSP; markup
 `style=""` is not). Icons are one inlined `<svg class="sprite">` of
 `<symbol>`s per page, referenced with `<use href="#id">` (plus the
-`xlink:href` form for older engines), so nothing is fetched. ESLint
+`xlink:href` form for older engines), so nothing is fetched; the
+brand mark is the one exception (§ masthead-mark). ESLint
 bans the HTML sinks; every node is `createElement` + `textContent`.
 
 <!-- SECTION: components -->
@@ -121,7 +123,7 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 
 | Module | API | Markup contract |
 |---|---|---|
-| `masthead.ts` | `renderMasthead(container, {kind:'popup', host?, search, markOnly?} \| {kind:'panel', query?, autoSync}, handlers)` → `{input?, toggle?, searchButton?}`; `appendSiteLabel` | `header.mast > svg.mast__mark[role=img]` + popup `span.mast__site` (`<b>` = registrable domain; «Ingen nettside» without a host; left out on the no-site empty state, `markOnly`, whose heading says it) + `button.icon-btn[aria-label]` (pinned right); panel `label.search > svg.icon + input[type=search][aria-label]` + `button.toggle[role=switch][aria-checked] > span.toggle__track` |
+| `masthead.ts` | `renderMasthead(container, {kind:'popup', host?, search, markOnly?} \| {kind:'panel', query?, autoSync}, handlers)` → `{input?, toggle?, searchButton?}`; `appendSiteLabel`; `brandMark()` (§ masthead-mark) | `header.mast > svg.mast__mark[role=img] > svg.mark--x1 + svg.mark--x2` + popup `span.mast__site` (`<b>` = registrable domain; «Ingen nettside» without a host; left out on the no-site empty state, `markOnly`, whose heading says it) + `button.icon-btn[aria-label]` (pinned right); panel `label.search > svg.icon + input[type=search][aria-label]` + `button.toggle[role=switch][aria-checked] > span.toggle__track` |
 | `identity.ts` | `renderIdentity(container, IdentityView, CopyHandlers)` → `{heading}`; `buildOrgnrButton(orgnr, handlers, {small})` | `div.ident > p.ident__over` (form · city) OR `p.ident__eyebrow` (provenance, `i-link`) · `h1.ident__name(--claim)` · `p.ident__line > button.orgnr + a.link` (with an eyebrow: `span.ident__rest > span.ident__meta` carries form · city, the link glued to its last word by `.nw`) · popup `p.ident__leaders > span × n` · `p.ident__note` (avdeling: «Avdeling: » + `b` (the branch name in ink, `appendName` against the parent) + « (org.nr)»). Panel: the painter adds `div.ident__row > p.ident__flags + button.text-btn` (Kopier sammendrag, pinned right with or without flags) |
 | `copy-feedback.ts` | `attachCopy(button, () => text, {done, label?}, {copy, announce})`, `COPY_FEEDBACK_MS` = 1400 | adds `.is-copied` (icon `.icon--copy` ⇄ `.icon--done`, the label swaps to «Kopiert») or `.is-failed`; announces «Org.nr kopiert» / «Kunne ikke kopiere» in the live region |
 | `answer.ts` | `buildAnswer(AnswerView, {onReject})` → `{section, heading}`; `buildErrorAnswer({head, support, retry}, {onRetry})`; `buildAnswerLoading()` | `section.answer.answer--ok\|--warn\|--danger[aria-labelledby] > span.answer__seal > svg.glyph` + `h2.answer__head` + `p.answer__support` + `div.answer__actions`. Danger (the framed field): `role=alert`, no seal, `span.answer__kicker > svg.glyph + «Alvorlig»` before the head, and the head is prose `span.stamp-pre? · strong.stamp-word · span.stamp-rest` |
@@ -147,6 +149,25 @@ state (`paintLoading` / `paintResult` / `paintPicker` / `paintEmpty` /
 `body[data-answer]` (ok | warn | danger | pick | empty | loading) and
 `main#app[data-state]` (loading | result | picker | empty | error |
 search): the smoke and the tests key on those, not on classes.
+
+<!-- SECTION: masthead-mark -->
+## The brand mark in the UI
+
+The overhand knot, landscape, in a 16×12 slot at the start of every
+masthead (popup, panel, the welcome page and its example cards).
+`brandMark()` in `masthead.ts` builds it with `createElementNS`, no
+sprite: one `svg.mast__mark` holding a nested `<svg>` per drawing from
+`src/lib/view/mark-data.ts`, which `pnpm icons` generates from the
+masters (`assets/brand/README.md`). `mark--x1` is the 16 px icon's
+drawing at one CSS px per unit; `mark--x2` is the 32 px drawing at half
+that, shown from `1.5dppx` up (the masthead block in `src/styles/brreg.css`), so the mark lands
+on whole device pixels at 1x and at 2x and shows both tails where there
+is room for them, as the toolbar does. Width and height are SVG
+attributes, not `style` (CSP). Colour is `--brand`, the masters'
+`#4A74FF` in both themes (3.6 light, 4.7 dark: a graphic, so 3:1);
+`tests/brand.test.ts` fails when the two drift. The popup and panel
+masthead name it (`role="img"`, `aria-label` «brreg-snap»); on the
+welcome page it is `aria-hidden`, beside the brand name in text.
 
 <!-- SECTION: a11y -->
 ## The a11y contract

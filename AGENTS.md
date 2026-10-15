@@ -57,6 +57,7 @@ pnpm smoke                      # Playwright: harness states x widths x themes +
 pnpm smoke:record               # re-record tests/e2e/fixtures/ from the live API; review the diff
 pnpm test:live                  # live brreg canary: API contracts + resolver corpus (network; not in the gate)
 pnpm preview                    # the built pages in a plain tab against the live API (scripts/preview/README.md)
+pnpm icons                      # brand masters → public/icons/ + the in-UI mark (assets/brand/README.md); needs the smoke's Chromium
 pnpm dev                        # the real extension in a Firefox profile (dev:chrome for Chromium)
 pnpm release X.Y.Z [--dry-run]  # then --tag; docs/release.md
 pnpm store-status [--deep]      # live AMO/CWS versions vs the tags

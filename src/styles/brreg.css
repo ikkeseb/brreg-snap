@@ -85,7 +85,7 @@
   --warn: #8A5200;         /*  5.7  (4.8 on its own 12 % tint) */
   --danger: #AE2A1E;       /*  6.0  text tone, the verdict's frame + word (5.4 on its own 7 % tint), negative figures */
   --amber: #8A5A12;        /*  5.3  focus ring only */
-  --brand: #A5711F;        /*  the mark only (graphic, 3.8) */
+  --brand: #4A74FF;        /*  3.6  the mark only (graphic; 4.7 on dark): the logo's one blue, assets/brand/ */
   --skel: #E4DED1;
   --skel-hi: #EFEBE2;
 }
@@ -105,7 +105,6 @@
     --warn: #E6AC4C;         /*  9.2 */
     --danger: #F2836F;       /*  7.4 */
     --amber: #D9A866;        /*  8.7 */
-    --brand: #D4A574;
     --skel: #221F1A;
     --skel-hi: #2C2822;
   }
@@ -182,7 +181,14 @@
   border-bottom: 1px solid var(--rule);
 }
 .app--panel .mast { height: 44px; }
-.mast__mark { width: 12px; height: 20px; flex: none; color: var(--brand); }
+.mast__mark { flex: none; color: var(--brand); fill: currentColor; }
+/* the mark's two drawings (mark-data.ts, ui.md § masthead-mark): the
+   16 px one on whole CSS px, the 32 px one from 1.5 dppx up */
+.mast__mark .mark--x2 { display: none; }
+@media (min-resolution: 1.5dppx) {
+  .mast__mark .mark--x1 { display: none; }
+  .mast__mark .mark--x2 { display: inline; }
+}
 .mast__site { flex: 1; min-width: 0; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mast__site b { color: var(--ink); }
 

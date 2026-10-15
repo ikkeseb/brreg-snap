@@ -8,6 +8,9 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ### Changed
 
+- A new logo: a blue ribbon tied in an overhand knot replaces the gold
+  «B», on the toolbar and store icons and at the head of the popup, the
+  panel and the welcome page.
 - A danger verdict is a field framed in thin red on a faint tint: a red
   «✕ Alvorlig» kicker, then the sentence in large type with only the
   key word in red.
