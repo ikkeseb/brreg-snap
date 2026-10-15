@@ -6,6 +6,16 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Added
+
+- Økonomi shows how the company has done over the last few years:
+  «Utvikling 2022–2024», driftsinntekter and årsresultat for up to
+  three years in aligned columns, with the unit once beside each label,
+  and one plain sentence per row («Driftsinntekter ned 26 %, høyest i
+  2024.»). A year with a loss is always named, and a sentence never
+  claims more than the years on screen show. A latest filing without
+  figures still shows the years before it.
+
 ### Changed
 
 - A new logo: a blue ribbon tied in an overhand knot replaces the gold
@@ -14,6 +24,30 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 - A danger verdict is a field framed in thin red on a faint tint: a red
   «✕ Alvorlig» kicker, then the sentence in large type with only the
   key word in red.
+- When brreg can't be reached to check a site, the answer comes first:
+  «Fikk ikke svar fra Brønnøysundregistrene» with «Prøv igjen», then
+  the search. The heading «Fikk ikke sjekket …» that said the same is
+  gone.
+- A sole proprietorship names its owner: «Innehaver» in the popup and
+  first under Ledelse in the panel.
+- One way of saying things: every date reads «26. aug. 2026», every
+  search field says «Navn eller org.nr», an org.nr that finds nothing
+  reads «Fant ikke noe selskap med org.nr …», and missing accounts are
+  explained in the register's words instead of «brreg sitt åpne API».
+- Less repetition: the popup's search view drops the line under its
+  heading that repeated the placeholder, the picker's «Eller søk selv»
+  field starts empty instead of holding the site's name, and on a tab
+  with no address the popup shows the logo alone over «Ingen nettside
+  å slå opp».
+- An org.nr that belongs to a branch: the «Avdeling: …» line mutes the
+  part of the branch's name it shares with the parent, as Enheter does.
+- The popup shows the loading outline under the site's name as soon as
+  it opens, instead of a blank strip while it finds the company.
+- The panel's back bar underlines on hover, «Kopier sammendrag» sits
+  at the right edge with or without registry flags before it, and the
+  equity bar's empty part is a hairline grey, not the loading grey.
+- [chrome] Search fields no longer show Chrome's built-in clear «×»,
+  the one control not drawn in the extension's own colours.
 
 ### Fixed
 
@@ -29,6 +63,13 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 - Short subsidiary keywords no longer match inside longer words (IT in
   SPIRIT, CARE in SKINCARE), and a site with æ, ø or å in its domain
   ties to the company that registered it.
+- A failed roles fetch showed as a row that read like data («Roller:
+  Kunne ikke hentes»); Ledelse now says it in a sentence, as Personer
+  does: «Kunne ikke hente roller. Prøv igjen senere.»
+- The panel's loading outline has a Kobling row only when the answer
+  will, so the rows no longer jump when it fills in. A short company
+  (a deleted one's Registrering) no longer scrolls into blank space
+  before you use its tabs.
 
 ## [1.5.0] — 2026-10-06
 
