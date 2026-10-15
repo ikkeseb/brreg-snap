@@ -13,6 +13,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { normalizeRequest } from '../../scripts/preview/fixtures.mjs';
+import { settle, watchPage } from './invariants.ts';
 import { STATES } from './states.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -124,6 +125,8 @@ try {
   for (const s of STATES) {
     if (s.offline) continue;
     const page = await browser.newPage();
+    // settle() (invariants.ts) rather than networkidle, which can hang.
+    const watch = await watchPage(page);
     page.on('request', (req) => {
       const url = new URL(req.url());
       if (url.pathname.startsWith('/brreg/')) {
@@ -132,17 +135,17 @@ try {
     });
     await page.goto(server.origin + s.path);
     await page.locator('main#app:not([data-state="loading"])').waitFor();
-    await page.waitForLoadState('networkidle');
+    await settle(page, watch);
     for (const a of s.actions ?? []) {
-      // The load state is sticky: 'networkidle' resolves at once when
-      // the page was already idle, so wait for the action's first
-      // request instead, then for the page to settle again.
+      // settle() returns at once when the page is already still, so
+      // wait for the action's first request first, then for the page
+      // to settle again.
       const first = page.waitForRequest((r) => r.url().includes('/brreg/'), { timeout: 5000 }).catch(() => {});
       if (a.type === 'click') await page.click(a.selector);
       else await page.fill(a.selector, a.text ?? '');
       await first;
       await page.locator('main#app:not([data-state="loading"])').waitFor();
-      await page.waitForTimeout(1500);
+      await settle(page, watch);
     }
     const state = await page.locator('main#app').getAttribute('data-state');
     console.log(`${s.name}: ${state}${state === s.state ? '' : ` (expected ${s.state})`}`);
