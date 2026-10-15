@@ -173,7 +173,7 @@ Every lookup sends the site's registrable domain, and a name label
 derived from it, to data.brreg.no. Mozilla counts any data "handled outside of the
 add-on or the local browser" as transmission, a public government API
 included, and its taxonomy puts domains under `browsingActivity`. The
-selection lookup («Slå opp «…» i brreg-snap» and its keyboard command)
+selection lookup (the «Slå opp «…» i brreg-snap» menu item)
 also sends text the user selected on the page (at most 100 characters),
 and Mozilla defines `websiteContent` as "anything visible on a website
 — such as text, images, videos, and links", with no exemption for a
