@@ -316,9 +316,9 @@ word pokes out of a line without any scroll overflow).
   under «EQUINOR ASA» keeps its whole name. The text stays the full
   name; only the node shape changes.
 - **No orphan at a line break.** A legal-form suffix stays with the
-  word before it wherever a name is written through `appendName`
-  (`.nw`, only for a pair of at most 16 characters so a long word can
-  still wrap), the konsern row's «55 selskaper» stays together, an
+  word before it wherever a name is written through `appendName` (a
+  no-break space, not `.nw`, so `.app`'s overflow-wrap can still break
+  a pair wider than its column), the konsern row's «55 selskaper» stays together, an
   underenhet's «postnr sted» is joined by no-break spaces, the PDF
   years' «·» trails the year before it so no line starts with one, and
   a footer row's second item stays right when it wraps.

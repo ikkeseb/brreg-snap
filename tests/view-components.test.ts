@@ -84,18 +84,22 @@ describe('dom helpers', () => {
     const write = (name: string, parent?: string) => {
       const b = document.createElement('b');
       appendName(b, name, parent);
-      return { text: b.textContent, glued: [...b.querySelectorAll('.nw')].map((n) => n.textContent) };
+      return b.textContent;
     };
-    expect(write('OPULENS NÆRING 4 AS')).toEqual({ text: 'OPULENS NÆRING 4 AS', glued: ['4 AS'] });
-    expect(write('tidligere LUNDE FASADE AS')).toEqual({ text: 'tidligere LUNDE FASADE AS', glued: ['FASADE AS'] });
-    expect(write('EQUINOR ASA')).toEqual({ text: 'EQUINOR ASA', glued: ['EQUINOR ASA'] });
-    // Under its parent: the muted prefix, then the glued tail.
-    expect(write('EQUINOR ENERGY AS', 'EQUINOR ASA')).toEqual({ text: 'EQUINOR ENERGY AS', glued: ['ENERGY AS'] });
-    // No legal form, a lone word, or a pair too long to hold a narrow column: no glue.
-    expect(write('AVD CCB SOTRA').glued).toEqual([]);
-    expect(write('Kari Nordmann').glued).toEqual([]);
-    expect(write('AS').glued).toEqual([]);
-    expect(write('PRICEWATERHOUSECOOPERS AS').glued).toEqual([]);
+    expect(write('OPULENS NÆRING 4 AS')).toBe('OPULENS NÆRING 4\u00A0AS');
+    expect(write('tidligere LUNDE FASADE AS')).toBe('tidligere LUNDE FASADE\u00A0AS');
+    expect(write('EQUINOR ASA')).toBe('EQUINOR\u00A0ASA');
+    // A long pair is joined too: overflow-wrap still breaks it in a narrow column.
+    expect(write('PRICEWATERHOUSECOOPERS AS')).toBe('PRICEWATERHOUSECOOPERS\u00A0AS');
+    // Under its parent: the muted prefix, then the joined tail.
+    const b = document.createElement('b');
+    appendName(b, 'EQUINOR ENERGY AS', 'EQUINOR ASA');
+    expect(b.querySelector('.name-prefix')?.textContent).toBe('EQUINOR ');
+    expect(b.textContent).toBe('EQUINOR ENERGY\u00A0AS');
+    // No legal form, or a lone word: written as is.
+    expect(write('AVD CCB SOTRA')).toBe('AVD CCB SOTRA');
+    expect(write('Kari Nordmann')).toBe('Kari Nordmann');
+    expect(write('AS')).toBe('AS');
   });
 });
 
@@ -644,7 +648,7 @@ describe('picker', () => {
     const rows = [...main.querySelectorAll('button.pick')];
     expect(rows).toHaveLength(3);
     expect(rows.map((r) => r.getAttribute('aria-keyshortcuts'))).toEqual(['1', '2', '0']);
-    expect(rows[0]!.querySelector('.pick__name')?.textContent).toBe('DNB BANK ASA');
+    expect(rows[0]!.querySelector('.pick__name')?.textContent).toBe('DNB BANK\u00A0ASA');
     expect(rows[0]!.querySelector('.evidence')?.className).toBe('evidence evidence--strong');
     expect(rows[0]!.querySelector('.pick__right')?.textContent).toContain('ansatte');
     // Every row: the chip first (on the name's line), the count or status under it.
@@ -801,7 +805,7 @@ describe('search view + recents', () => {
     expect(view.recents.section.hidden).toBe(false);
     const rows = [...view.recents.list.querySelectorAll<HTMLButtonElement>('button.recent')];
     expect(rows).toHaveLength(2);
-    expect(rows[0]!.querySelector('b')?.textContent).toBe('DNB BANK ASA');
+    expect(rows[0]!.querySelector('b')?.textContent).toBe('DNB BANK\u00A0ASA');
     expect(rows[0]!.querySelector('.recent__on')?.textContent).toBe(`984${NBSP}851${NBSP}006`);
     expect(rows[1]!.querySelector('.status-mark')?.textContent).toBe('Konkurs');
     rows[1]!.click();

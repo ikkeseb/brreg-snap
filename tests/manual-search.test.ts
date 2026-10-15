@@ -136,7 +136,7 @@ describe('manual search', () => {
     await vi.waitFor(() => expect(hits()).toHaveLength(1));
 
     const [hit] = hits();
-    expect(hit!.querySelector('b')?.textContent).toBe('EQUINOR ASA');
+    expect(hit!.querySelector('b')?.textContent).toBe('EQUINOR\u00A0ASA');
     expect(hit!.querySelector('.recent__on')?.textContent).toBe(`923${NBSP}609${NBSP}016`);
     expect(announced.at(-1)).toBe('1 treff.');
     // Straight to the entity, never a fuzzy name search on the digits.
@@ -151,7 +151,7 @@ describe('manual search', () => {
     const { resultsEl, type, hits } = setup();
     await type('NO 923 609 016 MVA');
     await vi.waitFor(() => expect(hits()).toHaveLength(1));
-    expect(resultsEl.textContent).toContain('EQUINOR ASA');
+    expect(resultsEl.textContent).toContain('EQUINOR\u00A0ASA');
   });
 
   it('shows an underenhet with its parent, and selecting it loads the branch orgnr', async () => {
@@ -165,7 +165,7 @@ describe('manual search', () => {
 
     const [hit] = hits();
     expect(hit!.querySelector('b')?.textContent).toBe(
-      'DNB BANK ASA AVD ALTA — avdeling av DNB BANK ASA',
+      'DNB BANK ASA AVD ALTA — avdeling av DNB BANK\u00A0ASA',
     );
     hit!.click();
     // The load falls back to the parent the same way (company-load).
@@ -204,7 +204,7 @@ describe('manual search', () => {
     const { resultsEl, type, hits } = setup();
     await type('dnb bank');
     await vi.waitFor(() => expect(hits()).toHaveLength(1));
-    expect(resultsEl.textContent).toContain('DNB BANK ASA');
+    expect(resultsEl.textContent).toContain('DNB BANK\u00A0ASA');
   });
 
   it('a failed orgnr lookup is a search error with a retry, not «no hits»', async () => {

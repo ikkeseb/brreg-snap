@@ -244,7 +244,7 @@ describe('result: the dossier', () => {
     const gone = q('#panel-personer .person--gone')!;
     expect(gone.querySelector('.person__role')?.textContent).toBe('Avregistrert');
     const entity = q<HTMLButtonElement>('#panel-personer button.entity-row')!;
-    expect(entity.querySelector('b')?.textContent).toBe('ERNST & YOUNG AS');
+    expect(entity.querySelector('b')?.textContent).toBe('ERNST & YOUNG\u00A0AS');
     expect(entity.querySelector('small')?.textContent).toMatch(/^Org\.nr .* · åpne$/);
     entity.click();
     expect(intents.drill).toHaveBeenCalledWith('976389387');
@@ -350,7 +350,7 @@ describe('result: the dossier', () => {
     expect(sections.map((s) => s.querySelector('.section__head')?.firstChild?.textContent)).toEqual(['Konsern', 'Underenheter']);
 
     const konsern = sections[0]!;
-    expect(konsern.querySelector('.entity-row--self b')?.textContent).toBe('EQUINOR ASA');
+    expect(konsern.querySelector('.entity-row--self b')?.textContent).toBe('EQUINOR\u00A0ASA');
     expect(konsern.querySelector('.entity-row--self small')?.textContent).toBe('Dette selskapet');
     const children = [...konsern.querySelectorAll('ul:not(.konsern-path) li')];
     expect(children).toHaveLength(34);
@@ -787,7 +787,7 @@ describe('the masthead search view', () => {
     expect(q('h1')).toBeNull();
     expect(q('.search-view button.back')?.textContent).toBe('Tilbake til EQUINOR ASA');
     await vi.waitFor(() => expect(q('.results button.recent')).not.toBeNull());
-    expect(q('.results button.recent b')?.textContent).toBe('EQUINOR ASA');
+    expect(q('.results button.recent b')?.textContent).toBe('EQUINOR\u00A0ASA');
 
     // An empty field shows the recents instead of the results.
     roots.search.value = '';
@@ -909,31 +909,32 @@ describe('the auto-sync switch and consent band', () => {
 });
 
 describe('appendName (name-prefix muting)', () => {
-  const muted = (name: string, parent: string) => {
+  // `text` is what the name renders as: a trailing legal form follows a no-break space.
+  const muted = (name: string, parent: string, text = name) => {
     const b = document.createElement('b');
     appendName(b, name, parent);
-    expect(b.textContent).toBe(name);
+    expect(b.textContent).toBe(text);
     return b.querySelector('.name-prefix')?.textContent ?? null;
   };
 
   it('mutes the parent prefix only when the name continues after it', () => {
     expect(muted('NORDVIK ENERGI ASA AVD FORUS', 'NORDVIK ENERGI ASA')).toBe('NORDVIK ENERGI ASA ');
-    expect(muted('NORDVIK ENERGI ASA', 'NORDVIK ENERGI ASA')).toBeNull();
-    expect(muted('NORDVIK ENERGISERVICE AS', 'NORDVIK ENERGI')).toBeNull();
+    expect(muted('NORDVIK ENERGI ASA', 'NORDVIK ENERGI ASA', 'NORDVIK ENERGI\u00A0ASA')).toBeNull();
+    expect(muted('NORDVIK ENERGISERVICE AS', 'NORDVIK ENERGI', 'NORDVIK ENERGISERVICE\u00A0AS')).toBeNull();
   });
 
   it('also mutes the parent’s base name (minus its legal form), whole words only', () => {
-    expect(muted('EQUINOR ALGERIA AS', 'EQUINOR ASA')).toBe('EQUINOR ');
+    expect(muted('EQUINOR ALGERIA AS', 'EQUINOR ASA', 'EQUINOR ALGERIA\u00A0AS')).toBe('EQUINOR ');
     expect(muted('EQUINOR ASA AVD BERGEN', 'EQUINOR ASA')).toBe('EQUINOR ASA ');
-    expect(muted('EQUINORSK AS', 'EQUINOR ASA')).toBeNull();
-    expect(muted('Equinor Energy AS', 'EQUINOR ASA')).toBe('Equinor ');
+    expect(muted('EQUINORSK AS', 'EQUINOR ASA', 'EQUINORSK\u00A0AS')).toBeNull();
+    expect(muted('Equinor Energy AS', 'EQUINOR ASA', 'Equinor Energy\u00A0AS')).toBe('Equinor ');
     // The base name must not swallow the whole child name.
     expect(muted('EQUINOR', 'EQUINOR ASA')).toBeNull();
-    expect(muted('EQUINOR AS', 'EQUINOR ASA')).toBeNull();
-    expect(muted('EQUINOR ASA', 'EQUINOR ASA')).toBeNull();
+    expect(muted('EQUINOR AS', 'EQUINOR ASA', 'EQUINOR\u00A0AS')).toBeNull();
+    expect(muted('EQUINOR ASA', 'EQUINOR ASA', 'EQUINOR\u00A0ASA')).toBeNull();
     // A parent whose last word is not a legal form has no base name.
-    expect(muted('KIWI NORGE BUTIKK AS', 'KIWI NORGE')).toBe('KIWI NORGE ');
-    expect(muted('KIWI BUTIKK AS', 'KIWI NORGE')).toBeNull();
+    expect(muted('KIWI NORGE BUTIKK AS', 'KIWI NORGE', 'KIWI NORGE BUTIKK\u00A0AS')).toBe('KIWI NORGE ');
+    expect(muted('KIWI BUTIKK AS', 'KIWI NORGE', 'KIWI BUTIKK\u00A0AS')).toBeNull();
     expect(baseName('EQUINOR ASA')).toBe('EQUINOR');
     expect(baseName('OBOS BBL')).toBe('OBOS');
     expect(baseName('AS')).toBe('AS');

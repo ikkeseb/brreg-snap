@@ -161,19 +161,16 @@ function mutedPrefix(name: string, parentName: string | undefined): string | und
 }
 
 // A legal-form suffix never sits alone on a line: «OPULENS NÆRING 4
-// AS» keeps «4 AS» together in a `.nw` span. Only a short pair is
-// glued, so a long word before the suffix («PRICEWATERHOUSECOOPERS
-// AS») can still wrap rather than overflow a narrow column.
-const GLUE_MAX = 16;
-
+// AS» joins «4 AS» with a no-break space. Unlike a nowrap span, the
+// pair can still break when it alone is wider than a narrow column
+// (`.app`'s overflow-wrap), so a long name never overflows.
 function appendGlued(container: HTMLElement, text: string): void {
-  const m = /^(.*\s)?(\S+\s+(\S+))$/.exec(text);
-  if (!m || m[2]!.length > GLUE_MAX || !LEGAL_FORMS.has(m[3]!.toUpperCase())) {
+  const m = /^(.*\s)?(\S+)\s+(\S+)$/.exec(text);
+  if (!m || !LEGAL_FORMS.has(m[3]!.toUpperCase())) {
     container.append(text);
     return;
   }
-  if (m[1]) container.append(m[1]);
-  container.appendChild(el('span', 'nw', m[2]));
+  container.append(`${m[1] ?? ''}${m[2]}\u00A0${m[3]}`);
 }
 
 // Writes a company name, or text that ends in one («tidligere …»).
