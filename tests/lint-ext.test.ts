@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { judgeLint } from '../scripts/lint-ext-judge.mjs';
+import { judgeLint } from '../scripts/lib/lint-ext.mjs';
 
 // The pass/fail decision of `pnpm lint:ext`, fed fake spawnSync results.
 // It must fail closed: a validator that did not run to a clean exit

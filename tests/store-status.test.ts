@@ -13,7 +13,7 @@ import {
   parseUpdateCheck,
   readCwsItemId,
   readZip,
-} from '../scripts/store-status-core.mjs';
+} from '../scripts/lib/store-status.mjs';
 
 // scripts/store-status.mjs's pure half, fed with live captures from
 // 2026-09-24 (tests/fixtures/stores/README.md).

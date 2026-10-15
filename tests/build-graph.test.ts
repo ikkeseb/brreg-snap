@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
-import { moduleViolation } from '../scripts/build-graph.mjs';
+import { moduleViolation } from '../scripts/lib/build-graph.mjs';
 
 // The decision behind the build-graph guard in vite.config.ts. The
 // plugin itself is demonstrated against a real build (a relative
@@ -29,7 +29,7 @@ describe('build-graph guard', () => {
     ['node_modules', 'node_modules/happy-dom/lib/utilities/StringUtility.js', 'outside src/'],
     ['pnpm store', 'node_modules/.pnpm/happy-dom@20.14.5/node_modules/happy-dom/lib/index.ts', 'outside src/'],
     ['tests', 'tests/helpers/fake.ts', 'outside src/'],
-    ['scripts', 'scripts/build-graph.mjs', 'outside src/'],
+    ['scripts', 'scripts/lib/build-graph.mjs', 'outside src/'],
     ['a sibling named like src', 'src-evil/x.ts', 'outside src/'],
     ['an .mjs entry', 'src/popup/probe.mjs', 'not an allowed source format'],
     ['a .js file', 'src/lib/x.js', 'not an allowed source format'],

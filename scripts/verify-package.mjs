@@ -4,10 +4,10 @@
 // exists; publish.yml runs it again on the downloaded Release assets.
 //
 // Extension zips: the same checks as verify:dist — the manifest
-// invariants (scripts/manifest-invariants.mjs) with stamped version ==
+// invariants (scripts/lib/manifest-invariants.mjs) with stamped version ==
 // X.Y.Z, every manifest-referenced file present, only the allowed root
 // entries, no runtime code generation (the AST scan in
-// scripts/codegen-scan.mjs, which needs the dev dependencies installed)
+// scripts/lib/codegen-scan.mjs, which needs the dev dependencies installed)
 // — plus no source maps or docs. Source zip: the tagged tree (package.json at X.Y.Z, the
 // lockfile), no build output. Prints sha256 + size per zip, and adds
 // them to the job summary when run in GitHub Actions.
@@ -15,8 +15,8 @@ import { createHash } from 'node:crypto';
 import { appendFileSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { findCodegen } from './codegen-scan.mjs';
-import { check, DIST_ROOT, referencedFiles } from './manifest-invariants.mjs';
+import { findCodegen } from './lib/codegen-scan.mjs';
+import { check, DIST_ROOT, referencedFiles } from './lib/manifest-invariants.mjs';
 import { assetNames } from './lib/release.mjs';
 import { readZip } from './lib/zip.mjs';
 

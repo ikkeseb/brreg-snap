@@ -1,5 +1,5 @@
 // `pnpm lint:ext`: web-ext lint (addons-linter) on dist-firefox/ that
-// fails on any error, on any warning not allowed in lint-ext-judge.mjs,
+// fails on any error, on any warning not allowed in lib/lint-ext.mjs,
 // and on a web-ext run that did not exit cleanly. Plain `web-ext lint`
 // exits 0 on warnings, so a new one would slip through.
 //
@@ -9,7 +9,7 @@
 import { spawnSync } from 'node:child_process';
 import { join } from 'node:path';
 
-import { judgeLint } from './lint-ext-judge.mjs';
+import { judgeLint } from './lib/lint-ext.mjs';
 
 const bin = join('node_modules', 'web-ext', 'bin', 'web-ext.js');
 const run = spawnSync(

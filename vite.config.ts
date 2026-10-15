@@ -10,7 +10,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 
-import { buildGraphGuard } from './scripts/build-graph.mjs';
+import { buildGraphGuard } from './scripts/lib/build-graph.mjs';
 
 // Build target browser, selected via Vite's mode: `vite build --mode
 // chrome|firefox` (a flag, not an env prefix, so the package scripts run
@@ -69,7 +69,7 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       // Fails the build if anything outside src/ (or a non-.ts script)
-      // lands in the module graph. See scripts/build-graph.mjs.
+      // lands in the module graph. See scripts/lib/build-graph.mjs.
       buildGraphGuard({
         root: import.meta.dirname,
         srcDir: resolve(import.meta.dirname, 'src'),

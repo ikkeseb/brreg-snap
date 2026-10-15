@@ -5,8 +5,8 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { findCodegen } from './codegen-scan.mjs';
-import { check, DIST_ROOT, referencedFiles } from './manifest-invariants.mjs';
+import { findCodegen } from './lib/codegen-scan.mjs';
+import { check, DIST_ROOT, referencedFiles } from './lib/manifest-invariants.mjs';
 
 const failures = [];
 const fail = (where, msg) => failures.push(`${where}: ${msg}`);

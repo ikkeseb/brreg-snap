@@ -90,7 +90,7 @@ note before reading the source file.
 | brreg API: regnskap base URL + several years and group (KONSERN) rows, regnskap 500 = not in the open API, error contract (search throws, `[]` = real empty), no signatur, name search matches a dot literally (finn.no misses because FINN was renamed), konsernstruktur (whole group, duplicate parents), annual-report copies + kunngjøringer links, live canary | `src/lib/brreg.ts`, `regnskap.ts`, `konsern.ts`, `aarsregnskap.ts`, `tests/live/` | `docs/notes/brreg-api.md`         |
 | Build/tooling: Vite popup.html relocation, clipboard without `clipboardWrite` | `vite.config.ts`, `src/lib/copy-orgnr.ts` | `docs/notes/build.md`             |
 | Trust view: answer priority, signals (deadline-aware regnskap, rekonstruksjon, NUF), merknader (påtegninger), endringer + the change feed | `src/lib/trust/*.ts`, `src/lib/brreg-endringer.ts`, `company-load.ts` | `docs/notes/trust.md`             |
-| Stores: store-status probe + verdict rules, what AMO/CWS change in a package; listing text lives in `docs/amo-submission.md` / `docs/cws-submission.md` (the kit renders from their anchors) | `scripts/store-status*.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
+| Stores: store-status probe + verdict rules, what AMO/CWS change in a package; listing text lives in `docs/amo-submission.md` / `docs/cws-submission.md` (the kit renders from their anchors) | `scripts/store-status.mjs`, `scripts/lib/store-status.mjs`, `.github/workflows/store-status.yml` | `docs/notes/stores.md`            |
 | UI system: the loudness rule, tokens + type scale, font + CSP, the component inventory (module → API → markup), the a11y contract, the popup's 600 px budget, the Økonomi trend, deviations from the original design, the panel's search view + compact head + tab landing, the badge rule, the welcome page, the brand mark + icon pipeline | `src/styles/brreg.css`, `src/lib/view/{trust-view,dossier-view,trend,copy}.ts`, `src/lib/view/components/*.ts`, `src/popup/views.ts`, `src/details/{painter,tabs}.ts`, `src/welcome/`, `scripts/generate-icons.mjs`, `src/lib/view/mark-data.ts`, `assets/brand/` | `docs/notes/ui.md`                |
 
 UI work starts in `docs/notes/ui.md`. Three rules bite most often:
@@ -126,13 +126,13 @@ never a workaround.
 
 | Rule | Enforced by |
 | --- | --- |
-| No content scripts; no `web_accessible_resources`, `externally_connectable` or any other unlisted manifest key | exact key lists in `scripts/manifest-invariants.mjs`, run on the source manifests by `tests/manifest.test.ts` and on the built ones by `pnpm verify:dist` |
+| No content scripts; no `web_accessible_resources`, `externally_connectable` or any other unlisted manifest key | exact key lists in `scripts/lib/manifest-invariants.mjs`, run on the source manifests by `tests/manifest.test.ts` and on the built ones by `pnpm verify:dist` |
 | Install-time permissions exactly: Firefox `activeTab` + `storage` + `menus`; Chrome `activeTab` + `storage` + `contextMenus` + `sidePanel`. No `<all_urls>`, `cookies`, `webRequest` | same |
 | `tabs` is `optional_permissions` only, requested at runtime (below) | same |
 | `data.brreg.no` is the only host permission | same |
 | CSP is exactly the strict policy: `default-src 'self'`, `base-uri` / `form-action` / `frame-ancestors` all `'none'`, no `'unsafe-inline'`, no remote script hosts | same |
 | Firefox declares `browsingActivity` as required data collection; Chrome ships no gecko block (the CWS privacy tab discloses web history) | `tests/manifest.test.ts` (data collection declaration) |
-| No `eval`, no `Function()`, no remote-loaded code | `src` lint rules in `eslint.config.js` (pinned by `tests/lint-security.test.ts`) and the AST scan of the built JS (`scripts/codegen-scan.mjs`, in `verify:dist`) |
+| No `eval`, no `Function()`, no remote-loaded code | `src` lint rules in `eslint.config.js` (pinned by `tests/lint-security.test.ts`) and the AST scan of the built JS (`scripts/lib/codegen-scan.mjs`, in `verify:dist`) |
 | No HTML sinks (`innerHTML` & co.) in `src`: brreg text is written by the registrants themselves | `src` lint rules, `tests/lint-security.test.ts` |
 
 The `tabs` opt-in flow (a runtime request from the panel's
@@ -145,7 +145,7 @@ declarations read as they do is § data-collection-declaration there.
 Zero runtime dependencies in the shipped bundle (everything is
 inlined TypeScript). `pnpm verify` enforces it: the build fails when
 any module outside `src/`, or any non-`.ts` script, enters the bundle
-graph (`scripts/build-graph.mjs`); ESLint bans non-relative imports in
+graph (`scripts/lib/build-graph.mjs`); ESLint bans non-relative imports in
 `src/`; `verify:dist` fails if `package.json` gains a `dependencies`
 field. Every package is a dev dependency, so `pnpm audit` advisories
 concern the toolchain, not the extension. `@types/node` follows the

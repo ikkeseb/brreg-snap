@@ -140,7 +140,7 @@ Chrome's unpacked load counts as an install. The page itself reads
 only `commands.getAll()` — the user's current shortcut bindings, no
 permission — and makes no request: its two examples are fictional
 view data painted with the shared components. `welcome/` is an
-allowed package root in `scripts/manifest-invariants.mjs`; no manifest
+allowed package root in `scripts/lib/manifest-invariants.mjs`; no manifest
 key points at it.
 
 <!-- SECTION: iframe-not-a-gesture-surface -->

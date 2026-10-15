@@ -7,14 +7,14 @@ import {
   DATA_COLLECTION,
   PERMISSIONS as EXPECTED_PERMISSIONS,
   referencedFiles,
-} from '../scripts/manifest-invariants.mjs';
+} from '../scripts/lib/manifest-invariants.mjs';
 
 // The security model is the product differentiator (AGENTS.md
 // § Security constraints): no content scripts, data.brreg.no as the
 // only host, install-time permissions limited to activeTab/storage/
 // menus (+ Chrome's contextMenus/sidePanel equivalents), `tabs` as
 // runtime opt-in only, and a strict CSP. The invariants live in
-// scripts/manifest-invariants.mjs; these tests pin the SOURCE manifests
+// scripts/lib/manifest-invariants.mjs; these tests pin the SOURCE manifests
 // with it so a violating change fails `pnpm test` locally, and
 // `pnpm verify:dist` re-checks the stamped dist manifests after build.
 //
@@ -54,7 +54,7 @@ const manifests = {
 describe.each(['firefox', 'chrome'] as const)('manifest.%s', (target) => {
   const m = manifests[target];
 
-  it('holds every invariant in scripts/manifest-invariants.mjs', () => {
+  it('holds every invariant in scripts/lib/manifest-invariants.mjs', () => {
     expect(check(m, target, pkg)).toEqual([]);
   });
 

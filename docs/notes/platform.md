@@ -23,7 +23,7 @@ build time (mechanics: `docs/notes/build.md` § dual-browser-build).
 
 Everything else (CSP, host permission, optional `tabs`, action,
 icons) is the same. Each target's shape is pinned in
-`scripts/manifest-invariants.mjs` (run by `tests/manifest.test.ts`,
+`scripts/lib/manifest-invariants.mjs` (run by `tests/manifest.test.ts`,
 `verify:dist` and the package check). Vite's `build.target` follows
 the floors (`vite.config.ts`).
 
@@ -140,7 +140,7 @@ popup and the panel are driven over raw CDP in `tests/e2e/native.ts`).
 Firefox build only: addons-linter rejects the Chrome MV3 manifest
 (`background.service_worker`, no gecko id). The Chrome build is
 covered by `verify:dist` and the smoke's real Chromium load. Allowed
-warnings: `ALLOWED_WARNINGS` in `scripts/lint-ext-judge.mjs`.
+warnings: `ALLOWED_WARNINGS` in `scripts/lib/lint-ext.mjs`.
 
 <!-- SECTION: owned-elsewhere -->
 ## Engine differences documented in other notes

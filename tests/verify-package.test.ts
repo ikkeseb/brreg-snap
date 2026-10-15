@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { crc32, deflateRawSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 
-import { referencedFiles } from '../scripts/manifest-invariants.mjs';
+import { referencedFiles } from '../scripts/lib/manifest-invariants.mjs';
 import { assetNames } from '../scripts/lib/release.mjs';
 import { readZip } from '../scripts/lib/zip.mjs';
 import { checkExtensionZip, checkSourceZip } from '../scripts/verify-package.mjs';
