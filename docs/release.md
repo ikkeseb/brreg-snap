@@ -6,7 +6,8 @@ CHANGELOG entries, the store release notes and the approval click.
 
 ## The flow
 
-1. **Changes land on `main`** with entries under `## [Unreleased]` in
+1. **Changes reach `main`** through `dev` (the branch rule in `AGENTS.md`)
+   with entries under `## [Unreleased]` in
    `CHANGELOG.md`, and CI goes green.
 2. **`pnpm release X.Y.Z`** (on `main`, clean tree, up to date with
    origin, CI green for `HEAD`, a non-empty `[Unreleased]`). It sets
