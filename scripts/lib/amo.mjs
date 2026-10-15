@@ -223,6 +223,10 @@ export async function publishAmo(o) {
   const log = o.log ?? console.log;
   const now = o.now ?? Date.now;
   const sleep = o.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+  // Every request shares the injected clock, so a throttled one (HTTP 429)
+  // waits on the same sleep as the polling.
+  /** @type {(method: string, url: string, init?: Parameters<typeof call>[3]) => ReturnType<typeof call>} */
+  const send = (method, url, init) => call(o.fetch, method, url, { ...init, sleep, now });
   const pollMs = o.pollMs ?? 5000;
   const timeoutMs = o.timeoutMs ?? 15 * 60_000;
   const missing = missingAmoSecrets(o.env);
@@ -269,7 +273,7 @@ export async function publishAmo(o) {
   up.set('upload', new File([o.pkg.bytes], o.pkg.name, { type: 'application/zip' }));
   up.set('channel', 'listed');
   log(`  1. upload ${describe(o.pkg)}`);
-  const upload = await call(o.fetch, 'POST', `${AMO_API}upload/`, { headers: headers(), body: up });
+  const upload = await send('POST', `${AMO_API}upload/`, { headers, body: up });
   const uuid = String(upload.uuid ?? '');
   if (!uuid) throw new Error(`AMO upload: no uuid in the response: ${JSON.stringify(upload)}`);
 
@@ -279,7 +283,7 @@ export async function publishAmo(o) {
   while (!detail.processed) {
     if (now() > deadline) throw new Error(`AMO validation of upload ${uuid} did not finish in ${timeoutMs / 60_000} min`);
     await sleep(pollMs);
-    detail = await call(o.fetch, 'GET', `${AMO_API}upload/${uuid}/`, { headers: headers() });
+    detail = await send('GET', `${AMO_API}upload/${uuid}/`, { headers });
   }
   const messages = detail.validation?.messages ?? [];
   for (const m of messages) log(`     ${m.type ?? 'message'}: ${stripTags(m.message)}${m.file ? ` (${m.file})` : ''}`);
@@ -287,8 +291,8 @@ export async function publishAmo(o) {
   log(`  2. validated (${messages.length} messages)`);
 
   // 3. Version.
-  const created = await call(o.fetch, 'POST', `${AMO_API}addon/${o.guid}/versions/`, {
-    headers: headers({ 'Content-Type': 'application/json' }),
+  const created = await send('POST', `${AMO_API}addon/${o.guid}/versions/`, {
+    headers: () => headers({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ ...versionBody, upload: uuid }),
   });
   const versionId = Number(created.id);
@@ -299,7 +303,7 @@ export async function publishAmo(o) {
   const src = new FormData();
   src.set('source', new File([o.source.bytes], o.source.name, { type: 'application/zip' }));
   try {
-    await call(o.fetch, 'PATCH', `${AMO_API}addon/${o.guid}/versions/${versionId}/`, { headers: headers(), body: src });
+    await send('PATCH', `${AMO_API}addon/${o.guid}/versions/${versionId}/`, { headers, body: src });
   } catch (err) {
     throw new Error(
       `AMO version ${o.version} (id ${versionId}) exists, but attaching the source failed. ` +
@@ -320,6 +324,7 @@ export async function publishAmo(o) {
  *   fetch: import('./publish.mjs').Fetch,
  *   dryRun: boolean,
  *   log?: (line: string) => void,
+ *   sleep?: (ms: number) => Promise<void>,
  *   now?: () => number,
  * }} ListingOptions
  */
@@ -336,6 +341,11 @@ export async function publishAmo(o) {
 export async function syncAmoListing(o) {
   const log = o.log ?? console.log;
   const now = o.now ?? Date.now;
+  const sleep = o.sleep ?? ((ms) => new Promise((r) => setTimeout(r, ms)));
+  // Every request shares the injected clock, so a throttled one (HTTP 429)
+  // waits on the same sleep as the polling.
+  /** @type {(method: string, url: string, init?: Parameters<typeof call>[3]) => ReturnType<typeof call>} */
+  const send = (method, url, init) => call(o.fetch, method, url, { ...init, sleep, now });
   const missing = missingAmoSecrets(o.env);
   const addonUrl = `${AMO_API}addon/${o.guid}/`;
   const policyUrl = `${addonUrl}eula_policy/`;
@@ -373,8 +383,8 @@ export async function syncAmoListing(o) {
   let live;
   try {
     live = {
-      ...(await call(o.fetch, 'GET', addonUrl, { headers: accept })),
-      ...(await call(o.fetch, 'GET', policyUrl, { headers: accept })),
+      ...(await send('GET', addonUrl, { headers: accept })),
+      ...(await send('GET', policyUrl, { headers: accept })),
     };
   } catch (err) {
     throw new Error(`could not read the live listing, so nothing was sent.\n${err.message}`, { cause: err });
@@ -390,10 +400,10 @@ export async function syncAmoListing(o) {
     const jwt = signHs256({ iss: issuer, jti: newJti(), iat, exp: iat + 60 }, secret);
     return { Authorization: `JWT ${jwt}`, Accept: 'application/json', 'Content-Type': 'application/json' };
   };
-  await call(o.fetch, 'PATCH', addonUrl, { headers: headers(), body: JSON.stringify(addon) });
+  await send('PATCH', addonUrl, { headers, body: JSON.stringify(addon) });
   log('  1. name, summary, description and categories updated');
   try {
-    await call(o.fetch, 'PATCH', policyUrl, { headers: headers(), body: JSON.stringify(policy) });
+    await send('PATCH', policyUrl, { headers, body: JSON.stringify(policy) });
   } catch (err) {
     throw new Error(`AMO listing text was updated, but the privacy policy was not.\n${err.message}`, { cause: err });
   }

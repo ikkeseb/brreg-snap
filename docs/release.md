@@ -98,6 +98,10 @@ CHANGELOG entries, the store release notes and the approval click.
   the other still runs. A store whose `*-submission-X.Y.Z` tag exists
   is skipped too, so re-running after a partial failure only retries
   the store that didn't go up.
+- A throttled request (HTTP 429) is sent again after the wait the store
+  names (at most three times, never for a wait over 120 s). If the
+  listing sync still fails, re-run it alone: the version step is
+  skipped once `amo-submission-X.Y.Z` exists.
 - AMO creates the version before attaching the source. If only the
   source step failed, the log says so: upload the source zip on the
   version's page in the AMO Developer Hub, then create the tag by hand
