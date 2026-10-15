@@ -39,10 +39,10 @@ import type { ManualSearchController } from '../lib/ui/manual-search.js';
 import { rejectChoice } from '../lib/ui/picker.js';
 import { getRecent, pushRecent } from '../lib/ui/recent.js';
 import {
+  hostOf,
   resolveTabContext,
   UNKNOWN_URL_METHOD,
   type ResolutionMethod,
-  type TabContext,
 } from '../lib/ui/resolve-tab.js';
 import { focusElement, liveRegionOf } from '../lib/view/components/live.js';
 import { COPY, reportHref } from '../lib/view/copy.js';
@@ -211,6 +211,17 @@ function showLoading(orgnr: string): void {
   repaint = lastLoad;
   paintLoading(roots, host, { onSearch });
   roots.live.announce(COPY.loadingOrgnr(orgnrText(orgnr).spaced));
+}
+
+// The tab's host is known before the resolution cascade's first round
+// trip: the skeleton goes up under the masthead at once instead of a
+// blank strip. The search view opened over it returns to a re-run.
+function showResolving(rerun: () => void): void {
+  dropSearch();
+  searchOpen = false;
+  repaint = rerun;
+  paintLoading(roots, host, { onSearch });
+  roots.live.announce(COPY.loading);
 }
 
 function showResult(view: TrustView, opts: { focus: boolean; reveal: boolean }): void {
@@ -492,15 +503,15 @@ async function refresh(): Promise<void> {
 
 // --- init -----------------------------------------------------------------------
 
-async function resolveFromActiveTab(): Promise<TabContext> {
+// The active tab's own fields, no network: its ids, title and host.
+async function readActiveTab(): Promise<{ url: string; title: string }> {
   const tabs = await browser.tabs.query({ active: true, currentWindow: true });
   const tab = tabs[0];
   windowId = tab?.windowId;
   tabId = tab?.id;
   tabTitle = tab?.title || undefined;
-  const ctx = await resolveTabContext(tab?.url ?? '', tab?.title ?? '');
-  host = ctx.host;
-  return ctx;
+  host = hostOf(tab?.url ?? '');
+  return { url: tab?.url ?? '', title: tab?.title ?? '' };
 }
 
 async function init(opts: { focus: boolean }): Promise<void> {
@@ -509,8 +520,12 @@ async function init(opts: { focus: boolean }): Promise<void> {
   // replaced by the host's late answer.
   const myRunId = claim();
   try {
-    const ctx = await resolveFromActiveTab();
+    const tab = await readActiveTab();
     if (stale(myRunId)) return;
+    if (host) showResolving(() => void init(opts));
+    const ctx = await resolveTabContext(tab.url, tab.title);
+    if (stale(myRunId)) return;
+    host = ctx.host;
     if (ctx.orgnr) {
       await loadAndRender(ctx.orgnr, ctx.method, opts);
       return;

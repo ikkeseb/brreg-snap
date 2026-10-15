@@ -32,7 +32,8 @@ export interface TabContext {
   degraded?: boolean;
 }
 
-function hostOf(url: string): string | undefined {
+// The hostname of a tab URL; undefined for none or an unparsable one.
+export function hostOf(url: string): string | undefined {
   if (!url) return undefined;
   try {
     return new URL(url).hostname || undefined;
