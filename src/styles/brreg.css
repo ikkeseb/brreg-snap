@@ -529,7 +529,7 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
    The registry's own words, quoted verbatim with their date, warn tone. */
 .notes { margin: 18px var(--gut) 0; }
 .notes > * + * { margin-top: 16px; }
-.note-head { display: flex; align-items: center; gap: 8px; font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
+.note-head { display: flex; align-items: center; gap: 10px; font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3); }
 .note-head .glyph { color: var(--tone); }
 .quote { margin-top: 8px; padding: 2px 0 2px 14px; border-left: 2px solid var(--tone); }
 .quote p { color: var(--ink); line-height: 1.5; }
@@ -537,7 +537,7 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .quote p::after { content: "»"; }
 .quote__date { margin-top: 6px; padding-left: 16px; color: var(--ink-2); }
 .changes { margin-top: 8px; border-top: 1px solid var(--rule); }
-.changes li { display: grid; grid-template-columns: 86px minmax(0, 1fr); gap: 0 12px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+.changes li { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 0 8px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
 .changes time { color: var(--ink-2); }
 .changes span { color: var(--ink-2); }
 .changes b { color: var(--ink); }
