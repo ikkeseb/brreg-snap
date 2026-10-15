@@ -9,18 +9,15 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 21231
+              "path": "/antallAnsatte"
             },
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-10-13"
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
             },
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-10-10"
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
             }
           ],
           "endringstype": "Endring",
@@ -32,18 +29,15 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-09-14"
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
             },
             {
               "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 21272
+              "path": "/antallAnsatte"
             },
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-09-10"
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
             }
           ],
           "endringstype": "Endring",
@@ -55,8 +49,7 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/sisteInnsendteAarsregnskap",
-              "value": "2025"
+              "path": "/sisteInnsendteAarsregnskap"
             }
           ],
           "endringstype": "Endring",
@@ -68,18 +61,15 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-08-12"
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
             },
             {
               "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 21239
+              "path": "/antallAnsatte"
             },
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-08-10"
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
             }
           ],
           "endringstype": "Endring",
@@ -91,18 +81,15 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-07-15"
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
             },
             {
               "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 21393
+              "path": "/antallAnsatte"
             },
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-07-10"
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
             }
           ],
           "endringstype": "Endring",
@@ -114,23 +101,19 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/vedtektsdato",
-              "value": "2026-05-12"
+              "path": "/vedtektsdato"
             },
             {
               "op": "replace",
-              "path": "/kapital/antallAksjer",
-              "value": 2390749040
+              "path": "/kapital/antallAksjer"
             },
             {
               "op": "replace",
-              "path": "/kapital/innfortDato",
-              "value": "2026-07-02"
+              "path": "/kapital/innfortDato"
             },
             {
               "op": "replace",
-              "path": "/kapital/belop",
-              "value": 5976872600
+              "path": "/kapital/belop"
             }
           ],
           "endringstype": "Endring",
@@ -142,18 +125,15 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-06-13"
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
             },
             {
               "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 21467
+              "path": "/antallAnsatte"
             },
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-06-10"
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
             }
           ],
           "endringstype": "Endring",
@@ -165,18 +145,15 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-05-12"
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
             },
             {
               "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 21327
+              "path": "/antallAnsatte"
             },
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-05-10"
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
             }
           ],
           "endringstype": "Endring",

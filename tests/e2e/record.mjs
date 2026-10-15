@@ -51,13 +51,9 @@ function anonymise(node, counter = { n: 0 }) {
       if (text in node) node[text] = ['Eksempelaktivitet.'];
     }
   }
-  // A change-feed patch (`{ op, path, value }`) names its field in the
-  // path, not in a key: `/postadresse/adresse/0` carries a bare line.
-  if (typeof node.path === 'string' && 'value' in node) {
-    const field = node.path.split('/').filter((s) => !/^(\d+|-)$/.test(s)).pop();
-    const fake = field && node.value !== null && fictitious(field, node.value);
-    if (fake) node.value = fake;
-  }
+  // A change-feed patch (`{ op, path, value }`) can carry any field's
+  // new value, a person's included; the extension reads only op and path.
+  if (typeof node.op === 'string' && typeof node.path === 'string') delete node.value;
   for (const [key, value] of Object.entries(node)) {
     const fake = fictitious(key, value);
     if (fake) node[key] = fake;

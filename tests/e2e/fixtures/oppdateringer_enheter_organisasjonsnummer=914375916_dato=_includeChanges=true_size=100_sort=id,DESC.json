@@ -9,57 +9,35 @@
           "endringer": [
             {
               "op": "add",
-              "path": "/postadresse",
-              "value": {
-                "land": "Norge",
-                "landkode": "NO",
-                "postnummer": "0201",
-                "poststed": "OSLO",
-                "adresse": [
-                  "Eksempelveien 1"
-                ],
-                "kommune": "OSLO",
-                "kommunenummer": "0301"
-              }
+              "path": "/postadresse"
             },
             {
               "op": "replace",
-              "path": "/forretningsadresse/postnummer",
-              "value": "0256"
+              "path": "/forretningsadresse/postnummer"
             },
             {
               "op": "replace",
-              "path": "/forretningsadresse/adresse/0",
-              "value": "Eksempelveien 1"
+              "path": "/forretningsadresse/adresse/0"
             },
             {
               "op": "replace",
-              "path": "/vedtektsdato",
-              "value": "2026-07-01"
+              "path": "/vedtektsdato"
             },
             {
               "op": "replace",
-              "path": "/navn",
-              "value": "TOLLBUGATA 17 OSLO AS"
+              "path": "/navn"
             },
             {
               "op": "replace",
-              "path": "/vedtektsfestetFormaal/0",
-              "value": "Å eie, drive utleie og utvikling av fast eiendom, og alt annet som"
+              "path": "/vedtektsfestetFormaal/0"
             },
             {
               "op": "replace",
-              "path": "/vedtektsfestetFormaal/1",
-              "value": "står i naturlig forbindelse med dette."
+              "path": "/vedtektsfestetFormaal/1"
             },
             {
               "op": "add",
-              "path": "/historiskeNavn/-",
-              "value": {
-                "navn": "OPULENS NÆRING 4 AS",
-                "fraDato": "2014-10-29 14:14:38",
-                "tilDato": "2026-09-01 12:29:08"
-              }
+              "path": "/historiskeNavn/-"
             }
           ],
           "endringstype": "Endring",
@@ -79,8 +57,7 @@
             },
             {
               "op": "replace",
-              "path": "/harRegistrertAntallAnsatte",
-              "value": false
+              "path": "/harRegistrertAntallAnsatte"
             }
           ],
           "endringstype": "Endring",
@@ -92,8 +69,7 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/sisteInnsendteAarsregnskap",
-              "value": "2025"
+              "path": "/sisteInnsendteAarsregnskap"
             }
           ],
           "endringstype": "Endring",
@@ -105,18 +81,15 @@
           "endringer": [
             {
               "op": "add",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-06-11"
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
             },
             {
               "op": "add",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-06-10"
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
             },
             {
               "op": "replace",
-              "path": "/harRegistrertAntallAnsatte",
-              "value": true
+              "path": "/harRegistrertAntallAnsatte"
             }
           ],
           "endringstype": "Endring",

@@ -21,8 +21,7 @@
             },
             {
               "op": "replace",
-              "path": "/harRegistrertAntallAnsatte",
-              "value": false
+              "path": "/harRegistrertAntallAnsatte"
             }
           ],
           "endringstype": "Endring",
@@ -42,8 +41,7 @@
             },
             {
               "op": "replace",
-              "path": "/registrertIMvaregisteret",
-              "value": false
+              "path": "/registrertIMvaregisteret"
             }
           ],
           "endringstype": "Endring",
@@ -55,13 +53,11 @@
           "endringer": [
             {
               "op": "add",
-              "path": "/konkursdato",
-              "value": "2026-08-26"
+              "path": "/konkursdato"
             },
             {
               "op": "replace",
-              "path": "/konkurs",
-              "value": true
+              "path": "/konkurs"
             }
           ],
           "endringstype": "Endring",
@@ -73,18 +69,15 @@
           "endringer": [
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret",
-              "value": "2026-06-11"
+              "path": "/registreringsdatoAntallAnsatteEnhetsregisteret"
             },
             {
               "op": "replace",
-              "path": "/antallAnsatte",
-              "value": 8
+              "path": "/antallAnsatte"
             },
             {
               "op": "replace",
-              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret",
-              "value": "2026-06-10"
+              "path": "/registreringsdatoAntallAnsatteNAVAaregisteret"
             }
           ],
           "endringstype": "Endring",
