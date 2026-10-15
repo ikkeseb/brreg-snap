@@ -11,10 +11,10 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 - Økonomi shows how the company has done over the last few years:
   «Utvikling 2022–2024», driftsinntekter and årsresultat for up to
   three years in aligned columns, with the unit once beside each label,
-  and one plain sentence per row («Driftsinntekter ned 26 %, høyest i
-  2024.»). A year with a loss is always named, and a sentence never
-  claims more than the years on screen show. A latest filing without
-  figures still shows the years before it.
+  and a plain sentence under them («Driftsinntekter ned 26 %, høyest i
+  2024.») that also says when the result turned from profit to loss or
+  back. A sentence never claims more than the years on screen show. A
+  latest filing without figures still shows the years before it.
 
 ### Changed
 
