@@ -334,7 +334,7 @@ export const COPY = {
   welcome: {
     title: 'Velkommen til brreg-snap',
     head: 'Hvem står bak nettsiden?',
-    lead: 'brreg-snap slår opp selskapet bak siden du ser på i Brønnøysundregistrene, og sier fra når noe er galt.',
+    lead: 'brreg-snap slår opp bedriften bak siden i Brønnøysundregistrene: org.nr, status, ledelse, regnskap, konsern og eventuelle varsler.',
     // The two fictional examples; the tag says so on the card itself.
     exampleTag: 'Oppdiktet eksempel',
     calm: 'Rolig når alt er i orden',
@@ -352,7 +352,7 @@ export const COPY = {
     menuHead: 'Høyreklikk',
     menuText: 'Marker et navn eller org.nr på en side, høyreklikk og velg «Slå opp «…» i brreg-snap».',
     privacy:
-      'Bare domenet til siden du er på sendes til Brønnøysundregistrene (data.brreg.no). Ingenting går til utvikleren. Ingen konto, ingen sporing.',
+      'Oppslagene går bare til Brønnøysundregistrene (data.brreg.no), med domenet til siden og navn utledet av det, et organisasjonsnummer eller tekst du selv søker på eller velger å slå opp. Ingenting går til utvikleren. Ingen konto, ingen sporing.',
     source: 'Kildekode på GitHub',
     sourceUrl: 'https://github.com/ikkeseb/brreg-snap',
   },

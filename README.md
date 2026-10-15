@@ -1,16 +1,19 @@
 # brreg-snap
 
-Sjekk hvem som står bak en norsk nettbutikk. Ett klikk viser bedriften
-bak siden du er på, hvordan siden henger sammen med den, og om
-Brønnøysundregistrene har noe å advare om.
+Oppslag i Brønnøysundregistrene, rett fra nettsiden du er på.
+brreg-snap slår opp bedriften bak siden, viser hvordan siden henger
+sammen med den, og henter det viktigste fra registeret: org.nr,
+status, ledelse, regnskap, konsern og eventuelle varsler.
 
 **Installer:** [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/brreg-snap/) (Firefox 115 eller nyere)
 · [Chrome Web Store](https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokhakeijmbafhdmli) (Chrome 116 eller nyere)
 
 ![brreg-snap på dnb.no: DNB BANK ASA, ingen varsler i registeret, dnb.no er registrert hjemmeside (eksempeldata)](docs/screenshots/01-lookup.png)
 
-*A Firefox and Chrome extension that shows which Norwegian company is
-behind the site you are on, from the public Brønnøysund register.*
+*A Firefox and Chrome extension for lookups in Norway's Brønnøysund
+Register Centre, right from the site you are on: the company behind
+it, its organisation number, status, management, accounts, group and
+any registry warnings.*
 
 ## Hva du ser
 

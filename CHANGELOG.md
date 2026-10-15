@@ -6,6 +6,13 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Changed
+
+- The welcome page leads with the lookup itself: «brreg-snap slår opp
+  bedriften bak siden i Brønnøysundregistrene: org.nr, status, ledelse,
+  regnskap, konsern og eventuelle varsler.», instead of a line that
+  ended «… og sier fra når noe er galt.»
+
 ## [1.6.0] — 2026-10-15
 
 ### Added
