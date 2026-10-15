@@ -83,8 +83,10 @@ export interface ErrorPaint {
 }
 
 export interface PanelPainter {
-  // The skeleton, with `orgnr` in the live status («Henter …»).
-  loading(orgnr: string): void;
+  // The skeleton, with `orgnr` in the live status («Henter …»). Its
+  // ledger has the Kobling row only when the result will
+  // (koblingInPlay), so nothing jumps when the data lands.
+  loading(orgnr: string, opts: { kobling: boolean }): void;
   result(paint: ResultPaint): void;
   provenance(paint: ProvenancePaint): void;
   // The candidates for `host`. The painter's picker persists the

@@ -169,7 +169,7 @@ describe('load races', () => {
     const { controller, painter, pending, shownOrgnrs } = setup({ manualLoads: true });
     controller.follow(companyView(DNB, 'www.dnb.no'));
     controller.follow(companyView(EQUINOR, 'www.equinor.com'));
-    expect(vi.mocked(painter.loading).mock.calls).toEqual([[DNB], [EQUINOR]]);
+    expect(vi.mocked(painter.loading).mock.calls.map(([orgnr]) => orgnr)).toEqual([DNB, EQUINOR]);
 
     // The older fetch lands first, then the newer one.
     pending[0]!.resolve(company(DNB));
@@ -227,6 +227,28 @@ describe('what the panel loads', () => {
     intents.back();
     await settle();
     expect(deps.loadCompany).toHaveBeenLastCalledWith(DNB, PANEL_LOAD_OPTIONS);
+  });
+
+  it('the skeleton has a Kobling row only when the result will', async () => {
+    const { controller, intents, painter } = setup();
+    const kobling = () => vi.mocked(painter.loading).mock.calls.at(-1)![1].kobling;
+    // A site in play: the result carries a Kobling row.
+    controller.follow(companyView(DNB, 'dnb.no'));
+    await settle();
+    expect(kobling()).toBe(true);
+    // A drill-in, an org.nr with no site, a manual pick: none.
+    intents.drill(EQUINOR);
+    await settle();
+    expect(kobling()).toBe(false);
+    intents.back();
+    await settle();
+    expect(kobling()).toBe(true);
+    controller.follow(companyView(EQUINOR));
+    await settle();
+    expect(kobling()).toBe(false);
+    intents.manual(DNB);
+    await settle();
+    expect(kobling()).toBe(false);
   });
 
   it('«Oppdater» never reuses a tree: everything is refetched', async () => {

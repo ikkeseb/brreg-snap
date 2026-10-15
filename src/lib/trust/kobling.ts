@@ -71,16 +71,24 @@ function kobling(
   return out;
 }
 
-// undefined when there is no site in play: a manual pick, an in-panel
-// drill-in, or no host (a panel hint, a restored history entry).
+// Whether a site is in play, so a Kobling row will be derived: not for
+// a manual pick, an in-panel drill-in, or no host (a panel hint, a
+// restored history entry). The panel's skeleton asks before the data
+// lands, so the rows that shimmer are the rows that land.
+export function koblingInPlay(
+  method: ResolutionMethod | undefined,
+  host: string | undefined,
+): host is string {
+  return !!host && !!method && method !== 'manual' && method !== 'drill-in';
+}
+
+// undefined when there is no site in play (koblingInPlay).
 export function deriveKobling({
   method,
   host,
   enhet,
 }: KoblingInput): Kobling | undefined {
-  if (!host || !method || method === 'manual' || method === 'drill-in') {
-    return undefined;
-  }
+  if (!koblingInPlay(method, host)) return undefined;
   const bare = host.toLowerCase().replace(/\.+$/, '').replace(/^www\./, '');
   if (!bare) return undefined;
   const hostDomain = registrableDomain(host) ?? bare;
