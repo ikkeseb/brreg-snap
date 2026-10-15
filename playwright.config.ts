@@ -40,7 +40,10 @@ export default defineConfig({
     ...harness('panel-400', '@panel', 400, 800),
     // Real unpacked load of dist-chrome (own persistent context): the
     // pages, then a toolbar click through the popup to the side panel.
-    { name: 'extension', testMatch: 'extension.spec.ts' },
+    // Each test launches and closes its own Chromium inside the test
+    // timeout, and under load the close alone has passed the 30 s
+    // default; the side panel's first paint has passed expect's 5 s.
+    { name: 'extension', testMatch: 'extension.spec.ts', timeout: 60_000, expect: { timeout: 15_000 } },
   ],
   webServer: {
     command: `node scripts/preview/serve.mjs --fixtures tests/e2e/fixtures --port ${process.env.SMOKE_PORT}`,

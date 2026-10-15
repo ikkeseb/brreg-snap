@@ -143,10 +143,6 @@ describe('src is TypeScript only', () => {
 });
 
 describe('the fast path stays the real config', () => {
-  // Type-aware: the first lint builds the TypeScript program cold, about
-  // a second on a quiet machine and several on a loaded one.
-  const typeAware = { timeout: 20_000 };
-
   // One per rule family, linted through `real` exactly as `pnpm lint`
   // would: the named rule must fire, and `fast` must report the same.
   // (The TypeScript-only family already runs through `real` above.)
@@ -158,13 +154,13 @@ describe('the fast path stays the real config', () => {
     ['no-restricted-syntax', 'an HTML sink', 'src/lib/orgnr.ts', header + 'el.innerHTML = v;'],
     ['no-restricted-syntax', '.constructor', 'src/lib/orgnr.ts', header + 'void (() => undefined).constructor;'],
     ['no-restricted-syntax', 'a package import', 'src/lib/orgnr.ts', "import x from 'not-a-dependency'; void x;"],
-  ])('real config: %s fires on %s', typeAware, async (rule, _name, file, code) => {
+  ])('real config: %s fires on %s', async (rule, _name, file, code) => {
     const got = await findings(code, file, real);
     expect(got.some((f) => f.startsWith(`${rule}: `))).toBe(true);
     expect(await findings(code, file)).toEqual(got);
   });
 
-  it('real config: a clean src file has no findings', typeAware, async () => {
+  it('real config: a clean src file has no findings', async () => {
     expect(
       await findings(header + "el.textContent = v; el.setAttribute('aria-label', v);", 'src/lib/orgnr.ts', real),
     ).toEqual([]);
