@@ -14,11 +14,12 @@ store) and GitHub Releases. Store state is never written down; run
 `pnpm store-status` (`--deep` compares the served packages with the
 Release).
 
-- `main` is the only branch that lives. One maintainer, so work lands
-  on `main` directly once `pnpm verify` is green (the pre-push hook
-  enforces it); a branch + PR is for when you want CI's browser smoke
-  before `main`, not a requirement. CI still runs smoke on every push to
-  `main`: a red smoke there is fixed forward first.
+- Work lands on `dev`: a feature branch merges into `dev` once reviewed
+  and `pnpm verify` is green (the pre-push hook enforces it). `dev` →
+  `main` only on the maintainer's explicit word; releases are cut from
+  `main` (`docs/release.md`). CI runs the gate and the browser smoke on
+  every push and PR to `main` and `dev`: a red smoke there is fixed
+  forward first.
 - The one public contact, everywhere: `sebastian@nuez.no`.
 - Releasing and store publishing (`pnpm release`, the generated
   submission kit, `release.yml`, `publish.yml`): `docs/release.md`.
