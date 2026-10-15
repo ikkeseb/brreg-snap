@@ -593,7 +593,7 @@ describe('picker', () => {
     const main = document.createElement('main');
     document.body.appendChild(main);
     const handlers = { onPick: vi.fn(), onNone: vi.fn(), onSearchSelect: vi.fn(), announce: vi.fn() };
-    const picker = renderPicker(main, { site: 'dnb.no', candidates, query: 'dnb' }, handlers);
+    const picker = renderPicker(main, { site: 'dnb.no', candidates }, handlers);
     return { main, handlers, picker };
   }
   const press = (key: string, target: EventTarget = document.body) => {
@@ -617,7 +617,9 @@ describe('picker', () => {
     expect(rows[1]!.querySelector('.status-mark')?.textContent).toBe('Konkurs');
     expect(rows[2]!.textContent).toBe(`0${COPY.none}`);
     expect(picker.firstRow).toBe(rows[0]);
-    expect(picker.input.value).toBe('dnb');
+    // The field starts empty: the rows are the search for the site's name.
+    expect(picker.input.value).toBe('');
+    expect(main.querySelector('.results')?.closest('section')?.hidden).toBe(true);
     expect(main.querySelector('label.field-label')?.textContent).toBe(COPY.searchYourself);
     expect(main.querySelector<HTMLLabelElement>('label.field-label')?.htmlFor).toBe(picker.input.id);
   });
@@ -633,7 +635,6 @@ describe('picker', () => {
           { ...(enhetKonkurs as unknown as Candidate), evidence: 'navn' },
           { ...(enhetDnb as unknown as Candidate), evidence: 'side' },
         ],
-        query: 'nrk',
       },
       { onPick: vi.fn(), onNone: vi.fn(), onSearchSelect: vi.fn(), announce: vi.fn() },
     );

@@ -18,7 +18,6 @@
 // half-read page survive (the footer's freshness row steps aside with
 // it). Any paint from the controller discards it.
 
-import { hostnameLabel } from '../lib/hostname-score.js';
 import type { Candidate, RememberedChoice } from '../lib/hostname-search.js';
 import { describeLoadFailure } from '../lib/ui/error-message.js';
 import { attachManualSearch } from '../lib/ui/manual-search.js';
@@ -753,7 +752,7 @@ export function createPanelPainter(
     };
     return renderPicker(
       main,
-      { site: siteName(host), candidates, query: hostnameLabel(host) ?? siteName(host) },
+      { site: siteName(host), candidates },
       {
         onPick: (orgnr) => choose(orgnr, () => intents.pick(host, orgnr)),
         onNone: () => choose(null, () => intents.none(host)),

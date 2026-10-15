@@ -710,6 +710,7 @@ describe('loading, error, empty, picker', () => {
     expect(app().dataset.state).toBe('picker');
     expect(document.body.dataset.answer).toBe('pick');
     expect(q('.pick-head h1')?.textContent).toBe('Fant ikke selskapet bak nrk.no');
+    expect(q<HTMLInputElement>('.pick-search input')?.value).toBe('');
     const first = q<HTMLButtonElement>('button.pick')!;
     expect(document.activeElement).toBe(first);
     first.click();

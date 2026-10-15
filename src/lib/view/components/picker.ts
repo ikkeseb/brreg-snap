@@ -1,6 +1,6 @@
 // The picker: a head that says what the rows are, up to four candidate
-// rows with a digit shortcut each, «Ingen av disse» (0), and a
-// prefilled «Eller søk selv» field. Digit keys are scoped to the picker:
+// rows with a digit shortcut each, «Ingen av disse» (0), and an
+// empty «Eller søk selv» field. Digit keys are scoped to the picker:
 // one document listener per document, replaced by the next picker
 // rendered there, that bails while this picker's list is not in the
 // document — detached, not gone: the panel's search view keeps the
@@ -24,8 +24,6 @@ export interface PickerData {
   // The site's display name («nrk.no»).
   site: string;
   candidates: readonly Candidate[];
-  // What the search field is prefilled with (the hostname label).
-  query: string;
 }
 
 export interface PickerHandlers {
@@ -135,7 +133,10 @@ export function renderPicker(
   container.appendChild(list);
 
   const searchWrap = el('div', 'pick-search');
-  const field = buildSearchField({ large: true, value: data.query, label: COPY.searchYourself });
+  // Empty: the rows above already are the search for the site's name,
+  // and a filled box with no hits under it reads as a search that
+  // found nothing.
+  const field = buildSearchField({ large: true, label: COPY.searchYourself });
   searchWrap.appendChild(field.root);
   container.appendChild(searchWrap);
   const results = buildListSection(COPY.results);
