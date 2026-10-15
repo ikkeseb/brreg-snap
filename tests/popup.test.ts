@@ -90,6 +90,10 @@ const waitState = (s: string) => vi.waitFor(() => expect(state()).toBe(s));
 const byText = (text: string): HTMLElement | undefined =>
   [...document.querySelectorAll<HTMLElement>('button, a')].find((el) => el.textContent?.trim() === text);
 
+// Every boot re-imports the popup module cold (`vi.resetModules`), and on a
+// loaded machine that first transform has run past Vitest's 5 s default.
+vi.setConfig({ testTimeout: 30_000 });
+
 async function boot(tab: unknown = DNB_TAB): Promise<ReturnType<typeof fakeBrowser>> {
   // A fresh controller instance per boot (the module runs init on import).
   vi.resetModules();
