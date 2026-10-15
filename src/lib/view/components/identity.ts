@@ -6,7 +6,7 @@
 import { COPY } from '../copy.js';
 import type { IdentityView } from '../trust-view.js';
 import { attachCopy, type CopyHandlers } from './copy-feedback.js';
-import { button, el, icon, link } from './dom.js';
+import { appendName, button, el, icon, link } from './dom.js';
 
 export interface Identity {
   // The <h1>, for focus after a user-initiated transition.
@@ -91,7 +91,15 @@ export function renderIdentity(
   }
 
   if (identity.avdeling) {
-    container.appendChild(el('p', 'ident__note', identity.avdeling));
+    // The branch is named after the company above it: the name in ink
+    // like the leaders line's, its shared prefix receding as in
+    // Enheter, so «AVD ALTA» reads first.
+    const note = el('p', 'ident__note', COPY.avdelingLabel);
+    const name = el('b');
+    appendName(name, identity.avdeling.name, identity.name);
+    note.appendChild(name);
+    note.append(COPY.avdelingOrgnr(identity.avdeling.orgnr));
+    container.appendChild(note);
   }
 
   return { heading };

@@ -65,8 +65,9 @@ export interface IdentityView {
   leaders: Array<{ label: string; name: string }>;
   // Panel: quiet registry flags + secondary statuses, «·»-joined.
   flags: string;
-  // The orgnr looked up was an underenhet; this is its parent.
-  avdeling?: string;
+  // The orgnr looked up was an underenhet (the company shown is its
+  // parent): the branch's name and its spaced org.nr.
+  avdeling?: { name: string; orgnr: string };
 }
 
 export type AnswerAction =
@@ -609,10 +610,10 @@ export function buildTrustView(input: TrustViewInput): TrustView {
     identity.flags = [...secondary, ...deriveRegistryFlags(enhet)].join(' · ');
   }
   if (company.avdeling) {
-    identity.avdeling = COPY.avdeling(
-      company.avdeling.navn,
-      orgnrText(company.avdeling.organisasjonsnummer).spaced,
-    );
+    identity.avdeling = {
+      name: company.avdeling.navn,
+      orgnr: orgnrText(company.avdeling.organisasjonsnummer).spaced,
+    };
   }
 
   // --- konsern, notes
