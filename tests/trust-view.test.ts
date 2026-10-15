@@ -300,9 +300,10 @@ describe('stampOf — pinned against the danger headlines the answer builder pro
     }
   });
 
-  it('covers every status the flags code can call danger', () => {
-    // All status booleans and dates on at once: every flag the code can
-    // derive shows up, so a new danger label cannot slip past the matrix.
+  it('covers every danger status the current Enhet status fields raise', () => {
+    // All status booleans and dates on at once: a new danger label on one
+    // of these fields cannot slip past the matrix. A status driven by a
+    // field not listed here can: extend this object when one is added.
     const everything = {
       ...(enhetKonkurs as object),
       slettedato: '2026-01-01',
