@@ -114,7 +114,8 @@ Removing the extension deletes all of it.
   because the domain of the site you look up is sent to
   Brønnøysundregistrene. It goes only to that public registry, never
   to the developer.
-- **Chrome Web Store** lists the same data as «Web history».
+- **Chrome Web Store** lists the same data as «Web history», and the
+  text you select and choose to look up as «Website content».
   brreg-snap's use of information received from Chrome extension APIs
   adheres to the Chrome Web Store User Data Policy, including the
   Limited Use requirements. The data is used only to show you the

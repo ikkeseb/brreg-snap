@@ -94,15 +94,22 @@ Source code under the MIT licence: https://github.com/ikkeseb/brreg-snap
    (MV3 + CSP `default-src 'self'` = none.)
 
 3. **Data usage — what is collected:** tick **Web history** and
-   nothing else. The extension sends the registrable domain of the
-   site the user looks up (dnb.no for nettbank.dnb.no) to
-   data.brreg.no (the CWS User Data FAQ counts "the domains or URLs
-   the browser interacts with" as web browsing activity). Lookups run
-   when the user asks for one; "Auto-oppdater" runs only after the user
-   confirms an in-panel disclosure and grants `tabs` (see the `tabs`
-   justification below). Leave unchecked: personally identifiable
-   information, health, financial and payment, authentication,
-   personal communications, location, user activity, website content.
+   **Website content**, nothing else. The extension sends the
+   registrable domain of the site the user looks up (dnb.no for
+   nettbank.dnb.no) to data.brreg.no (the CWS User Data FAQ counts
+   "the domains or URLs the browser interacts with" as web browsing
+   activity). Website content is ticked because text the user selects
+   on a page and chooses to look up with «Slå opp «…» i brreg-snap»
+   goes to data.brreg.no (at most 100 characters, and only the org.nr
+   when the selection holds exactly one valid one), and the FAQ counts
+   data captured from a web page as user data. The extension never
+   reads page content on its own: no content scripts, and `activeTab`
+   yields only the tab's address and title. Lookups run when the user
+   asks for one; "Auto-oppdater" runs only after the user confirms an
+   in-panel disclosure and grants `tabs` (see the `tabs` justification
+   below). Leave unchecked: personally identifiable information,
+   health, financial and payment, authentication, personal
+   communications, location, user activity.
    If the form asks what the data is used for: core functionality
    only.
 

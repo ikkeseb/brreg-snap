@@ -177,7 +177,10 @@ included, and its taxonomy puts domains under `browsingActivity`. So
 exactly `{"required": ["browsingActivity"]}`, pinned by
 `tests/manifest.test.ts` and the CI dist check. PRIVACY.md § Store
 declarations and the CWS privacy form («Web history») say the same
-thing; change all three together.
+thing; change all three together. CWS also ticks «Website content»
+for the selected text a user chooses to look up (its User Data FAQ
+counts data captured from a page); the Firefox list doesn't carry an
+equivalent yet, an open maintainer decision.
 
 - Required, not optional. Optional types are off until the user opts
   in, so click lookups would have to stop until then. `none` plus an
