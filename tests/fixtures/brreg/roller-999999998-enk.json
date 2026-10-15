@@ -1,0 +1,79 @@
+{
+  "_links": {
+    "self": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/999999998/roller"
+    },
+    "enhet": {
+      "href": "https://data.brreg.no/enhetsregisteret/api/enheter/999999998"
+    }
+  },
+  "rollegrupper": [
+    {
+      "roller": [
+        {
+          "avregistrert": false,
+          "person": {
+            "erDoed": false,
+            "fodselsdato": "1980-01-01",
+            "navn": { "etternavn": "Eksempel", "fornavn": "Kari" }
+          },
+          "rekkefolge": 0,
+          "type": {
+            "_links": {
+              "self": { "href": "https://data.brreg.no/enhetsregisteret/api/roller/rolletyper/INNH" }
+            },
+            "beskrivelse": "Innehaver",
+            "kode": "INNH"
+          }
+        }
+      ],
+      "sistEndret": "2023-06-03",
+      "type": {
+        "_links": {
+          "self": { "href": "https://data.brreg.no/enhetsregisteret/api/roller/rollegruppetyper/INNH" }
+        },
+        "beskrivelse": "Innehaver",
+        "kode": "INNH"
+      }
+    },
+    {
+      "roller": [
+        {
+          "avregistrert": false,
+          "enhet": {
+            "_links": {
+              "self": { "href": "https://data.brreg.no/enhetsregisteret/api/enheter/999999997" }
+            },
+            "erSlettet": false,
+            "godkjenningsstatus": "Godkjent regnskapsforetak",
+            "navn": ["EKSEMPEL REGNSKAP AS"],
+            "organisasjonsform": {
+              "_links": {
+                "self": { "href": "https://data.brreg.no/enhetsregisteret/api/organisasjonsformer/AS" }
+              },
+              "beskrivelse": "Aksjeselskap",
+              "kode": "AS"
+            },
+            "organisasjonsnummer": "999999997"
+          },
+          "rekkefolge": 0,
+          "type": {
+            "_links": {
+              "self": { "href": "https://data.brreg.no/enhetsregisteret/api/roller/rolletyper/REGN" }
+            },
+            "beskrivelse": "Regnskapsfører",
+            "kode": "REGN"
+          }
+        }
+      ],
+      "sistEndret": "2023-06-03",
+      "type": {
+        "_links": {
+          "self": { "href": "https://data.brreg.no/enhetsregisteret/api/roller/rollegruppetyper/REGN" }
+        },
+        "beskrivelse": "Regnskapsfører",
+        "kode": "REGN"
+      }
+    }
+  ]
+}

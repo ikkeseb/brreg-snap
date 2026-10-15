@@ -8,7 +8,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Candidate } from '../src/lib/hostname-search.js';
-import type { LedgerRow } from '../src/lib/view/trust-view.js';
+import { buildTrustView, type LedgerRow } from '../src/lib/view/trust-view.js';
 import { buildActions } from '../src/lib/view/components/actions.js';
 import {
   buildAnswer,
@@ -26,6 +26,7 @@ import { appendSiteLabel, renderMasthead } from '../src/lib/view/components/mast
 import { buildNotes } from '../src/lib/view/components/notes.js';
 import { pickerHead, renderPicker } from '../src/lib/view/components/picker.js';
 import {
+  buildSearchField,
   buildEntryRow,
   renderRecents,
   buildListSection,
@@ -35,6 +36,8 @@ import {
 import { buildSkeleton } from '../src/lib/view/components/skeleton.js';
 import { COPY } from '../src/lib/view/copy.js';
 import enhetDnb from './fixtures/brreg/enhet-984851006-dnb.json';
+import enhetEquinor from './fixtures/brreg/enhet-923609016-equinor.json';
+import regnskapEquinor from './fixtures/brreg/regnskap-923609016-usd.json';
 import enhetKonkurs from './fixtures/brreg/enhet-915330193-konkurs.json';
 
 const NBSP = ' ';
@@ -139,6 +142,10 @@ describe('masthead', () => {
     );
     expect(mast.input?.value).toBe('nrk');
     expect(mast.input?.type).toBe('search');
+    // One placeholder for every search field: the panel's picker field
+    // sits right under this one.
+    expect(mast.input?.placeholder).toBe('Navn eller org.nr');
+    expect(buildSearchField().input.placeholder).toBe('Navn eller org.nr');
     expect(mast.toggle?.getAttribute('role')).toBe('switch');
     expect(mast.toggle?.getAttribute('aria-checked')).toBe('true');
     mast.toggle!.click();
@@ -550,6 +557,30 @@ describe('skeleton', () => {
     expect(frag.querySelector('.ledger')?.getAttribute('aria-hidden')).toBe('true');
     expect(frag.querySelector('.ident__leaders .sk')).not.toBeNull();
     expect(buildSkeleton('panel').querySelector('.ident__flags .sk')).not.toBeNull();
+  });
+
+  it('shimmers the labels the ledger lands with (the trust derivations keep their own copy)', () => {
+    const view = buildTrustView({
+      company: {
+        enhet: enhetEquinor,
+        roller: undefined,
+        regnskap: { items: regnskapEquinor },
+        underenheter: undefined,
+        endringer: undefined,
+        aarsregnskapYears: undefined,
+        konsern: undefined,
+        fetchedAt: 0,
+      },
+      method: 'host-auto',
+      host: 'www.equinor.com',
+      now: new Date('2026-09-24T12:00:00'),
+      surface: 'panel',
+      env: { version: '0', browser: 'Firefox' },
+    });
+    const skeleton = (kobling: boolean) =>
+      [...buildSkeleton('panel', { kobling }).querySelectorAll('.ledger-row dt')].map((dt) => dt.textContent);
+    expect(skeleton(true)).toEqual(view.ledger.map((r) => r.label));
+    expect(skeleton(false)).toEqual(view.ledger.slice(1).map((r) => r.label));
   });
 });
 

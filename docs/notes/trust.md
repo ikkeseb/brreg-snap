@@ -59,8 +59,9 @@ the ledger (`src/lib/view/components/ledger.ts`).
   warn read from `underRekonstruksjonsforhandlingDato` alone: brreg has
   no boolean for it (docs, 2025 changelog; live RUTA ENTREPRENØR AS
   983830196, 2026-09-02). Found via the change feed; the search API has
-  no filter for it (400). Detail: the tvang reason, else «siden
-  dd.mm.yyyy», slettet just the date.
+  no filter for it (400). Detail: the tvang reason, else «siden 26.
+  aug. 2026», slettet just the date (`formatDateNo`, the spelling every
+  date in the UI uses).
 - **NUF / UTLA**: an ok status gets the detail «utenlandsk foretak
   (<land>)» from `underlagtLovgivningLandKode` (UTLA carries it), else
   `forretningsadresse.landkode`. Live NUFs (200 sampled 2026-09-24)

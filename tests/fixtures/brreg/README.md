@@ -13,6 +13,9 @@ orgnr (999999999, 999999998): its real orgnr leads straight back to the
 name. `regnskap-923609016-usd.json` is a full capture from 2026-10-06:
 three years of the group's consolidated rows (`KONSERN`) before the
 company's own (`SELSKAP`), the order the callers must not trust.
+`roller-999999998-enk.json` is a live ENK roller response's shape
+(2026-10-15: an `INNH` group, no daglig leder or styre, an accountant)
+with a fictitious owner and accountant.
 Tests import these so a brreg shape change shows up as a fixture diff,
 not a silent UI bug. Re-capture (and re-anonymize) when brreg changes a
 response.

@@ -21,6 +21,7 @@ import type {
 } from '../src/types/brreg.js';
 import enhetBbc from './fixtures/brreg/enhet-932324229-bbc.json';
 import enhetDnb from './fixtures/brreg/enhet-984851006-dnb.json';
+import enhetEnk from './fixtures/brreg/enhet-999999998-enk.json';
 import enhetEquinor from './fixtures/brreg/enhet-923609016-equinor.json';
 import enhetKonkurs from './fixtures/brreg/enhet-915330193-konkurs.json';
 import enhetNyttNavn from './fixtures/brreg/enhet-914375916-nytt-navn.json';
@@ -29,6 +30,7 @@ import enhetSlettet from './fixtures/brreg/enhet-989566733-slettet.json';
 import konsernEquinor from './fixtures/brreg/konsernstruktur-923609016-equinor.json';
 import feedNyttNavn from './fixtures/brreg/oppdateringer-914375916-nytt-navn.json';
 import regnskapEquinor from './fixtures/brreg/regnskap-923609016-usd.json';
+import rollerEnk from './fixtures/brreg/roller-999999998-enk.json';
 import rollerEquinor from './fixtures/brreg/roller-923609016-equinor.json';
 import rollerKonkurs from './fixtures/brreg/roller-915330193-konkurs.json';
 import rollerNyttNavn from './fixtures/brreg/roller-914375916-nytt-navn.json';
@@ -565,6 +567,23 @@ describe('buildTrustView — one person in both roles', () => {
   });
 });
 
+describe('buildTrustView — a sole proprietorship names its owner', () => {
+  // The live ENK shape: an INNH group, no DAGL / LEDE, an accountant.
+  const enk = (surface: 'popup' | 'panel') =>
+    view({ company: company(enhetEnk, { roller: rollerEnk as unknown as CompanyData['roller'] }), surface });
+
+  it('the popup\'s leaders line carries «Innehaver»', () => {
+    expect(enk('popup').identity.leaders).toEqual([{ label: 'Innehaver', name: 'Kari Eksempel' }]);
+  });
+
+  it('Ledelse lists the owner first, before the accountant', () => {
+    expect(enk('panel').dossier!.ledelse).toEqual([
+      { label: 'Innehaver', lines: ['Kari Eksempel'] },
+      { label: 'Regnskapsfører', drill: { text: 'EKSEMPEL REGNSKAP AS', orgnr: '999999997' } },
+    ]);
+  });
+});
+
 describe('buildTrustView — undo', () => {
   it('offers «Glem valget» where the site has a remembered choice', () => {
     const v = view({
@@ -640,7 +659,7 @@ describe('buildTrustView — the panel dossier', () => {
   it('says the roller fetch failed instead of «none»', () => {
     const failed = view({ company: company(enhetEquinor), surface: 'panel' }).dossier!;
     expect(failed.personer).toBe('failed');
-    expect(failed.ledelse).toEqual([{ label: 'Roller', lines: ['Kunne ikke hentes'] }]);
+    expect(failed.ledelse).toBe('failed');
     expect(failed.okonomi.figures).toEqual({
       kind: 'failed',
       text: 'Kunne ikke hente regnskapstallene. Prøv igjen senere.',

@@ -99,7 +99,7 @@ describe('lookupOrgnr', () => {
     expect(isNotFoundError(err)).toBe(true);
     expect(isPermanentLoadError(err)).toBe(true);
     expect(describeLoadError(err)).toBe(
-      'Fant ingen bedrift med organisasjonsnummer 923609024.',
+      'Fant ikke noe selskap med org.nr 923609024.',
     );
   });
 
@@ -111,7 +111,7 @@ describe('lookupOrgnr', () => {
     expect(err).toBeInstanceOf(DeletedAvdelingError);
     expect(isPermanentLoadError(err)).toBe(true);
     expect(describeLoadError(err)).toBe(
-      '915821537 er underenheten EIKSUND INVEST AS ENGROS, som er slettet 21.09.2026.',
+      '915821537 er underenheten EIKSUND INVEST AS ENGROS, som er slettet 21. sep. 2026.',
     );
   });
 

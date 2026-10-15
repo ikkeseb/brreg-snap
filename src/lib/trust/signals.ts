@@ -14,7 +14,7 @@
 // is OMITTED, never guessed: a failed regnskap fetch must not render
 // as "not filed". See docs/notes/trust.md § signals.
 
-import { formatCount, formatDateNumeric, parseIsoDate } from '../format.js';
+import { formatCount, formatDateNo, parseIsoDate } from '../format.js';
 import { latestRegnskap } from '../regnskap.js';
 import { primaryStatusFlag, type FlagSpec } from '../ui/flags.js';
 import type { Enhet, RegnskapResponse } from '../../types/brreg.js';
@@ -124,12 +124,12 @@ export function ageBasis(enhet: Enhet): AgeBasis | undefined {
   return registered[0] ? { iso: registered[0], word: 'reg.' } : undefined;
 }
 
-// "siden 26.08.2026" (konkurs/avvikling/rekonstruksjon), "mangler
+// "siden 26. aug. 2026" (konkurs/avvikling/rekonstruksjon), "mangler
 // regnskap" (a forced dissolution: the reason beats the date),
-// "15.09.2026" (slettet).
+// "15. sep. 2026" (slettet). The same spelling as the answer band's.
 function statusDetail(flag: FlagSpec): string | undefined {
   if (flag.reason) return flag.reason;
-  const date = formatDateNumeric(flag.since);
+  const date = formatDateNo(flag.since);
   if (!date) return undefined;
   return flag.label === 'Slettet' ? date : `siden ${date}`;
 }
