@@ -51,12 +51,27 @@ function anonymise(node, counter = { n: 0 }) {
       if (text in node) node[text] = ['Eksempelaktivitet.'];
     }
   }
+  // A change-feed patch (`{ op, path, value }`) names its field in the
+  // path, not in a key: `/postadresse/adresse/0` carries a bare line.
+  if (typeof node.path === 'string' && 'value' in node) {
+    const field = node.path.split('/').filter((s) => !/^(\d+|-)$/.test(s)).pop();
+    const fake = field && node.value !== null && fictitious(field, node.value);
+    if (fake) node.value = fake;
+  }
   for (const [key, value] of Object.entries(node)) {
-    if (key === 'epostadresse') node[key] = 'post@example.no';
-    else if (key === 'telefon' || key === 'mobil') node[key] = '00000000';
-    else if (key === 'adresse' && Array.isArray(value)) node[key] = ['Eksempelveien 1'];
+    const fake = fictitious(key, value);
+    if (fake) node[key] = fake;
     else anonymise(value, counter);
   }
+}
+
+/** The fictitious stand-in for a contact field, or undefined for any other field. */
+function fictitious(field, value) {
+  if (field === 'epostadresse') return 'post@example.no';
+  if (field === 'telefon' || field === 'mobil') return '00000000';
+  if (field === 'adresse' && Array.isArray(value)) return ['Eksempelveien 1'];
+  if (field === 'adresse' && typeof value === 'string') return 'Eksempelveien 1';
+  return undefined;
 }
 
 /** Drops the hypermedia `_links` the extension never reads. */

@@ -23,7 +23,8 @@ commits personal data:
 - every role-holder `person` gets a fictitious name and the birth date
   1970-01-01; every `bostyrer` is «Adv. Ola Nordmann»
 - every `epostadresse`, `telefon`, `mobil` and street `adresse` line is
-  fictitious (company addresses too; the smoke asserts none of them)
+  fictitious (company addresses too; the smoke asserts none of them),
+  including a change-feed patch `value` whose `path` names one of them
 - an ENK gets orgnr 999999999, the name «EKSEMPEL ENK», no historical
   names or activity text, and a hjemmeside path of `/eksempel` (its
   host stays: scoring reads it)
