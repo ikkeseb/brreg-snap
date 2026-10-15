@@ -332,6 +332,21 @@ describe('popup controller — search view, error, refresh', () => {
     expect(byText('Prøv igjen')).toBeUndefined();
   });
 
+  it('a host check that failed leads with the error band, then the search; no head repeats the band', async () => {
+    mocks.resolveTabContext.mockResolvedValue({ host: 'www.dnb.no', degraded: true });
+    await boot();
+    await waitState('empty');
+    expect(document.body.dataset.answer).toBe('warn');
+    const main = app();
+    expect(main.firstElementChild?.matches('section.answer--warn')).toBe(true);
+    expect(main.querySelector('.answer--warn h2')?.textContent).toBe('Fikk ikke svar fra Brønnøysundregistrene');
+    expect(main.querySelector('h1')).toBeNull();
+    expect(main.querySelector('.empty > p')?.textContent).toBe('Søk etter et selskap i stedet.');
+    expect(main.querySelector('.empty input[type="search"]')).not.toBeNull();
+    byText('Prøv igjen')!.click();
+    await vi.waitFor(() => expect(mocks.resolveTabContext).toHaveBeenCalledTimes(2));
+  });
+
   it('«Oppdater» drops the cache and reloads', async () => {
     await boot();
     await waitState('result');

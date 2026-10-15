@@ -146,8 +146,13 @@ export function renderRecents(
   }
 }
 
-export interface SearchViewData {
-  head: string;
+// The view leads with its own h1, or with an answer band (the degraded
+// state's error band: its head is the answer, so no h1 repeats it).
+export type SearchViewLead =
+  | { head: string; band?: undefined }
+  | { head?: undefined; band: { section: HTMLElement; heading: HTMLHeadingElement } };
+
+export type SearchViewData = SearchViewLead & {
   text?: string;
   // Prefilled query (searched at once).
   query?: string;
@@ -157,10 +162,7 @@ export interface SearchViewData {
   forgetSite?: string;
   // «Tilbake …» above the head, when the view was opened over another.
   back?: string;
-  // Anything to show between the search block and the lists (the
-  // degraded state's error band).
-  after?: readonly Node[];
-}
+};
 
 export interface SearchViewHandlers {
   onSelect: (orgnr: string) => void;
@@ -193,9 +195,15 @@ export function renderSearchView(
     container.appendChild(back);
   }
 
+  if (data.band) container.appendChild(data.band.section);
   const empty = el('div', 'empty');
-  const heading = el('h1', undefined, data.head);
-  empty.appendChild(heading);
+  let heading: HTMLHeadingElement;
+  if (data.band) {
+    heading = data.band.heading;
+  } else {
+    heading = el('h1', undefined, data.head);
+    empty.appendChild(heading);
+  }
   if (data.text) empty.appendChild(el('p', undefined, data.text));
   if (data.forgetSite) {
     const p = el('p', 'empty__undo');
@@ -208,8 +216,6 @@ export function renderSearchView(
   empty.appendChild(field.root);
   if (data.hint) empty.appendChild(el('p', 'hint', COPY.searchHint));
   container.appendChild(empty);
-
-  for (const node of data.after ?? []) container.appendChild(node);
 
   const results = buildListSection(COPY.results);
   results.section.hidden = true;

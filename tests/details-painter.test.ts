@@ -656,10 +656,14 @@ describe('loading, error, empty, picker', () => {
     expect(q('.empty h1')?.textContent).toBe('Fant ikke selskapet bak example.com');
     expect(q('.answer--warn')).toBeNull();
 
+    // A failed check leads with the error band; no h1 repeats it, one
+    // line points at the masthead field.
     painter.empty({ host: 'www.example.com', degraded: true, focus: false });
     expect(document.body.dataset.answer).toBe('warn');
-    expect(q('.empty h1')?.textContent).toBe('Fikk ikke sjekket example.com');
+    expect(app().firstElementChild?.matches('section.answer--warn')).toBe(true);
     expect(q('.answer--warn h2')?.textContent).toBe('Fikk ikke svar fra Brønnøysundregistrene');
+    expect(q('main h1')).toBeNull();
+    expect(q('.empty > p')?.textContent).toBe(COPY.emptyPanelText);
     byText('Prøv igjen')!.click();
     expect(intents.retry).toHaveBeenCalledOnce();
   });
