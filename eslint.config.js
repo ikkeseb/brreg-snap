@@ -199,4 +199,10 @@ export default defineConfig(
     files: ['scripts/preview/shim.js'],
     languageOptions: { sourceType: 'script', globals: { location: 'readonly' } },
   },
+  // The smoke's page helpers pass callbacks that Playwright runs in the
+  // page, where the browser globals exist.
+  {
+    files: ['tests/e2e/settle.mjs'],
+    languageOptions: { globals: { window: 'readonly', document: 'readonly' } },
+  },
 );

@@ -13,7 +13,7 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { normalizeRequest } from '../../scripts/preview/fixtures.mjs';
-import { settle, watchPage } from './invariants.ts';
+import { settle, watchPage } from './settle.mjs';
 import { STATES } from './states.mjs';
 
 const here = fileURLToPath(new URL('.', import.meta.url));
@@ -125,7 +125,7 @@ try {
   for (const s of STATES) {
     if (s.offline) continue;
     const page = await browser.newPage();
-    // settle() (invariants.ts) rather than networkidle, which can hang.
+    // settle() (settle.mjs) rather than networkidle, which can hang.
     const watch = await watchPage(page);
     page.on('request', (req) => {
       const url = new URL(req.url());
