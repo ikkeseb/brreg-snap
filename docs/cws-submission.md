@@ -55,6 +55,8 @@ Slå på «Auto-oppdater» hvis du vil at et åpent sidepanel skal følge fanen 
 
 Personvern: Oppslag sendes bare til data.brreg.no, aldri til utvikleren. Utvidelsen sender nettstedets registrerbare domene, et organisasjonsnummer eller søketeksten du selv skriver eller velger å slå opp. Den har ingen content scripts og leser ikke nettsideinnhold automatisk. Ingen analytics, trackere eller telemetri. Velkomstsiden gjør ingen nettverkskall. «Rapporter feil treff» åpner e-postprogrammet ditt; du velger selv om meldingen sendes.
 
+brreg-snap er et uavhengig prosjekt, ikke tilknyttet Brønnøysundregistrene, og bruker åpne data fra data.brreg.no.
+
 Kildekode under MIT-lisens: https://github.com/ikkeseb/brreg-snap
 ```
 
@@ -73,6 +75,8 @@ Check which company is behind a Norwegian shop or website. brreg-snap looks up t
 Turn on "Auto-oppdater" to let an open side panel follow your active tab. A short explanation and a request for tab access appear first. Turning it off gives the permission back.
 
 Privacy: Lookups go only to data.brreg.no, never to the developer. The extension sends the site's registrable domain, an organisation number or search text you type or choose to look up. It has no content scripts and does not read page content automatically. No analytics, trackers or telemetry. The welcome page makes no network requests. "Rapporter feil treff" opens your email app; you decide whether to send the message.
+
+brreg-snap is an independent project, not affiliated with the Brønnøysund Register Centre, and uses open data from data.brreg.no.
 
 Source code under the MIT licence: https://github.com/ikkeseb/brreg-snap
 ```

@@ -21,6 +21,9 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 - A new logo: a blue ribbon tied in an overhand knot replaces the gold
   «B», on the toolbar and store icons and at the head of the popup, the
   panel and the welcome page.
+- The store name and short description say what you get for the
+  company behind the site you are on, instead of the bare «brreg-snap»
+  and «Slå opp norske bedrifter i Brønnøysundregistrene med ett klikk.»
 - A danger verdict is a field framed in thin red on a faint tint: a red
   «✕ Alvorlig» kicker, then the sentence in large type with only the
   key word in red.

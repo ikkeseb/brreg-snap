@@ -120,11 +120,15 @@ one line first: version, store, what changes.
   (AMO keeps every newline and renders no headings or tables).
   Screenshots. After a release that changed the logo, check the
   listing icon and upload `public/icons/icon-128.png` if it still
-  shows the old one.
+  shows the old one. After a release that changed the manifest `name`
+  or `description`, edit the listing's name (the manifest `name`) and
+  summary (`docs/amo-submission.md` § summary-nb, § summary-en): AMO
+  imports them from the manifest only on the first upload.
 - **CWS:** store listing description, privacy practices tab,
   screenshots, and the store icon (`public/icons/icon-128.png`) when
   the logo changed. The privacy policy URL serves `PRIVACY.md` on
-  `main`.
+  `main`. The name and summary come from the package's manifest, so a
+  changed `name` or `description` needs nothing beyond the new package.
 
 ## One-time setup (maintainer)
 

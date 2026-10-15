@@ -20,7 +20,7 @@ digests. Never a local build. The flow and the manual fallback:
 
 ## Add-on URL slug
 
-`brreg-snap` (matches the extension name, repo name, and gecko ID).
+`brreg-snap` (matches the repo name and gecko ID).
 
 ## Categories
 
@@ -68,7 +68,7 @@ notes for reviewers below say how consent works there.
 <!-- SECTION: summary-nb -->
 ### Summary (kort beskrivelse, ≤ 250 tegn)
 
-> Slå opp norske bedrifter i Brønnøysundregistrene med ett klikk. Henter status, daglig leder, styret, nøkkeltall og regnskap direkte fra data.brreg.no. Ingen content scripts, ingen tredjeparts-trackere.
+> Orgnr, status, daglig leder, styre, omsetning, resultat og regnskap for bedriften bak nettsiden eller nettbutikken du er på, rett fra Brønnøysundregistrene (data.brreg.no). Ett klikk, ingen konto, ingen sporing.
 
 <!-- SECTION: description-nb -->
 ### Description (nb — paste as is)
@@ -85,6 +85,8 @@ notes for reviewers below say how consent works there.
 >
 > Personvern: Oppslag sendes bare til data.brreg.no, aldri til utvikleren. Utvidelsen sender nettstedets registrerbare domene, et organisasjonsnummer eller søketeksten du selv skriver eller velger å slå opp. Den har ingen content scripts og leser ikke nettsideinnhold automatisk. Ingen analytics, trackere eller telemetri. Velkomstsiden gjør ingen nettverkskall. «Rapporter feil treff» åpner e-postprogrammet ditt; du velger selv om meldingen sendes.
 >
+> brreg-snap er et uavhengig prosjekt, ikke tilknyttet Brønnøysundregistrene, og bruker åpne data fra data.brreg.no.
+>
 > Kildekode under MIT-lisens: https://github.com/ikkeseb/brreg-snap
 
 ---
@@ -94,7 +96,7 @@ notes for reviewers below say how consent works there.
 <!-- SECTION: summary-en -->
 ### Summary (≤ 250 chars)
 
-> Look up Norwegian companies in the public Brønnøysund Register with one click. Shows status, CEO, board, key figures, and accounts straight from data.brreg.no. No content scripts, no third-party trackers.
+> Organisation number (orgnr), status, CEO, board, revenue, results and accounts for the company behind the site or online shop you are on, straight from the Brønnøysund Register Centre (data.brreg.no). One click, no account, no tracking.
 
 <!-- SECTION: description-en -->
 ### Description (en)
@@ -110,6 +112,8 @@ notes for reviewers below say how consent works there.
 > Turn on "Auto-oppdater" to let an open side panel follow your active tab. A short explanation and a request for tab access appear first. Turning it off gives the permission back.
 >
 > Privacy: Lookups go only to data.brreg.no, never to the developer. The extension sends the site's registrable domain, an organisation number or search text you type or choose to look up. It has no content scripts and does not read page content automatically. No analytics, trackers or telemetry. The welcome page makes no network requests. "Rapporter feil treff" opens your email app; you decide whether to send the message.
+>
+> brreg-snap is an independent project, not affiliated with the Brønnøysund Register Centre, and uses open data from data.brreg.no.
 >
 > Source code under the MIT licence: https://github.com/ikkeseb/brreg-snap
 
