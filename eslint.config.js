@@ -18,7 +18,8 @@ const nodeGlobals = {
   AbortSignal: 'readonly',
 };
 
-// The src security rules, exported for tests/lint-security.test.ts.
+// The src security rules. Exported (with the blocks below that apply
+// them) for tests/lint-security.test.ts.
 // Core ESLint only. The selectors are static: they catch every spelling
 // of a forbidden name the source can write down literally (el.x, el['x'],
 // el[`x`], { x: v }, Reflect.set(el, 'x'), setAttribute('x')), not a
@@ -106,6 +107,32 @@ export const srcSecurityRules = {
   ],
 };
 
+// The blocks that apply them to src. None needs type information, so
+// the test lints most of its cases through these alone.
+/** @type {import('eslint').Linter.Config[]} */
+export const srcSecurityConfigs = [
+  // Extension source: security invariants as lint rules (AGENTS.md
+  // § Security constraints). Brreg text is written by the registrants
+  // themselves, so HTML sinks are the realistic injection surface.
+  {
+    files: ['src/**/*.ts'],
+    rules: srcSecurityRules,
+  },
+  // src is TypeScript only. Any other script format would skip the
+  // typecheck and the rules above, so its mere existence fails the lint
+  // (the build-graph guard in vite.config.ts also refuses to bundle it).
+  {
+    files: ['src/**/*.{js,mjs,cjs,jsx,tsx,mts,cts}'],
+    languageOptions: { parser: tseslint.parser },
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        { selector: 'Program', message: 'src is TypeScript only: use a .ts file.' },
+      ],
+    },
+  },
+];
+
 export default defineConfig(
   {
     ignores: [
@@ -135,26 +162,7 @@ export default defineConfig(
       ],
     },
   },
-  // Extension source: security invariants as lint rules (AGENTS.md
-  // § Security constraints). Brreg text is written by the registrants
-  // themselves, so HTML sinks are the realistic injection surface.
-  {
-    files: ['src/**/*.ts'],
-    rules: srcSecurityRules,
-  },
-  // src is TypeScript only. Any other script format would skip the
-  // typecheck and the rules above, so its mere existence fails the lint
-  // (the build-graph guard in vite.config.ts also refuses to bundle it).
-  {
-    files: ['src/**/*.{js,mjs,cjs,jsx,tsx,mts,cts}'],
-    languageOptions: { parser: tseslint.parser },
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        { selector: 'Program', message: 'src is TypeScript only: use a .ts file.' },
-      ],
-    },
-  },
+  ...srcSecurityConfigs,
   // Root config files live in tsconfig.node.json, which the project
   // service can't discover (it only finds files named tsconfig.json).
   {
