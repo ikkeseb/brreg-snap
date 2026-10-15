@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import type { CompanyData } from '../src/lib/company-load.js';
 import { deriveKonsern } from '../src/lib/konsern.js';
-import { MISMATCH_HEADLINE } from '../src/lib/trust/answer.js';
+import { deriveAnswer, MISMATCH_HEADLINE } from '../src/lib/trust/answer.js';
+import { deriveStatusFlags } from '../src/lib/ui/flags.js';
 import { reportHref } from '../src/lib/view/copy.js';
 import {
   buildTrustView,
@@ -27,6 +28,7 @@ import enhetKonkurs from './fixtures/brreg/enhet-915330193-konkurs.json';
 import enhetNyttNavn from './fixtures/brreg/enhet-914375916-nytt-navn.json';
 import enhetPaategning from './fixtures/brreg/enhet-935864879-paategning.json';
 import enhetSlettet from './fixtures/brreg/enhet-989566733-slettet.json';
+import enhetTvang from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
 import konsernEquinor from './fixtures/brreg/konsernstruktur-923609016-equinor.json';
 import feedNyttNavn from './fixtures/brreg/oppdateringer-914375916-nytt-navn.json';
 import regnskapEquinor from './fixtures/brreg/regnskap-923609016-usd.json';
@@ -248,6 +250,85 @@ describe('buildTrustView — danger statuses', () => {
       rest: '– mangler regnskap',
     });
     expect(stampOf('Slettet')).toEqual({ word: 'Slettet' });
+  });
+});
+
+describe('stampOf — pinned against the danger headlines the answer builder produces', () => {
+  // Real status shapes, dated and undated, built on the fixtures. The
+  // headlines come out of deriveAnswer, never from a list in this test.
+  const withoutDates = (e: object): Enhet => {
+    const copy: Record<string, unknown> = { ...e };
+    for (const key of Object.keys(copy)) if (/dato$/i.test(key)) delete copy[key];
+    return copy as unknown as Enhet;
+  };
+  const DANGER_ENHETER: Enhet[] = [
+    enhetKonkurs,
+    { ...(enhetKonkurs as object), konkursdato: undefined } as unknown as Enhet,
+    enhetSlettet,
+    enhetTvang,
+    { ...withoutDates(enhetTvang), underTvangsavviklingEllerTvangsopplosning: true },
+  ];
+
+  function dangerAnswer(enhet: Enhet) {
+    return deriveAnswer({
+      enhet,
+      roller: undefined,
+      signals: [],
+      kobling: undefined,
+      merknader: [],
+      now: NOW,
+    });
+  }
+
+  it('sets the key word of every danger status headline in red, whole words only', () => {
+    for (const enhet of DANGER_ENHETER) {
+      const answer = dangerAnswer(enhet);
+      expect(answer.tone, answer.headline).toBe('danger');
+      const label = deriveStatusFlags(enhet).find((f) => f.severity === 'danger')?.label;
+      expect(label).toBeDefined();
+      const stamp = stampOf(answer.headline);
+      // The key word is the status label itself, not the whole headline
+      // (a headline that is just the label has no rest, and that is fine).
+      expect(stamp.word, answer.headline).toBe(label);
+      expect(stamp.pre).toBeUndefined();
+      expect([stamp.word, stamp.rest].filter(Boolean).join(' '), answer.headline).toBe(
+        answer.headline,
+      );
+      expect(answer.headline.startsWith(`${stamp.word} `) || answer.headline === stamp.word).toBe(
+        true,
+      );
+    }
+  });
+
+  it('covers every status the flags code can call danger', () => {
+    // All status booleans and dates on at once: every flag the code can
+    // derive shows up, so a new danger label cannot slip past the matrix.
+    const everything = {
+      ...(enhetKonkurs as object),
+      slettedato: '2026-01-01',
+      underAvvikling: true,
+      underTvangsavviklingEllerTvangsopplosning: true,
+      underRekonstruksjonsforhandlingDato: '2026-01-01',
+    } as unknown as Enhet;
+    const dangerLabels = deriveStatusFlags(everything)
+      .filter((f) => f.severity === 'danger')
+      .map((f) => f.label)
+      .sort();
+    const covered = DANGER_ENHETER.map(
+      (e) => deriveStatusFlags(e).find((f) => f.severity === 'danger')!.label,
+    );
+    expect([...new Set(covered)].sort()).toEqual(dangerLabels);
+    // And each label alone, undated: it is the headline and still the stamp.
+    for (const label of dangerLabels) expect(stampOf(label)).toEqual({ word: label });
+  });
+
+  it('leaves warn-toned status headlines unstamped (they never reach stampOf)', () => {
+    // buildTrustView calls stampOf for tone danger only; avvikling and
+    // rekonstruksjon are warn, so they are deliberately not stamp words.
+    for (const e of [{ underAvvikling: true }, { underRekonstruksjonsforhandlingDato: '2026-09-02' }]) {
+      const answer = dangerAnswer({ ...(enhetEquinor as object), ...e } as unknown as Enhet);
+      expect(answer.tone).toBe('warn');
+    }
   });
 });
 
