@@ -2,8 +2,9 @@
 // store release notes are written by a human in between:
 //
 //   pnpm release X.Y.Z [--skip-ci-check]   preflight, bump versions, date
-//                                          the CHANGELOG, pnpm verify,
-//                                          render the submission kit
+//                                          the CHANGELOG, render the
+//                                          submission kit, delete the
+//                                          earlier kits, pnpm verify
 //   (write the release notes in docs/submission-kit/X.Y.Z/amo.md)
 //   pnpm release X.Y.Z --tag               commit + annotated tag vX.Y.Z,
 //                                          print the push command
@@ -11,8 +12,8 @@
 // `--dry-run` runs the read-only checks and prints every step without
 // writing anything. Never pushes. The whole flow: docs/release.md.
 import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 
 import {
   changelogSection,
@@ -24,6 +25,7 @@ import {
   reflowForAmo,
   renderTemplate,
   setJsonVersion,
+  staleKitFiles,
   unreleasedBody,
 } from './lib/release.mjs';
 
@@ -95,6 +97,36 @@ function checkRepoState() {
   check(branch === 'main', `on main (on ${branch})`);
   const dirty = git('status', '--porcelain');
   return { branch, dirty };
+}
+
+/** Earlier kits committed at HEAD: the release commit deletes them. */
+function staleKit() {
+  // -z: NUL-separated and unquoted (git quotes a name like notater-æ.md otherwise).
+  const names = execFileSync('git', ['ls-tree', '-r', '-z', '--name-only', 'HEAD', '--', 'docs/submission-kit'], {
+    cwd: ROOT,
+    encoding: 'utf8',
+  });
+  return staleKitFiles(names.split('\0').filter(Boolean), version);
+}
+
+/**
+ * Delete tracked files, then each directory they leave empty. Never
+ * recursive: a file git ignores (a *.log) has no copy to restore, so it
+ * stays, and so does its directory.
+ * @param {string[]} files
+ */
+function removeTracked(files) {
+  const dirs = new Set();
+  for (const f of files) {
+    rmSync(join(ROOT, f), { force: true });
+    for (let d = dirname(f); d.split('/').length > 2; d = dirname(d)) dirs.add(d);
+  }
+  for (const d of [...dirs].sort((a, b) => b.length - a.length)) {
+    if (!existsSync(join(ROOT, d))) continue;
+    const left = readdirSync(join(ROOT, d));
+    if (left.length) console.log(`     kept ${d}/: git does not track ${left.join(', ')}; move it out`);
+    else rmdirSync(join(ROOT, d));
+  }
 }
 
 function tagExists(tag) {
@@ -197,12 +229,17 @@ function prepare() {
     const todos = out[f] ? findTodos(out[f]).length : 0;
     step(`write ${f}${todos ? ` (${todos} TODO(store-notes) lines to fill)` : ''}`, () => write(f, out[f]));
   }
+  const stale = staleKit();
+  for (const dir of new Set(stale.map((f) => f.split('/').slice(0, 3).join('/')))) {
+    const files = stale.filter((f) => f.startsWith(`${dir}/`));
+    step(`delete the tracked files in ${dir}/ (its tag keeps them)`, () => removeTracked(files));
+  }
   step('run pnpm verify', () => {
     const r = spawnSync('pnpm', ['verify'], { cwd: ROOT, stdio: 'inherit', shell: process.platform === 'win32' });
     if (r.status !== 0) {
       console.error(
         `\npnpm verify failed. Fix it and re-run, or undo with:\n` +
-          `  git checkout -- ${VERSION_FILES.join(' ')} CHANGELOG.md && git clean -fd ${kitDir}`,
+          `  git checkout -- ${VERSION_FILES.join(' ')} CHANGELOG.md docs/submission-kit && git clean -fd ${kitDir}`,
       );
       process.exit(1);
     }
@@ -228,20 +265,30 @@ function tagRelease() {
   checkRepoState();
   check(!tagExists(tag), `tag ${tag} does not exist locally`);
 
-  const expected = [...VERSION_FILES, 'CHANGELOG.md', ...kitFiles];
+  const releaseFiles = [...VERSION_FILES, 'CHANGELOG.md', ...kitFiles];
+  const stale = staleKit();
   // -z: NUL-separated and unquoted; not trimmed (the status column can
-  // start with a space).
-  const changed = execFileSync('git', ['status', '--porcelain', '-z', '--untracked-files=all'], {
+  // start with a space). --no-renames: a staged kit move would otherwise
+  // add a source-path field and shift the parse.
+  const status = execFileSync('git', ['status', '--porcelain', '-z', '--no-renames', '--untracked-files=all'], {
     cwd: ROOT,
     encoding: 'utf8',
   })
     .split('\0')
     .filter(Boolean)
-    .map((l) => l.slice(3));
-  const extra = changed.filter((p) => !expected.includes(p));
-  const missing = expected.filter((p) => !changed.includes(p));
+    .map((l) => ({ xy: l.slice(0, 2), path: l.slice(3) }));
+  const changed = status.map((s) => s.path);
+  const extra = changed.filter((p) => !releaseFiles.includes(p) && !stale.includes(p));
+  const missing = releaseFiles.filter((p) => !changed.includes(p));
+  // Each earlier kit file must show as a deletion (staged or not) and as
+  // nothing else: a modified or recreated one would be committed.
+  const kept = stale.filter((p) => {
+    const xys = status.filter((s) => s.path === p).map((s) => s.xy);
+    return !xys.length || xys.some((xy) => xy !== 'D ' && xy !== ' D');
+  });
   check(!extra.length, `only release files changed${extra.length ? ` (also: ${extra.join(', ')})` : ''}`);
   check(!missing.length, `every release file changed${missing.length ? ` (unchanged: ${missing.join(', ')})` : ''}`);
+  check(!kept.length, `every earlier kit file is deleted${kept.length ? ` (still there: ${kept.join(', ')})` : ''}`);
 
   const section = changelogSection(read('CHANGELOG.md'), version);
   check(!!section, `CHANGELOG.md has a non-empty "## [${version}]" section`);
@@ -264,7 +311,10 @@ function tagRelease() {
   if (failed && !dry) return stop();
 
   console.log('\nSteps');
-  step(`git add ${expected.join(' ')}`, () => git('add', '--', ...expected));
+  // The kit directory as a whole stages the new kit and the deleted old
+  // ones, whether or not the deletions are staged already.
+  const add = [...VERSION_FILES, 'CHANGELOG.md', 'docs/submission-kit'];
+  step(`git add -A ${add.join(' ')}`, () => git('add', '-A', '--', ...add));
   step(`git commit -m "release: ${version}"`, () => git('commit', '-m', `release: ${version}`));
   step(`git tag -a ${tag} -m "brreg-snap ${version}"`, () => git('tag', '-a', tag, '-m', `brreg-snap ${version}`));
 

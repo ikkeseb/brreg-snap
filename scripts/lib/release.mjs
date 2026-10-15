@@ -259,6 +259,21 @@ export function kitFields(kit) {
   return out;
 }
 
+/**
+ * Files of earlier versions' submission kits among the tracked paths.
+ * `pnpm release` deletes them in the release commit, so `main` holds
+ * only the latest kit; each tag keeps its own
+ * (`git show vX.Y.Z:docs/submission-kit/X.Y.Z/amo.md`).
+ * @param {string[]} trackedFiles repo-relative, `/`-separated
+ * @param {string} version the version being released
+ */
+export function staleKitFiles(trackedFiles, version) {
+  return trackedFiles.filter((file) => {
+    const m = /^docs\/submission-kit\/(\d+\.\d+\.\d+(?:[-+][^/]+)?)\//.exec(file);
+    return !!m && m[1] !== version;
+  });
+}
+
 // ------------------------------------------------------------ AMO privacy
 
 /** @param {string} row */

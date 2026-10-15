@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -11,6 +11,7 @@ import {
   reflowForAmo,
   renderTemplate,
   setJsonVersion,
+  staleKitFiles,
   unreleasedBody,
 } from '../scripts/lib/release.mjs';
 
@@ -201,6 +202,31 @@ describe('the real kit templates', () => {
     expect(Object.keys(fields).sort()).toEqual(['approval_notes', 'release_notes.en-US', 'release_notes.nb-NO']);
     expect(fields['release_notes.nb-NO']).toContain('TODO(store-notes)');
     expect(fields.approval_notes).toMatch(/^This add-on is a popup and sidebar company lookup tool/);
+  });
+});
+
+describe('one kit on main', () => {
+  it('lists every earlier kit file and keeps the templates and the new kit', () => {
+    const tracked = [
+      'docs/submission-kit/templates/amo.md',
+      'docs/submission-kit/1.4.2/amo.md',
+      'docs/submission-kit/1.4.2/cws.md',
+      'docs/submission-kit/1.5.0-beta.1/amo.md',
+      'docs/submission-kit/1.5.0/amo.md',
+      'docs/amo-submission.md',
+    ];
+    expect(staleKitFiles(tracked, '1.5.0')).toEqual([
+      'docs/submission-kit/1.4.2/amo.md',
+      'docs/submission-kit/1.4.2/cws.md',
+      'docs/submission-kit/1.5.0-beta.1/amo.md',
+    ]);
+    expect(staleKitFiles(['docs/submission-kit/templates/cws.md'], '1.5.1')).toEqual([]);
+  });
+
+  it('the tree holds exactly the kit of the current version', () => {
+    const current = (JSON.parse(read('package.json')) as { version: string }).version;
+    expect(readdirSync('docs/submission-kit').sort()).toEqual([current, 'templates'].sort());
+    expect(readdirSync(`docs/submission-kit/${current}`)).toEqual(expect.arrayContaining(['amo.md', 'cws.md']));
   });
 });
 

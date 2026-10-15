@@ -13,9 +13,12 @@ CHANGELOG entries, the store release notes and the approval click.
    the version in `package.json` and both `public/manifest.*.json`,
    turns `[Unreleased]` into `## [X.Y.Z] — YYYY-MM-DD` under a fresh
    empty `[Unreleased]` (and moves the compare links at the file's end
-   on to `vX.Y.Z`), runs `pnpm verify`, and renders the
-   submission kit `docs/submission-kit/X.Y.Z/{amo,cws}.md` from
-   `docs/submission-kit/templates/`. Nothing is committed yet.
+   on to `vX.Y.Z`), renders the submission kit
+   `docs/submission-kit/X.Y.Z/{amo,cws}.md` from
+   `docs/submission-kit/templates/`, deletes the earlier kits' tracked
+   files (`main` holds only the latest, each tag keeps its own; a file
+   git ignores stays, and the script names it), and runs `pnpm verify`.
+   Nothing is committed yet.
    `--dry-run` runs the checks and prints every step without writing.
    No `gh` on the machine: pass `--skip-ci-check` and check the CI run
    on GitHub yourself.
@@ -27,8 +30,9 @@ CHANGELOG entries, the store release notes and the approval click.
    the canonical docs (`docs/amo-submission.md`,
    `docs/cws-submission.md`, `PRIVACY.md`, `CHANGELOG.md`) and re-run,
    never in the kit.
-4. **`pnpm release X.Y.Z --tag`** refuses while a TODO is left or
-   anything but the release files changed, then commits
+4. **`pnpm release X.Y.Z --tag`** refuses while a TODO is left,
+   anything but the release files changed, or an earlier kit file is
+   anything but deleted, then commits
    `release: X.Y.Z` and creates the annotated tag `vX.Y.Z`. It never
    pushes; it prints `git push --atomic origin main vX.Y.Z` (the
    pre-push hook runs `pnpm verify`).
@@ -217,4 +221,5 @@ node scripts/publish-cws.mjs X.Y.Z /tmp/assets --dry-run
 
 `publish-amo.mjs` reads the kit from the tag
 (`git show vX.Y.Z:docs/submission-kit/X.Y.Z/amo.md`); `--kit <file>`
-reads another file.
+reads another file. Older kits live only at their tags: read one with
+the same `git show`.
