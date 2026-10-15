@@ -14,6 +14,7 @@ import type {
 } from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
 import { primaryStatusFlag } from '../lib/ui/flags.js';
+import { koblingInPlay } from '../lib/trust/kobling.js';
 import {
   createLoadSequence,
   createPanelFollower,
@@ -187,7 +188,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     };
     const host = currentHost;
     leaveResult();
-    painter.loading(orgnr);
+    painter.loading(orgnr, { kobling: koblingInPlay(currentMethod, host) });
     painter.setBack(false);
     // Read when the paint happens, not when the load starts: the user
     // may have clicked into the page meanwhile.
