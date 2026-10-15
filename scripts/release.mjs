@@ -15,6 +15,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmdirSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
+import { amoLengthErrors, amoVersionTexts } from './lib/amo.mjs';
 import {
   changelogSection,
   compareVersions,
@@ -303,6 +304,11 @@ function tagRelease() {
     try {
       const fields = kitFields(read(kitFiles[0]));
       for (const name of KIT_FIELDS) check(!!fields[name], `${kitFiles[0]}: field ${name} is filled`);
+      if (KIT_FIELDS.every((name) => fields[name])) {
+        // The hand-written release notes are the one part the gate can't check.
+        const errors = amoLengthErrors(amoVersionTexts(fields));
+        check(!errors.length, `${kitFiles[0]}: fits AMO's length limits${errors.length ? ` (${errors.join('; ')})` : ''}`);
+      }
     } catch (err) {
       check(false, `${kitFiles[0]}: ${err.message}`);
     }

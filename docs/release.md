@@ -61,13 +61,16 @@ CHANGELOG entries, the store release notes and the approval click.
 6. **Publish to the stores:** Actions → **Publish to stores** → Run
    workflow → version `X.Y.Z`, stores `both`, `dry_run` on. Approve it
    in the `store-publish` environment and read the plan in the log.
-   Then run it again with `dry_run` off and approve. The workflow
+   Then run it again with `dry_run` off and approve. Two more inputs,
+   off by default: `amo_listing` (step 7) and `kit_from_main` (below,
+   § When a store run fails or is skipped). The workflow
    downloads the Release assets (never rebuilds), checks them against
    the Release's sha256 digests and the `release.yml` attestation
    (`gh attestation verify`); a separate `verify` job without the store
    keys runs `verify-package.mjs` on them first (its AST scan needs the
    dev dependencies). Then:
-   - **AMO** (`scripts/publish-amo.mjs`, API v5): uploads
+   - **AMO** (`scripts/publish-amo.mjs`, API v5): checks the kit's
+     texts against AMO's length limits, uploads
      `brreg-snap-X.Y.Z.zip` to the listed channel, waits for
      validation, creates the version with the kit's release notes
      (nb-NO, en-US) and reviewer notes, attaches
@@ -78,8 +81,15 @@ CHANGELOG entries, the store release notes and the approval click.
    - Tags what went up: annotated `amo-submission-X.Y.Z` /
      `cws-submission-X.Y.Z` on the `vX.Y.Z` commit, the message
      carrying asset names and sha256.
-7. **By hand, only if this release changed them:** listing text and
-   the privacy policy (see [What stays manual](#what-stays-manual)).
+7. **Only if this release changed them:** the AMO listing text and
+   privacy policy go up with `amo_listing` on (dry run first, as
+   above): `publish-amo.mjs --listing` reads the live listing, prints
+   what changes, then sets name (the package manifest's `name`, both
+   locales), summary and description (nb-NO, en-US), the categories
+   and the privacy policy from the kit. It doesn't depend on the
+   version step, so it also runs alone, or after
+   `amo-submission-X.Y.Z` exists. The rest stays by hand:
+   [What stays manual](#what-stays-manual).
 
 ### When a store run fails or is skipped
 
@@ -91,6 +101,16 @@ CHANGELOG entries, the store release notes and the approval click.
   source step failed, the log says so: upload the source zip on the
   version's page in the AMO Developer Hub, then create the tag by hand
   (below).
+- AMO rejected a text of the tagged kit (the 1.6.0 reviewer notes were
+  over its 3000 characters; the length check now catches that in
+  `pnpm verify` and before any request): fix the canonical doc on
+  `main`, bring that field of `docs/submission-kit/X.Y.Z/amo.md` there
+  in line with it (the hand-written release notes stay as tagged), and
+  run the workflow with `kit_from_main` on. It sends the kit from
+  `main` instead of the tag's; the `verify` job's log and job summary
+  show its diff against the tag's kit before the approval is asked:
+  approve only if that diff is the fix. This works while `main` still
+  holds that version's kit (until the next `pnpm release`).
 - The attestation check needs a Release built by this `release.yml`;
   Releases up to v1.3.1 have none, so the workflow can't publish them.
 
@@ -110,25 +130,24 @@ git push origin amo-submission-X.Y.Z cws-submission-X.Y.Z
 
 ## What stays manual
 
-Store APIs submit packages, not listings. These stay edits in the
-maintainer's logged-in store accounts, from the kit, and only when the
-release changed them. Before each store change, the maintainer sees
-one line first: version, store, what changes.
+AMO's listing text goes by API on request (step 7): AMO imports name
+and summary from the manifest only on the first upload, so a release
+that changed the manifest `name` or `description`, the listing
+sections of `docs/amo-submission.md` or `PRIVACY.md` needs that run.
+The rest stays edits in the maintainer's logged-in store accounts,
+from the kit, and only when the release changed them. Before each
+store change, the maintainer sees one line first: version, store,
+what changes.
 
-- **AMO:** summary and description (nb-NO, en-US), and the privacy
-  policy field, which gets the reflowed `PRIVACY.md` from the kit
-  (AMO keeps every newline and renders no headings or tables).
-  Screenshots. After a release that changed the logo, check the
-  listing icon and upload `public/icons/icon-128.png` if it still
-  shows the old one. After a release that changed the manifest `name`
-  or `description`, edit the listing's name (the manifest `name`) and
-  summary (`docs/amo-submission.md` § summary-nb, § summary-en): AMO
-  imports them from the manifest only on the first upload.
-- **CWS:** store listing description, privacy practices tab,
-  screenshots, and the store icon (`public/icons/icon-128.png`) when
-  the logo changed. The privacy policy URL serves `PRIVACY.md` on
-  `main`. The name and summary come from the package's manifest, so a
-  changed `name` or `description` needs nothing beyond the new package.
+- **AMO:** screenshots, and the listing icon after a release that
+  changed the logo (upload `public/icons/icon-128.png` if it still
+  shows the old one).
+- **CWS** (its API has no listing calls): store listing description,
+  privacy practices tab, screenshots, and the store icon
+  (`public/icons/icon-128.png`) when the logo changed. The privacy
+  policy URL serves `PRIVACY.md` on `main`. The name and summary come
+  from the package's manifest, so a changed `name` or `description`
+  needs nothing beyond the new package.
 
 ## One-time setup (maintainer)
 
@@ -224,7 +243,7 @@ Also worth turning on under Settings → General: immutable releases
 | Kit templates | `docs/submission-kit/templates/{amo,cws}.md`, pulling `<!-- SECTION: … -->` anchors from `docs/amo-submission.md` and `docs/cws-submission.md` |
 | Package check | `scripts/verify-package.mjs`, `scripts/lib/zip.mjs` |
 | Release notes for GitHub | `scripts/release-notes.mjs` |
-| Store publishers | `scripts/publish-amo.mjs`, `scripts/publish-cws.mjs`, `scripts/lib/{amo,cws,publish}.mjs`, tests: `tests/publish.test.ts` |
+| Store publishers | `scripts/publish-amo.mjs` (version, or `--listing`), `scripts/publish-cws.mjs`, `scripts/lib/{amo,cws,publish}.mjs` (AMO's length limits: `AMO_LIMITS` in `amo.mjs`), tests: `tests/publish.test.ts`; the kit-fits-AMO check: `tests/release.test.ts` |
 | Workflows | `.github/workflows/release.yml`, `.github/workflows/publish.yml` |
 
 Local dry run of a publisher against real Release assets (public, no
@@ -233,10 +252,14 @@ keys needed):
 ```bash
 gh release download vX.Y.Z --pattern '*.zip' --dir /tmp/assets
 node scripts/publish-amo.mjs X.Y.Z /tmp/assets --dry-run
+node scripts/publish-amo.mjs X.Y.Z /tmp/assets --listing --dry-run
 node scripts/publish-cws.mjs X.Y.Z /tmp/assets --dry-run
 ```
 
 `publish-amo.mjs` reads the kit from the tag
 (`git show vX.Y.Z:docs/submission-kit/X.Y.Z/amo.md`); `--kit <file>`
-reads another file. Older kits live only at their tags: read one with
-the same `git show`.
+reads another file (what `kit_from_main` passes). Older kits live only
+at their tags: read one with the same `git show`. A kit rendered
+before the listing sync existed has no listing fields. The listing dry
+run reads the live listing with public GETs; nothing else leaves the
+machine.

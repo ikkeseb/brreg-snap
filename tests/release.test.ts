@@ -14,6 +14,7 @@ import {
   staleKitFiles,
   unreleasedBody,
 } from '../scripts/lib/release.mjs';
+import { amoLengthErrors, amoListingTexts, amoTextLengths, amoVersionTexts } from '../scripts/lib/amo.mjs';
 
 // The pure half of `pnpm release` (scripts/release.mjs) and of the kit the
 // store publisher reads. The real canonical docs and templates are used
@@ -192,16 +193,49 @@ describe('the real kit templates', () => {
       expect(kit).not.toMatch(/\{\{|\}\}/);
       expect(kit).not.toContain('<version>');
     }
-    expect(amo).toContain('attached source zip (`git archive` of tag `v9.9.9`)');
+    expect(amo).toContain('attached source zip is `git archive` of tag `v9.9.9`');
   });
 
   it('leave exactly the two store-notes TODOs, in the release-notes fields', () => {
     expect(findTodos(amo)).toHaveLength(2);
     expect(findTodos(cws)).toEqual([]);
     const fields = kitFields(amo);
-    expect(Object.keys(fields).sort()).toEqual(['approval_notes', 'release_notes.en-US', 'release_notes.nb-NO']);
+    expect(Object.keys(fields).sort()).toEqual([
+      'approval_notes',
+      'categories',
+      'description.en-US',
+      'description.nb-NO',
+      'privacy_policy',
+      'release_notes.en-US',
+      'release_notes.nb-NO',
+      'summary.en-US',
+      'summary.nb-NO',
+    ]);
     expect(fields['release_notes.nb-NO']).toContain('TODO(store-notes)');
-    expect(fields.approval_notes).toMatch(/^This add-on is a popup and sidebar company lookup tool/);
+    expect(fields.approval_notes).toMatch(/^A popup and sidebar company lookup/);
+    expect(fields.privacy_policy).toBe(reflowForAmo(read('PRIVACY.md')).trim());
+  });
+
+  // The 1.6.0 submission failed at AMO on 3078 characters of reviewer
+  // notes: an over-long canonical text fails here, before a release.
+  it("fit AMO's length limits as sent, with the manifest name", () => {
+    const fields = kitFields(amo);
+    const name = JSON.parse(read('public/manifest.firefox.json')).name as string;
+    const listing = amoListingTexts(fields, name);
+    const bodies = [amoVersionTexts(fields), listing.addon, listing.policy];
+    expect(bodies.flatMap(amoLengthErrors)).toEqual([]);
+    expect(bodies.flatMap(amoTextLengths).map((t) => t.field)).toEqual([
+      'release_notes.nb-NO',
+      'release_notes.en-US',
+      'approval_notes',
+      'name.nb-NO',
+      'name.en-US',
+      'summary.nb-NO',
+      'summary.en-US',
+      'description.nb-NO',
+      'description.en-US',
+      'privacy_policy.nb-NO',
+    ]);
   });
 });
 

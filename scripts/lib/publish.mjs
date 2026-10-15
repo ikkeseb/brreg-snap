@@ -75,3 +75,37 @@ export const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Indent a multi-line value under a plan line. */
 export const indent = (/** @type {string} */ s, n = 6) => s.replace(/^/gm, ' '.repeat(n));
+
+/**
+ * A line diff of `a` → `b` (longest common subsequence): each line
+ * prefixed `-` (only in a), `+` (only in b) or ` ` (both). Small texts
+ * only: it is O(lines²).
+ * @param {string} a
+ * @param {string} b
+ * @returns {string[]}
+ */
+export function diffLines(a, b) {
+  const x = a.split('\n');
+  const y = b.split('\n');
+  /** @type {number[][]} */
+  const lcs = Array.from({ length: x.length + 1 }, () => new Array(y.length + 1).fill(0));
+  for (let i = x.length - 1; i >= 0; i--) {
+    for (let j = y.length - 1; j >= 0; j--) {
+      lcs[i][j] = x[i] === y[j] ? lcs[i + 1][j + 1] + 1 : Math.max(lcs[i + 1][j], lcs[i][j + 1]);
+    }
+  }
+  const out = [];
+  let i = 0;
+  let j = 0;
+  while (i < x.length || j < y.length) {
+    if (i < x.length && j < y.length && x[i] === y[j]) {
+      out.push(` ${x[i++]}`);
+      j++;
+    } else if (i < x.length && (j === y.length || lcs[i + 1][j] >= lcs[i][j + 1])) {
+      out.push(`-${x[i++]}`);
+    } else {
+      out.push(`+${y[j++]}`);
+    }
+  }
+  return out;
+}
