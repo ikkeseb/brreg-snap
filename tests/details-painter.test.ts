@@ -371,6 +371,12 @@ describe('result: the dossier', () => {
     expect(first.querySelector('.unit__meta')?.textContent).toBe(`Forusbeen 50, 4035${NBSP}Stavanger · 1${NBSP}840 ansatte`);
     expect(first.querySelector('button.orgnr--sm')?.textContent).toBe(`973${NBSP}118${NBSP}402`);
     expect(first.querySelector('.orgnr__label')).toBeNull();
+    // The reading order at every width (the narrow stack is CSS only).
+    expect([...first.querySelectorAll('.unit__name, .unit__meta, button')].map((n) => n.className)).toEqual([
+      'unit__name',
+      'unit__meta',
+      'orgnr orgnr--sm',
+    ]);
     const gone = units.querySelector('.unit--gone')!;
     expect(gone.querySelector('.unit__meta')?.textContent).toBe('Slettet 3. feb. 2025');
   });

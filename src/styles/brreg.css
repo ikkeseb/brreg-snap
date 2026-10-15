@@ -641,6 +641,16 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .unit__meta { display: block; color: var(--ink-2); }
 .unit--gone .unit__name { color: var(--ink-3); font-weight: 400; text-decoration: line-through; }
 .unit--gone .unit__meta { color: var(--ink-3); }
+/* Narrow (Firefox's 320 px sidebar): the org.nr column squeezed the name
+   and the address into three-line wraps. Stack instead: the name full
+   width, the org.nr under it, the meta last (visual order only; the DOM
+   still reads name, meta, button). */
+@container (max-width: 340px) {
+  .unit { grid-template-columns: minmax(0, 1fr); }
+  .unit__text { display: contents; }
+  .unit__meta { order: 1; }
+  .unit .orgnr { justify-self: start; }
+}
 
 
 /* ---------- compact sticky head (panel, once scrolled past identity) -----
