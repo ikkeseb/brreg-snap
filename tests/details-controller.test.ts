@@ -10,6 +10,8 @@ import type { PanelView, TabFields } from '../src/lib/panel-follow.js';
 import type { RejectOutcome } from '../src/lib/ui/reject-flow.js';
 import type { TabContext } from '../src/lib/ui/resolve-tab.js';
 import { createPanelController, PANEL_LOAD_OPTIONS, type ControllerDeps } from '../src/details/controller.js';
+import { loadCompany as realLoadCompany } from '../src/lib/company-load.js';
+import { fakeBrowser } from './helpers/fake-browser.js';
 import { createPanelHistory, type HistoryWindow } from '../src/details/history.js';
 import type { PanelPainter, ResultPaint } from '../src/details/view.js';
 import dnb from './fixtures/brreg/enhet-984851006-dnb.json';
@@ -135,6 +137,8 @@ interface SetupOptions {
   accessHeld?: boolean;
   // The user's answer to the data.brreg.no prompt. Default: a grant.
   requestBrregAccess?: () => Promise<boolean>;
+  // The real loader instead of the fake (with fetch and browser stubbed).
+  loadCompany?: ControllerDeps['loadCompany'];
 }
 
 function setup(opts: SetupOptions = {}) {
@@ -160,7 +164,7 @@ function setup(opts: SetupOptions = {}) {
     getTab: vi.fn(async () => opts.activeTab ?? {}),
     resolveTab: vi.fn(opts.resolveTab ?? (async () => ({}))),
     searchHost: vi.fn(opts.searchHost ?? (async () => ({ band: 'none' as const, candidates: [], complete: true }))),
-    loadCompany,
+    loadCompany: opts.loadCompany ? vi.fn(opts.loadCompany) : loadCompany,
     invalidateCache: vi.fn(async () => {}),
     permissions: {
       request: vi.fn(
@@ -640,6 +644,56 @@ describe('«Gi tilgang» (the data.brreg.no grant)', () => {
     await settle();
     expect(shownOrgnrs()).toEqual([DNB, DNB]);
     expect(noAccess(results()[1]!)).toBe(false);
+  });
+
+  it('a load in flight at the grant heals even when its own access check already saw the grant', async () => {
+    // company-load asks contains() only after every part settled: the
+    // figures failed before the grant, roller landed after it, and the
+    // late check reads «granted», so noHostAccess is never set.
+    const { controller, pending, deps } = setup({ manualLoads: true });
+    controller.follow(companyView(DNB));
+    controller.accessGranted();
+    pending[0]!.resolve(company(DNB));
+    await settle();
+    expect(deps.loadCompany).toHaveBeenCalledTimes(2);
+  });
+
+  it('the same, with the real loader: figures blocked before the grant, roller after it', async () => {
+    const fake = fakeBrowser({ origins: [] });
+    const roller = deferred<Response>();
+    let blocked = true;
+    const json = (body: unknown) =>
+      new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.endsWith(`/api/enheter/${DNB}`)) return json(dnb);
+      if (url.endsWith(`/api/enheter/${DNB}/roller`)) return roller.promise;
+      if (url.endsWith(`/regnskapsregisteret/regnskap/${DNB}`)) {
+        if (blocked) throw new TypeError('blocked by CORS');
+        return json([]);
+      }
+      return new Response('', { status: 404 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const { controller, results } = setup({ loadCompany: realLoadCompany });
+      controller.follow(companyView(DNB));
+      await vi.waitFor(() =>
+        expect(fetchMock.mock.calls.some(([u]) => String(u).endsWith(`/regnskapsregisteret/regnskap/${DNB}`))).toBe(true),
+      );
+      await settle();
+      await fake.browser.permissions.request({ origins: ['https://data.brreg.no/*'] });
+      blocked = false;
+      controller.accessGranted();
+      roller.resolve(json({ rollegrupper: [] }));
+      await vi.waitFor(() => expect(results()).toHaveLength(2));
+      expect(results()[0]!.company.regnskap).toBeUndefined();
+      expect(results()[0]!.company.noHostAccess).toBeUndefined();
+      expect(results()[1]!.company.regnskap).toEqual({ items: [] });
+      expect(results()[1]!.heal).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it('a grant outside the panel (permissions.onAdded) heals the result on screen, focus left alone', async () => {

@@ -77,9 +77,15 @@ sends no CORS header (`docs/notes/brreg-api.md` § cors).
   latest grant is fetched again and repainted in place: no load token,
   no skeleton, and only while that same result is still on screen. A
   tab switch, sync or pick meanwhile replaces it as usual and is never
-  made stale by the heal. A load in flight at the grant heals once it
-  lands, and a company loaded while the prompt was open heals on the
-  grant. A refetch that still lacks access stops there. A failed fetch
+  made stale by the heal. A heal never closes the user's search either:
+  while the search view is open it waits, and lands when the search
+  closes back to that result (`ResultPaint.heal`). A load in flight at
+  the grant heals once it lands, and a company loaded while the prompt
+  was open heals on the grant. A load that began before the latest grant
+  and came back without figures counts as lacking access even without
+  `noHostAccess`: the loader asks `contains` only after every part
+  settled, so it may already see the new grant. A refetch that still
+  lacks access stops there. A failed fetch
   is never cached, so the figures come in while the rest comes from the
   cache; after «Gi tilgang» the result lands on the open tab.
 - The popup says it as one line under the answer: «Mangler tilgang til

@@ -45,6 +45,11 @@ export interface ResultPaint {
   // load token.
   isStale: () => boolean;
   focus: ResultFocus;
+  // A repaint of the result on screen (the figures after a grant), not
+  // a new load: it never closes the user's search. While the search
+  // view is open it waits, and lands when the search closes back to
+  // this result.
+  heal?: true;
   // The tab the panel follows (read at startup, a tab event's, the one
   // the last message named; docs/notes/ui.md § badge): its toolbar
   // badge is set from this result — the answer's tone when the company

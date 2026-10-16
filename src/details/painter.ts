@@ -151,6 +151,8 @@ export function createPanelPainter(
   // The company the user drilled in from, for «Tilbake til <name>».
   let drillFrom: string | undefined;
   let aside: SearchAside | undefined;
+  // A heal that came while the search view was open (ResultPaint.heal).
+  let deferredHeal: ResultPaint | undefined;
   // «Tilbake til <name>» when the drill-in's origin is known.
   let backName: string | undefined;
   let backHidden = true;
@@ -320,6 +322,8 @@ export function createPanelPainter(
     const kept = aside;
     aside = undefined;
     search.reset();
+    const heal = deferredHeal;
+    deferredHeal = undefined;
     if (!restore) return;
     main.replaceChildren(kept.nodes);
     main.dataset.state = kept.state;
@@ -330,6 +334,8 @@ export function createPanelPainter(
     setBusy(kept.state === 'loading');
     watchIdent(shown && state === 'result' ? shown.ident : undefined);
     if (state === 'result') paintFooter();
+    // Back on the result the heal was for: it lands now, focus stays.
+    if (heal && state === 'result' && !heal.isStale()) result({ ...heal, focus: 'none' });
     roots.search.focus();
   }
 
@@ -564,6 +570,43 @@ export function createPanelPainter(
     });
   }
 
+  // A company result. A heal (ResultPaint.heal) never closes the user's
+  // search: while it is open the heal waits for closeSearch(true).
+  function result(paint: ResultPaint): void {
+    if (paint.heal && aside) {
+      deferredHeal = paint;
+      return;
+    }
+    paintId += 1;
+    closeSearch(false);
+    lastHost = paint.host;
+    const view = buildTrustView({
+      company: paint.company,
+      method: paint.method,
+      host: paint.host,
+      now: now(),
+      surface: 'panel',
+      ...(paint.remembered ? { remembered: paint.remembered } : {}),
+      env: deps.env,
+    });
+    backName = paint.method === 'drill-in' ? drillFrom : undefined;
+    drillFrom = undefined;
+    paintBack();
+    // A heal swaps in the figures quietly: no reveal animation.
+    paintResult(view, paint, !paint.heal);
+    badge(paint.tabId, view);
+    if (landOnTab) {
+      landOnTab = false;
+      scrollToTabs();
+    }
+    if (paint.focus === 'heading') focusElement(shown?.heading);
+    else if (paint.focus === 'refresh') focusElement(foot.querySelector('button'));
+    else if (paint.focus === 'tab') {
+      scrollToTabs();
+      focusElement(main.querySelector('[role="tab"][aria-selected="true"]'));
+    }
+  }
+
   // --- the painter -----------------------------------------------------------
 
   return {
@@ -579,35 +622,7 @@ export function createPanelPainter(
       live.announce(COPY.loadingOrgnr(orgnrText(orgnr).spaced));
     },
 
-    result(paint): void {
-      paintId += 1;
-      closeSearch(false);
-      lastHost = paint.host;
-      const view = buildTrustView({
-        company: paint.company,
-        method: paint.method,
-        host: paint.host,
-        now: now(),
-        surface: 'panel',
-        ...(paint.remembered ? { remembered: paint.remembered } : {}),
-        env: deps.env,
-      });
-      backName = paint.method === 'drill-in' ? drillFrom : undefined;
-      drillFrom = undefined;
-      paintBack();
-      paintResult(view, paint, true);
-      badge(paint.tabId, view);
-      if (landOnTab) {
-        landOnTab = false;
-        scrollToTabs();
-      }
-      if (paint.focus === 'heading') focusElement(shown?.heading);
-      else if (paint.focus === 'refresh') focusElement(foot.querySelector('button'));
-      else if (paint.focus === 'tab') {
-        scrollToTabs();
-        focusElement(main.querySelector('[role="tab"][aria-selected="true"]'));
-      }
-    },
+    result,
 
     // A same-company sync or tab event: how the company was reached
     // changed (host, method, the stored choice), the company did not.

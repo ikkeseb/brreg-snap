@@ -263,7 +263,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         tabId: followedTabId,
       });
       painter.setBack(history.current()?.method === 'drill-in');
-      shownAccess = { load: run, gen, missing: company.noHostAccess === true };
+      shownAccess = { load: run, gen, missing: lacksAccess(company, gen) };
       // Granted while this load was in flight: its figures failed for
       // nothing.
       healAccess();
@@ -307,7 +307,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
           const shown = onScreen;
           const remembered = currentHost === undefined ? undefined : await deps.getRememberedChoice(currentHost);
           if (onScreen !== shown) continue;
-          shownAccess = { load, gen, missing: company.noHostAccess === true };
+          shownAccess = { load, gen, missing: lacksAccess(company, gen) };
           const focus: ResultFocus = healToTab && deps.hasFocus() ? 'tab' : 'none';
           healToTab = false;
           painter.result({
@@ -319,6 +319,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
             isStale: () => shownLoad !== load,
             focus,
             tabId: followedTabId,
+            heal: true,
           });
           return;
         }
@@ -328,6 +329,15 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         if (healing === load) healing = undefined;
       }
     })();
+  }
+
+  // Whether a result fetched under grant count `gen` may lack its
+  // figures for want of the grant: company-load says so, or the
+  // figures failed and a grant came while it was in flight (its
+  // contains() check runs after every part settles, so it can already
+  // see the new grant and leave noHostAccess unset).
+  function lacksAccess(company: CompanyData, gen: number): boolean {
+    return company.noHostAccess === true || (company.regnskap === undefined && gen !== accessGen);
   }
 
   function granted(): void {

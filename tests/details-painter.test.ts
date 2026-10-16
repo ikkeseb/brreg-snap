@@ -857,6 +857,42 @@ describe('the masthead search view', () => {
     expect(intents.manual).not.toHaveBeenCalled();
   });
 
+  it('a heal (the figures after a grant) never closes the search; it lands when the search closes back', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const { painter, roots } = setup({ initialTab: 'okonomi' });
+    const blocked = { ...equinor(), regnskap: undefined, noHostAccess: true as const };
+    painter.result(resultPaint(blocked));
+    expect(q('#panel-okonomi .section__act')).not.toBeNull();
+
+    roots.search.value = 'Tomra';
+    roots.search.dispatchEvent(new Event('input'));
+    await vi.advanceTimersByTimeAsync(250);
+    expect(app().dataset.state).toBe('search');
+
+    painter.result(resultPaint(equinor(), { heal: true, focus: 'tab' }));
+    expect(app().dataset.state).toBe('search');
+    expect(roots.search.value).toBe('Tomra');
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    expect(app().dataset.state).toBe('result');
+    expect(q('#panel-okonomi .section__act')).toBeNull();
+    expect(q('#panel-okonomi .fig-head h2')?.textContent).toBe('Årsregnskap 2025');
+    expect(document.activeElement).toBe(roots.search);
+  });
+
+  it('a heal kept for a search that a new paint replaces is dropped', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const { painter, roots } = setup({ initialTab: 'okonomi' });
+    painter.result(resultPaint({ ...equinor(), regnskap: undefined, noHostAccess: true }));
+    roots.search.value = 'Tomra';
+    roots.search.dispatchEvent(new Event('input'));
+    await vi.advanceTimersByTimeAsync(250);
+    painter.result(resultPaint(equinor(), { heal: true }));
+    painter.loading('984851006', { kobling: false });
+    expect(app().dataset.state).toBe('loading');
+    expect(q('#panel-okonomi')).toBeNull();
+  });
+
   it('choosing a hit is a manual pick; a paint from the controller discards the search', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const { painter, roots, intents } = setup();
