@@ -32,6 +32,9 @@ dashboard after submission — get it right in the zip.
   square corners, full-bleed, showing the real UI. Upload the five `docs/screenshots/0*.png`
   files in numerical order. Fixture data and provenance:
   `docs/screenshots/README.md`.
+- **Promo tiles:** small 440×280 and marquee 1400×560, 24-bit PNG
+  without alpha: `docs/screenshots/promo-small-440x280.png` and
+  `docs/screenshots/promo-marquee-1400x560.png`.
 - **Description:** plain text. CWS does not render Markdown, so no
   `**bold**`, no backticks, no `[text](url)` links: they show up
   literally. Paste the Norwegian text below; the English one is for an
