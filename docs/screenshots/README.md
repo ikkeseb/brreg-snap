@@ -15,8 +15,9 @@ promo tiles.
 silent, looping 1280×720 30 fps cut of the 15 s promo «Hele oppslaget»
 (the bakery and its figures are fictional). The promo draws the UI from
 geometry extracted from the real markup and 1.6.2's `src/styles/brreg.css`;
-its build lives outside the repo. The still `01-lookup.png` is the
-fallback for a browser without AVIF.
+its build lives outside the repo. `promo-readme-poster.jpg`, the reel's
+frame at 4 s (the popup card), is the fallback for a browser without
+AVIF.
 
 ## Source
 

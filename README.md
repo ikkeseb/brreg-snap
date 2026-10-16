@@ -11,7 +11,7 @@ status, ledelse, regnskap, konsern og eventuelle varsler.
 <a href="https://sebastian.nuez.no/lab/brreg-snap/">
   <picture>
     <source type="image/avif" srcset="docs/screenshots/promo-readme.avif">
-    <img src="docs/screenshots/01-lookup.png" alt="Animasjon: brreg-snap på nettsiden til et bakeri. Ett klikk på knappen i verktøylinjen viser kortet «Ingen varsler i registeret». Så åpnes sidepanelet, og fanen Økonomi viser nøkkeltallene og utviklingen 2023–2025. Bakeriet og tallene er oppdiktet.">
+    <img src="docs/screenshots/promo-readme-poster.jpg" alt="Animasjon: brreg-snap på nettsiden til et bakeri. Ett klikk på knappen i verktøylinjen viser kortet «Ingen varsler i registeret». Så åpnes sidepanelet, og fanen Økonomi viser nøkkeltallene og utviklingen 2023–2025. Bakeriet og tallene er oppdiktet.">
   </picture>
 </a>
 
