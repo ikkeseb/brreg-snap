@@ -6,6 +6,14 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Changed
+
+- Dark mode is a cool graphite instead of a warm near-black, and the
+  rules that open a table (the ledger, section heads, figures) are a
+  mid-grey there instead of near-white lines. «Ingen varsler i
+  registeret» is no longer a tinted green band: a plain divider, the
+  green seal, nothing else. Warn and danger look as before.
+
 ### Fixed
 
 - With access to data.brreg.no switched off for the extension

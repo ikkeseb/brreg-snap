@@ -15,8 +15,10 @@ normal company trains people to ignore it, so when nothing is wrong the
 view is a calm registry extract (paper, ink, hairlines), and it
 escalates only with the answer's tone:
 
-- **ok** — a quiet band: 3 px tone rule, 5 % tint, a seal, «Ingen
-  varsler i registeret», no supporting line.
+- **ok** — not a band: a 1 px divider in `--rule-ink`, no tint, the
+  green seal, «Ingen varsler i registeret», no supporting line. Colour
+  as a field (a tint, a tone rule) is reserved for warn and danger, so
+  on a normal company the only green is the seal.
 - **warn** — a firmer band: 4 px rule, 12 % tint, headline at 800, an
   optional supporting line, and the way out INSIDE the band as a
   hairline button in the tone («Feil bedrift? Velg en annen»).
@@ -66,16 +68,22 @@ All in `brreg.css`. Light is the default, dark comes from
 `colorScheme`). Colour: `--paper`, `--paper-2`
 (sunk: inputs, kbd, hover), `--ink`, `--ink-2` (labels, details),
 `--ink-3` (captions, neutral glyphs), `--rule` (hairline, decorative),
-`--rule-strong` (UI boundaries), `--ok`, `--warn`, `--danger` (text
+`--rule-ink` (the rule that opens a table: the ledger, a section head,
+the figures, the picker; ink in light, a mid-grey in dark, where ink
+would be the brightest line on the page and read as a glow under the
+answer band), `--rule-strong` (UI boundaries), `--ok`, `--warn`, `--danger` (text
 tone and the verdict's frame, kicker and key word), `--amber` (the
 focus ring only), `--brand` (the mark only: the logo's one blue in
 both themes, § masthead-mark), `--skel` / `--skel-hi`.
 Every text/paper pair measures ≥ 4.5:1 in both themes; each token's
 ratio against `--paper` sits beside it in `brreg.css`. The verdict's tint is `color-mix` of 7 %
-`--danger` into `--paper` (resolves to #F2E5DB light / #211915 dark),
-and on it `--danger` measures 5.4 / 6.8, `--ink` 14.2 / 14.3, `--ink-2`
-7.3 / 8.5, the amber focus ring 4.8 / 8.0 (3.9 / 6.6 on the
-`.btn--tone` hover fill); the frame against `--paper` is 6.0 / 7.4.
+`--danger` into `--paper` (resolves to #F2E5DB light / #1C1718 dark),
+and on it `--danger` measures 5.4 / 7.0, `--ink` 14.2 / 14.7, `--ink-2`
+7.3 / 8.5, the amber focus ring 4.8 / 8.2 (3.9 / 6.7 on the
+`.btn--tone` hover fill); the frame against `--paper` is 6.0 / 7.5.
+The light paper is warm (a registry extract); the dark one is a cool
+graphite, since a warm dark reads brown beside the browser's own
+chrome.
 
 Type: four steps and the verdict, nothing else — `--t-cap` (600
 11px, uppercase + `--track-cap` for section heads and micro labels),

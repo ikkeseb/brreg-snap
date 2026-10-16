@@ -80,6 +80,7 @@
   --ink-2: #4E483E;        /*  8.1  labels, details */
   --ink-3: #655E52;        /*  5.7  captions, neutral glyphs (4.8 on warn tint) */
   --rule: #DDD6C8;         /*  hairline, decorative only */
+  --rule-ink: var(--ink);  /*  the rule that opens a table (ledger, section head, figures, picker) */
   --rule-strong: #8C8476;  /*  3.3  UI boundaries: inputs, buttons, kbd */
   --ok: #1D6A3A;           /*  5.9 */
   --warn: #8A5200;         /*  5.7  (4.8 on its own 12 % tint) */
@@ -94,19 +95,23 @@
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
-    --paper: #14120F;
-    --paper-2: #1D1A16;
-    --ink: #EEE9DF;          /* 15.5 */
-    --ink-2: #BDB5A6;        /*  9.2 */
-    --ink-3: #9A9283;        /*  6.1 */
-    --rule: #302C26;
-    --rule-strong: #6E675B;  /*  3.3 */
-    --ok: #7CC592;           /*  9.1 */
-    --warn: #E6AC4C;         /*  9.2 */
-    --danger: #F2836F;       /*  7.4 */
-    --amber: #D9A866;        /*  8.7 */
-    --skel: #221F1A;
-    --skel-hi: #2C2822;
+    /* cool graphite: the light theme's paper is warm by design, the dark
+       one leans the other way (a warm dark reads brown beside the OS
+       chrome), and the mark's blue sits on it as on a screen */
+    --paper: #0F1012;
+    --paper-2: #191B1E;
+    --ink: #E9EAEC;          /* 15.8 */
+    --ink-2: #B1B4B9;        /*  9.2 */
+    --ink-3: #8C9096;        /*  5.9 */
+    --rule: #272A2E;
+    --rule-ink: #50545B;     /*  2.5  a rule, not text: ink itself would be the brightest line on the page */
+    --rule-strong: #696D74;  /*  3.7 */
+    --ok: #7CC592;           /*  9.3 */
+    --warn: #E6AC4C;         /*  9.4 */
+    --danger: #F2836F;       /*  7.5 */
+    --amber: #D9A866;        /*  8.8 */
+    --skel: #1B1D21;
+    --skel-hi: #25282D;
   }
 }
 
@@ -309,7 +314,7 @@
 
 /* ---------- answer ------------------------------------------------------
    ONE headline in the tone of the most severe finding. Three forms:
-   .answer--ok      quiet band: 3 px rule, 5 % tint, seal, no support line
+   .answer--ok      quiet: a 1 px divider, no tint, seal, no support line
    .answer--warn    firmer band: 4 px rule, 12 % tint, 800 head, support
                     line, the way-out action inside the band
    .answer--danger  the stamped verdict: a field inset by the gutter, 2 px
@@ -324,7 +329,9 @@
   border-top: 3px solid var(--tone);
   background: color-mix(in oklab, var(--tone) var(--tint), var(--paper));
 }
-.answer--ok { --tone: var(--ok); }
+/* ok is not a band: no tint, no tone rule, a divider in the opening-rule
+   weight and the green seal. Only warn and danger carry colour as a field. */
+.answer--ok { --tone: var(--ok); background: none; border-top: 1px solid var(--rule-ink); padding-top: 13px; }
 .answer--warn { --tone: var(--warn); --tint: 12%; border-top-width: 4px; padding-top: 12px; padding-bottom: 14px; }
 .answer__seal {
   width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center;
@@ -375,7 +382,7 @@
      <dt><svg class="glyph">…</svg>Kobling<span class="sr-only">, ok</span></dt>
      <dd>value<span class="ledger-row__detail">…</span></dd></div>
    A signal whose fetch failed is OMITTED, never rendered as «Ingen». */
-.ledger { margin: 12px var(--gut) 0; border-top: 1px solid var(--ink); }
+.ledger { margin: 12px var(--gut) 0; border-top: 1px solid var(--rule-ink); }
 .ledger-row {
   display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 0 8px;
   padding: 5px 0 6px; border-bottom: 1px solid var(--rule);
@@ -489,7 +496,7 @@
 .section { margin: 18px var(--gut) 0; }
 .section__head {
   display: flex; justify-content: space-between; gap: 12px; padding-bottom: 6px;
-  border-bottom: 1px solid var(--ink);
+  border-bottom: 1px solid var(--rule-ink);
   font: var(--t-cap); letter-spacing: var(--track-cap); text-transform: uppercase; color: var(--ink-3);
 }
 .section__head .tab__count { margin: 0; letter-spacing: 0; }
@@ -589,13 +596,13 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .fig-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .fig-head h2 { font: var(--t-lead); }
 .fig-status { display: flex; align-items: center; gap: 8px; margin-top: 4px; color: var(--ink-2); }
-.figs { margin-top: 12px; border-top: 1px solid var(--ink); }
+.figs { margin-top: 12px; border-top: 1px solid var(--rule-ink); }
 .fig-group { padding: 13px 0 5px; border-bottom: 1px solid var(--rule); }
 .fig-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--rule); }
 .fig-row dt { color: var(--ink-2); }
 .fig-row dd { font-weight: 600; text-align: right; }
 .fig-row__unit { margin-left: 3px; font-weight: 400; color: var(--ink-3); }
-.fig-row--total { border-bottom-color: var(--ink); }
+.fig-row--total { border-bottom-color: var(--rule-ink); }
 .fig-row--total dt { color: var(--ink); font-weight: 700; }
 .fig-row--total dd { font-weight: 800; }
 /* single-year equity ratio: a proportion, not a trend */
@@ -620,7 +627,7 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .trend__table tbody td { color: var(--ink-2); }
 .trend__table tbody td:last-child { font-weight: 600; color: var(--ink); }
 .trend__table tbody td.num--neg { color: var(--danger); }
-.trend__table tbody tr:last-child th, .trend__table tbody tr:last-child td { border-bottom-color: var(--ink); }
+.trend__table tbody tr:last-child th, .trend__table tbody tr:last-child td { border-bottom-color: var(--rule-ink); }
 .trend__read { margin-top: 8px; color: var(--ink-2); }
 .trend__read + .trend__read { margin-top: 2px; }
 .honest { margin-top: 8px; color: var(--ink-2); }
@@ -687,7 +694,7 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 .pick-head { padding: 16px var(--gut) 0; }
 .pick-head h1 { font: var(--t-lead); }
 .pick-head p { margin-top: 4px; color: var(--ink-2); }
-.picker { margin: 12px var(--gut) 0; border-top: 1px solid var(--ink); }
+.picker { margin: 12px var(--gut) 0; border-top: 1px solid var(--rule-ink); }
 .pick {
   display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 0 10px; align-items: start;
   width: 100%; padding: 8px 0 9px; border: 0; border-bottom: 1px solid var(--rule);
