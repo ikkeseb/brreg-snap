@@ -6,6 +6,11 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Changed
+
+- The welcome page opens with «Slå opp bedriften med ett klikk.», the
+  same line as the store listing, instead of «Hvem står bak nettsiden?».
+
 ## [1.6.2] — 2026-10-16
 
 ### Changed
