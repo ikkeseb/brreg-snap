@@ -5,6 +5,7 @@
 // in popup.html, details.html and welcome.html).
 
 import type { Tone } from '../../trust/types.js';
+import { COPY } from '../copy.js';
 import type { TextPart } from '../trust-view.js';
 
 export const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -24,6 +25,23 @@ export function el<K extends keyof HTMLElementTagNameMap>(
 export function button(className: string, text?: string): HTMLButtonElement {
   const btn = el('button', className, text);
   btn.type = 'button';
+  return btn;
+}
+
+// «Gi tilgang»: asks for the data.brreg.no grant (onGrant resolves
+// whether it was given). One click, one prompt: a second click while
+// the prompt is open does nothing; aria-disabled, not disabled, so
+// focus stays on the button. A grant repaints the result, so the
+// button only has to work again for a refusal or a failed refetch.
+export function grantButton(className: string, onGrant: () => Promise<boolean>): HTMLButtonElement {
+  const btn = button(className, COPY.grantAccess);
+  btn.addEventListener('click', () => {
+    if (btn.getAttribute('aria-disabled') === 'true') return;
+    btn.setAttribute('aria-disabled', 'true');
+    // No await before onGrant: it reaches permissions.request
+    // synchronously (docs/notes/permissions-model.md § gesture-stack).
+    void onGrant().then(() => btn.removeAttribute('aria-disabled'));
+  });
   return btn;
 }
 

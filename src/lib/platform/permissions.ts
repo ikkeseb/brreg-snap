@@ -33,3 +33,20 @@ export async function hasBrregAccess(): Promise<boolean> {
     return true;
   }
 }
+
+// «Gi tilgang»: asks for the grant. Call it first thing in the click
+// handler, with no await before it (permissions-model.md
+// § gesture-stack). The namespace is passed in so the panel's
+// controller is tested with a fake. Refused without a prompt reads as
+// not granted.
+export function requestBrregAccess(
+  permissions: Pick<typeof browser.permissions, 'request'>,
+): Promise<boolean> {
+  return permissions.request(BRREG_ORIGINS).catch(() => false);
+}
+
+// permissions.onAdded: whether this grant includes data.brreg.no.
+export function grantsBrregAccess(perms: browser.permissions.Permissions): boolean {
+  const list = perms.origins as readonly string[] | undefined;
+  return BRREG_ORIGINS.origins!.some((o) => list?.includes(o) ?? false);
+}

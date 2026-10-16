@@ -719,6 +719,31 @@ describe('buildTrustView — regnskap failed with the host permission withheld',
     });
   });
 
+  it('popup: the access line replaces regnskap in «Noe kunne ikke hentes», other parts stay named', () => {
+    const answerOf = (extra: Partial<CompanyData>) =>
+      view({ company: company(enhetEquinor, { konsern: null, ...extra }) }).answer;
+    const blocked = answerOf({ roller: rollerEquinor, noHostAccess: true });
+    expect(blocked.access).toBe(true);
+    expect(blocked.note).toBeUndefined();
+    const both = answerOf({ noHostAccess: true });
+    expect(both.access).toBe(true);
+    expect(both.note).toBe('Noe kunne ikke hentes: roller');
+    const plain = answerOf({ roller: rollerEquinor });
+    expect(plain.access).toBeUndefined();
+    expect(plain.note).toBe('Noe kunne ikke hentes: regnskapstall');
+  });
+
+  it('popup: a verdict has no room for the access line either', () => {
+    const v = view({ company: company(enhetKonkurs, { roller: rollerKonkurs, noHostAccess: true }) });
+    expect(v.answer.tone).toBe('danger');
+    expect(v.answer.access).toBeUndefined();
+  });
+
+  it('the panel says it in Økonomi, not under the answer', () => {
+    const v = view({ company: company(enhetEquinor, { roller: rollerEquinor, noHostAccess: true }), surface: 'panel' });
+    expect(v.answer.access).toBeUndefined();
+  });
+
   it('the regnskap row keeps the Enhet’s filed year and shows no money either way', () => {
     const rowOf = (extra: Partial<CompanyData>) =>
       view({ company: company(enhetEquinor, extra), surface: 'panel' }).ledger.find((r) => r.key === 'regnskap');

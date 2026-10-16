@@ -131,6 +131,7 @@
         return true;
       },
       remove: async () => true,
+      onAdded: { addListener: noop, removeListener: noop },
       onRemoved: { addListener: noop, removeListener: noop },
     },
     sidePanel: {

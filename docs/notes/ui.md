@@ -45,7 +45,10 @@ A part whose fetch failed is named, never presented as absent.
 konsern when the Enhet says erIKonsern, endringer on the panel). The
 popup's ok and warn bands get one quiet line under the headline,
 «Noe kunne ikke hentes: roller, regnskapstall» (`answer.note`,
-`.answer__note`); a verdict has no room for it (§ popup-budget). The
+`.answer__note`); with the data.brreg.no grant withheld, regnskap
+leaves that line for its own, «Mangler tilgang til regnskapstallene.
+Gi tilgang» (`answer.access`); a verdict has room for neither
+(§ popup-budget). The
 panel says it where the part lives, as a sentence, never as a row that
 reads like data: «Kunne ikke hente roller» under Ledelse and in
 Personer, «… regnskapstallene» in Økonomi (or, with the data.brreg.no
@@ -127,7 +130,7 @@ negative → `.num--neg`, nowrap → `.nw`), `section(label, count?)`,
 | `masthead.ts` | `renderMasthead(container, {kind:'popup', host?, search, markOnly?} \| {kind:'panel', query?, autoSync}, handlers)` → `{input?, toggle?, searchButton?}`; `appendSiteLabel`; `brandMark()` (the 16×15 slot, § masthead-mark) | `header.mast > svg.mast__mark[role=img][width=16][height=15] > svg.mark--x1 + svg.mark--x2` + popup `span.mast__site` (`<b>` = registrable domain; «Ingen nettside» without a host; left out on the no-site empty state, `markOnly`, whose heading says it) + `button.icon-btn[aria-label]` (pinned right); panel `label.search > svg.icon + input[type=search][aria-label]` + `button.toggle[role=switch][aria-checked] > span.toggle__track` |
 | `identity.ts` | `renderIdentity(container, IdentityView, CopyHandlers)` → `{heading}`; `buildOrgnrButton(orgnr, handlers, {small})` | `div.ident > p.ident__over` (form · city) OR `p.ident__eyebrow` (provenance, `i-link`) · `h1.ident__name(--claim)` · `p.ident__line > button.orgnr + a.link` (with an eyebrow: `span.ident__rest > span.ident__meta` carries form · city, the link glued to its last word by `.nw`) · popup `p.ident__leaders > span × n` · `p.ident__note` (avdeling: «Avdeling: » + `b` (the branch name in ink, `appendName` against the parent) + « (org.nr)»). Panel: the painter adds `div.ident__row > p.ident__flags + button.text-btn` (Kopier sammendrag, pinned right with or without flags) |
 | `copy-feedback.ts` | `attachCopy(button, () => text, {done, label?}, {copy, announce})`, `COPY_FEEDBACK_MS` = 1400 | adds `.is-copied` (icon `.icon--copy` ⇄ `.icon--done`, the label swaps to «Kopiert») or `.is-failed`; announces «Org.nr kopiert» / «Kunne ikke kopiere» in the live region |
-| `answer.ts` | `buildAnswer(AnswerView, {onReject})` → `{section, heading}`; `buildErrorAnswer({head, support, retry}, {onRetry})`; `buildAnswerLoading()` | `section.answer.answer--ok\|--warn\|--danger[aria-labelledby] > span.answer__seal > svg.glyph` + `h2.answer__head` + `p.answer__support` + `div.answer__actions`. Danger (the framed field): `role=alert`, no seal, `span.answer__kicker > svg.glyph + «Alvorlig»` before the head, and the head is prose `span.stamp-pre? · strong.stamp-word · span.stamp-rest` |
+| `answer.ts` | `buildAnswer(AnswerView, {onReject, onGrant})` → `{section, heading}`; `buildErrorAnswer({head, support, retry}, {onRetry})`; `buildAnswerLoading()` | `section.answer.answer--ok\|--warn\|--danger[aria-labelledby] > span.answer__seal > svg.glyph` + `h2.answer__head` + `p.answer__support` (+ `p.answer__support.answer__note`: the failed parts, and the access line with `button.text-btn` «Gi tilgang», `grantButton` in `dom.ts`) + `div.answer__actions`. Danger (the framed field): `role=alert`, no seal, `span.answer__kicker > svg.glyph + «Alvorlig»` before the head, and the head is prose `span.stamp-pre? · strong.stamp-word · span.stamp-rest` |
 | `ledger.ts` | `buildLedger(rows, {onReject, onForget, reportHref})`, `buildLedgerRow`, `buildFacts(TextPart[])` (spoof) | `dl.ledger > div.ledger-row[data-tone][data-key](--inline, --danger-value) > dt (svg.glyph + label + span.sr-only «, ok / advarsel / alvorlig») + dd (value, `.ledger-row__aux`, `.ledger-row__detail`, `.ledger-row__act`)`. Spoof: `p.ledger-cap` + `p.facts`. A `report` action without a mailto is left out |
 | `konsern.ts` | `buildKonsernRow(KonsernView, {onOpen})` | `button.konsern > svg.icon + span.konsern__text + svg.konsern__chev` |
 | `actions.ts` | `buildActions({summary, panelHref?}, handlers)` → `{container}` (popup) | `div.actions > a.btn.btn--primary[href]` (Åpne i sidepanel) + `button.btn` (Kopier sammendrag) |
@@ -249,7 +252,11 @@ re-measured 2026-10-14 with the stamped verdict (live API and the smoke
 fixtures agree, Chromium through the preview harness): spoof 581,
 konkurs 586, nothing shed. With the «Noe kunne ikke hentes» line (a
 failed part drops a row too): dnb with roller + regnskap + konsern
-failed 506, equinor with only konsern failed 586; a verdict gets no
+failed 506, equinor with only konsern failed 586. The access line
+(2026-10-16, live API through the harness with `&hostaccess=withheld`):
+equinor, dnb and tomra 584, nothing shed, since the regnskap row loses
+its money; the panel's longer sentence there measured 603 with all
+three shed classes, which is why the popup has a one-line version. A verdict gets no
 line, because konkurs (586) or the spoof (581) plus a line would sit
 too close to the cap for a longer name.
 

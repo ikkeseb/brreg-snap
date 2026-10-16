@@ -8,7 +8,7 @@
 
 import { COPY } from '../copy.js';
 import type { FigRow, OkonomiView, TrendCell, TrendView } from '../dossier-view.js';
-import { button, el, glyph, link, section, uniqueId } from './dom.js';
+import { button, el, glyph, grantButton, link, section, uniqueId } from './dom.js';
 
 const YEARS_SHOWN = 5;
 
@@ -92,22 +92,9 @@ export interface OkonomiHandlers {
   onGrant: () => Promise<boolean>;
 }
 
-// One click, one prompt: a second click while the prompt is open does
-// nothing. aria-disabled, not disabled, so focus stays on the button.
 function buildGrant(onGrant: OkonomiHandlers['onGrant']): HTMLElement {
   const row = el('p', 'section__act');
-  const btn = button('btn btn--sm', COPY.grantAccess);
-  btn.addEventListener('click', () => {
-    if (btn.getAttribute('aria-disabled') === 'true') return;
-    btn.setAttribute('aria-disabled', 'true');
-    // No await before onGrant: it reaches permissions.request
-    // synchronously (docs/notes/permissions-model.md § gesture-stack).
-    void onGrant().then((granted) => {
-      // A grant repaints the tab; a refusal leaves the state as it was.
-      if (!granted) btn.removeAttribute('aria-disabled');
-    });
-  });
-  row.appendChild(btn);
+  row.appendChild(grantButton('btn btn--sm', onGrant));
   return row;
 }
 

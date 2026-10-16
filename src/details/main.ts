@@ -26,6 +26,7 @@ import {
   readPanelHint,
 } from '../lib/panel-protocol.js';
 import { setTrustBadge } from '../lib/platform/badge.js';
+import { grantsBrregAccess } from '../lib/platform/permissions.js';
 import { isFirefox } from '../lib/platform/engine.js';
 import { createTabWatcher } from '../lib/tab-sync.js';
 import { rejectChoice } from '../lib/ui/reject-flow.js';
@@ -190,6 +191,13 @@ function main(): void {
     const hint = readPanelHint(search, now, await panelWindowId);
     return controller.init(hint);
   }
+
+  // The data.brreg.no grant given outside «Gi tilgang» (about:addons,
+  // Chrome's site access): a result missing its figures heals. The
+  // listener lives as long as the panel document; nothing to remove.
+  browser.permissions.onAdded.addListener((perms) => {
+    if (grantsBrregAccess(perms)) controller.accessGranted();
+  });
 
   void setupAutoSync();
   void init();

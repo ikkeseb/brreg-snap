@@ -62,6 +62,9 @@ export const STATES = [
   { name: 'nomatch-recents', surface: 'panel', path: '/details/details.html?nomatch=example.com&seedrecents=1', state: 'empty' },
   { name: 'offline', surface: 'panel', path: '/details/details.html?orgnr=984851006', state: 'error', offline: true },
   { name: 'popup-dnb', surface: 'popup', path: '/popup/popup.html?taburl=https://www.dnb.no/', state: 'result' },
+  // The data.brreg.no grant withheld: one line with «Gi tilgang» under
+  // the answer, inside the 600 px budget.
+  { name: 'popup-no-access', surface: 'popup', path: '/popup/popup.html?taburl=https://www.dnb.no/&hostaccess=withheld', state: 'result' },
   // nrk.no's hjemmeside search yields several candidates.
   { name: 'popup-picker', surface: 'popup', path: '/popup/popup.html?taburl=https://www.nrk.no/', state: 'picker' },
   // A shop whose title carries Equinor's orgnr: the danger verdict

@@ -91,6 +91,10 @@ export interface AnswerView {
   // Popup: «Noe kunne ikke hentes: roller, regnskap» — the parts whose
   // fetch failed, so an answer built on less is never read as complete.
   note?: string;
+  // Popup: the regnskap figures failed because the data.brreg.no grant
+  // is withheld. Said as its own line with «Gi tilgang», and regnskap
+  // is left out of `note`.
+  access?: true;
   actions: AnswerAction[];
 }
 
@@ -537,8 +541,11 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   };
   if (shownAnswer.supporting) answerView.supporting = shownAnswer.supporting;
   if (shownAnswer.tone === 'danger') answerView.stamp = stampOf(shownAnswer.headline);
-  if (surface === 'popup' && failed.length > 0 && NOTE_TONES.has(shownAnswer.tone)) {
-    answerView.note = COPY.couldNotFetch(failed.map((p) => COPY.partName[p]).join(', '));
+  if (surface === 'popup' && NOTE_TONES.has(shownAnswer.tone)) {
+    const blocked = company.noHostAccess === true;
+    const noted = blocked ? failed.filter((p) => p !== 'regnskap') : failed;
+    if (noted.length > 0) answerView.note = COPY.couldNotFetch(noted.map((p) => COPY.partName[p]).join(', '));
+    if (blocked) answerView.access = true;
   }
 
   // --- ledger

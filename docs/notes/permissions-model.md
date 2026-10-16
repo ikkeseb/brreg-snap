@@ -66,28 +66,50 @@ sends no CORS header (`docs/notes/brreg-api.md` § cors).
   data.brreg.no, så regnskapstallene kan ikke hentes.» with a «Gi
   tilgang» button instead of «Prøv igjen senere». The click reaches
   `permissions.request(BRREG_ORIGINS)` with no await before it
-  (§ gesture-stack; `intents.grantAccess` in
-  `src/details/controller.ts`). A grant reloads the company on screen
-  and lands on the open tab: a failed fetch is never cached, so the
-  figures come in while the other parts come from the cache. A refusal
-  leaves the state as it was.
+  (§ gesture-stack; `requestBrregAccess` in
+  `src/lib/platform/permissions.ts`, `intents.grantAccess` in
+  `src/details/controller.ts`). A refusal leaves the state as it was.
+- A grant heals the panel instead of reloading it. The controller
+  counts grants (the request answering yes, and `permissions.onAdded`
+  with the origin, so a grant given in about:addons or Chrome's site
+  access counts too) and records the count each load began under. A
+  result on screen that lacks the figures and was fetched before the
+  latest grant is fetched again and repainted in place: no load token,
+  no skeleton, and only while that same result is still on screen. A
+  tab switch, sync or pick meanwhile replaces it as usual and is never
+  made stale by the heal. A load in flight at the grant heals once it
+  lands, and a company loaded while the prompt was open heals on the
+  grant. A refetch that still lacks access stops there. A failed fetch
+  is never cached, so the figures come in while the rest comes from the
+  cache; after «Gi tilgang» the result lands on the open tab.
+- The popup says it as one line under the answer: «Mangler tilgang til
+  regnskapstallene.» with a text button «Gi tilgang», instead of naming
+  regnskap in «Noe kunne ikke hentes: …» (other failed parts stay
+  named there). The panel's longer line doesn't fit the 600 px budget
+  (`docs/notes/ui.md` § popup-budget). A verdict has no room for either
+  line, as before.
+- The prompt closes the popup: a popup closes when it loses focus, and
+  the prompt takes it. Firefox: bug 1766834 («as soon as the
+  browserAction popup loses the focus, it gets auto-closed»), which
+  also reports the prompt can get hidden on Linux. Chromium: the smoke
+  sees the popup close on the click. The grant still applies, and the
+  next popup shows the figures. A popup that does survive reloads.
+- The ledger's regnskap row keeps the Enhet's filing year without
+  money, on both surfaces.
 - No manifest change: both engines let `permissions.request` ask for
   an origin in `host_permissions` the user withheld (MDN
   `host_permissions`: «it can request them using
   permissions.request()»; Chrome's permissions API: «required
   permissions that were withheld by the user»).
-- The popup and the ledger stay as they were: the popup's «Noe kunne
-  ikke hentes: regnskapstall» line, and a regnskap row that keeps the
-  Enhet's filing year without money.
-- A grant given outside the panel (about:addons) shows on the next
-  load; the panel doesn't listen for it.
 - The smoke withholds site access in real Chromium through
   `chrome.developerPrivate` on chrome://extensions, since Chrome refuses
-  `permissions.remove` for a required origin, and checks that the click
-  opens the prompt (`tests/e2e/extension.spec.ts`). Headless can't answer
-  the prompt; the reload after a grant is pinned in
-  `tests/details-controller.test.ts` and shown in the preview harness
-  with `&hostaccess=withheld`.
+  `permissions.remove` for a required origin (`tests/e2e/extension.spec.ts`).
+  In the popup the browser's own CORS check blocks the figures
+  (`tests/e2e/native.ts` answers with live CORS headers); the panel,
+  a Playwright page whose routes get a CORS header from Playwright,
+  aborts the figures instead. Headless can't answer the prompt; the
+  heal is pinned in `tests/details-controller.test.ts` and shown in
+  the preview harness with `&hostaccess=withheld`.
 
 <!-- SECTION: event-page-wakeup -->
 ## Background listeners must register synchronously at top level

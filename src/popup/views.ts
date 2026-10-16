@@ -92,6 +92,8 @@ export function paintLoading(roots: Roots, host: string | undefined, handlers: M
 
 export interface ResultHandlers extends CopyHandlers, MastHandlers {
   onReject: () => void;
+  // «Gi tilgang» when the data.brreg.no grant is withheld.
+  onGrant: () => Promise<boolean>;
   onForget: () => void;
   onBackToSite: () => void;
   onRefresh: () => void;
@@ -120,7 +122,7 @@ export function paintResult(roots: Roots, view: TrustView, handlers: ResultHandl
   const { heading } = renderIdentity(ident, view.identity, handlers);
   main.appendChild(ident);
 
-  const answer = buildAnswer(view.answer, { onReject: handlers.onReject });
+  const answer = buildAnswer(view.answer, { onReject: handlers.onReject, onGrant: handlers.onGrant });
   main.appendChild(answer.section);
 
   const ledgerHandlers = {

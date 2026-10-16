@@ -10,11 +10,13 @@
 
 import { COPY } from '../copy.js';
 import type { AnswerView } from '../trust-view.js';
-import { button, el, glyph, icon, link, uniqueId } from './dom.js';
+import { button, el, glyph, grantButton, icon, link, uniqueId } from './dom.js';
 
 export interface AnswerHandlers {
   // «Feil bedrift? Velg en annen» / «Søk etter riktig selskap».
   onReject?: () => void;
+  // «Gi tilgang» (popup): asks for the data.brreg.no grant.
+  onGrant?: () => Promise<boolean>;
 }
 
 export interface Answer {
@@ -62,6 +64,11 @@ export function buildAnswer(answer: AnswerView, handlers: AnswerHandlers = {}): 
   }
   if (answer.note) {
     sec.appendChild(el('p', 'answer__support answer__note', answer.note));
+  }
+  if (answer.access) {
+    const p = el('p', 'answer__support answer__note', COPY.regnskapNoAccessShort);
+    if (handlers.onGrant) p.append(' ', grantButton('text-btn', handlers.onGrant));
+    sec.appendChild(p);
   }
 
   if (answer.actions.length > 0) {

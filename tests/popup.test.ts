@@ -385,6 +385,32 @@ describe('popup controller — search view, error, refresh', () => {
     expect(document.activeElement).not.toBe(first);
   });
 
+  it('a withheld data.brreg.no grant is said under the answer with «Gi tilgang», which asks and reloads', async () => {
+    mocks.loadCompany.mockResolvedValueOnce({ ...company(enhetDnb, { rollegrupper: [] }), konsern: null, noHostAccess: true });
+    const browser = await boot();
+    await waitState('result');
+    const note = document.querySelector('.answer__note')!;
+    expect(note.textContent).toBe('Mangler tilgang til regnskapstallene. Gi tilgang');
+    // Never the «couldn't fetch» line for the same failure.
+    expect(document.querySelectorAll('.answer__note')).toHaveLength(1);
+    byText('Gi tilgang')!.click();
+    // Synchronously, in the click's own call stack.
+    expect(browser.permissions.request).toHaveBeenCalledWith({ origins: ['https://data.brreg.no/*'] });
+    await vi.waitFor(() => expect(mocks.loadCompany).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(app().textContent).not.toContain('Mangler tilgang'));
+    expect(state()).toBe('result');
+  });
+
+  it('a refused grant leaves the popup as it was', async () => {
+    mocks.loadCompany.mockResolvedValueOnce({ ...company(enhetDnb, { rollegrupper: [] }), konsern: null, noHostAccess: true });
+    const browser = await boot();
+    browser.permissions.request.mockResolvedValueOnce(false);
+    await waitState('result');
+    byText('Gi tilgang')!.click();
+    await vi.waitFor(() => expect(byText('Gi tilgang')?.hasAttribute('aria-disabled')).toBe(false));
+    expect(mocks.loadCompany).toHaveBeenCalledTimes(1);
+  });
+
   it('«Åpne i sidepanel» docks the panel in the popup\'s window and the konsern row opens Enheter', async () => {
     await boot();
     await waitState('result');

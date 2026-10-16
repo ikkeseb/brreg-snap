@@ -30,6 +30,7 @@ import {
   type PanelTarget,
 } from '../lib/panel-protocol.js';
 import { setTrustBadge } from '../lib/platform/badge.js';
+import { requestBrregAccess } from '../lib/platform/permissions.js';
 import { isFirefox } from '../lib/platform/engine.js';
 import { sidebar } from '../lib/platform/sidebar.js';
 import { describeLoadFailure } from '../lib/ui/error-message.js';
@@ -243,6 +244,7 @@ function showResult(view: TrustView, opts: { focus: LoadFocus; reveal: boolean }
       copy: writeClipboard,
       announce: roots.live.announce,
       onReject: () => void reject(),
+      onGrant: grantAccess,
       onForget: () => void forget(),
       onBackToSite: () => void init({ focus: true }),
       onRefresh: () => void refresh(),
@@ -497,6 +499,18 @@ async function forget(): Promise<void> {
   await forgetHost(host);
   if (stale(myRunId)) return;
   await init({ focus: true });
+}
+
+// «Gi tilgang»: the request comes first, no await before it
+// (permissions-model.md § gesture-stack). The prompt takes focus, and
+// a popup closes when it loses focus, so the popup may be gone before
+// the answer; the grant then shows on the next open. A popup still
+// open reloads: the failed figures were never cached.
+function grantAccess(): Promise<boolean> {
+  return requestBrregAccess(browser.permissions).then((granted) => {
+    if (granted) lastLoad?.(true);
+    return granted;
+  });
 }
 
 async function refresh(): Promise<void> {
