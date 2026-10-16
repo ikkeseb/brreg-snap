@@ -8,7 +8,12 @@ status, ledelse, regnskap, konsern og eventuelle varsler.
 **Installer:** [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/brreg-snap/) (Firefox 115 eller nyere)
 · [Chrome Web Store](https://chromewebstore.google.com/detail/brreg-snap/mccggmiialopdaaokhakeijmbafhdmli) (Chrome 116 eller nyere)
 
-![brreg-snap på dnb.no: DNB BANK ASA, ingen varsler i registeret, dnb.no er registrert hjemmeside (eksempeldata)](docs/screenshots/01-lookup.png)
+<a href="https://sebastian.nuez.no/lab/brreg-snap/">
+  <picture>
+    <source type="image/avif" srcset="docs/screenshots/promo-readme.avif">
+    <img src="docs/screenshots/promo-readme-poster.jpg" alt="Animasjon: brreg-snap på nettsiden til et bakeri. Ett klikk på knappen i verktøylinjen viser kortet «Ingen varsler i registeret». Så åpnes sidepanelet, og fanen Økonomi viser nøkkeltallene og utviklingen 2023–2025. Bakeriet og tallene er oppdiktet.">
+  </picture>
+</a>
 
 *A Firefox and Chrome extension for lookups in Norway's Brønnøysund
 Register Centre, right from the site you are on: the company behind
