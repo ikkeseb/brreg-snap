@@ -340,8 +340,8 @@ export const COPY = {
   // welcome page (opened once, on install)
   welcome: {
     title: 'Velkommen til brreg-snap',
-    head: 'Hvem står bak nettsiden?',
-    lead: 'brreg-snap slår opp bedriften bak siden i Brønnøysundregistrene: org.nr, status, ledelse, regnskap, konsern og eventuelle varsler.',
+    head: 'Slå opp bedriften med ett klikk.',
+    lead: 'brreg-snap finner bedriften bak nettsiden du er på og henter det viktigste fra Brønnøysundregistrene: org.nr, status, ledelse, regnskap, konsern og eventuelle varsler.',
     // The two fictional examples; the tag says so on the card itself.
     exampleTag: 'Oppdiktet eksempel',
     calm: 'Rolig når alt er i orden',
