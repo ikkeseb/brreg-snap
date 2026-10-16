@@ -880,6 +880,27 @@ describe('the masthead search view', () => {
     expect(document.activeElement).toBe(roots.search);
   });
 
+  it('a waiting heal lands with the provenance that came after it, not the old site', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    const { painter, roots, deps } = setup({ initialTab: 'okonomi' });
+    painter.result(resultPaint({ ...equinor(), regnskap: undefined, noHostAccess: true }, { tabId: 1 }));
+    roots.search.value = 'Tomra';
+    roots.search.dispatchEvent(new Event('input'));
+    await vi.advanceTimersByTimeAsync(250);
+    painter.result(resultPaint(equinor(), { heal: true, tabId: 1 }));
+    // A tab switch to the same company from another site (keepView).
+    painter.provenance({ method: 'manual', host: undefined, tabId: 2 });
+    vi.mocked(deps.setBadge).mockClear();
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+    expect(q('#panel-okonomi .fig-head h2')?.textContent).toBe('Årsregnskap 2025');
+    // No Kobling row for a manual pick: the old site's row is gone.
+    expect(qa('.ledger-row').map((r) => r.dataset.key)).not.toContain('kobling');
+    const badged = (vi.mocked(deps.setBadge).mock.calls as unknown[][]).map((c) => c[0]);
+    expect(badged.length).toBeGreaterThan(0);
+    expect(badged.every((tabId) => tabId === 2)).toBe(true);
+  });
+
   it('a heal kept for a search that a new paint replaces is dropped', async () => {
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const { painter, roots } = setup({ initialTab: 'okonomi' });

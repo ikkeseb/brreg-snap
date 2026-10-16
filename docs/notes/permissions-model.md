@@ -79,7 +79,9 @@ sends no CORS header (`docs/notes/brreg-api.md` § cors).
   tab switch, sync or pick meanwhile replaces it as usual and is never
   made stale by the heal. A heal never closes the user's search either:
   while the search view is open it waits, and lands when the search
-  closes back to that result (`ResultPaint.heal`). A load in flight at
+  closes back to that result (`ResultPaint.heal`), with how the company
+  is reached by then: a same-company tab switch meanwhile updates the
+  waiting heal's host, method, stored choice and tab. A load in flight at
   the grant heals once it lands, and a company loaded while the prompt
   was open heals on the grant. A load that began before the latest grant
   and came back without figures counts as lacking access even without

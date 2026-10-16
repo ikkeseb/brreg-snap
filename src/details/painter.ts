@@ -631,6 +631,18 @@ export function createPanelPainter(
     // progress stay.
     provenance({ method, host, remembered, tabId }): void {
       if (!shown) return;
+      // A heal waiting behind the search keeps its fresh company data
+      // but must land with how the company is reached now.
+      if (deferredHeal) {
+        const { remembered: _old, tabId: _oldTab, ...heal } = deferredHeal;
+        deferredHeal = {
+          ...heal,
+          method,
+          host,
+          ...(remembered ? { remembered } : {}),
+          ...(tabId !== undefined ? { tabId } : {}),
+        };
+      }
       const kept = shown;
       lastHost = host;
       const view = buildTrustView({
