@@ -116,6 +116,7 @@ function fakeIntents(): PanelIntents {
     forget: vi.fn(async () => {}),
     retry: vi.fn(),
     refresh: vi.fn(),
+    grantAccess: vi.fn(async () => true),
     pick: vi.fn(),
     none: vi.fn(),
     manual: vi.fn(),
@@ -248,6 +249,44 @@ describe('result: the dossier', () => {
     expect(entity.querySelector('small')?.textContent).toMatch(/^Org\.nr .* · åpne$/);
     entity.click();
     expect(intents.drill).toHaveBeenCalledWith('976389387');
+  });
+
+  it('Økonomi with the data.brreg.no grant withheld: the reason and «Gi tilgang», one prompt per click', async () => {
+    const { painter, intents } = setup({ initialTab: 'okonomi' });
+    let answer: (granted: boolean) => void = () => {};
+    vi.mocked(intents.grantAccess).mockImplementation(() => new Promise<boolean>((r) => (answer = r)));
+    painter.result(resultPaint({ ...equinor(), regnskap: undefined, noHostAccess: true }));
+    expect(qa('#panel-okonomi .section__text').map((p) => p.textContent)).toEqual([
+      'brreg-snap har ikke tilgang til data.brreg.no, så regnskapstallene kan ikke hentes.',
+    ]);
+    const grant = q<HTMLButtonElement>('#panel-okonomi .section__act button')!;
+    expect(grant.textContent).toBe('Gi tilgang');
+    grant.click();
+    // Synchronously: the click's own call stack reaches the request.
+    expect(intents.grantAccess).toHaveBeenCalledTimes(1);
+    expect(grant.getAttribute('aria-disabled')).toBe('true');
+    grant.click();
+    expect(intents.grantAccess).toHaveBeenCalledTimes(1);
+    // Refused: the state stays, and the button works again.
+    answer(false);
+    await Promise.resolve();
+    await Promise.resolve();
+    expect(grant.hasAttribute('aria-disabled')).toBe(false);
+    grant.click();
+    expect(intents.grantAccess).toHaveBeenCalledTimes(2);
+  });
+
+  it('Økonomi with a plain regnskap failure offers no grant', () => {
+    const { painter } = setup({ initialTab: 'okonomi' });
+    painter.result(resultPaint({ ...equinor(), regnskap: undefined }));
+    expect(q('#panel-okonomi .section__text')?.textContent).toBe(COPY.regnskapFailed);
+    expect(q('#panel-okonomi .section__act')).toBeNull();
+  });
+
+  it('a reload after the grant lands on the open tab, focus on its tab button', () => {
+    const { painter } = setup({ initialTab: 'okonomi' });
+    painter.result(resultPaint(equinor(), { focus: 'tab' }));
+    expect(document.activeElement?.id).toBe('tab-okonomi');
   });
 
   it('Økonomi: figures with currency, the equity bar via --share, the honest note, PDF years, kunngjøringer', () => {

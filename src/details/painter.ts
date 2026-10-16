@@ -450,7 +450,7 @@ export function createPanelPainter(
             panel.append(...buildPersoner(d.personer, handlers));
             break;
           case 'okonomi':
-            panel.append(...buildOkonomi(d.okonomi));
+            panel.append(...buildOkonomi(d.okonomi, { onGrant: () => intents.grantAccess() }));
             break;
           case 'enheter':
             panel.append(...buildEnheter(d.enheter, view.identity.name, handlers));
@@ -603,6 +603,10 @@ export function createPanelPainter(
       }
       if (paint.focus === 'heading') focusElement(shown?.heading);
       else if (paint.focus === 'refresh') focusElement(foot.querySelector('button'));
+      else if (paint.focus === 'tab') {
+        scrollToTabs();
+        focusElement(main.querySelector('[role="tab"][aria-selected="true"]'));
+      }
     },
 
     // A same-company sync or tab event: how the company was reached

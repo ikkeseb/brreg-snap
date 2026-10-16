@@ -112,6 +112,7 @@ function main(): void {
     searchHost: searchByHostnameDetailed,
     loadCompany,
     invalidateCache,
+    permissions: browser.permissions,
     pushRecent,
     rejectChoice,
     forgetHost,

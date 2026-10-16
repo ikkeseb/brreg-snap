@@ -12,6 +12,9 @@
 //   department, the number on a store receipt or a branch page. brreg
 //   has no enhet for it, so the view shows its parent and carries the
 //   branch along as `avdeling`.
+// - A failed regnskap fetch with the data.brreg.no grant withheld is
+//   not a passing failure: that endpoint sends no CORS header, so it
+//   can't load until the user grants access (`noHostAccess`).
 
 import { fetchAarsregnskapYears } from './aarsregnskap.js';
 import { fetchEndringer } from './brreg-endringer.js';
@@ -25,6 +28,7 @@ import {
   getFetchedAt,
 } from './brreg.js';
 import { deriveKonsern, fetchKonsernstruktur, type Konsern } from './konsern.js';
+import { hasBrregAccess } from './platform/permissions.js';
 import type {
   Enhet,
   EnhetOppdatering,
@@ -162,6 +166,11 @@ export interface CompanyData extends OrgnrMatch, SoftParts {
   // When this data was fetched from brreg (ms epoch): the oldest of its
   // cached parts, since a cache hit can be up to a day old.
   fetchedAt: number;
+  // Set when regnskap failed and the data.brreg.no host permission is
+  // not granted: Regnskapsregisteret sends no CORS header, so the
+  // figures can't load until the user grants it (docs/notes/brreg-api.md
+  // § cors). Every other part loads without the grant.
+  noHostAccess?: true;
 }
 
 export async function loadCompany(
@@ -190,5 +199,7 @@ export async function loadCompany(
   const fetchedAt = cached.length > 0 ? Math.min(...cached) : Date.now();
   const data: CompanyData = { ...match, ...soft, konsern: konsern?.konsern, fetchedAt };
   if (konsern?.tree) data.konsernTree = konsern.tree;
+  // Asked only after a failure: the common path costs no extra call.
+  if (soft.regnskap === undefined && !(await hasBrregAccess())) data.noHostAccess = true;
   return data;
 }

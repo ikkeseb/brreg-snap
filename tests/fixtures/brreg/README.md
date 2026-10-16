@@ -13,6 +13,9 @@ orgnr (999999999, 999999998): its real orgnr leads straight back to the
 name. `regnskap-923609016-usd.json` is a full capture from 2026-10-06:
 three years of the group's consolidated rows (`KONSERN`) before the
 company's own (`SELSKAP`), the order the callers must not trust.
+`regnskap-910747711-orkla.json` and `regnskap-927124238-tomra-eur.json`
+are full captures from 2026-10-16: three `KONSERN` and three `SELSKAP`
+years each, Tomra's 2024 and 2025 group rows in EUR.
 `roller-999999998-enk.json` is a live ENK roller response's shape
 (2026-10-15: an `INNH` group, no daglig leder or styre, an accountant)
 with a fictitious owner and accountant.

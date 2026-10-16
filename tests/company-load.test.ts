@@ -179,6 +179,62 @@ describe('loadCompany', () => {
     expect(company.underenheter).toBeUndefined();
   });
 
+  describe('a withheld data.brreg.no grant', () => {
+    // Regnskapsregisteret sends no CORS header, so without the host
+    // permission the browser blocks the response: fetch rejects.
+    const corsBlocked = (): Response => {
+      throw new TypeError('NetworkError when attempting to fetch resource.');
+    };
+    const routes = (regnskap: () => Response) => ({
+      [`${API}/enheter/923609016`]: () => json(enhetEquinor),
+      [`${API}/enheter/923609016/roller`]: () => json(rollerEquinor),
+      [`${REGNSKAP}/923609016`]: regnskap,
+    });
+
+    it('marks a failed regnskap as noHostAccess when the grant is missing', async () => {
+      fakeBrowser({ origins: [] });
+      routeBrreg(routes(corsBlocked));
+      const company = await loadCompany('923609016');
+      expect(company.regnskap).toBeUndefined();
+      expect(company.noHostAccess).toBe(true);
+      // The other parts carry CORS headers and load anyway.
+      expect(company.roller).toBeDefined();
+    });
+
+    it('a failure with the grant held is a plain failure', async () => {
+      routeBrreg(routes(corsBlocked));
+      const company = await loadCompany('923609016');
+      expect(company.regnskap).toBeUndefined();
+      expect(company.noHostAccess).toBeUndefined();
+    });
+
+    it('a browser that cannot say is not blamed on the permission', async () => {
+      const fake = fakeBrowser({ origins: [] });
+      vi.mocked(fake.browser.permissions.contains).mockRejectedValueOnce(new Error('no'));
+      routeBrreg(routes(corsBlocked));
+      expect((await loadCompany('923609016')).noHostAccess).toBeUndefined();
+    });
+
+    it('asks nothing when regnskap loaded', async () => {
+      const fake = fakeBrowser({ origins: [] });
+      routeBrreg(routes(() => json(regnskapEquinor)));
+      const company = await loadCompany('923609016');
+      expect(company.noHostAccess).toBeUndefined();
+      expect(fake.browser.permissions.contains).not.toHaveBeenCalled();
+    });
+
+    it('the failure is not cached: the next load after a grant gets the figures', async () => {
+      fakeBrowser({ origins: [] });
+      let blocked = true;
+      routeBrreg(routes(() => (blocked ? corsBlocked() : json(regnskapEquinor))));
+      expect((await loadCompany('923609016')).noHostAccess).toBe(true);
+      blocked = false;
+      const again = await loadCompany('923609016');
+      expect(again.regnskap?.items.length).toBeGreaterThan(0);
+      expect(again.noHostAccess).toBeUndefined();
+    });
+  });
+
   it('fetches the change feed only when asked, since the start of the window', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-09-24T12:00:00.000Z'));

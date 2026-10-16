@@ -20,9 +20,11 @@ import type { ResolutionMethod } from '../lib/resolution-method.js';
 //             to the company heading and screen readers announce it.
 //   refresh — «Oppdater»: the button was hidden with the footer while
 //             loading, so focus fell to <body>; hand it back.
+//   tab     — «Gi tilgang» in Økonomi: the button was torn down; land
+//             on the open tab again, focus on its tab button.
 //   none    — every other load (startup, sync, picker pick, manual
 //             search, a background tab event).
-export type ResultFocus = 'heading' | 'refresh' | 'none';
+export type ResultFocus = 'heading' | 'refresh' | 'tab' | 'none';
 
 export interface ResultPaint {
   company: CompanyData;
@@ -122,6 +124,10 @@ export interface PanelIntents {
   retry: () => void;
   // «Oppdater»: refetch the company on screen past the cache.
   refresh: () => void;
+  // «Gi tilgang» in Økonomi: request the data.brreg.no grant, in the
+  // click's own call stack (no await first). Resolves whether it was
+  // granted; on a grant the company on screen reloads.
+  grantAccess: () => Promise<boolean>;
   // A picker row, after the choice was persisted for `host`.
   pick: (host: string, orgnr: string) => void;
   // «Ingen av disse», after the negative choice was persisted.

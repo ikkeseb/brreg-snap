@@ -130,6 +130,8 @@ interface SetupOptions {
   rejectChoice?: ControllerDeps['rejectChoice'];
   // Loads resolve at once unless a test takes over with `pending`.
   manualLoads?: boolean;
+  // The user's answer to the data.brreg.no prompt.
+  requestBrregAccess?: () => Promise<boolean>;
 }
 
 function setup(opts: SetupOptions = {}) {
@@ -154,6 +156,7 @@ function setup(opts: SetupOptions = {}) {
     searchHost: vi.fn(opts.searchHost ?? (async () => ({ band: 'none' as const, candidates: [], complete: true }))),
     loadCompany,
     invalidateCache: vi.fn(async () => {}),
+    permissions: { request: vi.fn(opts.requestBrregAccess ?? (async () => true)) },
     pushRecent: vi.fn(async () => {}),
     rejectChoice: vi.fn(opts.rejectChoice ?? (async () => ({ kind: 'empty' as const }))),
     forgetHost: vi.fn(async () => {}),
@@ -519,6 +522,59 @@ describe('«Oppdater» and «Prøv igjen»', () => {
     controller.follow(companyView(DNB));
     await settle();
     expect(painter.error).toHaveBeenCalledWith(expect.any(Error), { retry: false, focus: false });
+  });
+});
+
+describe('«Gi tilgang» (the data.brreg.no grant)', () => {
+  it('requests in the click’s own call stack, then reloads without dropping the cache', async () => {
+    const { controller, intents, deps, results } = setup();
+    controller.follow(companyView(DNB, 'dnb.no'));
+    await settle();
+    const granted = intents.grantAccess();
+    // Reached before anything was awaited: Firefox would refuse it later.
+    expect(deps.permissions.request).toHaveBeenCalledTimes(1);
+    expect(deps.permissions.request).toHaveBeenCalledWith({ origins: ['https://data.brreg.no/*'] });
+    expect(await granted).toBe(true);
+    await settle();
+    expect(deps.loadCompany).toHaveBeenCalledTimes(2);
+    expect(deps.invalidateCache).not.toHaveBeenCalled();
+    expect(results()[1]).toMatchObject({ method: 'host-auto', host: 'dnb.no', focus: 'tab' });
+  });
+
+  it('a refused prompt changes nothing', async () => {
+    const { controller, intents, deps, painter } = setup({ requestBrregAccess: async () => false });
+    controller.follow(companyView(DNB));
+    await settle();
+    expect(await intents.grantAccess()).toBe(false);
+    await settle();
+    expect(deps.loadCompany).toHaveBeenCalledTimes(1);
+    expect(painter.loading).toHaveBeenCalledTimes(1);
+  });
+
+  it('a request the browser rejects reads as refused', async () => {
+    const { controller, intents, deps } = setup({
+      requestBrregAccess: () => Promise.reject(new Error('may only be called from a user input handler')),
+    });
+    controller.follow(companyView(DNB));
+    await settle();
+    expect(await intents.grantAccess()).toBe(false);
+    expect(deps.loadCompany).toHaveBeenCalledTimes(1);
+  });
+
+  it('a grant after the panel moved on reloads nothing', async () => {
+    let answer: (granted: boolean) => void = () => {};
+    const { controller, intents, shownOrgnrs } = setup({
+      requestBrregAccess: () => new Promise<boolean>((r) => (answer = r)),
+    });
+    controller.follow(companyView(DNB));
+    await settle();
+    const granted = intents.grantAccess();
+    controller.follow(companyView(EQUINOR));
+    await settle();
+    answer(true);
+    await granted;
+    await settle();
+    expect(shownOrgnrs()).toEqual([DNB, EQUINOR]);
   });
 });
 

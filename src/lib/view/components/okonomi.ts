@@ -3,7 +3,8 @@
 // a style attribute), the trend (driftsinntekter and årsresultat over
 // the years brreg served, as a plain table read in a sentence; no
 // chart), the honest years note, then Dokumenter: the annual-report
-// PDF years and the kunngjøringer link.
+// PDF years and the kunngjøringer link. With the data.brreg.no grant
+// withheld, the figures section says so and offers «Gi tilgang».
 
 import { COPY } from '../copy.js';
 import type { FigRow, OkonomiView, TrendCell, TrendView } from '../dossier-view.js';
@@ -85,12 +86,38 @@ function buildHonest(text: string): HTMLParagraphElement {
   return el('p', 'honest', text);
 }
 
-function buildFigures(view: OkonomiView): HTMLElement {
+export interface OkonomiHandlers {
+  // «Gi tilgang»: asks for the data.brreg.no grant. Resolves whether it
+  // was granted; on a grant the caller reloads the company.
+  onGrant: () => Promise<boolean>;
+}
+
+// One click, one prompt: a second click while the prompt is open does
+// nothing. aria-disabled, not disabled, so focus stays on the button.
+function buildGrant(onGrant: OkonomiHandlers['onGrant']): HTMLElement {
+  const row = el('p', 'section__act');
+  const btn = button('btn btn--sm', COPY.grantAccess);
+  btn.addEventListener('click', () => {
+    if (btn.getAttribute('aria-disabled') === 'true') return;
+    btn.setAttribute('aria-disabled', 'true');
+    // No await before onGrant: it reaches permissions.request
+    // synchronously (docs/notes/permissions-model.md § gesture-stack).
+    void onGrant().then((granted) => {
+      // A grant repaints the tab; a refusal leaves the state as it was.
+      if (!granted) btn.removeAttribute('aria-disabled');
+    });
+  });
+  row.appendChild(btn);
+  return row;
+}
+
+function buildFigures(view: OkonomiView, handlers: OkonomiHandlers | undefined): HTMLElement {
   const { figures } = view;
   if (figures.kind !== 'figures') {
     const sec = section(COPY.regnskap);
     const lines = figures.kind === 'failed' ? [figures.text] : figures.lines;
     for (const line of lines) sec.appendChild(el('p', 'section__text', line));
+    if (figures.kind === 'failed' && figures.grant && handlers) sec.appendChild(buildGrant(handlers.onGrant));
     if (view.trend) sec.appendChild(buildTrend(view.trend));
     if (view.honest) sec.appendChild(buildHonest(view.honest));
     return sec;
@@ -170,12 +197,14 @@ function buildYears(years: OkonomiView['pdf']): HTMLElement {
   return row;
 }
 
-export function buildOkonomi(view: OkonomiView): HTMLElement[] {
+// Without handlers (no grant to offer) a withheld grant is still said,
+// just without the button.
+export function buildOkonomi(view: OkonomiView, handlers?: OkonomiHandlers): HTMLElement[] {
   const docs = section(COPY.dokumenter);
   docs.appendChild(buildYears(view.pdf));
   const ext = el('div', 'ext-row');
   ext.appendChild(link(COPY.kunngjoringer, view.kunngjoringer, { className: '', external: true }));
   ext.appendChild(el('span', undefined, COPY.atBrreg));
   docs.appendChild(ext);
-  return [buildFigures(view), docs];
+  return [buildFigures(view, handlers), docs];
 }

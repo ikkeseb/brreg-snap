@@ -32,6 +32,8 @@ import enhetTvang from './fixtures/brreg/enhet-931744682-tvangsopplost.json';
 import konsernEquinor from './fixtures/brreg/konsernstruktur-923609016-equinor.json';
 import feedNyttNavn from './fixtures/brreg/oppdateringer-914375916-nytt-navn.json';
 import regnskapEquinor from './fixtures/brreg/regnskap-923609016-usd.json';
+import regnskapOrkla from './fixtures/brreg/regnskap-910747711-orkla.json';
+import regnskapTomra from './fixtures/brreg/regnskap-927124238-tomra-eur.json';
 import rollerEnk from './fixtures/brreg/roller-999999998-enk.json';
 import rollerEquinor from './fixtures/brreg/roller-923609016-equinor.json';
 import rollerKonkurs from './fixtures/brreg/roller-915330193-konkurs.json';
@@ -649,6 +651,81 @@ describe('buildTrustView — the Økonomi trend', () => {
     const o = okonomiOf([selskap('2023-12-31', 10, 1, 'NOK'), selskap('2024-12-31', 10, 1, 'USD'), selskap('2025-12-31', 12, 2, 'USD')]);
     expect(o.trend?.years).toEqual(['2024', '2025']);
     expect(o.trend?.currency).toBeUndefined();
+  });
+});
+
+describe('buildTrustView — Økonomi from the live Orkla and Tomra responses', () => {
+  // Both answer 200 with three KONSERN and three SELSKAP rows (Tomra's
+  // 2024 and 2025 group rows in EUR). The 1.6.1 «Kunne ikke hente
+  // regnskapstallene» on these was the withheld host permission, not
+  // the parsing: these pin that the shape renders.
+  const okonomiOf = (items: unknown[]) =>
+    view({
+      company: company(enhetEquinor, { regnskap: { items } as unknown as RegnskapResponse, aarsregnskapYears: [] }),
+      surface: 'panel',
+    }).dossier!.okonomi;
+  const cells = (o: ReturnType<typeof okonomiOf>) => o.trend?.rows.map((r) => r.cells.map((c) => c?.amount));
+
+  it("Orkla ASA: the company's own 2025 figures and a three-year trend", () => {
+    const o = okonomiOf(regnskapOrkla);
+    expect(o.figures.kind).toBe('figures');
+    if (o.figures.kind !== 'figures') return;
+    expect(o.figures.title).toBe('Årsregnskap 2025');
+    expect(o.figures.currency).toBe('Beløp i NOK');
+    // SELSKAP 2025: 95 m driftsinntekter, not the group's 71.8 bn.
+    expect(o.figures.groups[0]!.rows[0]).toMatchObject({ label: 'Driftsinntekter', amount: '95,0', unit: 'mill' });
+    expect(o.trend?.years).toEqual(['2023', '2024', '2025']);
+    expect(cells(o)).toEqual([
+      ['394,0', '292,0', '95,0'],
+      ['63,7', '10,4', '9,2'],
+    ]);
+    expect(o.honest).toBe('Åpne data dekker 2023–2025.');
+  });
+
+  it('Tomra Systems ASA: NOK company figures, the EUR group rows left out', () => {
+    const o = okonomiOf(regnskapTomra);
+    expect(o.figures.kind).toBe('figures');
+    if (o.figures.kind !== 'figures') return;
+    expect(o.figures.currency).toBe('Beløp i NOK');
+    expect(o.figures.groups[0]!.rows[0]).toMatchObject({ label: 'Driftsinntekter', amount: '3,5', unit: 'mrd' });
+    expect(o.trend?.years).toEqual(['2023', '2024', '2025']);
+    expect(o.trend?.rows.map((r) => r.name)).toEqual([
+      'Driftsinntekter, milliarder NOK',
+      'Årsresultat, millioner NOK',
+    ]);
+    expect(cells(o)).toEqual([
+      ['3,0', '3,1', '3,5'],
+      ['402,0', '963,0', '510,0'],
+    ]);
+  });
+});
+
+describe('buildTrustView — regnskap failed with the host permission withheld', () => {
+  const okonomiOf = (extra: Partial<CompanyData>) =>
+    view({ company: company(enhetEquinor, { roller: rollerEquinor, ...extra }), surface: 'panel' }).dossier!.okonomi;
+
+  it('says the access is missing and offers the grant, not a retry', () => {
+    expect(okonomiOf({ noHostAccess: true }).figures).toEqual({
+      kind: 'failed',
+      text: 'brreg-snap har ikke tilgang til data.brreg.no, så regnskapstallene kan ikke hentes.',
+      grant: true,
+    });
+  });
+
+  it('a failure with the grant held stays the plain failure', () => {
+    expect(okonomiOf({}).figures).toEqual({
+      kind: 'failed',
+      text: 'Kunne ikke hente regnskapstallene. Prøv igjen senere.',
+    });
+  });
+
+  it('the regnskap row keeps the Enhet’s filed year and shows no money either way', () => {
+    const rowOf = (extra: Partial<CompanyData>) =>
+      view({ company: company(enhetEquinor, extra), surface: 'panel' }).ledger.find((r) => r.key === 'regnskap');
+    const plain = rowOf({});
+    expect(plain?.value).toBe(`${enhetEquinor.sisteInnsendteAarsregnskap} levert`);
+    expect(plain?.figures).toBeUndefined();
+    expect(rowOf({ noHostAccess: true })).toEqual(plain);
   });
 });
 

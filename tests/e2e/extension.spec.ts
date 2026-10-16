@@ -86,6 +86,57 @@ test('panel renders a company', async ({ context, extensionId }, testInfo) => {
   await assertInvariants(page, watch);
 });
 
+// The user withheld the data.brreg.no grant (chrome://extensions → Site
+// access; Chrome refuses permissions.remove for a required origin, so
+// the smoke sets it as the extensions page does). The Enhet and the rest
+// still load; the figures can't, and the panel says why and asks.
+// Live, the browser's CORS check blocks the figures (brreg sends no
+// CORS header there: docs/notes/brreg-api.md § cors). A fulfilled route
+// can't show that, since Playwright adds the CORS header itself
+// (`_maybeAddCorsHeaders`), so the block is an abort here.
+test('panel offers the grant when site access is withheld', async ({ context, extensionId, worker }, testInfo) => {
+  const extensions = await context.newPage();
+  await extensions.goto('chrome://extensions');
+  await extensions.evaluate(async (id) => {
+    const { chrome } = globalThis as unknown as {
+      chrome: { developerPrivate: { updateExtensionConfiguration(c: { extensionId: string; hostAccess: string }): Promise<void> } };
+    };
+    await chrome.developerPrivate.updateExtensionConfiguration({ extensionId: id, hostAccess: 'ON_CLICK' });
+  }, extensionId);
+  await extensions.close();
+  const held = await worker.evaluate(() => {
+    const { chrome } = globalThis as unknown as {
+      chrome: { permissions: { contains(p: { origins: string[] }): Promise<boolean> } };
+    };
+    return chrome.permissions.contains({ origins: ['https://data.brreg.no/*'] });
+  });
+  expect(held, 'the data.brreg.no grant is withheld').toBe(false);
+
+  const page = await context.newPage();
+  await page.setViewportSize(PAGE_VIEWPORT);
+  await page.route('https://data.brreg.no/regnskapsregisteret/regnskap/923609016', (route) => route.abort('accessdenied'));
+  const watch = await watchPage(page);
+  await page.goto(`chrome-extension://${extensionId}/details/details.html?orgnr=923609016&tab=okonomi`);
+  await expect(page.locator('main#app')).toHaveAttribute('data-state', 'result');
+  const okonomi = page.getByRole('tabpanel', { name: 'Økonomi' });
+  await expect(okonomi).toContainText('brreg-snap har ikke tilgang til data.brreg.no');
+  const grant = okonomi.getByRole('button', { name: 'Gi tilgang' });
+  await settle(page, watch);
+  await page.screenshot({
+    path: join(testInfo.project.outputDir, 'screenshots', 'extension', 'details-no-access.png'),
+    fullPage: true,
+  });
+  // A trusted click reaches permissions.request with its gesture: the
+  // prompt opens (headless can't answer it) and the button waits on it.
+  // A request refused for a lost gesture would settle at once.
+  await grant.click();
+  await page.waitForTimeout(500);
+  await expect(grant).toHaveAttribute('aria-disabled', 'true');
+  // The blocked figures log a failed load; that one is expected.
+  watch.consoleErrors = watch.consoleErrors.filter((e) => !/net::ERR_ACCESS_DENIED/.test(e));
+  await assertInvariants(page, watch);
+});
+
 // Opened as a tab, the popup's active tab is itself: no company host,
 // so it settles on the empty state (manual search). The result state
 // is the toolbar-click test below.

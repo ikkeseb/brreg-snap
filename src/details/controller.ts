@@ -13,6 +13,7 @@ import type {
   RememberedChoice,
 } from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
+import { BRREG_ORIGINS } from '../lib/platform/permissions.js';
 import { primaryStatusFlag } from '../lib/ui/flags.js';
 import { koblingInPlay } from '../lib/trust/kobling.js';
 import {
@@ -57,6 +58,8 @@ export interface ControllerDeps {
   // drill-in within the same konsern).
   loadCompany: (orgnr: string, opts: LoadCompanyOptions) => Promise<CompanyData>;
   invalidateCache: (orgnr: string) => Promise<void>;
+  // browser.permissions, for «Gi tilgang» (the data.brreg.no grant).
+  permissions: Pick<typeof browser.permissions, 'request'>;
   // `status`: a danger status worth a mark in the list («Konkurs»).
   pushRecent: (orgnr: string, navn: string, status?: string) => Promise<void>;
   // lib/ui/reject-flow.ts: the «Feil bedrift?» flow the popup shares.
@@ -439,6 +442,27 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         invalidate: [currentOrgnr, shownEnhetOrgnr],
         focus: 'refresh',
       });
+    },
+
+    // The regnskap fetch failed because the grant is withheld. The
+    // request is the first call, before any await (permissions-model.md
+    // § gesture-stack). A failed fetch is never cached, so a plain
+    // reload refetches it; the parts already cached are reused.
+    grantAccess(): Promise<boolean> {
+      const asked = deps.permissions.request(BRREG_ORIGINS);
+      const orgnr = currentOrgnr;
+      return asked.then(
+        (granted) => {
+          // Only the company the button was on: anything loaded since
+          // already had the grant to fetch with.
+          if (granted && orgnr !== undefined && orgnr === currentOrgnr && onScreen?.kind === 'company') {
+            void loadOrgnr(orgnr, currentMethod, { focus: 'tab' });
+          }
+          return granted;
+        },
+        // Refused without a prompt: reads as not granted.
+        () => false,
+      );
     },
 
     pick(host, orgnr): void {

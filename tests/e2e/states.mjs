@@ -33,6 +33,14 @@ export const STATES = [
   // The other tabs, deep-linked (the popup's konsern row opens Enheter).
   { name: 'equinor-okonomi', surface: 'panel', path: '/details/details.html?orgnr=923609016&tab=okonomi', state: 'result' },
   { name: 'equinor-enheter', surface: 'panel', path: '/details/details.html?orgnr=923609016&tab=enheter', state: 'result' },
+  // The data.brreg.no grant withheld (the shim blocks the figures as
+  // CORS does): the reason and «Gi tilgang» in Økonomi.
+  {
+    name: 'okonomi-no-access',
+    surface: 'panel',
+    path: '/details/details.html?orgnr=923609016&tab=okonomi&hostaccess=withheld',
+    state: 'result',
+  },
   // A drill-in from Personer (the revisor) with the back bar.
   {
     name: 'drill-in',

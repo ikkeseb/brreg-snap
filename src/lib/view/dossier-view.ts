@@ -69,7 +69,9 @@ export interface FigRow {
 }
 
 export type OkonomiFigures =
-  | { kind: 'failed'; text: string }
+  // `grant`: the fetch failed because the data.brreg.no host permission
+  // is withheld; the tab offers «Gi tilgang» instead of a retry.
+  | { kind: 'failed'; text: string; grant?: true }
   | { kind: 'text'; lines: string[] }
   | {
       kind: 'figures';
@@ -417,7 +419,9 @@ function okonomi(input: DossierInput): OkonomiView {
   const years = company.aarsregnskapYears;
   const pdfNote = years && years.length > 0 ? COPY.honestPdf : '';
   if (!regnskap) {
-    figures = { kind: 'failed', text: COPY.regnskapFailed };
+    figures = company.noHostAccess
+      ? { kind: 'failed', text: COPY.regnskapNoAccess, grant: true }
+      : { kind: 'failed', text: COPY.regnskapFailed };
   } else if (regnskap.unavailable) {
     const gap = regnskapGap(enhet.naeringskode1?.kode, regnskap.unsupportedPlan);
     const lines: string[] = [gap === 'special-accounts' ? COPY.specialAccounts : COPY.apiError];

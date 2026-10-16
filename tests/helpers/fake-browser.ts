@@ -36,6 +36,12 @@ export interface FakeBrowserOptions {
   storage?: Partial<Record<AreaName, StorageMap>>;
   /** Permissions granted at start (e.g. ['tabs']). */
   permissions?: string[];
+  /**
+   * Origins granted at start. Default: the manifest's host permission,
+   * which both engines grant at install (Firefox from 127) and let the
+   * user withhold later; pass [] for a withheld grant.
+   */
+  origins?: string[];
   /** What permissions.request() resolves to (the user's answer). */
   grantOnRequest?: boolean;
   /**
@@ -148,20 +154,33 @@ export function fakeBrowser(opts: FakeBrowserOptions = {}) {
 
   type Perms = { permissions?: string[]; origins?: string[] };
   const granted = new Set(opts.permissions ?? []);
+  const grantedOrigins = new Set(opts.origins ?? ['https://data.brreg.no/*']);
   const permissions = {
-    contains: vi.fn(async (p: Perms) => (p.permissions ?? []).every((x) => granted.has(x))),
-    getAll: vi.fn(async () => ({ permissions: [...granted], origins: [] as string[] })),
+    contains: vi.fn(
+      async (p: Perms) =>
+        (p.permissions ?? []).every((x) => granted.has(x)) &&
+        (p.origins ?? []).every((x) => grantedOrigins.has(x)),
+    ),
+    getAll: vi.fn(async () => ({ permissions: [...granted], origins: [...grantedOrigins] })),
     request: vi.fn(async (p: Perms) => {
       if (!(opts.grantOnRequest ?? true)) return false;
       const added = (p.permissions ?? []).filter((x) => !granted.has(x));
+      const addedOrigins = (p.origins ?? []).filter((x) => !grantedOrigins.has(x));
       for (const x of added) granted.add(x);
-      if (added.length) permissions.onAdded.emit({ permissions: added, origins: [] });
+      for (const x of addedOrigins) grantedOrigins.add(x);
+      if (added.length || addedOrigins.length) {
+        permissions.onAdded.emit({ permissions: added, origins: addedOrigins });
+      }
       return true;
     }),
     remove: vi.fn(async (p: Perms) => {
       const removed = (p.permissions ?? []).filter((x) => granted.has(x));
+      const removedOrigins = (p.origins ?? []).filter((x) => grantedOrigins.has(x));
       for (const x of removed) granted.delete(x);
-      if (removed.length) permissions.onRemoved.emit({ permissions: removed, origins: [] });
+      for (const x of removedOrigins) grantedOrigins.delete(x);
+      if (removed.length || removedOrigins.length) {
+        permissions.onRemoved.emit({ permissions: removed, origins: removedOrigins });
+      }
       return true;
     }),
     onAdded: fakeEvent<(p: Perms) => void>(),

@@ -41,6 +41,10 @@ Drive the pages with URL params:
   the Firefox-only namespaces so it renders the Chrome copy (pin
   instruction, «Endre snarveier»), `?keys=none` unbinds every command
   («ikke satt»)
+- `&hostaccess=withheld` — the data.brreg.no grant withheld: the
+  regnskap figures fail as the CORS block makes them fail, Økonomi
+  offers «Gi tilgang», and the shim answers its request yes, so the
+  reload shows the figures
 - `?engine=chrome` works on every page (the shim exposes both engines'
   APIs at once by default, so `engine.ts` reads Firefox)
 
@@ -53,7 +57,8 @@ recorded; anything else answers 404 (see the fixtures README to add a
 state).
 
 Caveats: storage is per-page-load (no persistence across navigations),
-`permissions.contains` is always false (auto-sync toggle renders off),
+`permissions.contains` is false for `tabs` (auto-sync toggle renders
+off) and true for the data.brreg.no origin unless `&hostaccess=withheld`,
 and sidebar/side-panel APIs are no-ops. Data-dependent rendering must
 still be checked against the live API in a real extension load — this
 harness shares that live data path by design.

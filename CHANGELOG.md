@@ -6,6 +6,16 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Fixed
+
+- With access to data.brreg.no switched off for the extension
+  (about:addons → Permissions in Firefox, site access in Chrome),
+  Økonomi said «Kunne ikke hente regnskapstallene. Prøv igjen senere.»,
+  and trying again never helped: the accounts register only answers an
+  extension that holds that access. Økonomi now says «brreg-snap har
+  ikke tilgang til data.brreg.no, så regnskapstallene kan ikke
+  hentes.», and «Gi tilgang» asks for it and loads the figures.
+
 ## [1.6.1] — 2026-10-16
 
 ### Changed
