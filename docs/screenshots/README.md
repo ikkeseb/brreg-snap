@@ -11,6 +11,13 @@ promo tiles.
 - `promo-marquee-1400x560.png`: the CWS marquee promo tile (24-bit, no
   alpha), shown only if the listing is featured.
 
+`promo-readme.avif` is not a store upload: it is the README's hero, a
+silent, looping 1280×720 30 fps cut of the 15 s promo «Hele oppslaget»
+(the bakery and its figures are fictional). The promo draws the UI from
+geometry extracted from the real markup and 1.6.2's `src/styles/brreg.css`;
+its build lives outside the repo. The still `01-lookup.png` is the
+fallback for a browser without AVIF.
+
 ## Source
 
 The UI captures come from the smoke harness (`pnpm smoke`) at v1.6.2, on
