@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "brreg-snap – oppslag i Brønnøysundregistrene",
-  "version": "1.6.1",
+  "version": "1.6.2",
   "description": "Orgnr, status, daglig leder, styre, omsetning, resultat og regnskap for bedriften bak nettsiden du er på. Ett klikk, ingen konto.",
   "minimum_chrome_version": "116",
   "action": {
