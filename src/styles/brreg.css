@@ -530,6 +530,10 @@ button.ent { padding: 0; border: 0; background: none; color: inherit; text-align
 /* a section whose body is a sentence or two (a failed fetch, no filing) */
 .section__text { padding: 8px 0; color: var(--ink-2); }
 .section__text + .section__text { padding-top: 0; }
+/* the one action such a section offers (Økonomi's «Gi tilgang») */
+.section__act { padding: 0 0 8px; }
+/* a prompt is open: no second click, the colours stay (contrast) */
+.btn[aria-disabled="true"] { cursor: progress; }
 
 
 /* ---------- merknad + endret nylig ---------------------------------------

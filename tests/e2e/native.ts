@@ -12,6 +12,12 @@ import { MISS_HEADER, fixtureReply, type loadFixtures } from '../../scripts/prev
 type Fixtures = Awaited<ReturnType<typeof loadFixtures>>;
 
 const BRREG = 'https://data.brreg.no/';
+// As live (docs/notes/brreg-api.md § cors): every brreg endpoint the
+// extension calls allows any origin except Regnskapsregisteret's
+// figures. A fulfilled CDP request goes through the browser's CORS
+// check, so with the host permission withheld the figures are blocked
+// here exactly as they are live; with it, CORS never applies.
+const NO_CORS = /^\/regnskapsregisteret\/regnskap\/\d{9}$/;
 const TARGET_TIMEOUT_MS = 15_000;
 
 interface Reply {
@@ -71,7 +77,10 @@ export async function openNative(context: BrowserContext, fixtures: Fixtures): P
       .send('Fetch.fulfillRequest', {
         requestId: e.requestId,
         responseCode: reply.status,
-        responseHeaders: Object.entries(reply.headers).map(([name, value]) => ({ name, value })),
+        responseHeaders: Object.entries({
+          ...reply.headers,
+          ...(NO_CORS.test(url.pathname) ? {} : { 'access-control-allow-origin': '*' }),
+        }).map(([name, value]) => ({ name, value })),
         body: Buffer.from(reply.body).toString('base64'),
       })
       // The requesting document may be gone (the popup closes itself).

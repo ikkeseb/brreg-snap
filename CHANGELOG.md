@@ -14,6 +14,20 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   registeret» is no longer a tinted green band: a plain divider, the
   green seal, nothing else. Warn and danger look as before.
 
+### Fixed
+
+- With access to data.brreg.no switched off for the extension
+  (about:addons → Permissions in Firefox, site access in Chrome),
+  Økonomi said «Kunne ikke hente regnskapstallene. Prøv igjen senere.»,
+  and trying again never helped: the accounts register only answers an
+  extension that holds that access. Økonomi now says «brreg-snap har
+  ikke tilgang til data.brreg.no, så regnskapstallene kan ikke
+  hentes.», and «Gi tilgang» asks for it and loads the figures. The
+  popup says «Mangler tilgang til regnskapstallene.» with the same
+  button; the prompt closes the popup, and the figures are there the
+  next time you open it. Access given in the browser's own settings
+  fills in the figures in an open panel too.
+
 ## [1.6.1] — 2026-10-16
 
 ### Changed

@@ -10,8 +10,10 @@ import type { PanelView, TabFields } from '../src/lib/panel-follow.js';
 import type { RejectOutcome } from '../src/lib/ui/reject-flow.js';
 import type { TabContext } from '../src/lib/ui/resolve-tab.js';
 import { createPanelController, PANEL_LOAD_OPTIONS, type ControllerDeps } from '../src/details/controller.js';
+import { loadCompany as realLoadCompany } from '../src/lib/company-load.js';
+import { fakeBrowser } from './helpers/fake-browser.js';
 import { createPanelHistory, type HistoryWindow } from '../src/details/history.js';
-import type { PanelPainter } from '../src/details/view.js';
+import type { PanelPainter, ResultPaint } from '../src/details/view.js';
 import dnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import equinor from './fixtures/brreg/enhet-923609016-equinor.json';
 import konkurs from './fixtures/brreg/enhet-915330193-konkurs.json';
@@ -130,6 +132,13 @@ interface SetupOptions {
   rejectChoice?: ControllerDeps['rejectChoice'];
   // Loads resolve at once unless a test takes over with `pending`.
   manualLoads?: boolean;
+  // The data.brreg.no grant: held unless false. A load without it
+  // comes back with noHostAccess, as company-load reports it.
+  accessHeld?: boolean;
+  // The user's answer to the data.brreg.no prompt. Default: a grant.
+  requestBrregAccess?: () => Promise<boolean>;
+  // The real loader instead of the fake (with fetch and browser stubbed).
+  loadCompany?: ControllerDeps['loadCompany'];
 }
 
 function setup(opts: SetupOptions = {}) {
@@ -137,8 +146,11 @@ function setup(opts: SetupOptions = {}) {
   const fake = fakePainter();
   const focus = { has: opts.hasFocus ?? true };
   const pending: Array<ReturnType<typeof deferred<CompanyData>>> = [];
+  const access = { held: opts.accessHeld ?? true };
+  const loaded = (orgnr: string): CompanyData =>
+    access.held ? company(orgnr) : { ...company(orgnr), noHostAccess: true };
   const loadCompany = vi.fn((orgnr: string): Promise<CompanyData> => {
-    if (!opts.manualLoads) return Promise.resolve(company(orgnr));
+    if (!opts.manualLoads) return Promise.resolve(loaded(orgnr));
     const d = deferred<CompanyData>();
     pending.push(d);
     return d.promise;
@@ -152,8 +164,17 @@ function setup(opts: SetupOptions = {}) {
     getTab: vi.fn(async () => opts.activeTab ?? {}),
     resolveTab: vi.fn(opts.resolveTab ?? (async () => ({}))),
     searchHost: vi.fn(opts.searchHost ?? (async () => ({ band: 'none' as const, candidates: [], complete: true }))),
-    loadCompany,
+    loadCompany: opts.loadCompany ? vi.fn(opts.loadCompany) : loadCompany,
     invalidateCache: vi.fn(async () => {}),
+    permissions: {
+      request: vi.fn(
+        opts.requestBrregAccess ??
+          (async () => {
+            access.held = true;
+            return true;
+          }),
+      ),
+    },
     pushRecent: vi.fn(async () => {}),
     rejectChoice: vi.fn(opts.rejectChoice ?? (async () => ({ kind: 'empty' as const }))),
     forgetHost: vi.fn(async () => {}),
@@ -161,7 +182,7 @@ function setup(opts: SetupOptions = {}) {
   };
   const controller = createPanelController(deps);
   setOnPop((state) => controller.restore(state));
-  return { controller, intents: controller.intents, deps, url, focus, pending, ...fake };
+  return { controller, intents: controller.intents, deps, url, focus, pending, access, loaded, ...fake };
 }
 
 describe('load races', () => {
@@ -519,6 +540,192 @@ describe('«Oppdater» and «Prøv igjen»', () => {
     controller.follow(companyView(DNB));
     await settle();
     expect(painter.error).toHaveBeenCalledWith(expect.any(Error), { retry: false, focus: false });
+  });
+});
+
+describe('«Gi tilgang» (the data.brreg.no grant)', () => {
+  const noAccess = (r: ResultPaint) => r.company.noHostAccess === true;
+
+  it('requests in the click’s own call stack, then repaints the same result with the figures', async () => {
+    const { controller, intents, deps, painter, results } = setup({ accessHeld: false });
+    controller.follow(companyView(DNB, 'dnb.no'));
+    await settle();
+    expect(noAccess(results()[0]!)).toBe(true);
+    const granted = intents.grantAccess();
+    // Reached before anything was awaited: Firefox would refuse it later.
+    expect(deps.permissions.request).toHaveBeenCalledTimes(1);
+    expect(deps.permissions.request).toHaveBeenCalledWith({ origins: ['https://data.brreg.no/*'] });
+    expect(await granted).toBe(true);
+    await settle();
+    // A heal, not a new load: no skeleton, no dropped cache, same orgnr.
+    expect(painter.loading).toHaveBeenCalledTimes(1);
+    expect(deps.invalidateCache).not.toHaveBeenCalled();
+    expect(results()).toHaveLength(2);
+    expect(results()[1]).toMatchObject({ method: 'host-auto', host: 'dnb.no', focus: 'tab' });
+    expect(noAccess(results()[1]!)).toBe(false);
+  });
+
+  it('a refused prompt changes nothing', async () => {
+    const { controller, intents, deps, painter } = setup({ accessHeld: false, requestBrregAccess: async () => false });
+    controller.follow(companyView(DNB));
+    await settle();
+    expect(await intents.grantAccess()).toBe(false);
+    await settle();
+    expect(deps.loadCompany).toHaveBeenCalledTimes(1);
+    expect(painter.result).toHaveBeenCalledTimes(1);
+  });
+
+  it('a request the browser rejects reads as refused', async () => {
+    const { controller, intents, deps } = setup({
+      accessHeld: false,
+      requestBrregAccess: () => Promise.reject(new Error('may only be called from a user input handler')),
+    });
+    controller.follow(companyView(DNB));
+    await settle();
+    expect(await intents.grantAccess()).toBe(false);
+    expect(deps.loadCompany).toHaveBeenCalledTimes(1);
+  });
+
+  it('a grant while a tab switch resolves never makes that switch stale', async () => {
+    const prompt = deferred<boolean>();
+    const tabResolved = deferred<TabContext>();
+    const { controller, intents, access, shownOrgnrs, results } = setup({
+      accessHeld: false,
+      requestBrregAccess: () => prompt.promise,
+      resolveTab: () => tabResolved.promise,
+    });
+    controller.follow(companyView(DNB, 'www.dnb.no'));
+    await settle();
+    const granted = intents.grantAccess();
+    const switching = controller.followTab(7, { id: 7, url: 'https://www.equinor.com/', title: '' });
+    await settle();
+    access.held = true;
+    prompt.resolve(true);
+    await granted;
+    await settle();
+    tabResolved.resolve({ orgnr: EQUINOR, host: 'www.equinor.com', method: 'host-auto' });
+    await switching;
+    await settle();
+    expect(shownOrgnrs().at(-1)).toBe(EQUINOR);
+    expect(noAccess(results().at(-1)!)).toBe(false);
+  });
+
+  it('a company loaded while the prompt was open heals on the grant', async () => {
+    const prompt = deferred<boolean>();
+    const { controller, intents, access, shownOrgnrs, results } = setup({
+      accessHeld: false,
+      requestBrregAccess: () => prompt.promise,
+    });
+    controller.follow(companyView(DNB));
+    await settle();
+    const granted = intents.grantAccess();
+    controller.follow(companyView(EQUINOR));
+    await settle();
+    expect(shownOrgnrs()).toEqual([DNB, EQUINOR]);
+    expect(noAccess(results()[1]!)).toBe(true);
+    access.held = true;
+    prompt.resolve(true);
+    await granted;
+    await settle();
+    expect(shownOrgnrs()).toEqual([DNB, EQUINOR, EQUINOR]);
+    expect(noAccess(results()[2]!)).toBe(false);
+  });
+
+  it('a load in flight at the grant heals once it lands', async () => {
+    const { controller, pending, access, shownOrgnrs, results, deps } = setup({ manualLoads: true });
+    controller.follow(companyView(DNB));
+    access.held = true;
+    controller.accessGranted();
+    // The load began before the grant, so its figures failed.
+    pending[0]!.resolve({ ...company(DNB), noHostAccess: true });
+    await settle();
+    expect(deps.loadCompany).toHaveBeenCalledTimes(2);
+    pending[1]!.resolve(company(DNB));
+    await settle();
+    expect(shownOrgnrs()).toEqual([DNB, DNB]);
+    expect(noAccess(results()[1]!)).toBe(false);
+  });
+
+  it('a load in flight at the grant heals even when its own access check already saw the grant', async () => {
+    // company-load asks contains() only after every part settled: the
+    // figures failed before the grant, roller landed after it, and the
+    // late check reads «granted», so noHostAccess is never set.
+    const { controller, pending, deps } = setup({ manualLoads: true });
+    controller.follow(companyView(DNB));
+    controller.accessGranted();
+    pending[0]!.resolve(company(DNB));
+    await settle();
+    expect(deps.loadCompany).toHaveBeenCalledTimes(2);
+  });
+
+  it('the same, with the real loader: figures blocked before the grant, roller after it', async () => {
+    const fake = fakeBrowser({ origins: [] });
+    const roller = deferred<Response>();
+    let blocked = true;
+    const json = (body: unknown) =>
+      new Response(JSON.stringify(body), { status: 200, headers: { 'Content-Type': 'application/json' } });
+    const fetchMock = vi.fn(async (input: string | URL) => {
+      const url = String(input);
+      if (url.endsWith(`/api/enheter/${DNB}`)) return json(dnb);
+      if (url.endsWith(`/api/enheter/${DNB}/roller`)) return roller.promise;
+      if (url.endsWith(`/regnskapsregisteret/regnskap/${DNB}`)) {
+        if (blocked) throw new TypeError('blocked by CORS');
+        return json([]);
+      }
+      return new Response('', { status: 404 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    try {
+      const { controller, results } = setup({ loadCompany: realLoadCompany });
+      controller.follow(companyView(DNB));
+      await vi.waitFor(() =>
+        expect(fetchMock.mock.calls.some(([u]) => String(u).endsWith(`/regnskapsregisteret/regnskap/${DNB}`))).toBe(true),
+      );
+      await settle();
+      await fake.browser.permissions.request({ origins: ['https://data.brreg.no/*'] });
+      blocked = false;
+      controller.accessGranted();
+      roller.resolve(json({ rollegrupper: [] }));
+      await vi.waitFor(() => expect(results()).toHaveLength(2));
+      expect(results()[0]!.company.regnskap).toBeUndefined();
+      expect(results()[0]!.company.noHostAccess).toBeUndefined();
+      expect(results()[1]!.company.regnskap).toEqual({ items: [] });
+      expect(results()[1]!.heal).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('a grant outside the panel (permissions.onAdded) heals the result on screen, focus left alone', async () => {
+    const { controller, access, results } = setup({ accessHeld: false });
+    controller.follow(companyView(DNB));
+    await settle();
+    access.held = true;
+    controller.accessGranted();
+    await settle();
+    expect(results()).toHaveLength(2);
+    expect(results()[1]).toMatchObject({ focus: 'none' });
+    expect(noAccess(results()[1]!)).toBe(false);
+  });
+
+  it('heals once per grant: still without access, it stops', async () => {
+    const { controller, deps, results } = setup({ accessHeld: false });
+    controller.follow(companyView(DNB));
+    await settle();
+    controller.accessGranted();
+    await settle();
+    await settle();
+    expect(deps.loadCompany).toHaveBeenCalledTimes(2);
+    expect(noAccess(results().at(-1)!)).toBe(true);
+  });
+
+  it('a result with its figures is left alone', async () => {
+    const { controller, deps } = setup();
+    controller.follow(companyView(DNB));
+    await settle();
+    controller.accessGranted();
+    await settle();
+    expect(deps.loadCompany).toHaveBeenCalledTimes(1);
   });
 });
 

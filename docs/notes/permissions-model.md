@@ -3,7 +3,7 @@
 Source: `public/manifest.firefox.json`, `public/manifest.chrome.json`,
 `src/background/background.ts`,
 `src/details/{auto-sync-ui,auto-sync-switch}.ts`, `src/lib/auto-sync-*.ts`,
-`src/welcome/welcome.ts`.
+`src/lib/platform/permissions.ts`, `src/welcome/welcome.ts`.
 
 <!-- SECTION: active-tab-limits -->
 ## Auto-sync on tab switch is blocked by activeTab — by design
@@ -45,6 +45,79 @@ outside an open panel listens to tabs, so the grant never causes a
 lookup while the panel is closed. Settings live in `storage.local`
 (survives browser restarts); the response cache stays on
 `storage.session` (in-memory).
+
+<!-- SECTION: withheld-host-permission -->
+## A withheld data.brreg.no grant: say so, offer «Gi tilgang»
+
+The user can withhold the one host permission after install: Firefox
+lists it as optional in about:addons → Permissions (MDN
+`host_permissions`: «most browsers treat `host_permissions` as
+optional»), Chrome under the extension's site access. Firefox only
+grants it at install from 127 (bug 1889402, «Grant origin permissions
+during install for mv3»), so an install on 115–126 starts without it.
+Without the grant only the regnskap figures fail, since that endpoint
+sends no CORS header (`docs/notes/brreg-api.md` § cors).
+
+- `loadCompany` asks `permissions.contains(BRREG_ORIGINS)` only after
+  the regnskap fetch failed, and sets `noHostAccess` when the grant is
+  missing. A browser that can't answer counts as holding it, so a
+  plain failure is never blamed on a permission.
+- The panel's Økonomi tab then says «brreg-snap har ikke tilgang til
+  data.brreg.no, så regnskapstallene kan ikke hentes.» with a «Gi
+  tilgang» button instead of «Prøv igjen senere». The click reaches
+  `permissions.request(BRREG_ORIGINS)` with no await before it
+  (§ gesture-stack; `requestBrregAccess` in
+  `src/lib/platform/permissions.ts`, `intents.grantAccess` in
+  `src/details/controller.ts`). A refusal leaves the state as it was.
+- A grant heals the panel instead of reloading it. The controller
+  counts grants (the request answering yes, and `permissions.onAdded`
+  with the origin, so a grant given in about:addons or Chrome's site
+  access counts too) and records the count each load began under. A
+  result on screen that lacks the figures and was fetched before the
+  latest grant is fetched again and repainted in place: no load token,
+  no skeleton, and only while that same result is still on screen. A
+  tab switch, sync or pick meanwhile replaces it as usual and is never
+  made stale by the heal. A heal never closes the user's search either:
+  while the search view is open it waits, and lands when the search
+  closes back to that result (`ResultPaint.heal`), with how the company
+  is reached by then: a same-company tab switch meanwhile updates the
+  waiting heal's host, method, stored choice and tab. A load in flight at
+  the grant heals once it lands, and a company loaded while the prompt
+  was open heals on the grant. A load that began before the latest grant
+  and came back without figures counts as lacking access even without
+  `noHostAccess`: the loader asks `contains` only after every part
+  settled, so it may already see the new grant. A refetch that still
+  lacks access stops there. A failed fetch
+  is never cached, so the figures come in while the rest comes from the
+  cache; after «Gi tilgang» the result lands on the open tab.
+- The popup says it as one line under the answer: «Mangler tilgang til
+  regnskapstallene.» with a text button «Gi tilgang», instead of naming
+  regnskap in «Noe kunne ikke hentes: …» (other failed parts stay
+  named there). The panel's longer line doesn't fit the 600 px budget
+  (`docs/notes/ui.md` § popup-budget). A verdict has no room for either
+  line, as before.
+- The prompt closes the popup: a popup closes when it loses focus, and
+  the prompt takes it. Firefox: bug 1766834 («as soon as the
+  browserAction popup loses the focus, it gets auto-closed»), which
+  also reports the prompt can get hidden on Linux. Chromium: the smoke
+  sees the popup close on the click. The grant still applies, and the
+  next popup shows the figures. A popup that does survive reloads.
+- The ledger's regnskap row keeps the Enhet's filing year without
+  money, on both surfaces.
+- No manifest change: both engines let `permissions.request` ask for
+  an origin in `host_permissions` the user withheld (MDN
+  `host_permissions`: «it can request them using
+  permissions.request()»; Chrome's permissions API: «required
+  permissions that were withheld by the user»).
+- The smoke withholds site access in real Chromium through
+  `chrome.developerPrivate` on chrome://extensions, since Chrome refuses
+  `permissions.remove` for a required origin (`tests/e2e/extension.spec.ts`).
+  In the popup the browser's own CORS check blocks the figures
+  (`tests/e2e/native.ts` answers with live CORS headers); the panel,
+  a Playwright page whose routes get a CORS header from Playwright,
+  aborts the figures instead. Headless can't answer the prompt; the
+  heal is pinned in `tests/details-controller.test.ts` and shown in
+  the preview harness with `&hostaccess=withheld`.
 
 <!-- SECTION: event-page-wakeup -->
 ## Background listeners must register synchronously at top level

@@ -209,6 +209,13 @@ export const COPY = {
   honestShowingYear: (year: string) => `Viser tallene for ${year}.`,
   honestOtherPdf: ' Andre år finnes som PDF.',
   regnskapFailed: 'Kunne ikke hente regnskapstallene. Prøv igjen senere.',
+  // The data.brreg.no host permission is withheld (about:addons, Chrome's
+  // site access): asking again can't help, granting it does.
+  regnskapNoAccess: 'brreg-snap har ikke tilgang til data.brreg.no, så regnskapstallene kan ikke hentes.',
+  // The popup's line under the answer: one line with «Gi tilgang», the
+  // longer one breaks the 600 px cap (ui.md § popup-budget).
+  regnskapNoAccessShort: 'Mangler tilgang til regnskapstallene.',
+  grantAccess: 'Gi tilgang',
   regnskapNone: 'Ingen årsregnskap er registrert.',
   regnskapNoFigures: 'Regnskap registrert, men uten utdrag.',
   specialAccounts:

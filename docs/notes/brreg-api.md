@@ -87,6 +87,27 @@ spesialregnskap», nothing filed gives «Mangler», «Ingen» or «Ikke pliktig�
 (`regnskapSignal` in `src/lib/trust/signals.ts`; staleness and the
 ENK case: `docs/notes/trust.md` § signals).
 
+<!-- SECTION: cors -->
+## Regnskap sends no CORS header: the figures need the host permission
+
+Checked live 2026-10-16 with an `Origin: moz-extension://…` header:
+every Enhetsregisteret endpoint the extension calls (enheter, the
+search, roller, underenheter, konsernstruktur, oppdateringer) and the
+annual-report year list (`…/aarsregnskap/kopi/{orgnr}/aar`) answer
+`access-control-allow-origin: *`, on a 404 too.
+`/regnskapsregisteret/regnskap/{orgnr}` sends no CORS header on any
+status (200, 404, 500), for any origin, and its OPTIONS answer has none
+either.
+
+An extension page skips the CORS check only for a host it holds a host
+permission for. With the data.brreg.no grant withheld, everything
+loads except the figures: `fetchRegnskap` rejects, and `loadCompany`
+marks the company `noHostAccess` when `permissions.contains` confirms
+the grant is missing (`docs/notes/permissions-model.md`
+§ withheld-host-permission). The preview harness reroutes every brreg
+call through its own server for the same reason
+(`scripts/preview/README.md`). The live canary asserts both sides.
+
 <!-- SECTION: error-contract -->
 ## Error contract: search throws, [] means a real empty result
 

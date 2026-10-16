@@ -7,6 +7,8 @@
 //   ?taburl=https://www.dnb.no&tabtitle=DNB  -> real resolution cascade
 //   ?orgnr=984851006                          -> direct load (details)
 //   (no params)                               -> empty state
+//   &hostaccess=withheld                      -> the data.brreg.no grant
+//                                                withheld («Gi tilgang»)
 (function () {
   'use strict';
 
@@ -43,17 +45,28 @@
   // regnskapsregisteret sends no CORS headers (the extension bypasses
   // CORS via host_permissions, a plain tab can't), and one path lets the
   // server answer from the live API or from recorded fixtures.
+  const params = new URLSearchParams(location.search);
+  // ?hostaccess=withheld: the user withheld the data.brreg.no host
+  // permission. The regnskap figures then fail as the browser's CORS
+  // block makes them fail (the other endpoints send CORS headers), and
+  // «Gi tilgang» is answered yes, so the reload shows the figures.
+  let hostAccess = params.get('hostaccess') !== 'withheld';
+  const NO_CORS = /^regnskapsregisteret\/regnskap\/\d{9}$/;
+
   const realFetch = globalThis.fetch.bind(globalThis);
   globalThis.fetch = (input, init) => {
     const url = typeof input === 'string' ? input : input.url ?? String(input);
     const PREFIX = 'https://data.brreg.no/';
     if (url.startsWith(PREFIX)) {
-      return realFetch('/brreg/' + url.slice(PREFIX.length), init);
+      const path = url.slice(PREFIX.length);
+      if (!hostAccess && NO_CORS.test(path)) {
+        return Promise.reject(new TypeError('shim: blocked by CORS (no host permission)'));
+      }
+      return realFetch('/brreg/' + path, init);
     }
     return realFetch(input, init);
   };
 
-  const params = new URLSearchParams(location.search);
   const tabUrl = params.get('taburl') ?? '';
   const tabTitle = params.get('tabtitle') ?? '';
   // ?engine=chrome drops the Firefox-only namespaces so engine.ts reads
@@ -108,10 +121,17 @@
       local: makeArea(),
       onChanged: { addListener: noop, removeListener: noop },
     },
+    // Origins: the data.brreg.no grant (held unless ?hostaccess=withheld).
+    // API permissions (`tabs`): never held, never granted.
     permissions: {
-      contains: async () => false,
-      request: async () => false,
+      contains: async (p) => !p?.permissions?.length && (hostAccess || !p?.origins?.length),
+      request: async (p) => {
+        if (p?.permissions?.length || !p?.origins?.length) return false;
+        hostAccess = true;
+        return true;
+      },
       remove: async () => true,
+      onAdded: { addListener: noop, removeListener: noop },
       onRemoved: { addListener: noop, removeListener: noop },
     },
     sidePanel: {

@@ -20,9 +20,11 @@ import type { ResolutionMethod } from '../lib/resolution-method.js';
 //             to the company heading and screen readers announce it.
 //   refresh — «Oppdater»: the button was hidden with the footer while
 //             loading, so focus fell to <body>; hand it back.
+//   tab     — «Gi tilgang» in Økonomi: the button was torn down; land
+//             on the open tab again, focus on its tab button.
 //   none    — every other load (startup, sync, picker pick, manual
 //             search, a background tab event).
-export type ResultFocus = 'heading' | 'refresh' | 'none';
+export type ResultFocus = 'heading' | 'refresh' | 'tab' | 'none';
 
 export interface ResultPaint {
   company: CompanyData;
@@ -43,6 +45,11 @@ export interface ResultPaint {
   // load token.
   isStale: () => boolean;
   focus: ResultFocus;
+  // A repaint of the result on screen (the figures after a grant), not
+  // a new load: it never closes the user's search. While the search
+  // view is open it waits, and lands when the search closes back to
+  // this result.
+  heal?: true;
   // The tab the panel follows (read at startup, a tab event's, the one
   // the last message named; docs/notes/ui.md § badge): its toolbar
   // badge is set from this result — the answer's tone when the company
@@ -122,6 +129,10 @@ export interface PanelIntents {
   retry: () => void;
   // «Oppdater»: refetch the company on screen past the cache.
   refresh: () => void;
+  // «Gi tilgang» in Økonomi: request the data.brreg.no grant, in the
+  // click's own call stack (no await first). Resolves whether it was
+  // granted; on a grant the company on screen reloads.
+  grantAccess: () => Promise<boolean>;
   // A picker row, after the choice was persisted for `host`.
   pick: (host: string, orgnr: string) => void;
   // «Ingen av disse», after the negative choice was persisted.

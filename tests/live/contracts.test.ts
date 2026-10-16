@@ -33,6 +33,7 @@ import type { Enhet, Rolle, RollerResponse, SearchHit } from '../../src/types/br
 import {
   ER_API,
   REGNSKAP_API,
+  getCors,
   getJson,
   getText,
   installLive,
@@ -140,6 +141,21 @@ const ANCHOR_TESTS: Record<string, () => Promise<void>> = {
     const own = r.items.filter((i) => i.regnskapstype === 'SELSKAP');
     const tilDato = latest?.regnskapsperiode?.tilDato;
     expect(own.every((i) => (i.regnskapsperiode?.tilDato ?? '') <= tilDato!)).toBe(true);
+  },
+
+  cors: async () => {
+    // Enhetsregisteret and the annual-report list allow any origin;
+    // Regnskapsregisteret's figures send no CORS header on any status,
+    // so an extension needs the data.brreg.no host permission for them.
+    for (const url of [
+      `${ER_API}/enheter/${EQUINOR}`,
+      `${ER_API}/konsernstruktur/${EQUINOR}`,
+      `${REGNSKAP_API}/aarsregnskap/kopi/${EQUINOR}/aar`,
+    ]) {
+      expect(await getCors(url), url).toEqual({ status: 200, allowOrigin: '*' });
+    }
+    expect(await getCors(`${REGNSKAP_API}/${EQUINOR}`)).toEqual({ status: 200, allowOrigin: null });
+    expect(await getCors(`${REGNSKAP_API}/${DNB}`)).toEqual({ status: 500, allowOrigin: null });
   },
 
   'regnskap-500-unsupported-plan': async () => {

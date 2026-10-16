@@ -82,6 +82,19 @@ export async function getJson<T = unknown>(
   return { status: res.status, body };
 }
 
+/**
+ * GET through the queue the way an extension page asks: with an
+ * `Origin` header. Returns the status and the response's
+ * `access-control-allow-origin` (null when brreg sends none).
+ */
+export async function getCors(url: string): Promise<{ status: number; allowOrigin: string | null }> {
+  const res = await politeFetch(url, {
+    headers: { Accept: 'application/json', Origin: 'moz-extension://brreg-snap-canary' },
+  });
+  await res.arrayBuffer();
+  return { status: res.status, allowOrigin: res.headers.get('access-control-allow-origin') };
+}
+
 /** GET through the queue as text (the docs page). */
 export async function getText(
   url: string,

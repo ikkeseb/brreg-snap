@@ -13,6 +13,7 @@ import type {
   RememberedChoice,
 } from '../lib/hostname-search.js';
 import { isValidOrgnr } from '../lib/mod11.js';
+import { requestBrregAccess } from '../lib/platform/permissions.js';
 import { primaryStatusFlag } from '../lib/ui/flags.js';
 import { koblingInPlay } from '../lib/trust/kobling.js';
 import {
@@ -57,6 +58,8 @@ export interface ControllerDeps {
   // drill-in within the same konsern).
   loadCompany: (orgnr: string, opts: LoadCompanyOptions) => Promise<CompanyData>;
   invalidateCache: (orgnr: string) => Promise<void>;
+  // browser.permissions, for «Gi tilgang» (the data.brreg.no grant).
+  permissions: Pick<typeof browser.permissions, 'request'>;
   // `status`: a danger status worth a mark in the list («Konkurs»).
   pushRecent: (orgnr: string, navn: string, status?: string) => Promise<void>;
   // lib/ui/reject-flow.ts: the «Feil bedrift?» flow the popup shares.
@@ -85,6 +88,9 @@ export interface PanelController {
   intents: PanelIntents;
   // Startup: the stamped panel-URL hint against the active tab.
   init(hint: PanelHint): Promise<void>;
+  // permissions.onAdded with the data.brreg.no origin: a grant given
+  // outside «Gi tilgang» (about:addons, Chrome's site access).
+  accessGranted(): void;
   // A tab in this panel's window became active or navigated.
   followTab(tabId: number, tab?: TabFields): Promise<void>;
   // A sync or search message: the sender already resolved the view.
@@ -135,6 +141,19 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   // sync that keeps the same company claims a token but leaves this
   // load's result standing.
   let shownLoad: LoadToken | undefined;
+  // The data.brreg.no grant (permissions-model.md
+  // § withheld-host-permission). `accessGen` counts the grants seen;
+  // `shownAccess` says whether the result on screen (its load) lacked
+  // the grant and under which count it was fetched. A result fetched
+  // before the latest grant and missing its figures is healed: fetched
+  // again and repainted in place, without a load token, so a tab switch
+  // or a load already in flight is never made stale by it.
+  let accessGen = 0;
+  let shownAccess: { load: LoadToken; gen: number; missing: boolean } | undefined;
+  // The load a heal is running for: one at a time per result.
+  let healing: LoadToken | undefined;
+  // «Gi tilgang» was clicked: the healed result lands on the open tab.
+  let healToTab = false;
   // Re-trigger for the «Prøv igjen» button in the full error state, or
   // in a degraded empty state (the host search failed).
   let lastLoad: (() => void) | undefined;
@@ -181,6 +200,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     // older fetches must not overwrite the newer ones when they land out
     // of order.
     const run = loads.begin();
+    const gen = accessGen;
     currentOrgnr = orgnr;
     if (method !== undefined) currentMethod = method;
     // «Prøv igjen» is a user-initiated transition: the result (or the
@@ -243,6 +263,10 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         tabId: followedTabId,
       });
       painter.setBack(history.current()?.method === 'drill-in');
+      shownAccess = { load: run, gen, missing: lacksAccess(company, gen) };
+      // Granted while this load was in flight: its figures failed for
+      // nothing.
+      healAccess();
     } catch (err) {
       if (run.isStale()) return;
       painter.error(err, {
@@ -254,6 +278,71 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         tabId: followedTabId,
       });
     }
+  }
+
+  // Refetch the result on screen when it lacks the figures and a grant
+  // came after its fetch. No load token and no skeleton: the repaint
+  // lands only while that same result is still the one on screen, and
+  // anything newer (a tab switch, a sync, a pick) simply replaces it.
+  // A refetch that still lacks access records the new count, so it
+  // never loops.
+  function healAccess(): void {
+    const load = shownLoad;
+    const view = onScreen;
+    if (!load || view?.kind !== 'company' || healing === load) return;
+    if (shownAccess?.load !== load || !shownAccess.missing || shownAccess.gen === accessGen) return;
+    healing = load;
+    const gen = accessGen;
+    const orgnr = view.orgnr;
+    const loadOpts: LoadCompanyOptions = { ...PANEL_LOAD_OPTIONS };
+    if (lastTree) loadOpts.konsernTree = lastTree;
+    const current = (): boolean => shownLoad === load && onScreen?.kind === 'company' && onScreen.orgnr === orgnr;
+    void (async () => {
+      try {
+        const company = await deps.loadCompany(orgnr, loadOpts);
+        // A same-company sync may change the provenance meanwhile: read
+        // the stored choice for the host that is on screen at paint.
+        for (;;) {
+          if (!current()) return;
+          const shown = onScreen;
+          const remembered = currentHost === undefined ? undefined : await deps.getRememberedChoice(currentHost);
+          if (onScreen !== shown) continue;
+          shownAccess = { load, gen, missing: lacksAccess(company, gen) };
+          const focus: ResultFocus = healToTab && deps.hasFocus() ? 'tab' : 'none';
+          healToTab = false;
+          painter.result({
+            company,
+            method: currentMethod,
+            host: currentHost,
+            remembered,
+            fetchedAt: company.fetchedAt,
+            isStale: () => shownLoad !== load,
+            focus,
+            tabId: followedTabId,
+            heal: true,
+          });
+          return;
+        }
+      } catch {
+        // The Enhet itself failed this time: the result on screen stays.
+      } finally {
+        if (healing === load) healing = undefined;
+      }
+    })();
+  }
+
+  // Whether a result fetched under grant count `gen` may lack its
+  // figures for want of the grant: company-load says so, or the
+  // figures failed and a grant came while it was in flight (its
+  // contains() check runs after every part settles, so it can already
+  // see the new grant and leave noHostAccess unset).
+  function lacksAccess(company: CompanyData, gen: number): boolean {
+    return company.noHostAccess === true || (company.regnskap === undefined && gen !== accessGen);
+  }
+
+  function granted(): void {
+    accessGen += 1;
+    healAccess();
   }
 
   // The painters claim the token: an in-flight load must not land on
@@ -441,6 +530,20 @@ export function createPanelController(deps: ControllerDeps): PanelController {
       });
     },
 
+    // The regnskap fetch failed because the grant is withheld. The
+    // request is the first call, before any await (permissions-model.md
+    // § gesture-stack). A failed fetch is never cached, so the heal's
+    // refetch gets the figures; the parts already cached are reused.
+    grantAccess(): Promise<boolean> {
+      const asked = requestBrregAccess(deps.permissions);
+      healToTab = true;
+      return asked.then((ok) => {
+        if (ok) granted();
+        else healToTab = false;
+        return ok;
+      });
+    },
+
     pick(host, orgnr): void {
       if (!pickerStillShown(host)) return;
       history.setOrgnr(orgnr, 'host-pick', host, { push: false, tabId: followedTabId });
@@ -480,6 +583,8 @@ export function createPanelController(deps: ControllerDeps): PanelController {
 
   return {
     intents,
+
+    accessGranted: granted,
 
     init(hint): Promise<void> {
       history.dropStamp();
