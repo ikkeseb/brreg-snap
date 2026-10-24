@@ -17,7 +17,11 @@ silent, looping 1280×720 30 fps cut of the 15 s promo «Hele oppslaget»
 geometry extracted from the real markup and 1.6.2's `src/styles/brreg.css`;
 its build lives outside the repo. `promo-readme-poster.jpg`, the reel's
 frame at 4 s (the popup card), is the fallback for a browser without
-AVIF.
+AVIF. `promo-readme-dark.avif` and `promo-readme-dark-poster.jpg` are
+the same cut and frame in the dark theme, which the README serves under
+`prefers-color-scheme: dark`: the UI from the dark block of the same
+`src/styles/brreg.css`, the desk and the bakery's page in a dark
+rendition made for the promo.
 
 ## Source
 
