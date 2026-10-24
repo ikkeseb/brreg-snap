@@ -49,10 +49,10 @@ when reporting a change as done:
 `package.json` lists every script; these are the ones with a catch.
 `pnpm install` points git at the committed hooks in `.githooks/`.
 pre-push runs `pnpm verify`; `git push --no-verify` is the conscious
-bypass. pre-commit and commit-msg run the maintainer's public-hygiene
-check on staged added lines, paths and the message when the local
-`maintainer/` folder carries it (rule and setup there), and do nothing
-elsewhere.
+bypass. pre-commit, pre-merge-commit and commit-msg run the
+maintainer's public-hygiene check on staged added lines, paths and the
+message when the local `maintainer/` folder carries it (rule and setup
+there), and do nothing elsewhere.
 
 ```bash
 pnpm verify                     # the gate (~12 s): typecheck, lint, test, check:docs, both builds, verify:dist, lint:ext
