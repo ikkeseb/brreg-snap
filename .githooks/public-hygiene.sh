@@ -12,18 +12,28 @@ if ! common=$(git rev-parse --git-common-dir 2>/dev/null) ||
 fi
 if [ "$common" = "$current" ]; then
   # Also works for separate git directories and submodule checkouts.
-  top=$(git rev-parse --show-toplevel 2>/dev/null) || {
+  # A sentinel preserves any trailing newlines belonging to the path.
+  top=$(git rev-parse --show-toplevel 2>/dev/null && printf .) || {
     warn "cannot locate the main checkout"; exit 0;
   }
+  top=${top%.}
+  top=${top%'
+'}
 else
-  worktrees=$(git -c core.quotePath=false worktree list --porcelain 2>/dev/null) || {
-    warn "cannot list worktrees"; exit 0;
-  }
-  first=${worktrees%%'
+  case $common in
+    # The conventional metadata directory identifies its parent without
+    # line-oriented parsing, even when the checkout name contains a newline.
+    */.git) top=${common%/.git} ;;
+    *)
+      worktrees=$(git -c core.quotePath=false worktree list --porcelain 2>/dev/null) || {
+        warn "cannot list worktrees"; exit 0;
+      }
+      first=${worktrees%%'
 '*}
-  case $first in
-    'worktree '*) top=${first#worktree } ;;
-    *) warn "cannot locate the main checkout"; exit 0 ;;
+      case $first in
+        'worktree '*) top=${first#worktree } ;;
+        *) warn "cannot locate the main checkout"; exit 0 ;;
+      esac ;;
   esac
   # Git can report only the metadata directory for a separate main gitdir.
   # Reject that result (and quoted paths) instead of silently skipping setup.
@@ -37,9 +47,11 @@ else
   fi
   main_top=$(
     unset GIT_DIR GIT_WORK_TREE
-    git -C "$top" rev-parse --show-toplevel 2>/dev/null
+    git -C "$top" rev-parse --show-toplevel 2>/dev/null && printf .
   ) || { warn "main checkout is unavailable"; exit 0; }
-  top=$main_top
+  main_top=${main_top%.}
+  top=${main_top%'
+'}
 fi
 [ -d "$top/maintainer" ] || exit 0
 check="$top/maintainer/hooks/check.sh"

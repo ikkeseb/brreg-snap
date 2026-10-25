@@ -71,6 +71,18 @@ describe('optional maintainer hook discovery', () => {
     dispatched(tree);
     dispatched(linked);
   });
+  it.skipIf(process.platform === 'win32').each(['main\ncheckout', 'main\n'])(
+    'preserves newlines in the main checkout path: %j',
+    (name) => {
+      // Windows filenames cannot contain LF; POSIX linked worktrees can.
+      const tree = init(name);
+      install(tree);
+      const linked = join(root, 'linked');
+      git(tree, 'worktree', 'add', '-q', '-b', 'linked', linked);
+      dispatched(tree);
+      dispatched(linked);
+    },
+  );
   it('dispatches from a checkout with a separate git directory', () => {
     const tree = init('separate tree', true);
     install(tree);
