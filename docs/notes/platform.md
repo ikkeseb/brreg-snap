@@ -9,7 +9,7 @@ the compiler target are chosen per browser (mechanics:
 `docs/notes/build.md` § dual-browser-build).
 
 <!-- SECTION: manifest-split -->
-## The manifests are the only build-time switch
+## Manifest differences
 
 `public/manifest.firefox.json` vs `public/manifest.chrome.json`:
 
