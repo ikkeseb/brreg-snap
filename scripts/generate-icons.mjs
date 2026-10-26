@@ -99,6 +99,13 @@ function sized(svg, size) {
 
 async function main() {
   const { chromium } = await import('@playwright/test');
+  // Headless, so no display server: under WSLg the screenshots stall
+  // while DISPLAY and WAYLAND_DISPLAY are set (same fix as
+  // playwright.config.ts).
+  if (process.platform === 'linux') {
+    delete process.env.DISPLAY;
+    delete process.env.WAYLAND_DISPLAY;
+  }
   const browser = await chromium.launch();
   try {
     mkdirSync(ICON_DIR, { recursive: true });
