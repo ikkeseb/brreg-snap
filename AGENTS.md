@@ -76,6 +76,10 @@ pnpm store-status [--deep]      # live AMO/CWS versions vs the tags
 There is no Vite dev server for an extension popup: use `pnpm dev` or
 `pnpm preview`. Chrome's side panel needs `dist-chrome/` loaded
 unpacked (`chrome://extensions` → Developer mode → Load unpacked).
+Under WSL, `pnpm dev:chrome` fails (web-ext's chrome-launcher starts
+the Windows Chrome and loses its debugging pipe); the Chromium real
+load there is `pnpm smoke` or `dist-chrome/` loaded unpacked in the
+Windows Chrome.
 
 One source tree, two targets (`--mode firefox|chrome` → `dist-firefox/`,
 `dist-chrome/`): only the manifest and the compiler target differ at
