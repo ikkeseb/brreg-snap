@@ -236,7 +236,7 @@ a reviewer asks. The notes for reviewers below carry the short form.
 > The attached source zip is `git archive` of tag `v<version>`;
 > instructions in `BUILD.md` at the repo root. Reproduce with
 > `pnpm install --frozen-lockfile && pnpm package` on Node 24
-> (`.node-version`) and pnpm 12.10.1 (`packageManager`). The unzipped
+> (`.node-version`) and pnpm 12.15.0 (`packageManager`). The unzipped
 > package matches the CI build attached to the GitHub Release for
 > `v<version>`.
 >
