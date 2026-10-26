@@ -16,6 +16,20 @@ async function freePort(): Promise<number> {
   });
 }
 process.env.SMOKE_PORT ??= String(await freePort());
+
+// Headless Chromium needs no display server. Where WSLg's compositor
+// restarts after crashes, screenshots and the toolbar popup stalled
+// until the test timed out unless DISPLAY and WAYLAND_DISPLAY were
+// unset, so a headless run drops both on Linux. A headed run (the
+// inspector, --headed, UI mode) keeps them: workers load this config
+// again without the runner's flags, so the runner's verdict travels in
+// the env, like the port above.
+const headed = !!process.env.PWDEBUG || process.argv.some((arg) => arg === '--headed' || arg.startsWith('--ui'));
+process.env.SMOKE_HEADED ??= headed ? '1' : '0';
+if (process.platform === 'linux' && process.env.SMOKE_HEADED === '0') {
+  delete process.env.DISPLAY;
+  delete process.env.WAYLAND_DISPLAY;
+}
 const baseURL = `http://127.0.0.1:${process.env.SMOKE_PORT}`;
 
 const themes = ['dark', 'light'] as const;
