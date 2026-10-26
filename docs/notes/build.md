@@ -9,10 +9,14 @@ Source: `vite.config.ts`, `package.json`,
 `vite.config.ts` reads Vite's mode (`chrome`; any other mode builds
 Firefox), builds to `dist-${browser}/`, and the `copy-static-assets`
 `closeBundle` plugin copies `public/manifest.${browser}.json` to
-`dist-${browser}/manifest.json`. `publicDir` is set to `false` so
-Vite's automatic public/ copy doesn't drag BOTH source manifests into
-the output — the plugin copies exactly the right one, the icons
-(filtering out `icons/*.md`) and `public/fonts/`. Scripts:
+`dist-${browser}/manifest.json`. `build.target` is per browser too
+(`chrome116` / `firefox115`); with today's source both emit the same
+JavaScript (`diff -r dist-firefox dist-chrome` shows only
+`manifest.json`), so a target change that lowers syntax for one engine
+shows there first. `publicDir` is set to `false` so Vite's automatic
+public/ copy doesn't drag BOTH source manifests into the output — the
+plugin copies exactly the right one, the icons (filtering out
+`icons/*.md`) and `public/fonts/`. Scripts:
 `build:{firefox,chrome}`, `package:{firefox,chrome}`; the bare
 `build`/`dev`/`package` alias the Firefox target, and `watch` rebuilds
 `dist-firefox/` on every change. The built `manifest.json` is the

@@ -3,16 +3,18 @@
 Guidance for coding agents in this repository. `CLAUDE.md` only imports
 this file; edit this one. Machine- and account-specific rules for the
 maintainer's own sessions live in a local, gitignored
-`maintainer/AGENTS.md`: read it when it exists.
+`maintainer/AGENTS.md`: read it when it exists. A linked worktree has
+no copy; read the main checkout's (the first path `git worktree list`
+prints).
 
 ## Active work + release rules
 
-The backlog is a local, gitignored file that `maintainer/AGENTS.md`
-names. Release state lives in git tags (`v*` = tagged release,
-`amo-submission-*` / `cws-submission-*` = what was uploaded to each
-store) and GitHub Releases. Store state is never written down; run
-`pnpm store-status` (`--deep` compares the served packages with the
-Release).
+The backlog lives in the maintainer's gitignored `maintainer/` folder,
+named in `maintainer/AGENTS.md`. Release state lives in git tags
+(`v*` = tagged release, `amo-submission-*` / `cws-submission-*` = what
+was uploaded to each store) and GitHub Releases. Store state is never
+written down; run `pnpm store-status` (`--deep` compares the served
+packages with the Release).
 
 - Work lands on `dev`: a feature branch merges into `dev` once reviewed
   and `pnpm verify` is green (the pre-push hook enforces it). `dev` →
@@ -20,6 +22,9 @@ Release).
   `main` (`docs/release.md`). CI runs the gate and the browser smoke on
   every push and PR to `main` and `dev`: a red smoke there is fixed
   forward first.
+- A user-visible change adds its line under `## [Unreleased]` in
+  `CHANGELOG.md` on the same branch; the release notes are built from
+  that section.
 - The one public contact, everywhere: `sebastian@nuez.no`.
 - Releasing and store publishing (`pnpm release`, the generated
   submission kit, `release.yml`, `publish.yml`): `docs/release.md`.
@@ -55,7 +60,7 @@ message when the local `maintainer/` folder carries it (rule and setup
 there), and do nothing elsewhere.
 
 ```bash
-pnpm verify                     # the gate (~12 s): typecheck, lint, test, check:docs, both builds, verify:dist, lint:ext
+pnpm verify                     # the gate: typecheck, lint, test, check:docs, both builds, verify:dist, lint:ext
 pnpm exec vitest run tests/orgnr.test.ts                                 # one file
 pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # one test
 pnpm smoke                      # Playwright: harness states x widths x themes + a real Chromium load (toolbar click, popup, side panel); not in the gate (CI runs it); once: pnpm exec playwright install chromium
@@ -73,11 +78,11 @@ There is no Vite dev server for an extension popup: use `pnpm dev` or
 unpacked (`chrome://extensions` → Developer mode → Load unpacked).
 
 One source tree, two targets (`--mode firefox|chrome` → `dist-firefox/`,
-`dist-chrome/`): only the manifest differs at build time
-(`docs/notes/build.md` § dual-browser-build), and engine differences
-are runtime checks (`docs/notes/platform.md`). Store uploads are the CI
-release artifacts only; `.gitattributes` forces LF so local and CI
-builds match.
+`dist-chrome/`): only the manifest and the compiler target differ at
+build time (`docs/notes/build.md` § dual-browser-build), and engine
+differences are runtime checks (`docs/notes/platform.md`). Store
+uploads are the CI release artifacts only; `.gitattributes` forces LF
+so local and CI builds match.
 
 ## Architecture — routing table
 
