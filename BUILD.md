@@ -57,10 +57,11 @@ reads the file list from git, so it needs the checkout's `.git`.
 
 `pnpm package` is an alias for `pnpm package:firefox`. The repository
 also builds a Chrome target (`pnpm package:chrome`). Both come from
-the same `src/` and ship the same JavaScript and HTML; only
-`manifest.json` differs (`public/manifest.<browser>.json`). Engine
-differences are runtime feature checks in `src/lib/platform/`
-(`docs/notes/platform.md`).
+the same `src/`; the build picks `manifest.json`
+(`public/manifest.<browser>.json`) and the compiler target
+(`build.target` in `vite.config.ts`) per browser, and the packages
+differ only in `manifest.json`. Engine differences are runtime feature
+checks in `src/lib/platform/` (`docs/notes/platform.md`).
 
 The Firefox package's `manifest.json` is `public/manifest.firefox.json`
 byte for byte, apart from the stamped `version` (see Versioning). AMO

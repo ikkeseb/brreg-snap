@@ -6,9 +6,8 @@ CHANGELOG entries, the store release notes and the approval click.
 
 ## The flow
 
-1. **Changes reach `main`** through `dev` (the branch rule in `AGENTS.md`)
-   with entries under `## [Unreleased]` in
-   `CHANGELOG.md`, and CI goes green.
+1. **Changes reach `main`** through `dev` (the branch rule and the
+   CHANGELOG line in `AGENTS.md`), and CI goes green.
 2. **`pnpm release X.Y.Z`** (on `main`, clean tree, up to date with
    origin, CI green for `HEAD`, a non-empty `[Unreleased]`). It sets
    the version in `package.json` and both `public/manifest.*.json`,
@@ -37,15 +36,18 @@ CHANGELOG entries, the store release notes and the approval click.
    step 2 prints when `pnpm verify` fails (`git checkout -- package.json
    public/manifest.firefox.json public/manifest.chrome.json
    CHANGELOG.md docs/submission-kit && git clean -fd
-   docs/submission-kit/X.Y.Z`); only then fix the canonical docs,
-   commit and push the fix to `main`; once CI is green run step 2
-   again and paste the notes back.
+   docs/submission-kit/X.Y.Z`); only then fix the canonical docs on
+   `dev` and bring the fix to `main` the way step 1 does; once CI is
+   green run step 2 again and paste the notes back.
 4. **`pnpm release X.Y.Z --tag`** refuses while a TODO is left,
    anything but the release files changed, or an earlier kit file is
    anything but deleted, then commits
    `release: X.Y.Z` and creates the annotated tag `vX.Y.Z`. It never
    pushes; it prints `git push --atomic origin main vX.Y.Z` (the
-   pre-push hook runs `pnpm verify`).
+   pre-push hook runs `pnpm verify`). Then bring `dev` level with the
+   release commit: `git switch dev && git merge --ff-only main && git
+   push origin dev` (a plain `git merge main` if `dev` moved on
+   meanwhile).
 5. **`release.yml`** (on the tag):
    - `build` (read-only token): `pnpm verify`, tag == `package.json`
      version, a non-empty CHANGELOG section for the tag, the three zips,
@@ -108,10 +110,10 @@ CHANGELOG entries, the store release notes and the approval click.
   (below).
 - AMO rejected a text of the tagged kit (the 1.6.0 reviewer notes were
   over its 3000 characters; the length check now catches that in
-  `pnpm verify` and before any request): fix the canonical doc on
-  `main`, bring that field of `docs/submission-kit/X.Y.Z/amo.md` there
-  in line with it (the hand-written release notes stay as tagged), and
-  run the workflow with `kit_from_main` on. It sends the kit from
+  `pnpm verify` and before any request): fix the canonical doc and
+  bring that field of `docs/submission-kit/X.Y.Z/amo.md` in line with
+  it on `dev`, then to `main` the way step 1 does (the hand-written
+  release notes stay as tagged), and run the workflow with `kit_from_main` on. It sends the kit from
   `main` instead of the tag's; the `verify` job's log and job summary
   show its diff against the tag's kit before the approval is asked:
   approve only if that diff is the fix. This works while `main` still

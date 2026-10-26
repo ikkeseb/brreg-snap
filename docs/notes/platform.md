@@ -4,8 +4,9 @@ Source: `src/lib/platform/`, `public/manifest.firefox.json`,
 `public/manifest.chrome.json`, `src/background/background.ts`,
 `src/lib/tab-sync.ts`, `scripts/lint-ext.mjs`.
 
-Both engines run the same JavaScript; only the manifest is chosen at
-build time (mechanics: `docs/notes/build.md` § dual-browser-build).
+Both engines run the same source; at build time only the manifest and
+the compiler target are chosen per browser (mechanics:
+`docs/notes/build.md` § dual-browser-build).
 
 <!-- SECTION: manifest-split -->
 ## The manifests are the only build-time switch
