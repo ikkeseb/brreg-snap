@@ -1,6 +1,6 @@
 # Privacy Policy
 
-_Last updated: 2026-10-16. Applies to brreg-snap 1.4 and later._
+_Last updated: 2026-10-31. Applies to brreg-snap 1.4 and later._
 
 brreg-snap is a browser extension for Firefox and Chrome that shows
 public information about Norwegian companies from
@@ -18,7 +18,9 @@ says exactly what is sent, when, and what is kept on your device.
   some known hosting platforms, such as `github.io`, the site's own
   name there is its domain: `firma.github.io`). It never sends the full page address, the page
   title or cookies, and never page content unless you select text and
-  choose to look it up.
+  choose to look it up. One exception: a nine-digit number in the page
+  address or title that passes the organisation-number check is sent
+  (see «What is sent»).
 - Nothing goes to the developer or to any other party. There is no
   developer server, no analytics, no ads and no telemetry.
 - Lookups happen when you ask for one. If you turn on the optional
@@ -47,7 +49,8 @@ IP addresses (like `192.168.1.10`) and reserved local names are never
 sent: `localhost`, names without a dot, and endings such as `.local`,
 `.lokal`, `.internal`, `.intern`, `.lan`, `.home.arpa` and `.priv`.
 Other names that only work on a private network are looked up like
-any other site.
+any other site. This covers the site's name. A number in the address
+or title can still be sent from such a page (see «What is sent»).
 
 ## What is sent
 
@@ -55,12 +58,12 @@ any other site.
 |---|---|---|
 | The site's registrable domain. Subdomains and `www.` are not sent. On some known hosting platforms, such as `github.io`, the site's own name there is kept (`firma.github.io`) | `dnb.no` (on `nettbank.dnb.no`) | Finds companies that list that domain as their website |
 | The main word of that domain, plus Norwegian spellings of it | `elkjop`, `elkjøp` (on `elkjop.no`) | Finds companies whose name matches the domain |
-| An organisation number | `923609016` | Fetches the company's registry entry, roles, sub-units, group structure, recent changes, the latest accounts and the list of filed annual reports. All of it from `data.brreg.no`. The number comes from the page address or title (read on your device), from a search result, from a link in the extension, or from your recent lookups |
+| An organisation number | `923609016` | Fetches the company's registry entry, roles, sub-units, group structure, recent changes, the latest accounts and the list of filed annual reports. All of it from `data.brreg.no`. The number comes from the page address or title (read on your device), from a search result, from a link in the extension, or from your recent lookups. A nine-digit number in the page address or title that passes the organisation-number check is sent, even when it is really something else, such as an order or account number, and also from a private page, an IP address or a local file. |
 | Text you type in the search box | `equinor` | Searches the register by company name |
 | Text you select, only when you choose «Slå opp «…» i brreg-snap» in the right-click menu (at most 100 characters) | `Kiwi Norge` | Searches the register by company name, as if you had typed it. If the selection contains exactly one valid organisation number, only that number is sent; otherwise the text is searched as it is |
 
-Never sent: the full page address (path and query string), the page
-title, page content other than text you select and look up, cookies or
+Never sent, apart from that number: the full page address (path and
+query string), the page title, page content other than text you select and look up, cookies or
 login data, or any identifier for you or your browser.
 
 «Rapporter feil treff» does not send anything either. It opens your
