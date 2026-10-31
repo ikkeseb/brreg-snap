@@ -99,7 +99,9 @@ export async function fetchEnhet(orgnr: string): Promise<Enhet> {
   if (cached) return cached;
 
   const res = await brregFetch(`${API}/enheter/${orgnr}`);
-  if (res.status === 404) {
+  // 410 Gone: removed for legal reasons. The registry has answered, and
+  // to the user that reads the same as an orgnr it doesn't know.
+  if (res.status === 404 || res.status === 410) {
     throw new Error(`No entity found for orgnr ${orgnr}.`);
   }
   if (!res.ok) {
@@ -165,7 +167,7 @@ export async function fetchRoller(orgnr: string): Promise<RollerResponse> {
 
 // One underenhet (a branch or department) by its own orgnr — the
 // fallback when an orgnr typed in or found in a URL is not an enhet.
-// Resolves undefined on 404 ("not an underenhet either") so a lookup
+// Resolves undefined on 404 or 410 ("not an underenhet either") so a lookup
 // chain can move on without try/catch; throws on network and other
 // failures like the other fetchers. A deleted one still answers 200, as
 // a SlettetUnderEnhet with a slettedato and no overordnetEnhet.
@@ -177,7 +179,7 @@ export async function fetchUnderenhet(
   if (cached) return cached;
 
   const res = await brregFetch(`${API}/underenheter/${orgnr}`);
-  if (res.status === 404) return undefined;
+  if (res.status === 404 || res.status === 410) return undefined;
   if (!res.ok) {
     throw new Error(`brreg underenhet API returned ${res.status}.`);
   }
@@ -268,8 +270,11 @@ export async function fetchRegnskap(orgnr: string): Promise<RegnskapResponse> {
     throw new Error(`brreg regnskap API returned ${res.status}.`);
   }
   const data: unknown = await res.json();
-  const items = Array.isArray(data) ? data.filter(isRegnskap) : [];
-  const response: RegnskapResponse = { items };
+  // Any other 2xx body is "couldn't ask", not "none filed" (no cache).
+  if (!Array.isArray(data)) {
+    throw new Error('brreg returned an unexpected response shape.');
+  }
+  const response: RegnskapResponse = { items: data.filter(isRegnskap) };
   await cacheSet(key, response);
   return response;
 }

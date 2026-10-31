@@ -12,6 +12,7 @@ import {
   formatPercent,
   postalLine,
 } from '../format.js';
+import { hjemmesideDomains } from '../hostname-score.js';
 import type { KonsernChild, KonsernRef } from '../konsern.js';
 import {
   egenkapitalandelTone,
@@ -250,8 +251,12 @@ export function addressLines(addr: Adresse | undefined): string[] {
   return lines;
 }
 
-function hjemmesideHref(raw: string): string {
-  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+// The field is free text (hostname-score.ts § hjemmesideEntries): link
+// its first entry that names a site; undefined when none does.
+function hjemmesideHref(raw: string): string | undefined {
+  const entry = raw.split(/[\s,;]+/).find((e) => hjemmesideDomains(e).length > 0);
+  if (!entry) return undefined;
+  return /^https?:\/\//i.test(entry) ? entry : `https://${entry}`;
 }
 
 function kontakt(enhet: Enhet): DefRow[] {
@@ -272,14 +277,13 @@ function kontakt(enhet: Enhet): DefRow[] {
     });
   }
   if (enhet.hjemmeside) {
-    rows.push({
-      label: COPY.hjemmeside,
-      link: {
-        text: enhet.hjemmeside.replace(/^https?:\/\//i, '').replace(/\/$/, ''),
-        href: hjemmesideHref(enhet.hjemmeside),
-        external: true,
-      },
-    });
+    const shown = enhet.hjemmeside.replace(/^https?:\/\//i, '').replace(/\/$/, '');
+    const href = hjemmesideHref(enhet.hjemmeside);
+    rows.push(
+      href
+        ? { label: COPY.hjemmeside, link: { text: shown, href, external: true } }
+        : text(COPY.hjemmeside, shown),
+    );
   }
   return present(rows);
 }

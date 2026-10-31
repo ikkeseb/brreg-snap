@@ -161,6 +161,13 @@ describe('fetchRegnskap special-casing', () => {
     await expect(fetchRegnskap('123456785')).rejects.toThrow(/503/);
   });
 
+  it('a non-array 2xx is a failed fetch, never a cached «no regnskap»', async () => {
+    fetchMock.mockImplementation(async () => jsonResponse({ error: 'x' }));
+    await expect(fetchRegnskap('123456785')).rejects.toThrow('unexpected response shape');
+    await expect(fetchRegnskap('123456785')).rejects.toThrow('unexpected response shape');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('2xx array → items returned', async () => {
     fetchMock.mockResolvedValue(
       jsonResponse([{ journalnr: '1', regnskapsperiode: { tilDato: '2023-12-31' } }]),
@@ -168,6 +175,18 @@ describe('fetchRegnskap special-casing', () => {
     const result = await fetchRegnskap('123456785');
     expect(result.items).toHaveLength(1);
     expect(result.unavailable).toBeUndefined();
+  });
+});
+
+describe('410 Gone (removed for legal reasons)', () => {
+  it('fetchEnhet reads it as the not-found answer', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}, 410));
+    await expect(fetchEnhet('923609016')).rejects.toThrow('No entity found for orgnr 923609016.');
+  });
+
+  it('fetchUnderenhet reads it as «not an underenhet either»', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}, 410));
+    await expect(fetchUnderenhet('923609016')).resolves.toBeUndefined();
   });
 });
 

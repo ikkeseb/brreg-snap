@@ -12,6 +12,7 @@
 import { formatOrgnr, postalLine } from '../format.js';
 import { findDagligLeder, findRoleHolder } from '../roller.js';
 import type { Adresse, Enhet, RollerResponse } from '../../types/brreg.js';
+import { displayDomain } from './kobling.js';
 import { TONE_PREFIX, type Answer, type Kobling, type Signal } from './types.js';
 
 export const BRREG_ENHET_URL = 'https://virksomhet.brreg.no/nb/oppslag/enheter/';
@@ -92,7 +93,7 @@ export function buildSummary(input: SummaryInput): string {
 
   if (kobling) {
     const detail = kobling.detail ? ` (${kobling.detail})` : '';
-    lines.push(`${kobling.label} (${kobling.host}): ${kobling.value}${detail}`);
+    lines.push(`${kobling.label} (${displayDomain(kobling.host)}): ${kobling.value}${detail}`);
   }
 
   lines.push(

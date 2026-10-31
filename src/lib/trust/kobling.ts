@@ -40,7 +40,7 @@ export interface KoblingInput {
 
 // Registrable domains are compared in their ACE form (the URL parser's
 // hostname); the copy shows them the way people type them.
-function displayDomain(domain: string): string {
+export function displayDomain(domain: string): string {
   return domain
     .split('.')
     .map((label) => {

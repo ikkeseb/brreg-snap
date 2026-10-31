@@ -21,7 +21,7 @@ import { isHostDerived, type ResolutionMethod } from '../resolution-method.js';
 import { findRoleHolder } from '../roller.js';
 import { deriveAnswer, MISMATCH_HEADLINE, MISMATCH_PARTS } from '../trust/answer.js';
 import { deriveEndringer } from '../trust/endringer.js';
-import { deriveKobling } from '../trust/kobling.js';
+import { deriveKobling, displayDomain } from '../trust/kobling.js';
 import { deriveMerknader } from '../trust/merknader.js';
 import { deriveSignals, expectedLatestFiledYear } from '../trust/signals.js';
 import { brregUrl, buildSummary } from '../trust/summary.js';
@@ -199,9 +199,11 @@ export function orgnrText(digits: string): OrgnrText {
   return { digits, spaced: formatOrgnr(digits).replace(/ /g, NBSP) };
 }
 
-// The display form of a site: www. and trailing dots dropped.
+// The display form of a site: www. and trailing dots dropped, IDN
+// labels decoded.
 export function siteName(host: string): string {
-  return registrableDomain(host) ?? host.toLowerCase().replace(/\.+$/, '').replace(/^www\./, '');
+  const site = registrableDomain(host) ?? host.toLowerCase().replace(/\.+$/, '').replace(/^www\./, '');
+  return displayDomain(site);
 }
 
 // Re-exported: the identity line and every address share one spelling.
@@ -289,7 +291,7 @@ function koblingRow(
       break;
     case 'mismatch':
       if (stated && kobling.registeredDomain) {
-        row.value = COPY.notSite(kobling.registeredDomain);
+        row.value = COPY.notSite(displayDomain(kobling.registeredDomain));
         delete row.detail;
         row.inline = true;
       }
@@ -528,7 +530,7 @@ export function buildTrustView(input: TrustViewInput): TrustView {
   if (spoof && kobling) {
     const domain = kobling.registeredDomain ?? hjemmesideDomains(enhet.hjemmeside)[0];
     if (domain) {
-      answerActions.push({ kind: 'goto', text: COPY.gotoSite(domain), href: registeredHref(domain) });
+      answerActions.push({ kind: 'goto', text: COPY.gotoSite(displayDomain(domain)), href: registeredHref(domain) });
     }
     if (canReject) answerActions.push({ kind: 'reject', text: COPY.searchRightCompany });
   } else if (koblingDoubt && canReject) {

@@ -3,6 +3,8 @@
 // surface-specific side effects (URL params, load tokens, panel
 // messages) stay in the callers.
 
+import { fetchEnhet } from '../brreg.js';
+import { hjemmesideDomains, registrableDomain } from '../hostname-score.js';
 import {
   addRejectedChoice,
   searchByHostnameDetailed,
@@ -12,6 +14,23 @@ import {
 export type RejectOutcome =
   | { kind: 'picker'; candidates: Candidate[] }
   | { kind: 'empty' };
+
+// A remembered picker choice comes back from the host search with no
+// candidates. It is still what this site resolves to, so the picker
+// offers it; undefined when brreg can't serve it right now.
+async function rememberedCandidate(
+  host: string,
+  orgnr: string,
+): Promise<Candidate | undefined> {
+  try {
+    const enhet = await fetchEnhet(orgnr);
+    const site = registrableDomain(host);
+    const tied = site !== undefined && hjemmesideDomains(enhet.hjemmeside).includes(site);
+    return { ...enhet, evidence: tied ? 'hjemmeside' : 'navn' };
+  } catch {
+    return undefined;
+  }
+}
 
 // «Feil bedrift?»: records the rejection and re-runs the host
 // resolution. `orgnrs` is every orgnr the result stood for: the one the
@@ -35,6 +54,11 @@ export async function rejectChoice(
     // Always show the picker (even if a single candidate now wins
     // band='auto') — the user just expressed doubt; let them confirm.
     return { kind: 'picker', candidates: detailed.candidates };
+  }
+  if (detailed.choice) {
+    const remembered = await rememberedCandidate(host, detailed.choice);
+    if (isStale()) return undefined;
+    if (remembered) return { kind: 'picker', candidates: [remembered] };
   }
   return { kind: 'empty' };
 }

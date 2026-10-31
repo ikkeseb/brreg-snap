@@ -6,6 +6,20 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+### Fixed
+
+- A branch opened from the popup stays the branch in the panel, with its
+  «Avdeling» line.
+- A failed drill-in keeps Back, Oppdater keeps the origin company's name
+  on it, and «Glem valget» updates the panel's empty state.
+- «Feil bedrift?» offers the company still remembered for the site
+  instead of an empty result.
+- The popup treats browser and extension pages as no site.
+- A company removed from the register (410) reads as not found, and an
+  unexpected answer about accounts is no longer kept as «nothing filed».
+- A hjemmeside field with several sites links to the first one, and
+  Norwegian domains read decoded in the trust copy.
+
 ## [1.6.3] — 2026-10-25
 
 ### Changed

@@ -148,13 +148,17 @@ export function createPanelPainter(
   // The orgnr the last load was for (the error state's context).
   let lastOrgnr: string | undefined;
   let lastHost: string | undefined;
-  // The company the user drilled in from, for «Tilbake til <name>».
+  // The company the user drilled in from, for «Tilbake til <name>», and
+  // the orgnr that drill-in is for: a load of anything else ends it.
   let drillFrom: string | undefined;
+  let drillTo: string | undefined;
   let aside: SearchAside | undefined;
   // A heal that came while the search view was open (ResultPaint.heal).
   let deferredHeal: ResultPaint | undefined;
-  // «Tilbake til <name>» when the drill-in's origin is known.
+  // «Tilbake til <name>» when the drill-in's origin is known, and the
+  // company it was painted for: a repaint of that company keeps it.
   let backName: string | undefined;
+  let backOrgnr: string | undefined;
   let backHidden = true;
 
   // --- roots ------------------------------------------------------------
@@ -197,11 +201,11 @@ export function createPanelPainter(
     }
   }
 
-  function paintBack(): void {
+  function paintBack(name = backName): void {
     roots.back.replaceChildren(icon('i-back'));
-    if (backName) {
+    if (name) {
       roots.back.append(COPY.back(''));
-      roots.back.appendChild(el('b', undefined, backName));
+      roots.back.appendChild(el('b', undefined, name));
     } else {
       roots.back.append(COPY.backPlain);
     }
@@ -414,6 +418,7 @@ export function createPanelPainter(
 
   function drill(orgnr: string): void {
     drillFrom = shown?.view.identity.name;
+    drillTo = orgnr;
     intents.drill(orgnr);
   }
 
@@ -589,7 +594,10 @@ export function createPanelPainter(
       ...(paint.remembered ? { remembered: paint.remembered } : {}),
       env: deps.env,
     });
-    backName = paint.method === 'drill-in' ? drillFrom : undefined;
+    const orgnr = paint.company.enhet.organisasjonsnummer;
+    const kept = orgnr === backOrgnr ? backName : undefined;
+    backName = paint.method === 'drill-in' ? (drillFrom ?? kept) : undefined;
+    backOrgnr = orgnr;
     drillFrom = undefined;
     paintBack();
     // A heal swaps in the figures quietly: no reveal animation.
@@ -614,6 +622,7 @@ export function createPanelPainter(
       paintId += 1;
       closeSearch(false);
       lastOrgnr = orgnr;
+      if (orgnr !== drillTo) drillFrom = undefined;
       shown = undefined;
       watchIdent(undefined);
       setState('loading', 'loading');
@@ -751,6 +760,9 @@ export function createPanelPainter(
       shown = undefined;
       watchIdent(undefined);
       setState('error', 'warn');
+      // A failed drill-in: Back returns to the company it left. Kept
+      // for «Prøv igjen», which lands on the same drill-in.
+      if (drillFrom) paintBack(drillFrom);
       const failure = describeLoadFailure(err);
       failure.retry = failure.retry && retry;
       main.replaceChildren();

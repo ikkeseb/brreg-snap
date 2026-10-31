@@ -19,6 +19,8 @@ import { koblingInPlay } from '../lib/trust/kobling.js';
 import {
   createLoadSequence,
   createPanelFollower,
+  isReadableSite,
+  viewFromContext,
   viewFromHostSearch,
   type FollowOrigin,
   type LoadSequence,
@@ -277,6 +279,7 @@ export function createPanelController(deps: ControllerDeps): PanelController {
         focus: focus() !== 'none',
         tabId: followedTabId,
       });
+      painter.setBack(history.current()?.method === 'drill-in');
     }
   }
 
@@ -436,6 +439,25 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     })();
   }
 
+  // The followed tab when it is still on this host: its URL and title
+  // may hold an org.nr. Otherwise the host alone, as a no-match probe.
+  async function resolveForgotten(host: string): Promise<PanelView> {
+    try {
+      const tab = followedTabId === undefined ? undefined : await deps.getTab(followedTabId);
+      if (tab && isReadableSite(tab.url, deps.ownUrlPrefix)) {
+        const ctx = await deps.resolveTab(tab.url, tab.title ?? '');
+        if (ctx.host === host) return viewFromContext(ctx);
+      }
+    } catch {
+      // The tab is gone or unreadable: the host still answers.
+    }
+    try {
+      return viewFromHostSearch(host, await deps.searchHost(host, titleFor(host)));
+    } catch {
+      return { kind: 'empty', host, degraded: true };
+    }
+  }
+
   const follower: PanelFollower = createPanelFollower({
     loads,
     ownUrlPrefix: deps.ownUrlPrefix,
@@ -498,22 +520,19 @@ export function createPanelController(deps: ControllerDeps): PanelController {
     },
 
     // Drops the picker choice / «Ingen av disse» / rejections stored
-    // for the site, then resolves the host as a no-match probe would —
-    // through the follower, so the same company is kept, not repainted.
+    // for the site, then resolves it again — through the follower, so
+    // the same company is kept, not repainted. An empty state always
+    // repaints: its wording and its «Glem valget» are what just went.
     async forget(): Promise<void> {
       const host = currentHost;
       if (!host) return;
       const run = loads.begin();
       await deps.forgetHost(host);
       if (run.isStale()) return;
-      let view: PanelView;
-      try {
-        view = viewFromHostSearch(host, await deps.searchHost(host, titleFor(host)));
-      } catch {
-        view = { kind: 'empty', host, degraded: true };
-      }
+      const view = await resolveForgotten(host);
       if (run.isStale()) return;
-      follower.follow(view, followedTabId);
+      if (view.kind === 'empty') showEmpty(view, deps.hasFocus());
+      else follower.follow(view, followedTabId);
     },
 
     retry(): void {

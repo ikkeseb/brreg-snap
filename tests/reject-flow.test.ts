@@ -5,6 +5,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { Candidate } from '../src/lib/hostname-search.js';
+import type { Enhet } from '../src/types/brreg.js';
 import enhetDnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import enhetEquinor from './fixtures/brreg/enhet-923609016-equinor.json';
 
@@ -13,6 +14,8 @@ vi.mock('../src/lib/hostname-search.js', () => ({
   addRejectedChoice: vi.fn(),
   searchByHostnameDetailed: vi.fn(),
 }));
+
+vi.mock('../src/lib/brreg.js', () => ({ fetchEnhet: vi.fn() }));
 
 const candidates: Candidate[] = [enhetDnb, enhetEquinor].map((e) => ({
   ...e,
@@ -27,11 +30,14 @@ async function setup() {
   );
   vi.mocked(addRejectedChoice).mockReset().mockResolvedValue(undefined);
   vi.mocked(searchByHostnameDetailed).mockReset();
+  const { fetchEnhet } = await import('../src/lib/brreg.js');
+  vi.mocked(fetchEnhet).mockReset();
   return {
     rejectChoice,
     loads: createLoadSequence(),
     addRejectedChoice: vi.mocked(addRejectedChoice),
     search: vi.mocked(searchByHostnameDetailed),
+    fetchEnhet: vi.mocked(fetchEnhet),
   };
 }
 
@@ -55,6 +61,73 @@ describe('«Feil bedrift?» reject flow', () => {
       candidates: [candidates[1]],
     });
     expect(addRejectedChoice).toHaveBeenCalledWith('dnb.no', enhetDnb.organisasjonsnummer);
+  });
+
+  it('a remembered pick for the site survives: the picker offers it, not an empty state', async () => {
+    const { rejectChoice, search, fetchEnhet } = await setup();
+    search.mockResolvedValue({
+      band: 'auto',
+      candidates: [],
+      choice: enhetEquinor.organisasjonsnummer,
+      complete: true,
+    });
+    fetchEnhet.mockResolvedValue(enhetEquinor);
+    await expect(rejectChoice('equinor.com', [enhetDnb.organisasjonsnummer], undefined)).resolves.toEqual({
+      kind: 'picker',
+      candidates: [{ ...enhetEquinor, evidence: 'hjemmeside' }],
+    });
+    expect(fetchEnhet).toHaveBeenCalledWith(enhetEquinor.organisasjonsnummer);
+  });
+
+  it('the remembered company is a name match when the registry does not tie it to the site', async () => {
+    const { rejectChoice, search, fetchEnhet } = await setup();
+    search.mockResolvedValue({
+      band: 'auto',
+      candidates: [],
+      choice: enhetEquinor.organisasjonsnummer,
+      complete: true,
+    });
+    fetchEnhet.mockResolvedValue(enhetEquinor);
+    await expect(rejectChoice('www.x.no', [enhetDnb.organisasjonsnummer], undefined)).resolves.toEqual({
+      kind: 'picker',
+      candidates: [{ ...enhetEquinor, evidence: 'navn' }],
+    });
+  });
+
+  it('a remembered pick brreg cannot serve right now falls back to the empty state', async () => {
+    const { rejectChoice, search, fetchEnhet } = await setup();
+    search.mockResolvedValue({
+      band: 'auto',
+      candidates: [],
+      choice: enhetEquinor.organisasjonsnummer,
+      complete: true,
+    });
+    fetchEnhet.mockRejectedValue(new Error('brreg API returned 503.'));
+    await expect(rejectChoice('x.no', [enhetDnb.organisasjonsnummer], undefined)).resolves.toEqual({
+      kind: 'empty',
+    });
+  });
+
+  it('a flow that starts while the remembered company loads wins', async () => {
+    const { rejectChoice, loads, search, fetchEnhet } = await setup();
+    search.mockResolvedValue({
+      band: 'auto',
+      candidates: [],
+      choice: enhetEquinor.organisasjonsnummer,
+      complete: true,
+    });
+    let answer!: (value: Enhet) => void;
+    fetchEnhet.mockReturnValue(
+      new Promise((resolve) => {
+        answer = resolve;
+      }),
+    );
+    const run = loads.begin();
+    const outcome = rejectChoice('x.no', [enhetDnb.organisasjonsnummer], undefined, () => run.isStale());
+    await vi.waitFor(() => expect(fetchEnhet).toHaveBeenCalled());
+    loads.begin();
+    answer(enhetEquinor);
+    await expect(outcome).resolves.toBeUndefined();
   });
 
   it('re-runs the host search with the tab title, so its word hints survive', async () => {
