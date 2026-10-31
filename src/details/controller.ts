@@ -35,7 +35,7 @@ import {
   type ResolutionMethod,
 } from '../lib/resolution-method.js';
 import type { RejectOutcome } from '../lib/ui/reject-flow.js';
-import type { TabContext } from '../lib/ui/resolve-tab.js';
+import { hostOf, type TabContext } from '../lib/ui/resolve-tab.js';
 import type { PanelHistory } from './history.js';
 import type { PanelIntents, PanelPainter, ResultFocus } from './view.js';
 
@@ -440,13 +440,13 @@ export function createPanelController(deps: ControllerDeps): PanelController {
   }
 
   // The followed tab when it is still on this host: its URL and title
-  // may hold an org.nr. Otherwise the host alone, as a no-match probe.
+  // may hold an org.nr. Otherwise the host alone, as a no-match probe:
+  // a tab that moved to another site is never looked up from here.
   async function resolveForgotten(host: string): Promise<PanelView> {
     try {
       const tab = followedTabId === undefined ? undefined : await deps.getTab(followedTabId);
-      if (tab && isReadableSite(tab.url, deps.ownUrlPrefix)) {
-        const ctx = await deps.resolveTab(tab.url, tab.title ?? '');
-        if (ctx.host === host) return viewFromContext(ctx);
+      if (tab && isReadableSite(tab.url, deps.ownUrlPrefix) && hostOf(tab.url) === host) {
+        return viewFromContext(await deps.resolveTab(tab.url, tab.title ?? ''));
       }
     } catch {
       // The tab is gone or unreadable: the host still answers.

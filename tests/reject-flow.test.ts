@@ -94,6 +94,29 @@ describe('«Feil bedrift?» reject flow', () => {
     });
   });
 
+  // The same labels a normal picker draws: only the site itself is
+  // 'hjemmeside', and the tie is read against the site, not the literal
+  // host.
+  it.each([
+    ['a page on the site', 'nrk.no', 'https://nrk.no/urort/artist/test', 'side'],
+    ['a subdomain of the site', 'nrk.no', 'https://artist.nrk.no/', 'side'],
+    ['a subdomain, visited there', 'artist.nrk.no', 'https://artist.nrk.no/', 'side'],
+    ['the site, visited on a subdomain', 'nettbank.nrk.no', 'https://www.nrk.no/', 'hjemmeside'],
+  ])('the remembered company reads as in a normal picker: %s', async (_case, host, hjemmeside, evidence) => {
+    const { rejectChoice, search, fetchEnhet } = await setup();
+    search.mockResolvedValue({
+      band: 'auto',
+      candidates: [],
+      choice: enhetEquinor.organisasjonsnummer,
+      complete: true,
+    });
+    fetchEnhet.mockResolvedValue({ ...enhetEquinor, hjemmeside });
+    await expect(rejectChoice(host, [enhetDnb.organisasjonsnummer], undefined)).resolves.toEqual({
+      kind: 'picker',
+      candidates: [{ ...enhetEquinor, hjemmeside, evidence }],
+    });
+  });
+
   it('a remembered pick brreg cannot serve right now falls back to the empty state', async () => {
     const { rejectChoice, search, fetchEnhet } = await setup();
     search.mockResolvedValue({

@@ -14,6 +14,8 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
   on it, and «Glem valget» updates the panel's empty state.
 - «Feil bedrift?» offers the company still remembered for the site
   instead of an empty result.
+- The mail from «Rapporter feil treff» after «Feil bedrift?» no longer
+  names the rejected result's method.
 - The popup treats browser and extension pages as no site.
 - A company removed from the register (410) reads as not found, and an
   unexpected answer about accounts is no longer kept as «nothing filed».

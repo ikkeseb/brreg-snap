@@ -576,16 +576,29 @@ describe('«Glem valget»', () => {
   });
 
   it('falls back to the host when the followed tab has moved on, or cannot be read', async () => {
-    const contexts: TabContext[] = [{ host: 'example.no' }, { host: 'other.no' }];
-    const { controller, intents, deps, painter } = setup({
+    const { controller, intents, deps, painter, shownOrgnrs } = setup({
       activeTab: { id: 7, url: 'https://example.no/', title: 'Example' },
-      resolveTab: async () => contexts.shift()!,
+      resolveTab: async (url) =>
+        url.includes('other.no')
+          ? { orgnr: DNB, host: 'other.no', method: 'url-param' }
+          : { host: 'example.no' },
     });
     await controller.followTab(7);
     await settle();
+    vi.mocked(deps.resolveTab).mockClear();
+
+    // The tab now shows another site, with an org.nr in its address: no
+    // lookup for that site, the panel's own host answers.
+    vi.mocked(deps.getTab).mockResolvedValueOnce({
+      id: 7,
+      url: `https://other.no/?orgnr=${DNB}`,
+      title: 'Other',
+    });
     await intents.forget();
     await settle();
+    expect(deps.resolveTab).not.toHaveBeenCalled();
     expect(deps.searchHost).toHaveBeenLastCalledWith('example.no', 'Example');
+    expect(shownOrgnrs()).toEqual([]);
 
     vi.mocked(deps.getTab).mockRejectedValueOnce(new Error('No tab with id: 7'));
     await intents.forget();

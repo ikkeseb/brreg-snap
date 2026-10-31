@@ -4,7 +4,7 @@
 // messages) stay in the callers.
 
 import { fetchEnhet } from '../brreg.js';
-import { hjemmesideDomains, registrableDomain } from '../hostname-score.js';
+import { registrableDomain, scoreCandidate } from '../hostname-score.js';
 import {
   addRejectedChoice,
   searchByHostnameDetailed,
@@ -17,7 +17,9 @@ export type RejectOutcome =
 
 // A remembered picker choice comes back from the host search with no
 // candidates. It is still what this site resolves to, so the picker
-// offers it; undefined when brreg can't serve it right now.
+// offers it, labelled as a normal picker row would be: scored against
+// the site, with the site as label since only the hjemmeside is read.
+// Undefined when brreg can't serve it right now.
 async function rememberedCandidate(
   host: string,
   orgnr: string,
@@ -25,8 +27,8 @@ async function rememberedCandidate(
   try {
     const enhet = await fetchEnhet(orgnr);
     const site = registrableDomain(host);
-    const tied = site !== undefined && hjemmesideDomains(enhet.hjemmeside).includes(site);
-    return { ...enhet, evidence: tied ? 'hjemmeside' : 'navn' };
+    const kind = site === undefined ? undefined : scoreCandidate(enhet, site, site).hjemmesideKind;
+    return { ...enhet, evidence: kind === 'exact' ? 'hjemmeside' : kind ? 'side' : 'navn' };
   } catch {
     return undefined;
   }
