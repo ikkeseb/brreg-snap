@@ -41,8 +41,8 @@ export function parseRetryAfter(
   return Math.max(0, at - now);
 }
 
-// Every brreg request goes through here: JSON accept header, the
-// timeout, and at most ONE retry on 429 when Retry-After asks for no
+// Every brreg request goes through here: JSON accept header, no
+// cookies, the timeout, and at most ONE retry on 429 when Retry-After asks for no
 // more than MAX_RETRY_AFTER_MS. Otherwise the 429 response is handed
 // back as is, and the caller's `!res.ok` branch turns it into the
 // usual transient «returned 429» error (docs/notes/brreg-api.md
@@ -51,6 +51,7 @@ export function parseRetryAfter(
 export async function brregFetch(url: string | URL): Promise<Response> {
   const init = (): RequestInit => ({
     headers: { Accept: 'application/json' },
+    credentials: 'omit',
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
   const res = await fetch(url, init());

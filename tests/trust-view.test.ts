@@ -969,7 +969,29 @@ describe('view helpers', () => {
     expect(kontakt.find((r) => r.label === 'Hjemmeside')).toEqual({ label: 'Hjemmeside', lines: ['ingen'] });
   });
 
-  it('reportHref carries the host, orgnr, method and version — never a path', () => {
+  it('reportHref names the domain, never a subdomain', () => {
+    const href = reportHref({
+      host: 'nettbank.dnb.no',
+      orgnr: '984851006',
+      method: 'host-auto',
+      version: '1.4.0',
+      browser: 'Chrome',
+    });
+    const params = new URLSearchParams(href.split('?')[1]);
+    expect(params.get('subject')).toBe('Feil treff i brreg-snap: dnb.no');
+    expect(params.get('body')).toContain('Nettsted: dnb.no');
+    expect(href).not.toContain('nettbank');
+  });
+
+  it.each(['192.168.1.10', 'localhost', 'intranett.local'])('reportHref names no site for %s, which has no domain', (host) => {
+    const href = reportHref({ host, orgnr: undefined, method: undefined, version: '1.4.0', browser: 'Chrome' });
+    const params = new URLSearchParams(href.split('?')[1]);
+    expect(params.get('subject')).toBe('Feil treff i brreg-snap');
+    expect(params.get('body')).toContain('Nettsted: (ingen)');
+    expect(href).not.toContain(encodeURIComponent(host));
+  });
+
+  it('reportHref carries the domain, orgnr, method and version — never a path', () => {
     const href = reportHref({
       host: 'www.nrk.no',
       orgnr: '923609016',
@@ -979,7 +1001,7 @@ describe('view helpers', () => {
     });
     expect(href.startsWith('mailto:sebastian@nuez.no?subject=')).toBe(true);
     const body = new URLSearchParams(href.split('?')[1]).get('body')!;
-    expect(body).toContain('Nettsted: www.nrk.no');
+    expect(body).toContain('Nettsted: nrk.no');
     expect(body).toContain('Org.nr vist: 923609016');
     expect(body).toContain('brreg-snap 1.4.0 · Chrome');
     expect(href).not.toContain('+');

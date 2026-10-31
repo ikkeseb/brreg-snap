@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeBrowser } from './helpers/fake-browser.js';
 
 import {
+  brregFetch,
   fetchEnhet,
   fetchRegnskap,
   fetchRoller,
@@ -175,6 +176,19 @@ describe('fetchRegnskap special-casing', () => {
     const result = await fetchRegnskap('123456785');
     expect(result.items).toHaveLength(1);
     expect(result.unavailable).toBeUndefined();
+  });
+});
+
+describe('brregFetch request', () => {
+  it('sends no cookies, on the first try or the 429 retry', async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response('{}', { status: 429, headers: { 'Retry-After': '0' } }))
+      .mockResolvedValueOnce(jsonResponse({}));
+    await brregFetch('https://data.brreg.no/enhetsregisteret/api/enheter/984851006');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    for (const [, init] of fetchMock.mock.calls) {
+      expect(init).toMatchObject({ credentials: 'omit' });
+    }
   });
 });
 

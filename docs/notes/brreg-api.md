@@ -65,7 +65,9 @@ is unknown. Don't depend on the body.
 `fetchRegnskap` therefore maps the answers explicitly
 (`RegnskapResponse` in `src/types/brreg.ts`):
 
-- 2xx → `items`; 404 → `items: []` (nothing filed), cached 24h.
+- 2xx array → `items`; 404 → `items: []` (nothing filed), cached 24h.
+  Any other 2xx body rejects, uncached: «couldn't ask», not «none
+  filed».
 - 500 → `{ items: [], unavailable: true }`, plus `unsupportedPlan` if
   the body still names one. Cached **6h**: stable for banks, but also
   what a real outage looks like.
@@ -124,10 +126,11 @@ The detail fetchers (`fetchEnhet`, `fetchUnderenhet`, `fetchRoller`,
 `fetchAarsregnskapYears`, and `fetchEndringer` in
 `src/lib/brreg-endringer.ts`, see `docs/notes/trust.md` § endringer)
 keep their documented special cases — roller 404 → empty, regnskap 404
-→ empty, regnskap 500 → unavailable (above), underenhet 404 →
+→ empty, regnskap 500 → unavailable (above), underenhet 404 or 410 →
 `undefined` (so an orgnr lookup can fall back without try/catch),
-konsernstruktur 404 → `undefined` and aarsregnskap 404 → `[]` (below)
-— and throw on everything else.
+enhet 410 (removed for legal reasons) reads as its 404, konsernstruktur
+404 → `undefined` and aarsregnskap 404 → `[]` (below) — and throw on
+everything else.
 `loadCompany` in `src/lib/company-load.ts` is the one place that
 turns a soft dependency's rejection into `undefined`; the renderers
 then say "Kunne ikke hente …", never the empty state. It also owns the
@@ -140,7 +143,9 @@ rows, with `total` from `page.totalElements` (Posten Bring 984661185:
 `page.totalElements: 0`.
 
 Every brreg fetch goes through `brregFetch` in `brreg.ts` (the change
-feed, `konsern.ts` and `aarsregnskap.ts` too) and carries
+feed, `konsern.ts` and `aarsregnskap.ts` too). It sends
+`credentials: 'omit'`, so the «no cookies» line in `PRIVACY.md` holds
+in the code and not by the browser's default, and carries
 `AbortSignal.timeout(8000)` (Firefox 100+ / Chrome 103+). A timeout
 aborts the fetch with a rejection, which counts as a failure like any
 other. The only retry is the one below.

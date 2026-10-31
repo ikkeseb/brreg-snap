@@ -17,6 +17,10 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 - The mail from «Rapporter feil treff» after «Feil bedrift?» no longer
   names the rejected result's method.
 - The popup treats browser and extension pages as no site.
+- «Rapporter feil treff» names the site's domain, as the privacy policy
+  says, not the full hostname, and no site at all for an IP address or
+  a local name.
+- Lookups explicitly send no cookies.
 - A company removed from the register (410) reads as not found, and an
   unexpected answer about accounts is no longer kept as «nothing filed».
 - A hjemmeside field with several sites links to the first one, and

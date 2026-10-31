@@ -403,7 +403,10 @@ for IP/intranet hosts — so an answer given on `www.dnb.no` holds for
   cached band (`:rej:` and `:seg:` variants included) for the site,
   also entries 1.3.1 wrote under the full hostname (it lists
   `storage.session` and matches each key's site). The next lookup
-  resolves from scratch. Never throws.
+  resolves from scratch. Never throws. The panel's «Glem valget»
+  re-resolves the followed tab while it is still on that host (its
+  address or title may hold an org.nr), otherwise the host alone, and
+  a tab that moved to another site is never looked up from there.
 
 The surfaces wire these; the lib side is pinned in
 `tests/hostname-search.test.ts`.
@@ -432,8 +435,13 @@ is on the site's rejection list, so a reload doesn't bring the
 rejected company back. The context menu resolves synchronously
 without storage and still shows it (limitation). The picker then opens over the remaining candidates
 (even when filtering leaves a single AUTO winner — the user just
-expressed doubt, the picker requires explicit confirmation). Empty
-after filtering → empty state with inline manual search.
+expressed doubt, the picker requires explicit confirmation). A
+remembered choice for another company answers the re-run with no
+candidates, so `rejectChoice` offers that company as a one-row picker,
+labelled as a normal row (`src/lib/ui/reject-flow.ts`). Its head can
+read «Fant ikke selskapet bak …» when it is only a name match. Empty
+after filtering, or a remembered company brreg can't serve right now
+→ empty state with inline manual search.
 
 <!-- SECTION: coalescing -->
 ## Coalescing concurrent lookups
