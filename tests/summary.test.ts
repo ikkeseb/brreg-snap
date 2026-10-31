@@ -127,6 +127,18 @@ describe('buildSummary', () => {
     expect(lines).toContain('Kobling (www.equinor.com): Registrert nettsted');
   });
 
+  it('names an IDN site the way people type it', () => {
+    const kobling: Kobling = {
+      key: 'kobling',
+      kind: 'name-guess',
+      label: 'Kobling',
+      value: 'Gjettet ut fra navnet «blåbær»',
+      tone: 'warn',
+      host: 'www.xn--blbr-roah.no',
+    };
+    expect(buildSummary(input({ kobling }))).toContain('Kobling (www.blåbær.no): Gjettet');
+  });
+
   it('leaves out what couldn’t be fetched instead of claiming «Ingen»', () => {
     // roller undefined = the fetch failed; no signals = nothing derived.
     const text = buildSummary(input({ roller: undefined, signals: [] }));

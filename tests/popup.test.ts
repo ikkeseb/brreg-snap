@@ -7,10 +7,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { CompanyData } from '../src/lib/company-load.js';
-import type { Enhet, RollerResponse } from '../src/types/brreg.js';
+import { deriveKonsern } from '../src/lib/konsern.js';
+import type { Enhet, KonsernNode, RollerResponse } from '../src/types/brreg.js';
 import { fakeBrowser } from './helpers/fake-browser.js';
 import enhetDnb from './fixtures/brreg/enhet-984851006-dnb.json';
 import enhetKonkurs from './fixtures/brreg/enhet-915330193-konkurs.json';
+import konsernEquinor from './fixtures/brreg/konsernstruktur-923609016-equinor.json';
 import rollerKonkurs from './fixtures/brreg/roller-915330193-konkurs.json';
 
 const mocks = vi.hoisted(() => ({
@@ -277,6 +279,20 @@ describe('popup controller — result', () => {
     expect(document.querySelector('h1')?.textContent).toBe(enhetKonkurs.navn);
   });
 
+  it('the picker after «Feil bedrift?» reports no method: the rejected match is gone', async () => {
+    mocks.rejectChoice.mockResolvedValue({
+      kind: 'picker',
+      candidates: [{ ...(enhetKonkurs as Enhet), evidence: 'navn' }],
+    });
+    await boot();
+    await waitState('result');
+    byText('Feil bedrift?')!.click();
+    await waitState('picker');
+    const body = new URL((byText('Rapporter feil treff') as HTMLAnchorElement).href).searchParams.get('body');
+    expect(body).toContain('Org.nr vist: (ingen)');
+    expect(body).toContain('Funnet via: (ukjent)');
+  });
+
   it('«Ingen av disse» remembers it and lands on the empty state with «Glem valget»', async () => {
     mocks.resolveTabContext.mockResolvedValue({
       host: 'www.nrk.no',
@@ -421,6 +437,26 @@ describe('popup controller — search view, error, refresh', () => {
     expect(mocks.sidebar.open).toHaveBeenCalledWith({ windowId: 1, tabId: 7 });
   });
 
+  it('an underenhet opens in the panel as itself, so the panel shows its «Avdeling» line', async () => {
+    const tree = konsernEquinor as KonsernNode;
+    mocks.resolveTabContext.mockResolvedValue({ orgnr: '973160834', host: 'www.dnb.no', method: 'url-param' });
+    mocks.loadCompany.mockResolvedValue({
+      ...company(enhetDnb),
+      avdeling: { organisasjonsnummer: '973160834', navn: 'DNB BANK ASA AVD ALTA', overordnetEnhet: '984851006' },
+      konsern: deriveKonsern(tree, '923609016'),
+    });
+    await boot({ ...DNB_TAB, url: 'https://www.dnb.no/?orgnr=973160834' });
+    await waitState('result');
+    const open = byText('Åpne i sidepanel') as HTMLAnchorElement;
+    expect(open.href).toMatch(/details\/details\.html\?orgnr=973160834&at=\d+$/);
+    document.querySelector<HTMLElement>('button.konsern')!.click();
+    expect(mocks.sidebar.setPanel).toHaveBeenLastCalledWith(
+      expect.stringMatching(/orgnr=973160834&.*tab=enheter/),
+    );
+    open.click();
+    expect(mocks.sidebar.setPanel).toHaveBeenLastCalledWith(expect.stringMatching(/orgnr=973160834&at=\d+&w=1$/));
+  });
+
   it('an open panel is told what this tab shows, naming the tab, so it badges no other', async () => {
     mocks.sidebar.isOpen.mockResolvedValue(true);
     const { runtime } = await boot();
@@ -449,6 +485,32 @@ describe('popup controller — search view, error, refresh', () => {
     document.querySelector<HTMLButtonElement>('button.recent')!.click();
     await waitState('result');
     expect(document.querySelector('.mast__site')?.textContent).toBe('Ingen nettside');
+  });
+});
+
+describe('popup controller — a tab that is no web page', () => {
+  it.each([
+    ['an extension page', 'chrome-extension://abcdefghijklmnopabcdefghijklmnop/welcome/welcome.html'],
+    ['a Firefox extension page', 'moz-extension://3f1c0d2e-aaaa-bbbb-cccc-1234567890ab/details/details.html'],
+    ['a browser page', 'chrome://settings/'],
+  ])('%s is the no-site state and asks brreg nothing', async (_name, url) => {
+    const real = await vi.importActual<typeof import('../src/lib/ui/resolve-tab.js')>('../src/lib/ui/resolve-tab.js');
+    mocks.resolveTabContext.mockImplementation(real.resolveTabContext);
+    const fetchStub = vi.fn();
+    vi.stubGlobal('fetch', fetchStub);
+    await boot({ id: 7, windowId: 1, url, title: 'Innstillinger' });
+    await waitState('empty');
+    await vi.waitFor(() => expect(document.querySelector('h1')?.textContent).toBe('Ingen nettside å slå opp'));
+    expect(document.querySelector('.mast__site')).toBeNull();
+    expect(byText('Rapporter feil treff')).toBeUndefined();
+    expect(fetchStub).not.toHaveBeenCalled();
+  });
+
+  it('a page with no host keeps its address for the org.nr resolution', async () => {
+    mocks.resolveTabContext.mockResolvedValue({ orgnr: '984851006', method: 'url-param' });
+    await boot({ id: 7, windowId: 1, url: 'file:///tmp/orgnr=984851006.html', title: '' });
+    await waitState('result');
+    expect(mocks.resolveTabContext).toHaveBeenCalledWith('file:///tmp/orgnr=984851006.html', '');
   });
 });
 

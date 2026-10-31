@@ -157,8 +157,10 @@ function openPanel(target: PanelTarget, ev?: Event): void {
   window.close();
 }
 
+// The orgnr asked for, not the enhet on screen: an underenhet opens as
+// itself, so the panel keeps its «Avdeling» line.
 function panelTarget(): PanelTarget {
-  if (currentOrgnr) return { orgnr: currentOrgnr };
+  if (currentOrgnr) return { orgnr: requestedOrgnr ?? currentOrgnr };
   if (host) return { nomatch: host };
   return undefined;
 }
@@ -249,7 +251,7 @@ function showResult(view: TrustView, opts: { focus: LoadFocus; reveal: boolean }
       onBackToSite: () => void init({ focus: true }),
       onRefresh: () => void refresh(),
       onOpenPanel: (ev) => openPanel(target, ev),
-      onOpenKonsern: () => openPanel(currentOrgnr ? { orgnr: currentOrgnr, tab: 'enheter' } : target),
+      onOpenKonsern: () => openPanel(currentOrgnr ? { orgnr: requestedOrgnr ?? currentOrgnr, tab: 'enheter' } : target),
       ...(target ? { panelHref: panelHref(target) } : {}),
     });
   const painted = paint(opts.reveal);
@@ -264,6 +266,7 @@ function showPicker(candidates: Candidate[], opts: { focus: boolean }): void {
   const h = host;
   dropSearch();
   currentOrgnr = undefined;
+  currentMethod = undefined;
   currentView = undefined;
   searchOpen = false;
   const paint = (): ReturnType<typeof paintPicker> => {
@@ -524,6 +527,11 @@ async function refresh(): Promise<void> {
 
 // --- init -----------------------------------------------------------------------
 
+// chrome://settings and an extension's id parse as hostnames, but only
+// a web page has a site behind it: anything else is the no-site state.
+// An address with no host (file:, about:) stays for its org.nr.
+const siteUrl = (url: string): string => (!hostOf(url) || /^https?:/.test(url) ? url : '');
+
 // The active tab's own fields, no network: its ids, title and host.
 async function readActiveTab(): Promise<{ url: string; title: string }> {
   const tabs = await browser.tabs.query({ active: true, currentWindow: true });
@@ -531,8 +539,9 @@ async function readActiveTab(): Promise<{ url: string; title: string }> {
   windowId = tab?.windowId;
   tabId = tab?.id;
   tabTitle = tab?.title || undefined;
-  host = hostOf(tab?.url ?? '');
-  return { url: tab?.url ?? '', title: tab?.title ?? '' };
+  const url = siteUrl(tab?.url ?? '');
+  host = hostOf(url);
+  return { url, title: tab?.title ?? '' };
 }
 
 async function init(opts: { focus: boolean }): Promise<void> {

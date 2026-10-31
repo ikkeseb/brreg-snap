@@ -583,6 +583,75 @@ describe('result: the dossier', () => {
     expect(roots.back.textContent).toBe('Tilbake');
   });
 
+  it('«Oppdater» and a heal on a drilled-in company keep the origin on the back bar', () => {
+    const { painter, roots, intents } = setup();
+    painter.result(resultPaint(equinor()));
+    q<HTMLButtonElement>('#panel-personer button.entity-row')!.click();
+    painter.loading(vi.mocked(intents.drill).mock.lastCall![0], { kobling: false });
+    painter.result(resultPaint(konkurs(), { method: 'drill-in', host: undefined }));
+    painter.setBack(true);
+    expect(roots.back.textContent).toBe('Tilbake til EQUINOR ASA');
+
+    // «Oppdater»: the same company through the skeleton.
+    painter.loading('915330193', { kobling: false });
+    painter.result(resultPaint(konkurs(), { method: 'drill-in', host: undefined }));
+    expect(roots.back.textContent).toBe('Tilbake til EQUINOR ASA');
+
+    // A heal: no skeleton.
+    painter.result(resultPaint(konkurs(), { method: 'drill-in', host: undefined, heal: true }));
+    expect(roots.back.textContent).toBe('Tilbake til EQUINOR ASA');
+
+    // A failed «Oppdater», then «Prøv igjen».
+    painter.loading('915330193', { kobling: false });
+    painter.error(new Error('network'), { retry: true, focus: false });
+    expect(roots.back.textContent).toBe('Tilbake til EQUINOR ASA');
+    painter.loading('915330193', { kobling: false });
+    painter.result(resultPaint(konkurs(), { method: 'drill-in', host: undefined }));
+    expect(roots.back.textContent).toBe('Tilbake til EQUINOR ASA');
+  });
+
+  describe('a failed drill-in', () => {
+    // EQUINOR ASA → (drill-in) ANNET AS, the second company has rows to
+    // drill on from.
+    const annet = (): CompanyData => ({
+      ...equinor(),
+      enhet: { ...enhetEquinor, organisasjonsnummer: '915330193', navn: 'ANNET AS' },
+    });
+    function drilledIn(): ReturnType<typeof setup> & { target: () => string } {
+      const s = setup();
+      const target = (): string => vi.mocked(s.intents.drill).mock.lastCall![0];
+      s.painter.result(resultPaint(equinor()));
+      q<HTMLButtonElement>('#panel-personer button.entity-row')!.click();
+      s.painter.loading(target(), { kobling: false });
+      s.painter.result(resultPaint(annet(), { method: 'drill-in', host: undefined }));
+      expect(s.roots.back.textContent).toBe('Tilbake til EQUINOR ASA');
+      return { ...s, target };
+    }
+
+    it('labels the back bar with the company it left, also after «Prøv igjen»', () => {
+      const { painter, roots, target } = drilledIn();
+      q<HTMLButtonElement>('#panel-personer button.entity-row')!.click();
+      painter.loading(target(), { kobling: false });
+      painter.error(new Error('network'), { retry: true, focus: false });
+      expect(roots.back.textContent).toBe('Tilbake til ANNET AS');
+
+      painter.loading(target(), { kobling: false });
+      painter.result(resultPaint(konkurs(), { method: 'drill-in', host: undefined }));
+      expect(roots.back.textContent).toBe('Tilbake til ANNET AS');
+    });
+
+    it('Back from it restores the company with the origin that company had', () => {
+      const { painter, roots, target } = drilledIn();
+      q<HTMLButtonElement>('#panel-personer button.entity-row')!.click();
+      painter.loading(target(), { kobling: false });
+      painter.error(new Error('network'), { retry: true, focus: false });
+
+      painter.loading('915330193', { kobling: false });
+      painter.result(resultPaint(annet(), { method: 'drill-in', host: undefined, focus: 'heading' }));
+      expect(roots.back.textContent).toBe('Tilbake til EQUINOR ASA');
+    });
+  });
+
   it('provenance swaps what is above the tabs and keeps the tab panels', () => {
     const { painter } = setup();
     painter.result(resultPaint(equinor()));

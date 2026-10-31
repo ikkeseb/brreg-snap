@@ -4,6 +4,8 @@
 // answer headline, signal values): those are the registry's facts, and
 // their tests pin them. This file holds the chrome around them.
 
+import { registrableDomain } from '../hostname-score.js';
+
 export const COPY = {
   brand: 'brreg-snap',
   searchLabel: 'Søk etter selskap',
@@ -366,8 +368,9 @@ export const COPY = {
 } as const;
 
 // «Rapporter feil treff»: a mailto link the user clicks, prefilled with
-// what a wrong match needs to be reproduced. Only the site's hostname —
-// never the page title or the URL path, which can carry personal data.
+// what a wrong match needs to be reproduced. Only the site's domain —
+// never a subdomain, the page title or the URL path, which can carry
+// personal data. A host with no domain (an IP, a local name) names none.
 export const SUPPORT_EMAIL = 'sebastian@nuez.no';
 
 export interface ReportInput {
@@ -379,13 +382,14 @@ export interface ReportInput {
 }
 
 export function reportHref({ host, orgnr, method, version, browser }: ReportInput): string {
-  const subject = host ? `Feil treff i brreg-snap: ${host}` : 'Feil treff i brreg-snap';
+  const site = host ? registrableDomain(host) : undefined;
+  const subject = site ? `Feil treff i brreg-snap: ${site}` : 'Feil treff i brreg-snap';
   const body = [
     'Hva er feil, og hvilket selskap burde det vært?',
     '',
     '',
     '---',
-    `Nettsted: ${host ?? '(ingen)'}`,
+    `Nettsted: ${site ?? '(ingen)'}`,
     `Org.nr vist: ${orgnr ?? '(ingen)'}`,
     `Funnet via: ${method ?? '(ukjent)'}`,
     `brreg-snap ${version} · ${browser}`,

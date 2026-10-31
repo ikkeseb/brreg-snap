@@ -95,10 +95,14 @@ as `github.io`, the site's own name there: `firma.github.io`) and its
 main word, an organisation number, or text you search for or select
 and look up. A selection that holds exactly one valid organisation
 number sends only that number. Never the full address, the page title
-or cookies. IP addresses and reserved local names (`localhost`, names
-without a dot, endings like `.local` or `.lan`) are never sent; other
-names that only work on a private network are looked up like any other
-site. Nothing goes to the developer. Firefox declares this as
+or cookies, with one exception: a nine-digit number in the page address
+or title that passes the organisation-number check is sent, even when
+it is really something else, such as an order or account number, and
+also from a private page, an IP address or a local file. IP addresses
+and reserved local names (`localhost`, names without a dot, endings
+like `.local` or `.lan`) are never sent as a site; other names that
+only work on a private network are looked up like any other site.
+Nothing goes to the developer. Firefox declares this as
 `browsingActivity` data collection and the Chrome Web Store as web
 history; both add website content for the selected text you choose
 to look up (`websiteContent` on Firefox).

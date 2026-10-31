@@ -18,6 +18,7 @@ import { formatDateNo } from '../format.js';
 import { findRoleHolder } from '../roller.js';
 import { primaryStatusFlag, type FlagSpec } from '../ui/flags.js';
 import type { Enhet, RollerResponse } from '../../types/brreg.js';
+import { displayDomain } from './kobling.js';
 import { firstSentence } from './merknader.js';
 import { ageBasis, expectedLatestFiledYear, monthsSince } from './signals.js';
 import type { Answer, Finding, Kobling, Merknad, Signal } from './types.js';
@@ -62,18 +63,18 @@ function mismatchFinding(kobling: Kobling | undefined): Finding | undefined {
 
 function mismatchSupporting(kobling: Kobling): string {
   return kobling.registeredDomain
-    ? `Registrert hjemmeside er ${kobling.registeredDomain}. ${ANYONE_CAN_PASTE}`
+    ? `Registrert hjemmeside er ${displayDomain(kobling.registeredDomain)}. ${ANYONE_CAN_PASTE}`
     : ANYONE_CAN_PASTE;
 }
 
 // A match the resolver couldn't tie to the company's own website.
 function uncertainKoblingFinding(kobling: Kobling | undefined): Finding | undefined {
   if (kobling?.kind === 'name-guess') {
-    return { tone: 'warn', source: 'kobling', text: `Usikker kobling til ${kobling.host}` };
+    return { tone: 'warn', source: 'kobling', text: `Usikker kobling til ${displayDomain(kobling.host)}` };
   }
   if (kobling?.kind === 'other-site') {
     const text = kobling.registeredDomain
-      ? `Registrert hjemmeside er ${kobling.registeredDomain}`
+      ? `Registrert hjemmeside er ${displayDomain(kobling.registeredDomain)}`
       : 'Registrert hjemmeside er et annet nettsted';
     return { tone: 'warn', source: 'kobling', text };
   }

@@ -232,6 +232,21 @@ describe('buildTrustView — danger statuses', () => {
     expect(kobling.actions).toEqual([{ kind: 'reject' }, { kind: 'report' }]);
   });
 
+  it('shows a registered IDN domain the way people type it; the link keeps the ACE form', () => {
+    const v = view({
+      company: company({ ...enhetEquinor, hjemmeside: 'www.blåbær.no' }),
+      method: 'url-param',
+      host: 'example.no',
+    });
+    expect(v.answer.supporting).toContain('Registrert hjemmeside er blåbær.no.');
+    expect(v.answer.actions[0]).toEqual({
+      kind: 'goto',
+      text: 'Gå til blåbær.no',
+      href: 'https://xn--blbr-roah.no',
+    });
+    expect(v.ledger.find((r) => r.key === 'kobling')!.value).toBe('Ikke blåbær.no');
+  });
+
   it('stamps a deleted entity «Slettet»', () => {
     const v = view({ company: company(enhetSlettet), method: 'manual', host: undefined });
     expect(v.answer.tone).toBe('danger');
@@ -933,9 +948,50 @@ describe('view helpers', () => {
   it('shows a site without www.', () => {
     expect(siteName('www.nrk.no')).toBe('nrk.no');
     expect(siteName('nettbank.dnb.no')).toBe('dnb.no');
+    expect(siteName('www.xn--blbr-roah.no')).toBe('blåbær.no');
   });
 
-  it('reportHref carries the host, orgnr, method and version — never a path', () => {
+  it.each([
+    ['one site', 'https://www.equinor.com/', 'www.equinor.com', 'https://www.equinor.com/'],
+    ['a page, no scheme', 'tine.no/om', 'tine.no/om', 'https://tine.no/om'],
+    ['several sites: the first', 'a.no, b.no', 'a.no, b.no', 'https://a.no'],
+    ['junk before a site', 'post@a.no; b.no', 'post@a.no; b.no', 'https://b.no'],
+  ])('hjemmeside link, %s', (_, hjemmeside, text, href) => {
+    const { kontakt } = view({ company: company({ ...enhetEquinor, hjemmeside }), surface: 'panel' }).dossier!;
+    expect(kontakt.find((r) => r.label === 'Hjemmeside')).toEqual({
+      label: 'Hjemmeside',
+      link: { text, href, external: true },
+    });
+  });
+
+  it('a hjemmeside with no site in it stays plain text', () => {
+    const { kontakt } = view({ company: company({ ...enhetEquinor, hjemmeside: 'ingen' }), surface: 'panel' }).dossier!;
+    expect(kontakt.find((r) => r.label === 'Hjemmeside')).toEqual({ label: 'Hjemmeside', lines: ['ingen'] });
+  });
+
+  it('reportHref names the domain, never a subdomain', () => {
+    const href = reportHref({
+      host: 'nettbank.dnb.no',
+      orgnr: '984851006',
+      method: 'host-auto',
+      version: '1.4.0',
+      browser: 'Chrome',
+    });
+    const params = new URLSearchParams(href.split('?')[1]);
+    expect(params.get('subject')).toBe('Feil treff i brreg-snap: dnb.no');
+    expect(params.get('body')).toContain('Nettsted: dnb.no');
+    expect(href).not.toContain('nettbank');
+  });
+
+  it.each(['192.168.1.10', 'localhost', 'intranett.local'])('reportHref names no site for %s, which has no domain', (host) => {
+    const href = reportHref({ host, orgnr: undefined, method: undefined, version: '1.4.0', browser: 'Chrome' });
+    const params = new URLSearchParams(href.split('?')[1]);
+    expect(params.get('subject')).toBe('Feil treff i brreg-snap');
+    expect(params.get('body')).toContain('Nettsted: (ingen)');
+    expect(href).not.toContain(encodeURIComponent(host));
+  });
+
+  it('reportHref carries the domain, orgnr, method and version — never a path', () => {
     const href = reportHref({
       host: 'www.nrk.no',
       orgnr: '923609016',
@@ -945,7 +1001,7 @@ describe('view helpers', () => {
     });
     expect(href.startsWith('mailto:sebastian@nuez.no?subject=')).toBe(true);
     const body = new URLSearchParams(href.split('?')[1]).get('body')!;
-    expect(body).toContain('Nettsted: www.nrk.no');
+    expect(body).toContain('Nettsted: nrk.no');
     expect(body).toContain('Org.nr vist: 923609016');
     expect(body).toContain('brreg-snap 1.4.0 · Chrome');
     expect(href).not.toContain('+');

@@ -201,6 +201,16 @@ describe('deriveAnswer — headline and tone', () => {
       { tone: 'warn', headline: 'Registrert hjemmeside er komplettgroup.com' },
     ],
     [
+      'name guess on an IDN site, shown as people type it',
+      { enhet: PLAIN, kobling: kobling('name-guess', { host: 'www.xn--blbr-roah.no' }) },
+      { tone: 'warn', headline: 'Usikker kobling til www.blåbær.no' },
+    ],
+    [
+      'registered IDN site elsewhere, shown as people type it',
+      { enhet: PLAIN, kobling: kobling('other-site', { host: 'komplett.no', registeredDomain: 'xn--blbr-roah.no' }) },
+      { tone: 'warn', headline: 'Registrert hjemmeside er blåbær.no' },
+    ],
+    [
       'registered site elsewhere, domain unknown',
       { enhet: PLAIN, kobling: kobling('other-site') },
       { tone: 'warn', headline: 'Registrert hjemmeside er et annet nettsted' },

@@ -367,6 +367,36 @@ describe('drill-in and Back', () => {
     expect(painter.selectTab).toHaveBeenLastCalledWith('oversikt');
   });
 
+  it('a failed load of a drilled-in company keeps Back', async () => {
+    const { controller, intents, deps, painter } = setup();
+    controller.follow(companyView(DNB, 'dnb.no'));
+    await settle();
+
+    vi.mocked(deps.loadCompany).mockRejectedValueOnce(new Error('network'));
+    intents.drill(EQUINOR);
+    await settle();
+    expect(painter.error).toHaveBeenCalledTimes(1);
+    expect(painter.setBack).toHaveBeenLastCalledWith(true);
+
+    // «Oppdater» on a drilled-in company that fails: same bar.
+    intents.retry();
+    await settle();
+    vi.mocked(deps.loadCompany).mockRejectedValueOnce(new Error('network'));
+    intents.refresh();
+    await settle();
+    expect(painter.error).toHaveBeenCalledTimes(2);
+    expect(painter.setBack).toHaveBeenLastCalledWith(true);
+  });
+
+  it('a failed load of a company reached any other way shows no Back', async () => {
+    const { controller, deps, painter } = setup();
+    vi.mocked(deps.loadCompany).mockRejectedValueOnce(new Error('network'));
+    controller.follow(companyView(DNB, 'dnb.no'));
+    await settle();
+    expect(painter.error).toHaveBeenCalledTimes(1);
+    expect(painter.setBack).toHaveBeenLastCalledWith(false);
+  });
+
   it('a drill-in into an invalid orgnr is ignored', () => {
     const { intents, painter, deps } = setup();
     intents.drill('123');
@@ -494,6 +524,107 @@ describe('«Glem valget»', () => {
     await settle();
     await intents.forget();
     expect(deps.forgetHost).not.toHaveBeenCalled();
+  });
+
+  it('an empty state for the same host repaints: the choice it named is gone', async () => {
+    const { controller, intents, painter } = setup();
+    controller.follow({ kind: 'empty', host: 'example.no' });
+    await settle();
+    expect(painter.empty).toHaveBeenCalledTimes(1);
+    await intents.forget();
+    await settle();
+    expect(painter.empty).toHaveBeenCalledTimes(2);
+    expect(painter.empty).toHaveBeenLastCalledWith(
+      expect.objectContaining({ host: 'example.no', degraded: false, focus: true }),
+    );
+  });
+
+  it('a failed search repaints a same-host degraded empty state too', async () => {
+    const { controller, intents, painter } = setup({
+      searchHost: async () => {
+        throw new Error('network');
+      },
+    });
+    controller.follow({ kind: 'empty', host: 'example.no', degraded: true });
+    await settle();
+    await intents.forget();
+    await settle();
+    expect(painter.empty).toHaveBeenCalledTimes(2);
+    expect(painter.empty).toHaveBeenLastCalledWith(expect.objectContaining({ host: 'example.no', degraded: true }));
+  });
+
+  it('re-resolves the followed tab: an org.nr in its address comes back', async () => {
+    const url = 'https://example.no/?orgnr=984851006';
+    const contexts: TabContext[] = [
+      { host: 'example.no' },
+      { orgnr: DNB, host: 'example.no', method: 'url-param' },
+    ];
+    const { controller, intents, deps, shownOrgnrs, results } = setup({
+      activeTab: { id: 7, url, title: 'Example' },
+      resolveTab: async () => contexts.shift()!,
+    });
+    await controller.followTab(7);
+    await settle();
+    expect(shownOrgnrs()).toEqual([]);
+    await intents.forget();
+    await settle();
+    expect(deps.forgetHost).toHaveBeenCalledWith('example.no');
+    expect(deps.resolveTab).toHaveBeenLastCalledWith(url, 'Example');
+    expect(deps.searchHost).not.toHaveBeenCalled();
+    expect(shownOrgnrs()).toEqual([DNB]);
+    expect(results()[0]).toMatchObject({ method: 'url-param', host: 'example.no', tabId: 7 });
+  });
+
+  it('falls back to the host when the followed tab has moved on, or cannot be read', async () => {
+    const { controller, intents, deps, painter, shownOrgnrs } = setup({
+      activeTab: { id: 7, url: 'https://example.no/', title: 'Example' },
+      resolveTab: async (url) =>
+        url.includes('other.no')
+          ? { orgnr: DNB, host: 'other.no', method: 'url-param' }
+          : { host: 'example.no' },
+    });
+    await controller.followTab(7);
+    await settle();
+    vi.mocked(deps.resolveTab).mockClear();
+
+    // The tab now shows another site, with an org.nr in its address: no
+    // lookup for that site, the panel's own host answers.
+    vi.mocked(deps.getTab).mockResolvedValueOnce({
+      id: 7,
+      url: `https://other.no/?orgnr=${DNB}`,
+      title: 'Other',
+    });
+    await intents.forget();
+    await settle();
+    expect(deps.resolveTab).not.toHaveBeenCalled();
+    expect(deps.searchHost).toHaveBeenLastCalledWith('example.no', 'Example');
+    expect(shownOrgnrs()).toEqual([]);
+
+    vi.mocked(deps.getTab).mockRejectedValueOnce(new Error('No tab with id: 7'));
+    await intents.forget();
+    await settle();
+    expect(deps.searchHost).toHaveBeenCalledTimes(2);
+    expect(painter.empty).toHaveBeenLastCalledWith(expect.objectContaining({ host: 'example.no', tabId: 7 }));
+  });
+
+  it('a tab event during the re-resolve wins', async () => {
+    const resolved = deferred<TabContext>();
+    const contexts: Array<Promise<TabContext>> = [Promise.resolve({ host: 'example.no' }), resolved.promise];
+    const { controller, intents, painter } = setup({
+      activeTab: { id: 7, url: 'https://example.no/', title: 'Example' },
+      resolveTab: () => contexts.shift() ?? Promise.resolve({ host: 'other.no' }),
+    });
+    await controller.followTab(7);
+    await settle();
+    const forgetting = intents.forget();
+    await settle();
+    await controller.followTab(7);
+    await settle();
+    resolved.resolve({ orgnr: DNB, host: 'example.no', method: 'url-param' });
+    await forgetting;
+    await settle();
+    expect(painter.result).not.toHaveBeenCalled();
+    expect(painter.empty).toHaveBeenLastCalledWith(expect.objectContaining({ host: 'other.no' }));
   });
 });
 

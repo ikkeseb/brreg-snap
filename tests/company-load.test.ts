@@ -103,6 +103,18 @@ describe('lookupOrgnr', () => {
     );
   });
 
+  it('reads a 410 as the permanent not-found, with its copy', async () => {
+    routeBrreg({
+      [`${API}/enheter/923609024`]: () => new Response('', { status: 410 }),
+      [`${API}/underenheter/923609024`]: () => new Response('', { status: 410 }),
+    });
+    const err = await lookupOrgnr('923609024').catch((e: unknown) => e);
+    expect(isPermanentLoadError(err)).toBe(true);
+    expect(describeLoadError(err)).toBe(
+      'Fant ikke noe selskap med org.nr 923609024.',
+    );
+  });
+
   it('rejects a deleted underenhet (no parent to show) as permanent', async () => {
     routeBrreg({
       [`${API}/underenheter/915821537`]: () => json(underenhetSlettet),

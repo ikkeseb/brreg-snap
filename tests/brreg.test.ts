@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fakeBrowser } from './helpers/fake-browser.js';
 
 import {
+  brregFetch,
   fetchEnhet,
   fetchRegnskap,
   fetchRoller,
@@ -161,6 +162,13 @@ describe('fetchRegnskap special-casing', () => {
     await expect(fetchRegnskap('123456785')).rejects.toThrow(/503/);
   });
 
+  it('a non-array 2xx is a failed fetch, never a cached «no regnskap»', async () => {
+    fetchMock.mockImplementation(async () => jsonResponse({ error: 'x' }));
+    await expect(fetchRegnskap('123456785')).rejects.toThrow('unexpected response shape');
+    await expect(fetchRegnskap('123456785')).rejects.toThrow('unexpected response shape');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('2xx array → items returned', async () => {
     fetchMock.mockResolvedValue(
       jsonResponse([{ journalnr: '1', regnskapsperiode: { tilDato: '2023-12-31' } }]),
@@ -168,6 +176,31 @@ describe('fetchRegnskap special-casing', () => {
     const result = await fetchRegnskap('123456785');
     expect(result.items).toHaveLength(1);
     expect(result.unavailable).toBeUndefined();
+  });
+});
+
+describe('brregFetch request', () => {
+  it('sends no cookies, on the first try or the 429 retry', async () => {
+    fetchMock
+      .mockResolvedValueOnce(new Response('{}', { status: 429, headers: { 'Retry-After': '0' } }))
+      .mockResolvedValueOnce(jsonResponse({}));
+    await brregFetch('https://data.brreg.no/enhetsregisteret/api/enheter/984851006');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    for (const [, init] of fetchMock.mock.calls) {
+      expect(init).toMatchObject({ credentials: 'omit' });
+    }
+  });
+});
+
+describe('410 Gone (removed for legal reasons)', () => {
+  it('fetchEnhet reads it as the not-found answer', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}, 410));
+    await expect(fetchEnhet('923609016')).rejects.toThrow('No entity found for orgnr 923609016.');
+  });
+
+  it('fetchUnderenhet reads it as «not an underenhet either»', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({}, 410));
+    await expect(fetchUnderenhet('923609016')).resolves.toBeUndefined();
   });
 });
 
