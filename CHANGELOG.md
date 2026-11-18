@@ -6,6 +6,8 @@ Browser-specific lines are prefixed `[chrome]` / `[firefox]`.
 
 ## [Unreleased]
 
+## [1.6.4] — 2026-11-18
+
 ### Fixed
 
 - A branch opened from the popup stays the branch in the panel, with its
@@ -658,7 +660,8 @@ name; functionality unchanged from the pre-1.0 development branch.
   `activeTab` + `storage` + `menus` + the brreg host.
 - Zero runtime dependencies in the shipped bundle.
 
-[Unreleased]: https://github.com/ikkeseb/brreg-snap/compare/v1.6.3...HEAD
+[Unreleased]: https://github.com/ikkeseb/brreg-snap/compare/v1.6.4...HEAD
+[1.6.4]: https://github.com/ikkeseb/brreg-snap/compare/v1.6.3...v1.6.4
 [1.6.3]: https://github.com/ikkeseb/brreg-snap/compare/v1.6.2...v1.6.3
 [1.6.2]: https://github.com/ikkeseb/brreg-snap/compare/v1.6.1...v1.6.2
 [1.6.1]: https://github.com/ikkeseb/brreg-snap/compare/v1.6.0...v1.6.1
