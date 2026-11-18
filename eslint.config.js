@@ -143,6 +143,8 @@ export default defineConfig(
       'node_modules/',
       'coverage/',
       '.claude/',
+      // The maintainer's gitignored private folder (its own repo).
+      'maintainer/',
     ],
   },
   {
