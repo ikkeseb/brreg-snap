@@ -14,7 +14,8 @@ const HEAD = 'a'.repeat(40);
 const OTHER = 'b'.repeat(40);
 const TAG = 'c'.repeat(40);
 const update = (sha = HEAD, ref = 'refs/heads/main', remote = OTHER) => `${ref} ${sha} ${ref} ${remote}\n`;
-const deletion = (length = 40) => update('0'.repeat(length), '(delete)');
+const deletion = (length = 40, remote = 'b'.repeat(length)) =>
+  `(delete) ${'0'.repeat(length)} refs/heads/main ${remote}\n`;
 const peel = (sha: string) => (sha === TAG ? HEAD : sha);
 const gateCall = { command: 'pnpm verify', args: [], options: { stdio: 'inherit', shell: true } };
 
@@ -27,8 +28,9 @@ interface RecordedCall {
 interface ExerciseOptions {
   head?: string;
   status?: string;
+  lsFiles?: string;
   resolve?: (sha: string) => string;
-  gitFailure?: 'head' | 'status' | 'peel';
+  gitFailure?: 'head' | 'status' | 'ls-files' | 'peel';
   gitResult?: RunResult;
   gateResult?: RunResult;
 }
@@ -38,6 +40,7 @@ function exercise(
   {
     head = HEAD,
     status = '',
+    lsFiles = 'H tracked.txt\n',
     resolve = peel,
     gitFailure,
     gitResult = { status: 1, stdout: '' },
@@ -49,10 +52,12 @@ function exercise(
     calls.push({ command, args, options });
     if (command === 'pnpm verify') return gateResult;
     if (command !== 'git') throw new Error(`unexpected command: ${command}`);
-    const operation = args[0] === 'status' ? 'status' : args[1] === 'HEAD' ? 'head' : 'peel';
+    const operation =
+      args[0] === 'status' ? 'status' : args[0] === 'ls-files' ? 'ls-files' : args[1] === 'HEAD' ? 'head' : 'peel';
     if (operation === gitFailure) return gitResult;
     if (operation === 'head') return { status: 0, stdout: `${head}\n` };
     if (operation === 'status') return { status: 0, stdout: status };
+    if (operation === 'ls-files') return { status: 0, stdout: lsFiles };
     return { status: 0, stdout: resolve((args[2] ?? '').replace(/\^\{commit\}$/, '')) };
   });
   return { result, calls, gates: calls.filter(({ command }) => command === 'pnpm verify') };
@@ -63,12 +68,19 @@ function checkedRefs(calls: RecordedCall[], shas: string[]) {
   expect(calls.filter(({ command }) => command === 'git')).toEqual([
     { command: 'git', args: ['rev-parse', 'HEAD'], options },
     { command: 'git', args: ['status', '--porcelain', '--untracked-files=all'], options },
+    { command: 'git', args: ['ls-files', '-v'], options },
     ...shas.map((sha) => ({ command: 'git', args: ['rev-parse', '--verify', `${sha}^{commit}`], options })),
   ]);
 }
 
 function refused(stdin: string, options: ExerciseOptions, reason: RegExp) {
-  const decision = decidePush(stdin, HEAD, options.resolve ?? peel, options.status ?? '');
+  const decision = decidePush(
+    stdin,
+    HEAD,
+    options.resolve ?? peel,
+    options.status ?? '',
+    options.lsFiles ?? 'H tracked.txt\n',
+  );
   expect(decision.action).toBe('refuse');
   expect(decision.message).toMatch(reason);
   const { result, gates } = exercise(stdin, options);
@@ -90,16 +102,17 @@ describe('pre-push decision and runner', () => {
             throw new Error('must not peel deletion');
           },
           '?? new.txt\n',
+          'h tracked.txt\n',
         ).action,
       ).toBe('nothing');
-      const { result, calls } = exercise(stdin, { status: '?? new.txt\n' });
+      const { result, calls } = exercise(stdin, { status: '?? new.txt\n', lsFiles: 'h tracked.txt\n' });
       expect(result.code).toBe(0);
       expect(calls).toEqual([]);
     });
   }
 
   it('empty stdin skips the gate', () => {
-    expect(decidePush('', HEAD, peel, '').action).toBe('nothing');
+    expect(decidePush('', HEAD, peel, '', 'H tracked.txt\n').action).toBe('nothing');
     const { result, calls } = exercise('');
     expect(result.code).toBe(0);
     expect(calls).toEqual([]);
@@ -112,9 +125,10 @@ describe('pre-push decision and runner', () => {
     ['deletion mixed with HEAD and a tag', deletion() + update() + update(TAG, 'refs/tags/v1'), [HEAD, TAG]],
     ['CRLF updates', (deletion() + update()).replaceAll('\n', '\r\n'), [HEAD]],
     ['new ref with zero remote SHA', update(HEAD, 'refs/heads/new', '0'.repeat(40)), [HEAD]],
+    ['ref name containing U+00A0 at HEAD', update(HEAD, 'refs/heads/review\u00a0branch'), [HEAD]],
   ] as const) {
     it(`${name} checks pushed commits and runs pnpm verify once`, () => {
-      expect(decidePush(stdin, HEAD, peel, '').action).toBe('gate');
+      expect(decidePush(stdin, HEAD, peel, '', 'H tracked.txt\n').action).toBe('gate');
       const { result, calls, gates } = exercise(stdin);
       expect(result.code).toBe(0);
       checkedRefs(calls, [...shas]);
@@ -122,10 +136,19 @@ describe('pre-push decision and runner', () => {
     });
   }
 
+  it('H-only ls-files output gates', () => {
+    const lsFiles = 'H a.txt\nH b.txt\n';
+    expect(decidePush(update(), HEAD, peel, '', lsFiles).action).toBe('gate');
+    const { result, calls, gates } = exercise(update(), { lsFiles });
+    expect(result.code).toBe(0);
+    checkedRefs(calls, [HEAD]);
+    expect(gates).toEqual([gateCall]);
+  });
+
   it('64-digit commit at HEAD runs the gate once', () => {
     const head = 'd'.repeat(64);
     const stdin = update(head, 'refs/heads/main', 'e'.repeat(64));
-    expect(decidePush(stdin, head, peel, '').action).toBe('gate');
+    expect(decidePush(stdin, head, peel, '', 'H tracked.txt\n').action).toBe('gate');
     const { result, calls, gates } = exercise(stdin, { head });
     expect(result.code).toBe(0);
     checkedRefs(calls, [head]);
@@ -146,6 +169,27 @@ describe('pre-push decision and runner', () => {
     });
   }
 
+  for (const [label, lsFiles, expectedPath] of [
+    ['assume-unchanged (h)', 'H clean.txt\nh hidden.txt\n', /hidden\.txt/],
+    ['skip-worktree (S)', 'H clean.txt\nS skipped.txt\n', /skipped\.txt/],
+  ] as const) {
+    it(`ls-files -v with ${label} refuses without a gate`, () => {
+      refused(update(), { lsFiles }, /assume-unchanged or skip-worktree/);
+      const decision = decidePush(update(), HEAD, peel, '', lsFiles);
+      expect(decision.message).toMatch(expectedPath);
+    });
+  }
+
+  it('ls-files -v refusal names at most five hidden paths', () => {
+    const lsFiles = ['a', 'b', 'c', 'd', 'e', 'f'].map((n) => `h ${n}.txt`).join('\n') + '\n';
+    const decision = decidePush(update(), HEAD, peel, '', lsFiles);
+    expect(decision.action).toBe('refuse');
+    expect(decision.message).toMatch(/assume-unchanged or skip-worktree/);
+    for (const n of ['a', 'b', 'c', 'd', 'e']) expect(decision.message).toContain(`${n}.txt`);
+    expect(decision.message).not.toContain('f.txt');
+    expect(decision.message).toContain('... 1 more paths');
+  });
+
   for (const [name, stdin] of [
     ['three fields', `refs/heads/main ${HEAD} refs/heads/main\n`],
     ['five fields', `${update().trimEnd()} extra\n`],
@@ -153,7 +197,9 @@ describe('pre-push decision and runner', () => {
     ['invalid remote SHA', update(HEAD, 'refs/heads/main', 'not-a-sha')],
     ['short zero SHA', update('0')],
     ['deletion missing a field', `(delete) ${'0'.repeat(40)} refs/heads/main\n`],
-    ['deletion with invalid remote SHA', update('0'.repeat(40), '(delete)', 'bad')],
+    ['deletion with invalid remote SHA', deletion(40, 'bad')],
+    ['all-zero local oid with non-delete ref', update('0'.repeat(40), 'refs/heads/main')],
+    ['delete ref with non-zero local oid', `(delete) ${HEAD} refs/heads/main ${OTHER}\n`],
   ] as const) {
     it(`malformed update with ${name} refuses without a gate`, () => {
       refused(stdin, {}, /invalid ref update/);
@@ -176,7 +222,7 @@ describe('pre-push decision and runner', () => {
     refused(update(), { resolve: () => '' }, /could not be peeled to a commit/);
   });
 
-  for (const operation of ['head', 'status', 'peel'] as const) {
+  for (const operation of ['head', 'status', 'ls-files', 'peel'] as const) {
     for (const [name, gitResult] of [
       ['non-zero exit', { status: 1, stdout: '' }],
       ['spawn error despite status zero', { error: new Error('EIO'), status: 0, stdout: `${HEAD}\n` }],
@@ -368,6 +414,45 @@ describe.skipIf(process.platform === 'win32')('pre-push hook git integration', (
     const push = git(['push', 'origin', 'main']);
     expect(push.status).not.toBe(0);
     expect(gateRuns()).toEqual(['verify']);
+    expect(remoteRef('main')).toBeNull();
+  });
+
+  it('deletion-only push exits 0 without running gate and removes remote ref', () => {
+    const { git, headSha, remoteRef, gateRuns } = setupRepo();
+    const initialPush = git(['push', 'origin', 'main']);
+    expect(initialPush.status, initialPush.stderr).toBe(0);
+    expect(gateRuns()).toEqual(['verify']);
+    expect(remoteRef('main')).toBe(headSha());
+
+    const del = git(['push', 'origin', '--delete', 'main']);
+    expect(del.status, del.stderr).toBe(0);
+    expect(gateRuns()).toEqual(['verify']);
+    expect(remoteRef('main')).toBeNull();
+  });
+
+  it('tracked file marked assume-unchanged and edited refuses without running gate and leaves remote unchanged', () => {
+    const { work, git, mustGit, remoteRef, gateRuns } = setupRepo();
+    mustGit(['update-index', '--assume-unchanged', 'tracked.txt']);
+    writeFileSync(join(work, 'tracked.txt'), 'hidden edit\n');
+
+    const push = git(['push', 'origin', 'main']);
+    expect(push.status).not.toBe(0);
+    expect(push.stderr).toMatch(/assume-unchanged or skip-worktree/);
+    expect(push.stderr).toMatch(/tracked\.txt/);
+    expect(gateRuns()).toEqual([]);
+    expect(remoteRef('main')).toBeNull();
+  });
+
+  // By design: with the mark set, git status cannot tell an unchanged file
+  // from an edited one, so the gate refuses either way.
+  it('tracked file marked skip-worktree but unchanged still refuses, naming the remedy', () => {
+    const { git, mustGit, remoteRef, gateRuns } = setupRepo();
+    mustGit(['update-index', '--skip-worktree', 'tracked.txt']);
+
+    const push = git(['push', 'origin', 'main']);
+    expect(push.status).not.toBe(0);
+    expect(push.stderr).toMatch(/--no-skip-worktree/);
+    expect(gateRuns()).toEqual([]);
     expect(remoteRef('main')).toBeNull();
   });
 });

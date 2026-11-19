@@ -30,18 +30,27 @@ import { spawnSync } from 'node:child_process';
 
 /** @param {string} stdin */
 function pushedRefs(stdin) {
+  const validSha = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
   const refs = stdin
-    .split(/\r?\n/)
-    .map((line) => line.trim())
+    .split('\n')
+    .map((line) => (line.endsWith('\r') ? line.slice(0, -1) : line))
     .filter(Boolean)
-    .map((line) => line.split(/\s+/));
+    .map((line) => line.split(' '));
   for (const fields of refs) {
-    const validSha = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/i;
-    if (fields.length !== 4 || !validSha.test(fields[1]) || !validSha.test(fields[3])) {
+    const isDelete = fields[0] === '(delete)';
+    const isZero = /^0+$/.test(fields[1] ?? '');
+    if (
+      fields.length !== 4 ||
+      !fields[0] ||
+      !fields[2] ||
+      !validSha.test(fields[1]) ||
+      !validSha.test(fields[3]) ||
+      isDelete !== isZero
+    ) {
       throw new Error(`invalid ref update: ${fields.join(' ')}`);
     }
   }
-  return refs.filter((fields) => !/^0+$/.test(fields[1]));
+  return refs.filter((fields) => fields[0] !== '(delete)');
 }
 
 /**
@@ -54,14 +63,16 @@ function refusal(reason) {
 
 /**
  * Decide whether the push described on stdin should skip the gate, be refused,
- * or run the gate. Tests supply HEAD, status and a peel function without starting git.
+ * or run the gate. Tests supply HEAD, status, ls-files -v output and a peel
+ * function without starting git.
  * @param {string} stdin
  * @param {string} head
  * @param {(sha: string) => string} peel
  * @param {string} status
+ * @param {string} [lsFiles]
  * @returns {PushDecision}
  */
-export function decidePush(stdin, head, peel, status) {
+export function decidePush(stdin, head, peel, status, lsFiles = '') {
   let refs;
   try {
     refs = pushedRefs(stdin);
@@ -85,6 +96,21 @@ export function decidePush(stdin, head, peel, status) {
     const more = dirty.length > 5 ? `\n... ${dirty.length - 5} more status lines` : '';
     return refusal(`working tree or index is not clean:\n${dirty.slice(0, 5).join('\n')}${more}`);
   }
+  // git status cannot see edits to these, so the gate cannot vouch for them
+  // even when they happen to be unchanged: refuse rather than guess.
+  const hidden = lsFiles
+    .split('\n')
+    .map((line) => (line.endsWith('\r') ? line.slice(0, -1) : line))
+    .filter((line) => /^[a-zS] /.test(line))
+    .map((line) => line.slice(2));
+  if (hidden.length) {
+    const more = hidden.length > 5 ? `\n... ${hidden.length - 5} more paths` : '';
+    return refusal(
+      `tracked files marked assume-unchanged or skip-worktree, whose edits git status cannot see:\n` +
+        `${hidden.slice(0, 5).join('\n')}${more}\n` +
+        'Clear the marks (git update-index --no-assume-unchanged / --no-skip-worktree <path>) to push through the gate.',
+    );
+  }
   return { action: 'gate' };
 }
 
@@ -99,7 +125,7 @@ export function runPrePush(stdin, run = spawnSync) {
   try {
     let decision;
     if (pushedRefs(stdin).length === 0) {
-      decision = decidePush(stdin, '', () => '', '');
+      decision = decidePush(stdin, '', () => '', '', '');
     } else {
       /** @param {string[]} args */
       const git = (args) => {
@@ -109,7 +135,14 @@ export function runPrePush(stdin, run = spawnSync) {
       };
       const head = git(['rev-parse', 'HEAD']).trim();
       const status = git(['status', '--porcelain', '--untracked-files=all']);
-      decision = decidePush(stdin, head, (sha) => git(['rev-parse', '--verify', `${sha}^{commit}`]).trim(), status);
+      const lsFiles = git(['ls-files', '-v']);
+      decision = decidePush(
+        stdin,
+        head,
+        (sha) => git(['rev-parse', '--verify', `${sha}^{commit}`]).trim(),
+        status,
+        lsFiles,
+      );
     }
     if (decision.action !== 'gate') return { code: decision.action === 'nothing' ? 0 : 1, message: decision.message };
     // One command string through the shell: `.cmd` shims need it on Windows, and Node 24 warns
