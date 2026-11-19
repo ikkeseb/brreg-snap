@@ -132,7 +132,9 @@ from the kit, then record it:
 gh release view vX.Y.Z --json assets --jq '.assets[] | [.name, .digest] | @tsv'
 git tag -a amo-submission-X.Y.Z 'vX.Y.Z^{commit}' -m "AMO X.Y.Z: brreg-snap-X.Y.Z.zip sha256:… source brreg-snap-source-X.Y.Z.zip sha256:…"
 git tag -a cws-submission-X.Y.Z 'vX.Y.Z^{commit}' -m "CWS X.Y.Z: brreg-snap-chrome-X.Y.Z.zip sha256:…"
+git switch --detach vX.Y.Z   # the pre-push hook gates only the checked-out commit
 git push origin amo-submission-X.Y.Z cws-submission-X.Y.Z
+git switch -
 ```
 
 ## What stays manual

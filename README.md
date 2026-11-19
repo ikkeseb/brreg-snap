@@ -145,7 +145,9 @@ pnpm verify     # the full gate
 ```
 
 `pnpm install` also sets this clone's `core.hooksPath` to
-`.githooks/`, whose pre-push hook runs `pnpm verify`
+`.githooks/`, whose pre-push hook runs `pnpm verify` on the commit
+being pushed: it refuses a push from a checkout with uncommitted or
+untracked files, or of a ref other than the checked-out commit
 (`git push --no-verify` skips it).
 
 - [docs/release.md](docs/release.md): releasing and store publishing
