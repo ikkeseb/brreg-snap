@@ -94,8 +94,8 @@ so local and CI builds match.
 ## Architecture — routing table
 
 Topic notes live in `docs/notes/`. Each note has stable
-`<!-- SECTION: ... -->` anchors that `grep` can target. Hit the
-note before reading the source file.
+`<!-- SECTION: ... -->` anchors that `grep` can target. Read the
+note before changing what it covers.
 
 | Concern                                       | Source                          | Note                              |
 | --------------------------------------------- | ------------------------------- | --------------------------------- |
@@ -123,8 +123,8 @@ rendered as "not filed".
 
 - Cross-doc references read `path` § `slug`, where the slug is a
   `<!-- SECTION: slug -->` anchor in the target; `pnpm check:docs`
-  (in `pnpm verify`) fails when a backticked repo path or an anchor
-  doesn't resolve.
+  (in `pnpm verify`) fails on unresolved references it recognizes in
+  the docs it scans.
 - Cite files, symbols or tags, never short commit hashes. History
   lives in git and `CHANGELOG.md`.
 - Tracked docs are public: name the maintainer's role, not their
