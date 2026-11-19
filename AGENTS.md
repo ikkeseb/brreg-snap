@@ -56,10 +56,11 @@ when reporting a change as done:
 pre-push (`scripts/lib/pre-push.mjs`) refuses unless every pushed ref
 is the checked-out HEAD and the tree is clean, then runs `pnpm verify`,
 so the gate tests what is pushed: push each ref from a clean checkout
-of its commit. `git push --no-verify` is the conscious bypass. pre-commit, pre-merge-commit and commit-msg run the
-maintainer's public-hygiene check on staged added lines, paths and the
-message when the local `maintainer/` folder carries it (rule and setup
-there), and do nothing elsewhere.
+of its commit. `git push --no-verify` is the conscious bypass.
+pre-commit, pre-merge-commit and commit-msg run the maintainer's
+public-hygiene check on staged added lines, paths and the message when
+the local `maintainer/` folder carries it (rule and setup there), and
+do nothing elsewhere.
 
 ```bash
 pnpm verify                     # the gate: typecheck, lint, test, check:docs, both builds, verify:dist, lint:ext
