@@ -1,6 +1,6 @@
 // Logic for the pre-push hook (scripts/pre-push.mjs, invoked by .githooks/pre-push).
-// Gates refs that peel to a clean HEAD so `pnpm verify` checks the commit actually
-// being pushed. Git supplies updates on stdin; deletions need no gate and remote
+// Gates refs that peel to a clean HEAD so `pnpm verify:fast` checks the commit actually
+// being pushed; the full `pnpm verify` is CI's. Git supplies updates on stdin; deletions need no gate and remote
 // arguments are unused.
 
 import { spawnSync } from 'node:child_process';
@@ -115,7 +115,7 @@ export function decidePush(stdin, head, peel, status, lsFiles = '') {
 }
 
 /**
- * Run git checks against stdin ref updates and invoke `pnpm verify` when gated.
+ * Run git checks against stdin ref updates and invoke `pnpm verify:fast` when gated.
  * Tests inject subprocess results; the installed hook uses spawnSync.
  * @param {string} stdin
  * @param {Runner} [run]
@@ -147,8 +147,8 @@ export function runPrePush(stdin, run = spawnSync) {
     if (decision.action !== 'gate') return { code: decision.action === 'nothing' ? 0 : 1, message: decision.message };
     // One command string through the shell: `.cmd` shims need it on Windows, and Node 24 warns
     // (DEP0190) when an argument list goes through one.
-    const result = run('pnpm verify', [], { stdio: 'inherit', shell: true });
-    if (result.error) return { code: 1, message: `pre-push: could not start pnpm verify: ${result.error.message}` };
+    const result = run('pnpm verify:fast', [], { stdio: 'inherit', shell: true });
+    if (result.error) return { code: 1, message: `pre-push: could not start pnpm verify:fast: ${result.error.message}` };
     return { code: result.status ?? 1 };
   } catch (e) {
     return { code: 1, message: refusal(e instanceof Error ? e.message : String(e)).message };

@@ -33,7 +33,7 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # The one gate, same as CI and the pre-push hook.
+      # The full gate, same as CI.
       - run: pnpm verify
 
       - name: Tag matches package.json

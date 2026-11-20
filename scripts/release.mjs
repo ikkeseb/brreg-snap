@@ -325,7 +325,7 @@ function tagRelease() {
   step(`git tag -a ${tag} -m "brreg-snap ${version}"`, () => git('tag', '-a', tag, '-m', `brreg-snap ${version}`));
 
   console.log(
-    `\nNext (not run — pushing is yours; the pre-push hook runs pnpm verify):\n` +
+    `\nNext (not run — pushing is yours; the pre-push hook runs pnpm verify:fast, release.yml the full gate):\n` +
       `  git push --atomic origin main ${tag}\n` +
       `Then release.yml builds the GitHub Release; publish with the "Publish to stores" workflow (docs/release.md).`,
   );

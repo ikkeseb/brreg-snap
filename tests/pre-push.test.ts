@@ -17,7 +17,7 @@ const update = (sha = HEAD, ref = 'refs/heads/main', remote = OTHER) => `${ref} 
 const deletion = (length = 40, remote = 'b'.repeat(length)) =>
   `(delete) ${'0'.repeat(length)} refs/heads/main ${remote}\n`;
 const peel = (sha: string) => (sha === TAG ? HEAD : sha);
-const gateCall = { command: 'pnpm verify', args: [], options: { stdio: 'inherit', shell: true } };
+const gateCall = { command: 'pnpm verify:fast', args: [], options: { stdio: 'inherit', shell: true } };
 
 interface RecordedCall {
   command: string;
@@ -50,7 +50,7 @@ function exercise(
   const calls: RecordedCall[] = [];
   const result = runPrePush(stdin, (command, args, options) => {
     calls.push({ command, args, options });
-    if (command === 'pnpm verify') return gateResult;
+    if (command === 'pnpm verify:fast') return gateResult;
     if (command !== 'git') throw new Error(`unexpected command: ${command}`);
     const operation =
       args[0] === 'status' ? 'status' : args[0] === 'ls-files' ? 'ls-files' : args[1] === 'HEAD' ? 'head' : 'peel';
@@ -60,7 +60,7 @@ function exercise(
     if (operation === 'ls-files') return { status: 0, stdout: lsFiles };
     return { status: 0, stdout: resolve((args[2] ?? '').replace(/\^\{commit\}$/, '')) };
   });
-  return { result, calls, gates: calls.filter(({ command }) => command === 'pnpm verify') };
+  return { result, calls, gates: calls.filter(({ command }) => command === 'pnpm verify:fast') };
 }
 
 function checkedRefs(calls: RecordedCall[], shas: string[]) {
@@ -127,7 +127,7 @@ describe('pre-push decision and runner', () => {
     ['new ref with zero remote SHA', update(HEAD, 'refs/heads/new', '0'.repeat(40)), [HEAD]],
     ['ref name containing U+00A0 at HEAD', update(HEAD, 'refs/heads/review\u00a0branch'), [HEAD]],
   ] as const) {
-    it(`${name} checks pushed commits and runs pnpm verify once`, () => {
+    it(`${name} checks pushed commits and runs pnpm verify:fast once`, () => {
       expect(decidePush(stdin, HEAD, peel, '', 'H tracked.txt\n').action).toBe('gate');
       const { result, calls, gates } = exercise(stdin);
       expect(result.code).toBe(0);
@@ -247,7 +247,7 @@ describe('pre-push decision and runner', () => {
       checkedRefs(calls, [HEAD]);
       expect(gates).toEqual([gateCall]);
       expect(result.code).toBe(code);
-      if (gateResult.error) expect(result.message).toMatch(/could not start pnpm verify/);
+      if (gateResult.error) expect(result.message).toMatch(/could not start pnpm verify:fast/);
     });
   }
 
@@ -348,7 +348,7 @@ describe.skipIf(process.platform === 'win32')('pre-push hook git integration', (
     const head = headSha();
     const push = git(['push', 'origin', 'main']);
     expect(push.status, push.stderr).toBe(0);
-    expect(gateRuns()).toEqual(['verify']);
+    expect(gateRuns()).toEqual(['verify:fast']);
     expect(remoteRef('main')).toBe(head);
   });
 
@@ -404,7 +404,7 @@ describe.skipIf(process.platform === 'win32')('pre-push hook git integration', (
     mustGit(['tag', '-a', 'v1.0.0', '-m', 'release']);
     const push = git(['push', '--atomic', 'origin', 'main', 'v1.0.0']);
     expect(push.status, push.stderr).toBe(0);
-    expect(gateRuns()).toEqual(['verify']);
+    expect(gateRuns()).toEqual(['verify:fast']);
     expect(git(['--git-dir', bare, 'rev-parse', '--verify', 'v1.0.0^{commit}']).stdout.trim()).toBe(head);
     expect(git(['--git-dir', bare, 'rev-parse', '--verify', 'refs/heads/main']).stdout.trim()).toBe(head);
   });
@@ -413,7 +413,7 @@ describe.skipIf(process.platform === 'win32')('pre-push hook git integration', (
     const { git, remoteRef, gateRuns } = setupRepo(3);
     const push = git(['push', 'origin', 'main']);
     expect(push.status).not.toBe(0);
-    expect(gateRuns()).toEqual(['verify']);
+    expect(gateRuns()).toEqual(['verify:fast']);
     expect(remoteRef('main')).toBeNull();
   });
 
@@ -421,12 +421,12 @@ describe.skipIf(process.platform === 'win32')('pre-push hook git integration', (
     const { git, headSha, remoteRef, gateRuns } = setupRepo();
     const initialPush = git(['push', 'origin', 'main']);
     expect(initialPush.status, initialPush.stderr).toBe(0);
-    expect(gateRuns()).toEqual(['verify']);
+    expect(gateRuns()).toEqual(['verify:fast']);
     expect(remoteRef('main')).toBe(headSha());
 
     const del = git(['push', 'origin', '--delete', 'main']);
     expect(del.status, del.stderr).toBe(0);
-    expect(gateRuns()).toEqual(['verify']);
+    expect(gateRuns()).toEqual(['verify:fast']);
     expect(remoteRef('main')).toBeNull();
   });
 
