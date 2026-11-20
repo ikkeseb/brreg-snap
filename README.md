@@ -113,7 +113,7 @@ to look up (`websiteContent` on Firefox).
 - `pnpm verify` is the gate, run by
   [CI](https://github.com/ikkeseb/brreg-snap/actions/workflows/ci.yml)
   on every push and pull request to main and dev, and by the release
-  workflow on every tag:
+  workflow on every release tag:
   typecheck, ESLint with zero warnings, Vitest unit tests, a check that
   every path the docs name exists, both builds, checks on the built
   packages, and `web-ext lint`. A pre-push hook runs its fast part

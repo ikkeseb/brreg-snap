@@ -21,8 +21,10 @@ packages with the Release).
   full gate: `pnpm verify` and the browser smoke on every push and PR to
   `main` and `dev`, and red there is fixed forward first. `dev` → `main`
   only on the maintainer's explicit word, after green CI on the commit
-  `main` moves to; releases are cut from `main`, and `release.yml` gates
-  each tag again (`docs/release.md`).
+  `main` moves to; releases are cut from `main` (`docs/release.md`): the
+  release commit is the one push to `main` ahead of its CI, since
+  `pnpm release` runs the full gate on it before tagging and
+  `release.yml` runs it again on the `v*` tag.
 - A user-visible change adds its line under `## [Unreleased]` in
   `CHANGELOG.md` on the same branch; the release notes are built from
   that section.
@@ -35,7 +37,7 @@ packages with the Release).
 The verification rungs, lowest first; they are the surfaces to name
 when reporting a change as done:
 
-1. **Fast checks pass locally, then CI is green on the pushed commit.**
+1. **Fast checks pass locally, then CI is green once it lands on `dev`.**
    Locally that is `pnpm verify:fast` (the pre-push hook runs it), plus
    the one full-gate step that covers what changed when the fast set
    cannot see it (`pnpm check:docs` for a doc reference, a build and
