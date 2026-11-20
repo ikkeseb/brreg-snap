@@ -44,7 +44,8 @@ CHANGELOG entries, the store release notes and the approval click.
    anything but deleted, then commits
    `release: X.Y.Z` and creates the annotated tag `vX.Y.Z`. It never
    pushes; it prints `git push --atomic origin main vX.Y.Z` (the
-   pre-push hook runs `pnpm verify`). Then bring `dev` level with the
+   pre-push hook runs `pnpm verify:fast`; `release.yml` runs the full
+   gate on the tag). Then bring `dev` level with the
    release commit: `git switch dev && git merge --ff-only main && git
    push origin dev` (a plain `git merge main` if `dev` moved on
    meanwhile).

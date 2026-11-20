@@ -17,11 +17,12 @@ written down; run `pnpm store-status` (`--deep` compares the served
 packages with the Release).
 
 - Work lands on `dev`: a feature branch merges into `dev` once reviewed
-  and `pnpm verify` is green (the pre-push hook enforces it). `dev` →
-  `main` only on the maintainer's explicit word; releases are cut from
-  `main` (`docs/release.md`). CI runs the gate and the browser smoke on
-  every push and PR to `main` and `dev`: a red smoke there is fixed
-  forward first.
+  and its fast checks are green (the pre-push hook runs them). CI is the
+  full gate: `pnpm verify` and the browser smoke on every push and PR to
+  `main` and `dev`, and red there is fixed forward first. `dev` → `main`
+  only on the maintainer's explicit word, after green CI on the commit
+  `main` moves to; releases are cut from `main`, and `release.yml` gates
+  each tag again (`docs/release.md`).
 - A user-visible change adds its line under `## [Unreleased]` in
   `CHANGELOG.md` on the same branch; the release notes are built from
   that section.
@@ -34,8 +35,12 @@ packages with the Release).
 The verification rungs, lowest first; they are the surfaces to name
 when reporting a change as done:
 
-1. **`pnpm verify` is green.** It is the gate CI, the release workflow
-   and the pre-push hook all run.
+1. **Fast checks pass locally, then CI is green on the pushed commit.**
+   Locally that is `pnpm verify:fast` (the pre-push hook runs it), plus
+   the one full-gate step that covers what changed when the fast set
+   cannot see it (`pnpm check:docs` for a doc reference, a build and
+   `pnpm verify:dist` for a manifest or build change). The full
+   `pnpm verify` runs in CI and the release workflow.
 2. **Data-dependent or visual change: checked against the live API**
    in `scripts/preview/` (both themes, popup and the 320 px panel), and
    `pnpm smoke` for the recorded state matrix. Synthetic fixtures and
@@ -54,16 +59,18 @@ when reporting a change as done:
 `package.json` lists every script; these are the ones with a catch.
 `pnpm install` points git at the committed hooks in `.githooks/`.
 pre-push (`scripts/lib/pre-push.mjs`) refuses unless every pushed ref
-is the checked-out HEAD and the tree is clean, then runs `pnpm verify`,
-so the gate tests what is pushed: push each ref from a clean checkout
-of its commit. `git push --no-verify` is the conscious bypass.
+is the checked-out HEAD and the tree is clean, then runs
+`pnpm verify:fast`, so the fast checks test what is pushed: push each
+ref from a clean checkout of its commit. `git push --no-verify` is the
+conscious bypass.
 pre-commit, pre-merge-commit and commit-msg run the maintainer's
 public-hygiene check on staged added lines, paths and the message when
 the local `maintainer/` folder carries it (rule and setup there), and
 do nothing elsewhere.
 
 ```bash
-pnpm verify                     # the gate: typecheck, lint, test, check:docs, both builds, verify:dist, lint:ext
+pnpm verify:fast                # pre-push: typecheck, lint, test
+pnpm verify                     # the full gate (CI, release.yml): verify:fast, check:docs, both builds, verify:dist, lint:ext
 pnpm exec vitest run tests/orgnr.test.ts                                 # one file
 pnpm exec vitest run -t "rejects numbers whose check digit would be 10"  # one test
 pnpm smoke                      # Playwright: harness states x widths x themes + a real Chromium load (toolbar click, popup, side panel); not in the gate (CI runs it); once: pnpm exec playwright install chromium

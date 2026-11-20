@@ -112,10 +112,12 @@ to look up (`websiteContent` on Firefox).
 
 - `pnpm verify` is the gate, run by
   [CI](https://github.com/ikkeseb/brreg-snap/actions/workflows/ci.yml)
-  and by a pre-push hook:
+  on every push and pull request to main and dev, and by the release
+  workflow on every tag:
   typecheck, ESLint with zero warnings, Vitest unit tests, a check that
   every path the docs name exists, both builds, checks on the built
-  packages, and `web-ext lint`.
+  packages, and `web-ext lint`. A pre-push hook runs its fast part
+  (`pnpm verify:fast`: typecheck, lint, tests).
 - `tests/manifest.test.ts` pins permissions, hosts, CSP and the data
   declarations on the source manifests, and `pnpm verify:dist` checks
   the built ones against the same rules. Adding a host, a content
@@ -145,7 +147,7 @@ pnpm verify     # the full gate
 ```
 
 `pnpm install` also sets this clone's `core.hooksPath` to
-`.githooks/`, whose pre-push hook runs `pnpm verify` on the commit
+`.githooks/`, whose pre-push hook runs `pnpm verify:fast` on the commit
 being pushed: it refuses a push from a checkout with uncommitted or
 untracked files, or of a ref other than the checked-out commit
 (`git push --no-verify` skips it).

@@ -27,8 +27,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      # The one gate (package.json): typecheck, lint, test, both builds,
-      # dist invariants, web-ext lint. Same command as the pre-push hook.
+      # The full gate (package.json): typecheck, lint, test, the docs check,
+      # both builds, dist invariants, web-ext lint. The pre-push hook runs
+      # only the fast part (verify:fast); this job is where the rest runs.
       - run: pnpm verify
 
   # Browser smoke (tests/e2e/, playwright.config.ts): the preview harness
